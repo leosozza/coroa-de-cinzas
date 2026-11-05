@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Gera os sons de Coroa de Cinzas no ElevenLabs: efeitos, narrador e música.
 
-Uso: python3 tools/elevenlabs_audio.py [sfx] [voz] [musica]   (sem argumentos: tudo)
+Uso: python3 tools/elevenlabs_audio.py [sfx] [voz] [musica] [aprendiz]   (sem argumentos: sfx, voz e musica)
 A chave vem do Keychain do macOS (serviço "elevenlabs-api-key") e nunca é impressa.
 Arquivos já gerados são pulados, então rodar de novo só completa o que falta.
 """
@@ -162,6 +162,16 @@ def voz():
              OUT / f"{name}.mp3")
 
 
+def aprendiz():
+    """Falas do Modo Aprendiz, lidas de data/falas-aprendiz.json (id -> texto)."""
+    falas = json.loads((ROOT / "data" / "falas-aprendiz.json").read_text())
+    for name, text in falas.items():
+        post(f"/v1/text-to-speech/{NARRATOR}?output_format=mp3_44100_128",
+             {"text": text, "model_id": "eleven_multilingual_v2", "language_code": "pt",
+              "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.35, "use_speaker_boost": True}},
+             OUT / f"{name}.mp3")
+
+
 def musica():
     for name, (prompt, ms) in MUSICA.items():
         post("/v1/music?output_format=mp3_44100_128",
@@ -172,4 +182,4 @@ if __name__ == "__main__":
     parts = sys.argv[1:] or ["sfx", "voz", "musica"]
     for p in parts:
         print(f"== {p}", flush=True)
-        {"sfx": sfx, "voz": voz, "musica": musica}[p]()
+        {"sfx": sfx, "voz": voz, "musica": musica, "aprendiz": aprendiz}[p]()

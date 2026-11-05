@@ -117,6 +117,27 @@ canvas{display:block; width:100%}
 #cv:focus-visible{outline:2px solid var(--ember); outline-offset:-2px}
 #ov{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none}
 .hint{font-size:.88rem; color:var(--ash); font-style:italic; margin:0}
+/* minimapa 2D no canto da cena */
+.mm{--mm:176px; position:absolute; top:10px; right:10px; z-index:3; width:var(--mm); padding:5px 6px 6px; border:1px solid rgba(227,165,72,.55); border-radius:4px;
+  background:rgba(10,8,6,.66); box-shadow:0 0 0 1px rgba(0,0,0,.65), 0 10px 26px rgba(0,0,0,.55), inset 0 0 14px rgba(227,165,72,.07)}
+.mm.big{--mm:236px}
+.mm.drag{border-color:rgba(240,190,100,.9); box-shadow:0 0 0 1px rgba(0,0,0,.7), 0 22px 46px rgba(0,0,0,.72), inset 0 0 14px rgba(227,165,72,.1)}
+.mm.drag, .mm.drag *{cursor:grabbing}
+.mm-head{cursor:move; touch-action:none; user-select:none; -webkit-user-select:none}
+.mm-head button{cursor:pointer}
+.mm-grip{position:absolute; right:0; bottom:0; width:22px; height:22px; cursor:nwse-resize; touch-action:none; border-bottom-right-radius:4px;
+  background:linear-gradient(135deg, transparent 52%, rgba(227,165,72,.75) 52% 58%, transparent 58% 68%, rgba(227,165,72,.75) 68% 74%, transparent 74% 84%, rgba(227,165,72,.75) 84% 90%, transparent 90%)}
+.mm-head{display:flex; align-items:center; gap:4px; margin-bottom:5px; font-family:var(--f-ui); font-size:.72rem; letter-spacing:.16em; color:var(--ember)}
+.mm-head .t{flex:1; padding-left:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.mm-head button, .mm-fab{display:grid; place-items:center; min-width:28px; height:28px; padding:0 5px; border:1px solid var(--seam); border-radius:3px;
+  background:rgba(0,0,0,.5); color:var(--bone); font-family:var(--f-ui); font-size:.95rem; line-height:1; cursor:pointer}
+.mm-head button:hover, .mm-fab:hover{border-color:var(--ember); color:var(--ember)}
+.mm-head button:focus-visible, .mm-fab:focus-visible{outline:2px solid var(--ember); outline-offset:1px}
+.mm-head button[aria-pressed="true"]{border-color:var(--ember-deep); color:var(--ember)}
+.mm canvas{display:block; width:100%; height:auto; aspect-ratio:1; border:1px solid rgba(227,165,72,.4); border-radius:1px; cursor:pointer; touch-action:manipulation}
+.mm-fab{position:absolute; top:10px; right:10px; z-index:3; width:40px; height:40px; padding:0; background:var(--hud); border-color:rgba(227,165,72,.5); color:var(--ember)}
+.mm svg, .mm-fab svg{width:18px; height:18px; display:block}
+@media (max-width:560px){ .mm{--mm:min(64vw, 240px)} .mm.big{--mm:min(84vw, 320px)} }
 .nogl{min-height:260px; display:grid; place-content:center; gap:8px; padding:40px 24px; text-align:center; color:var(--ash); font-size:.98rem}
 .nogl strong{font-family:var(--f-ui); color:var(--bone); letter-spacing:.04em; font-size:1.05rem}
 
@@ -426,6 +447,15 @@ details.rules[open] summary::before{content:"▾ "}
         <div class="cine" id="cine" aria-hidden="true"><i class="vig"></i><i class="bar t"></i><i class="bar b"></i><i class="flash" id="cine-flash"></i><div class="cap" id="cine-cap"><b></b><span></span></div><span class="skip">Toque ou Esc para pular</span></div>
         <p class="sr-only" id="cine-live" aria-live="polite"></p>
         <div class="view-hint" id="view-hint" aria-hidden="true" hidden>arraste: girar • pinça ou roda: zoom</div>
+        <div class="mm" id="mm" role="region" aria-label="Minimapa" hidden>
+          <div class="mm-head" id="mm-head" title="Arraste para mover; toque duplo volta ao canto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="t">Mapa</span>
+            <button type="button" id="mm-size" aria-pressed="false" title="Mapa maior ou menor" aria-label="Mapa maior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V4h6M20 14v6h-6M4 4l6 6m10 10-6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+            <button type="button" id="mm-hide" title="Esconder o mapa (atalho: M)" aria-label="Esconder o mapa">×</button>
+          </div>
+          <i class="mm-grip" id="mm-grip" title="Arraste para redimensionar" aria-hidden="true"></i>
+          <canvas id="mm-cv" role="img" aria-label="Tabuleiro 2D com a posição atual. Clique numa casa para escolher ou mover uma peça."></canvas>
+        </div>
+        <button type="button" class="mm-fab" id="mm-fab" aria-controls="mm" aria-expanded="false" title="Mostrar o mapa (atalho: M)" aria-label="Mostrar o mapa" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
         <div class="promo" id="promo" role="dialog" aria-modal="true" aria-labelledby="promo-title" hidden>
           <div class="promo-box">
             <h2 id="promo-title">Promoção</h2>
@@ -921,7 +951,7 @@ try { const a = localStorage.getItem(ARENA_KEY); if (ARENAS[a]) arena = a; } cat
 const AR = () => ARENAS[arena];
 let envRoot = null, envRT = null, warmL = null;
 // estado animado da arena: texturas de lava, luzes que pulsam, dragão no céu, rajadas de fogo
-const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], orbs:[], bob:[], floaters:[], motes:[], bubbles:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
+const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], orbs:[], bob:[], floaters:[], motes:[], bubbles:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false, dragons:null };
 function mkCanvas(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function canvasTex(c, srgb = true){
   const t = new THREE.CanvasTexture(c);
@@ -1607,7 +1637,7 @@ function buildArena(){
   torches.length = 0; mists.length = 0;
   ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0; ENVX.orbs.length = 0; ENVX.bob.length = 0; ENVX.floaters.length = 0; ENVX.motes.length = 0; ENVX.bubbles.length = 0;
   ENVX.repaint = null; ENVX.onCapture = null;
-  ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false;
+  ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false; ENVX.dragons = null;
   const now = performance.now();
   ENVX.nextGlide = now + 7000; ENVX.nextBurst = now + 14000 + Math.random() * 10000;
   buildBoard();
@@ -3836,10 +3866,198 @@ function buildEnvDragon(){
   buildBackdrop(paintBackdropDragon);
   ENVX.glider = makeGlider();
   backdrop.add(ENVX.glider.g);
+  buildFlyingDragons(rnd);
+  // numa captura, um dos dragões pode rugir (e às vezes soltar fogo)
+  ENVX.onCapture = () => {
+    const D = ENVX.dragons, n = performance.now();
+    if (!D || n < D.roarAt || Math.random() > 0.6) return;
+    D.roarAt = n + 6000;
+    snd('rugido_dragao', { vol:0.55 });
+    if (Math.random() < 0.5){ snd('sopro_fogo', { vol:0.45, delay:0.35 }); dragonBreath(n + 350); }
+  };
   for (let i = 0; i < 2; i++){
     const mm = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x6a3a28 : 0x3a2a24), transparent:true, opacity:i ? 0.3 : 0.42, depthWrite:false }));
     mm.rotation.x = -Math.PI / 2; mm.position.y = GROUND_Y + 0.25 + i * 0.35; mm.renderOrder = 1;
     envRoot.add(mm); mists.push(mm);
+  }
+}
+/* dragões alados que voam em círculos sobre o covil: corpo, cauda e asas de malhas fundidas (sem luzes próprias) */
+function dragonLimb(par, mat, a, b, ra, rb, seg = 6){
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), L = d.length();
+  const o = new THREE.Mesh(new THREE.CylinderGeometry(rb, ra, L, seg), mat);
+  o.position.copy(A).addScaledVector(d, 0.5);
+  o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  par.add(o); return o;
+}
+function dragonSpike(par, mat, at, dir, r, h){
+  const o = new THREE.Mesh(new THREE.ConeGeometry(r, h, 5), mat), v = new THREE.Vector3(...dir).normalize();
+  o.position.set(...at).addScaledVector(v, h / 2);
+  o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v);
+  par.add(o); return o;
+}
+function dragonWing(M){
+  const tmp = new THREE.Group();
+  // em planta (x para fora, z para frente): ombro, cotovelo, pulso e três dedos com a membrana recortada entre eles
+  const S = [0, 0], E = [0.9, 0.28], W = [1.7, 0.08], F = [[2.95, -0.35], [2.45, -1.05], [1.6, -1.4]], R = [0.05, -0.9];
+  const toward = (p, q, k) => [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
+  const pts = [S, E, W, F[0], toward(toward(F[0], F[1], 0.5), W, 0.28), F[1], toward(toward(F[1], F[2], 0.5), W, 0.3), F[2], toward(toward(F[2], R, 0.5), W, 0.22), R];
+  const sh = new THREE.Shape(pts.map(p => new THREE.Vector2(p[0], -p[1])));
+  const mg = new THREE.ShapeGeometry(sh); mg.rotateX(-Math.PI / 2);
+  const mp = mg.attributes.position;
+  for (let i = 0; i < mp.count; i++){ const x = mp.getX(i), z = mp.getZ(i); mp.setY(i, -0.07 * x - 0.06 * Math.max(0, -z)); }
+  mg.computeVertexNormals();
+  tmp.add(new THREE.Mesh(mg, M.membrane));
+  const y = p => [p[0], p === S ? 0 : -0.07 * p[0] - 0.06 * Math.max(0, -p[1]) + 0.015, p[1]];
+  dragonLimb(tmp, M.hide, y(S), y(E), 0.075, 0.06);
+  dragonLimb(tmp, M.hide, y(E), y(W), 0.06, 0.045);
+  for (const f of F) dragonLimb(tmp, M.hide, y(W), y(f), 0.035, 0.012, 5);
+  dragonSpike(tmp, M.bronze, y(W), [0.3, 0.2, 1], 0.04, 0.2);
+  const g = new THREE.Group();
+  bakeInto(tmp, g);
+  return g;
+}
+function makeFlyingDragon(M, s){
+  const g = new THREE.Group(); g.rotation.order = 'YXZ'; g.scale.setScalar(s);
+  const tmp = new THREE.Group();
+  const part = (geo, m, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.scale.set(sx, sy, sz); o.rotation.x = rx; tmp.add(o); return o; };
+  part(new THREE.SphereGeometry(0.5, 10, 7), M.hide, 0, 0, 0, 0.62, 0.55, 1.25);
+  part(new THREE.SphereGeometry(0.5, 10, 7), M.bronze, 0, -0.11, 0.05, 0.5, 0.42, 1.1);
+  dragonLimb(tmp, M.hide, [0, 0.06, 0.45], [0, 0.36, 1.2], 0.21, 0.13, 7);
+  part(new THREE.SphereGeometry(0.2, 8, 6), M.hide, 0, 0.4, 1.28, 1, 0.85, 1.15);
+  part(new THREE.ConeGeometry(0.15, 0.52, 6), M.hide, 0, 0.37, 1.58, 1, 1, 1, Math.PI / 2);
+  part(new THREE.ConeGeometry(0.1, 0.42, 5), M.hide, 0, 0.27, 1.52, 1, 1, 1, Math.PI / 2 + 0.3);
+  for (const sx of [-1, 1]){
+    dragonSpike(tmp, M.bronze, [sx * 0.09, 0.5, 1.2], [sx * 0.3, 0.55, -1], 0.045, 0.42);
+    dragonSpike(tmp, M.bronze, [sx * 0.14, 0.42, 1.15], [sx * 0.9, 0.2, -0.6], 0.03, 0.2);
+    part(new THREE.SphereGeometry(0.035, 6, 4), M.eye, sx * 0.1, 0.46, 1.42);
+    // patas recolhidas sob o corpo
+    dragonLimb(tmp, M.hide, [sx * 0.2, -0.18, 0.35], [sx * 0.25, -0.42, 0.08], 0.07, 0.05);
+    dragonLimb(tmp, M.hide, [sx * 0.2, -0.16, -0.35], [sx * 0.24, -0.36, -0.78], 0.09, 0.05);
+    dragonSpike(tmp, M.bronze, [sx * 0.25, -0.42, 0.08], [0, -0.3, -1], 0.03, 0.12);
+    dragonSpike(tmp, M.bronze, [sx * 0.24, -0.36, -0.78], [0, -0.2, -1], 0.03, 0.12);
+  }
+  for (let i = 0; i < 6; i++){ const z = 0.55 - i * 0.22; dragonSpike(tmp, M.bronze, [0, 0.24 + 0.04 * Math.cos(i), z], [0, 1, -0.6], 0.05, 0.2 - i * 0.015); }
+  const body = new THREE.Group(); bakeInto(tmp, body); g.add(body);
+  const mouth = new THREE.Object3D(); mouth.position.set(0, 0.34, 1.86); g.add(mouth);
+  // cauda em quatro segmentos encadeados, afinando até a ponta em lança
+  const tail = [];
+  let par = g, at = [0, 0.02, -0.55];
+  const Ls = [0.75, 0.7, 0.62, 0.55], Rs = [0.22, 0.16, 0.11, 0.07, 0.035];
+  for (let i = 0; i < 4; i++){
+    const sg = new THREE.Group(); sg.position.set(...at); par.add(sg);
+    const tt = new THREE.Group();
+    dragonLimb(tt, M.hide, [0, 0, 0], [0, 0, -Ls[i]], Rs[i], Rs[i + 1], 6);
+    dragonSpike(tt, M.bronze, [0, Rs[i] * 0.8, -Ls[i] * 0.4], [0, 1, -0.7], 0.035, 0.14 - i * 0.02);
+    if (i === 3){ const sp = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.42, 4), M.bronze); sp.rotation.x = -Math.PI / 2; sp.scale.set(1, 1, 0.25); sp.position.set(0, 0, -Ls[i] - 0.18); tt.add(sp); }
+    bakeInto(tt, sg);
+    tail.push(sg); par = sg; at = [0, 0, -Ls[i]];
+  }
+  const wl = dragonWing(M), wr = dragonWing(M);
+  wl.position.set(0.26, 0.22, 0.28); wr.position.set(-0.26, 0.22, 0.28); wr.scale.x = -1;
+  g.add(wl, wr);
+  return { g, wl, wr, tail, mouth };
+}
+function buildFlyingDragons(rnd){
+  const M = {
+    hide:new THREE.MeshStandardMaterial({ color:C(0x4e1610), roughness:0.72, metalness:0.1, flatShading:true, emissive:C(0x0e0302), envMapIntensity:0.6 }),
+    bronze:new THREE.MeshStandardMaterial({ color:C(0xb07a3a), roughness:0.42, metalness:0.65, flatShading:true, envMapIntensity:1 }),
+    membrane:new THREE.MeshStandardMaterial({ color:C(0x64201a), roughness:0.85, flatShading:true, side:THREE.DoubleSide, emissive:C(0x160402) }),
+    eye:new THREE.MeshBasicMaterial({ color:C(0xffc040) }),
+  };
+  const root = new THREE.Group(); root.name = 'dragoes-alados'; envRoot.add(root);
+  // as órbitas acompanham (com atraso) o lado de onde a câmera olha: os dragões cruzam a faixa de cima da tela, além do
+  // tabuleiro, e somem para os lados e para o alto; assim ficam sempre à vista sem cobrir as peças (só o rasante desce)
+  const D = { root, list:[], tx:0, tz:0, cyaw:null, swoop:null, nextSwoop:performance.now() + 9000 + rnd() * 6000, roarAt:0 };
+  // rx é a fração da meia-largura da vista: acima de 1, o dragão sai pelas laterais e volta
+  const cfg = [{ rx:1.25, rz:2.4, band:0.07, w:0.24, s:0.6 }, { rx:1.05, rz:1.8, band:0.13, w:-0.3, s:0.5 }, { rx:1.5, rz:2.8, band:0.04, w:0.19, s:0.66 }];
+  for (const c of cfg){
+    const d = makeFlyingDragon(M, c.s);
+    Object.assign(d, c, { a:rnd() * TAU, ph:rnd() * 10, fp:rnd() * TAU, pitch:0, roll:0, yaw:null, yb:null, e:0, breath:null });
+    d.g.position.set(0, 9, 0);
+    root.add(d.g); D.list.push(d);
+  }
+  ENVX.dragons = D;
+}
+// o dragão mais perto da câmera sopra fogo a partir de t0
+function dragonBreath(t0){
+  const D = ENVX.dragons; if (!D) return;
+  let best = null, bd = Infinity;
+  for (const d of D.list){ if (d.breath) continue; const q = d.g.position.distanceToSquared(camera.position); if (q < bd){ bd = q; best = d; } }
+  if (best) best.breath = { t0 };
+}
+const _dv = new THREE.Vector3(), _df = new THREE.Vector3();
+const FIRE_COLS = ['#fff2b8', '#ffc24a', '#ff7a1e', '#e0401a'];
+function updateDragons(now, dt){
+  const D = ENVX.dragons, t = now / 1000, k = Math.min(dt, 60) / 1000;
+  // referência da câmera, suavizada: direção horizontal, ponto do chão para onde ela olha e a borda de cima da vista
+  camera.getWorldDirection(_df);
+  const cp = camera.position, pitch = Math.asin(clamp(-_df.y, -1, 1)), cyaw = Math.atan2(_df.x, _df.z);
+  const tg = _df.y < -0.05 ? (GROUND_Y + 0.6 - cp.y) / _df.y : 14;
+  const sm0 = D.cyaw == null ? 1 : 1 - Math.exp(-dt / 2500);
+  if (D.cyaw == null) D.cyaw = cyaw; else { let dd = cyaw - D.cyaw; if (dd > Math.PI) dd -= TAU; else if (dd < -Math.PI) dd += TAU; D.cyaw += dd * sm0; }
+  D.tx += (cp.x + _df.x * tg - D.tx) * sm0; D.tz += (cp.z + _df.z * tg - D.tz) * sm0;
+  const fx = Math.sin(D.cyaw), fz = Math.cos(D.cyaw);
+  const halfW = Math.hypot(D.tx - cp.x, cp.y, D.tz - cp.z) * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect;
+  const top = pitch - THREE.MathUtils.degToRad(camera.fov) / 2;
+  if (!RM && !D.swoop && now > D.nextSwoop && !cine.active) D.swoop = { d:D.list[Math.floor(Math.random() * D.list.length)], t0:now, dur:7500 };
+  for (const d of D.list){
+    let e = 0;
+    if (D.swoop && D.swoop.d === d){
+      const u = (now - D.swoop.t0) / D.swoop.dur;
+      if (u >= 1 || RM){ D.swoop = null; D.nextSwoop = now + 15000 + Math.random() * 15000; }
+      else e = Math.pow(Math.sin(Math.PI * u), 2);
+    }
+    d.e = e;
+    // voo em elipse; no rasante a órbita encolhe e o dragão desce até perto das peças
+    d.a += d.w * (RM ? 0.45 : 1) * (1 + 0.6 * e) * k;
+    d.fp += k * TAU * (RM ? 0.35 : 1.05 + 0.3 * e);
+    const amp = RM ? 0.1 : (0.22 + 0.5 * (0.5 + 0.5 * Math.sin(t * 0.19 + d.ph * 3))) * (1 - 0.55 * e);
+    const fl = Math.sin(d.fp);
+    d.g.scale.setScalar(d.s * clamp(halfW / 6, 0.6, 1));
+    const lat = d.rx * Math.max(2.5, halfW) * Math.cos(d.a), dep = d.rz * Math.sin(d.a), off = 1.5;
+    const x = D.tx + fx * (off + dep) + fz * lat, z = D.tz + fz * (off + dep) - fx * lat;
+    // altura que mantém o dragão logo abaixo da borda de cima da tela (mais longe, mais baixo: a órbita é inclinada)
+    const dh = Math.max(3, Math.hypot(x - cp.x, z - cp.z));
+    const yb = clamp(cp.y - dh * Math.tan(top + d.band), 3.4, 14);
+    d.yb = d.yb == null ? yb : d.yb + (yb - d.yb) * (1 - Math.exp(-dt / 400));
+    const y = mix(d.yb + 0.3 * Math.sin(t * 0.37 + d.ph), 3.1, e) - 0.16 * fl * amp * d.s;
+    const p = d.g.position, vx = x - p.x, vy = y - p.y, vz = z - p.z;
+    p.set(x, y, z);
+    const hor = Math.hypot(vx, vz);
+    if (hor > 1e-6){
+      const yaw = Math.atan2(vx, vz);
+      let dy = d.yaw == null ? 0 : yaw - d.yaw;
+      if (dy > Math.PI) dy -= TAU; else if (dy < -Math.PI) dy += TAU;
+      d.yaw = yaw; d.g.rotation.y = yaw;
+      const sm = 1 - Math.exp(-dt * 0.004);
+      d.pitch += (clamp(Math.atan2(-vy, hor) * 0.7, -0.45, 0.45) - d.pitch) * sm;
+      d.roll += (clamp(-dy / Math.max(k, 1e-3) * 0.9, -0.55, 0.55) - d.roll) * sm;
+      d.g.rotation.x = d.pitch; d.g.rotation.z = d.roll;
+    }
+    const wz = 0.12 + amp * fl - 0.18 * e;
+    d.wl.rotation.z = wz; d.wr.rotation.z = -wz;
+    d.wl.rotation.y = d.wr.rotation.y = 0;
+    d.wl.rotation.x = d.wr.rotation.x = 0.08 * Math.cos(d.fp) * (RM ? 0.3 : 1);
+    for (let i = 0; i < d.tail.length; i++){
+      const tg = d.tail[i];
+      tg.rotation.y = (RM ? 0.06 : 0.16) * Math.sin(t * 1.3 + d.ph - i * 0.75);
+      tg.rotation.x = 0.05 * Math.sin(t * 0.9 + d.ph + i) - d.pitch * 0.15;
+    }
+    // sopro de fogo: um jorro de brasas a partir da boca, para frente e um pouco para baixo
+    if (d.breath){
+      const u = (now - d.breath.t0) / 1500;
+      if (u > 1) d.breath = null;
+      else if (u > 0 && GLOK){
+        d.mouth.getWorldPosition(_dv);
+        _df.set(0, -0.35, 1).normalize().applyQuaternion(d.g.quaternion);
+        const n = Math.min(8, Math.max(1, Math.round(dt * 0.3 * (u < 0.8 ? 1 : (1 - u) * 5))));
+        for (let i = 0; i < n; i++){
+          const sp = 5 + Math.random() * 3;
+          sparks.emit(_dv.x, _dv.y, _dv.z, _df.x * sp + (Math.random() - 0.5) * 1.2, _df.y * sp + (Math.random() - 0.5) * 1.2, _df.z * sp + (Math.random() - 0.5) * 1.2,
+            520 + Math.random() * 380, 0.2 + Math.random() * 0.22, FIRE_COLS[(Math.random() * 4) | 0], 0.95, 1.6, 0.9);
+        }
+      }
+    }
   }
 }
 /* Fogo x Gelo */
@@ -4774,6 +4992,7 @@ function makeProcCharacter(type, side){
     root, meshes, headHeight:meta.H * meta.s, type, side, kind:'proc',
     faceTowards:S0.faceTowards, setAlert:S0.setAlert, setTransform:S0.setTransform, setHidden:S0.setHidden,
     play(name, opts = {}){
+      if (name === 'charge') name = 'attack';
       if (name === 'idle'){
         st.walk = false;
         if (st.act && st.act.hold){ finishClip(st.act); st.actOut = 1; st.actOutName = st.act.name; st.act = null; }
@@ -4821,7 +5040,9 @@ function makeProcCharacter(type, side){
       return new THREE.Vector3(root.position.x, api.headHeight * k + st.lift, root.position.z);
     },
     update(dt, now){
-      const ghost = st.ghost, t = ghost ? 0 : now / 1000, amp = ghost ? 0 : RM ? 0.35 : 1;
+      // respiração e balanço só na peça selecionada ou quando ela está agindo; as outras ficam paradas
+      const live = st.sel || st.act || st.hit || st.death || st.walk || st.walkW > 0.02 || st.actOut > 0;
+      const ghost = st.ghost, t = ghost ? 0 : now / 1000, amp = ghost || !live ? 0 : RM ? 0.35 : 1;
       const adv = c => { if (!c) return null; c.t += dt; const u = Math.min(1, c.t / c.dur); if (c.res && u >= c.key) finishClip(c); return u; };
       const ua = adv(st.act), uh = adv(st.hit), ud = adv(st.death);
       if (st.act && !st.act.hold && ua >= 1) st.act = null;
@@ -4924,8 +5145,8 @@ const GLB_SPEC = {
   b:{ rigged:true, h:1.28, w:0.72 },
   q:{ rigged:true, h:1.42, w:0.75 },
   k:{ rigged:true, h:1.46, w:0.8 },
-  n:{ rigged:false, h:1.22, w:0.86 },
-  r:{ rigged:false, h:1.14, w:0.82 },
+  n:{ rigged:false, h:1.45, w:1.0 },
+  r:{ rigged:false, h:1.66, w:0.85, stretch:1.36 },
 };
 const GLB = {};
 let glbPending = new Set(), glbLog = [];
@@ -5033,6 +5254,8 @@ function prepAsset(type, gltf, walkGltf){
   const box = measure(scene), size = box.getSize(new THREE.Vector3());
   let s = spec.h / Math.max(1e-4, size.y);
   if (Math.max(size.x, size.z) * s > spec.w) s = spec.w / Math.max(size.x, size.z);
+  // a Torre é larga para a altura: preso na largura, ela ganha altura esticando só na vertical (até spec.stretch)
+  const sy = spec.stretch ? Math.min(spec.h / Math.max(1e-4, size.y), s * spec.stretch) : s;
   const mats = new Set();
   scene.traverse(o => {
     if (!o.isMesh) return;
@@ -5046,15 +5269,44 @@ function prepAsset(type, gltf, walkGltf){
   }
   const clips = spec.rigged ? mapClips(gltf.animations || [], walkGltf && walkGltf.animations) : {};
   const A = {
-    type, rigged:spec.rigged && !!clips.idle, scene, clips, scale:s,
-    off:new THREE.Vector3(-(box.min.x + box.max.x) / 2 * s, -box.min.y * s, -(box.min.z + box.max.z) / 2 * s),
-    height:size.y * s, radius:Math.max(size.x, size.z) * s / 2,
+    type, rigged:spec.rigged && !!clips.idle, scene, clips, scale:s, scaleY:sy,
+    off:new THREE.Vector3(-(box.min.x + box.max.x) / 2 * s, -box.min.y * sy, -(box.min.z + box.max.z) / 2 * s),
+    height:size.y * sy, radius:Math.max(size.x, size.z) * s / 2,
     impact:spec.rigged ? findImpact(scene, clips.attack) : 0,
   };
   A.frames = A.rigged ? propFrames(scene, type) : [];
   const bones = []; scene.traverse(o => { if (o.isBone) bones.push(o.name); });
   if (bones.length) glbLog.push(`${GLB_SLUG[type]}: ossos ${bones.join(', ')}`);
   glbLog.push(`${GLB_SLUG[type]}: altura ${A.height.toFixed(2)}, escala ${s.toFixed(3)}, giro ${(yawFix * 180 / Math.PI).toFixed(0)}°, clipes ${Object.entries(clips).map(([k, c]) => k + '=' + (c ? c.name + ' ' + c.duration.toFixed(2) + 's' : '-')).join(', ')}, impacto ${A.impact.toFixed(2)}s`);
+  return A;
+}
+// torre composta: a base estática na altura da Torre e o arqueiro (com rig) de pé no alto, na escala do Peão
+function composeTower(baseG, riderG, walkG){
+  const fit = (scene, h, w, stretch = 1) => {
+    scene.updateMatrixWorld(true);
+    const box = measure(scene), size = box.getSize(new THREE.Vector3());
+    let k = h / Math.max(1e-4, size.y);
+    if (Math.max(size.x, size.z) * k > w) k = w / Math.max(size.x, size.z);
+    const ky = Math.min(h / Math.max(1e-4, size.y), k * stretch);
+    const holder = new THREE.Group(), inner = new THREE.Group();
+    inner.add(scene); holder.add(inner);
+    inner.scale.set(k, ky, k);
+    inner.position.set(-(box.min.x + box.max.x) / 2 * k, -box.min.y * ky, -(box.min.z + box.max.z) / 2 * k);
+    return { holder, h:size.y * ky, r:Math.max(size.x, size.z) * k / 2 };
+  };
+  const rs = riderG.scene;
+  const head = findBone(rs, /^head$/i) || findBone(rs, /head/i), front = findBone(rs, /headfront|head_front|nose/i);
+  rs.updateMatrixWorld(true);
+  if (head && front){ const a = head.getWorldPosition(new THREE.Vector3()), b = front.getWorldPosition(new THREE.Vector3()); if (Math.hypot(b.x - a.x, b.z - a.z) > 1e-4) rs.rotation.y = -Math.atan2(b.x - a.x, b.z - a.z); }
+  const B = fit(baseG.scene, GLB_SPEC.r.h, GLB_SPEC.r.w, GLB_SPEC.r.stretch), R = fit(rs, GLB_SPEC.p.h, GLB_SPEC.p.w);
+  R.holder.position.y = B.h * 0.97;
+  const scene = new THREE.Group(); scene.add(B.holder, R.holder);
+  const mats = new Set();
+  scene.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = false; if (o.isSkinnedMesh) o.frustumCulled = false; for (const m of [].concat(o.material)) mats.add(m); } });
+  for (const m of mats){ if ('envMapIntensity' in m) m.envMapIntensity = 0.9; if (m.map) m.map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy()); }
+  const clips = mapClips(riderG.animations || [], walkG && walkG.animations);
+  const A = { type:'r', rigged:!!clips.idle, scene, clips, scale:1, off:new THREE.Vector3(), height:B.h * 0.97 + R.h, radius:Math.max(B.r, R.r), impact:findImpact(rs, clips.attack), frames:[], composite:true, tipY:B.h * 0.97 + R.h * 0.62 };
+  glbLog.push(`torre composta: base ${B.h.toFixed(2)} + arqueiro ${R.h.toFixed(2)}, clipes ${Object.entries(clips).map(([k, c]) => k + '=' + (c ? c.name : '-')).join(', ')}`);
   return A;
 }
 /* adereços nas mãos dos GLB (o A-pose da Meshy perde as armas): orientados pela pose de ligação */
@@ -5157,6 +5409,19 @@ async function loadModels(){
   const urls = (slug, name) => (opt ? [`assets/meshy/${slug}/${name}.opt.gltf.json`, `assets/meshy/${slug}/${name}.opt.glb`] : []).concat([`assets/meshy/${slug}/${name}.glb`]);
   await Promise.all(Object.keys(GLB_SPEC).map(async type => {
     const slug = GLB_SLUG[type], spec = GLB_SPEC[type];
+    if (type === 'r'){
+      // quando chegarem a base sem arqueiro e o arqueiro com rig, a torre vira composta
+      const base = await loadGltf(loader, urls('torre_base', 'model'));
+      const rider = base ? await loadGltf(loader, urls('arqueiro', 'animated')) : null;
+      if (base && rider){
+        const walk = await loadGltf(loader, ['assets/meshy/arqueiro/walk.gltf.json', 'assets/meshy/arqueiro/walk.glb']);
+        try { GLB.r = composeTower(base, rider, walk); glbPending.add('r'); return; } catch (e){ glbLog.push(`torre composta: falha (${e.message})`); }
+      }
+    }
+    if (type === 'n'){
+      const mounted = await loadGltf(loader, urls('cavalo_montado', 'model'));
+      if (mounted){ try { GLB.n = prepAsset('n', mounted, null); GLB.n.lance = true; glbPending.add('n'); return; } catch (e){ glbLog.push(`cavalo montado: falha (${e.message})`); } }
+    }
     const main = await loadGltf(loader, urls(slug, spec.rigged ? 'animated' : 'model'));
     if (!main){ glbLog.push(`${slug}: sem arquivo, mantém o procedural`); return; }
     // walk.glb só traz o clipe (sem textura), então não há cópia otimizada
@@ -5219,15 +5484,36 @@ function applySideTint(obj, side){
 }
 
 let proxyGeo = null;
+// mão do cavaleiro no modelo montado (ajuste fino por olho, em frações da altura do modelo) e ângulos da lança
+const LANCE = { off:[-0.16, 0.6, 0.04], rest:-0.08, couch:Math.PI / 2 + 0.12 };
+function buildLance(side, H){
+  const g = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color:C(0x6b4a2b), roughness:0.75 }), steel = new THREE.MeshStandardMaterial({ color:C(0xc9ced6), metalness:0.85, roughness:0.3, envMapIntensity:1.3 });
+  const L = 1.25;
+  const add = (geo, m, y) => { const o = new THREE.Mesh(geo, m); o.position.y = y; o.castShadow = true; g.add(o); return o; };
+  add(new THREE.CylinderGeometry(0.016, 0.024, L, 7), wood, L / 2 - 0.25);
+  add(new THREE.ConeGeometry(0.06, 0.14, 10, 1, true), steel, 0.02).rotation.x = Math.PI;
+  add(new THREE.ConeGeometry(0.03, 0.16, 6), steel, L - 0.17);
+  const pen = new THREE.Mesh(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.12, 0), new THREE.Vector3(0, -0.06, -0.22)]),
+    new THREE.MeshStandardMaterial({ color:C(RING_COL[side]), side:THREE.DoubleSide, roughness:0.8 }));
+  pen.geometry.computeVertexNormals(); pen.position.y = L - 0.32; g.add(pen);
+  const tip = new THREE.Object3D(); tip.position.y = L - 0.1; g.add(tip);
+  g.userData.tip = tip;
+  g.position.set(LANCE.off[0] * H, LANCE.off[1] * H, LANCE.off[2] * H);
+  g.rotation.x = LANCE.rest;
+  return g;
+}
 function makeGlbCharacter(type, side, A){
   const S0 = shell(side), st = S0.st, root = S0.root, holder = S0.holder;
   const model = A.rigged ? THREE.SkeletonUtils.clone(A.scene) : A.scene.clone(true);
   const wrap = new THREE.Group();
-  wrap.add(model); wrap.scale.setScalar(A.scale); wrap.position.copy(A.off);
+  wrap.add(model); wrap.scale.set(A.scale, A.scaleY || A.scale, A.scale); wrap.position.copy(A.off);
   holder.add(wrap);
   applySideTint(model, side);
   // adereços nas mãos (já na paleta do lado; a tinta não se aplica a eles)
   let tipObj = null, zap = null;
+  // lança procedural do cavaleiro (modelo montado com a mão vazia): de pé em repouso, deitada e cravada no ataque
+  const lance = A.lance ? buildLance(side, A.height) : null;
+  if (lance) holder.add(lance);
   const props = [];
   // as trilhas de escala dos clipes mudam a escala dos ossos: a compensação é refeita a cada quadro
   const fitProps = () => {
@@ -5304,8 +5590,9 @@ function makeGlbCharacter(type, side, A){
   const acts = {};
   if (mixer) for (const k of ['idle', 'walk', 'attack', 'death']) if (A.clips[k]) acts[k] = mixer.clipAction(A.clips[k]);
   let loopName = 'idle';
-  if (acts.idle){ acts.idle.play(); acts.idle.time = Math.random() * A.clips.idle.duration; }
-  Object.assign(st, { walk:false, shot:null, pshot:null, hit:null, death:null, gal:0, walkW:0 });
+  // em repouso o rig fica parado no primeiro quadro do idle (pose natural, não o T-pose)
+  if (acts.idle){ acts.idle.play(); acts.idle.time = 0; mixer.update(0); }
+  Object.assign(st, { walk:false, shot:null, pshot:null, hit:null, death:null, gal:0, walkW:0, wake:0 });
   const tsAttack = A.clips.attack ? clamp(A.impact / 0.42, 1, 3.5) : 1;
   const tsDeath = A.clips.death ? clamp(A.clips.death.duration / 0.8, 1, 3) : 1;
   const resolve = o => { if (o && o.res){ o.res(); o.res = null; } };
@@ -5377,7 +5664,13 @@ function makeGlbCharacter(type, side, A){
       for (const m of ownMats()){ m.transparent = a < 0.999; m.opacity = a; }
     },
     anchor(name){
+      if (name === 'lance'){
+        root.updateMatrixWorld(true);
+        if (lance) return lance.userData.tip.getWorldPosition(new THREE.Vector3());
+        return new THREE.Vector3(root.position.x + Math.sin(root.rotation.y) * 0.75, A.height * 0.55, root.position.z + Math.cos(root.rotation.y) * 0.75);
+      }
       if (name === 'tip' && tipObj){ root.updateMatrixWorld(true); return tipObj.getWorldPosition(new THREE.Vector3()); }
+      if (name === 'tip' && A.tipY) return new THREE.Vector3(root.position.x, A.tipY + st.lift, root.position.z);
       const k = name === 'chest' ? 0.6 : name === 'top' ? 1 : name === 'tip' ? (type === 'r' ? 0.95 : 0.8) : 0.85;
       return new THREE.Vector3(root.position.x, A.height * k + st.lift, root.position.z);
     },
@@ -5393,10 +5686,16 @@ function makeGlbCharacter(type, side, A){
             to.timeScale = want === 'walk' ? 1.25 : 1;
             to.play();
             if (from) from.crossFadeTo(to, 0.2, false); else to.fadeIn(0.2);
-            loopName = want;
+            loopName = want; st.wake = now + 450;
           }
         }
-        mixer.update(dt / 1000);
+        if (st.sel || st.shot || st.death || st.walk || now < st.wake) mixer.update(dt / 1000);
+        else if (acts.idle && acts.idle.time > 0){
+          // ao desmarcar, o idle volta devagar para o primeiro quadro e a peça assenta
+          const a = acts.idle;
+          a.time = a.time * Math.exp(-dt * 0.008); if (a.time < 0.01) a.time = 0;
+          mixer.update(0);
+        }
         if (st.shot){
           const a = acts.attack;
           if (st.shot.res && a.time >= st.shot.key) resolve(st.shot);
@@ -5406,6 +5705,7 @@ function makeGlbCharacter(type, side, A){
             loopName = st.walk && acts.walk ? 'walk' : 'idle';
             back.reset().play();
             a.crossFadeTo(back, 0.25, false);
+            st.wake = now + 450;
           }
         }
         if (st.death && st.death.glb && st.death.res && acts.death.time >= st.death.end) resolve(st.death);
@@ -5416,7 +5716,7 @@ function makeGlbCharacter(type, side, A){
       if (st.sel && !RM) y += 0.03 + 0.025 * Math.sin(now / 280);
       if (st.ghost) rx += 0.08;
       else if (!A.rigged){
-        y += 0.006 * Math.sin(t * 1.7 + st.ph) * amp;
+        if (st.sel) y += 0.006 * Math.sin(t * 1.7 + st.ph) * amp;
         if (st.walkW > 0.01){ st.gal += dt * 0.024; y += Math.abs(Math.sin(st.gal)) * 0.05 * st.walkW; rx += 0.06 * Math.sin(st.gal) * st.walkW; }
       }
       const ps = st.pshot;
@@ -5424,7 +5724,15 @@ function makeGlbCharacter(type, side, A){
         ps.t += dt;
         const u = Math.min(1, ps.t / ps.dur);
         if (ps.res && u >= ps.key) resolve(ps);
-        if (ps.name === 'jump'){
+        if (ps.name === 'charge'){
+          const rear = seg(u, 0, 0.26) * (1 - seg(u, 0.36, 0.5)), thrust = seg(u, 0.44, 0.6) * (1 - seg(u, 0.78, 1));
+          rx += -0.42 * rear + 0.14 * thrust; y += 0.2 * rear; z += -0.05 * rear + 0.3 * thrust;
+          if (lance){
+            const couch = seg(u, 0.18, 0.44) * (1 - seg(u, 0.84, 1));
+            lance.rotation.x = LANCE.rest + (LANCE.couch - LANCE.rest) * couch;
+            lance.position.z = LANCE.off[2] * A.height + 0.26 * thrust;
+          }
+        } else if (ps.name === 'jump'){
           const ms = ps.t / SPD, air = ps.dur / SPD - 280;
           const crouch = ms < 120 ? ease3(ms / 120) : ms < 120 + air ? Math.max(0, 1 - (ms - 120) / 120) : 0.8 * Math.max(0, 1 - (ms - 120 - air) / 160);
           const leap = ms > 120 && ms < 120 + air ? Math.sin(Math.PI * (ms - 120) / air) : 0;
@@ -5465,6 +5773,7 @@ function makeGlbCharacter(type, side, A){
       proxy.material.dispose();
       // adereços e esqueleto são próprios deste personagem (a malha do GLB é compartilhada)
       for (const pr of props) pr.g.traverse(o => { if (o.isMesh) o.geometry.dispose(); else if (o.isSprite) o.material.dispose(); });
+      if (lance) lance.traverse(o => { if (o.isMesh){ o.geometry.dispose(); o.material.dispose(); } });
       model.traverse(o => { if (o.isSkinnedMesh && o.skeleton) o.skeleton.dispose(); });
       S0.disposeShell();
     },
@@ -6189,22 +6498,28 @@ async function meleeCapture(p, v, tx, tz){
   await walkTo(p, tx, tz, true);
 }
 // Cavalo: salta para perto e atravessa a vítima numa carga de lança
+// Cavalo: como São Jorge, o cavalo empina, o cavaleiro baixa a lança e a crava na vítima
 async function lanceCharge(p, v, tx, tz){
   const ch = charOf(p);
   let dx = v.dx - p.dx, dz = v.dz - p.dz, L = Math.hypot(dx, dz);
-  if (L > 1.25){ await gallopLeap(p, p.dx + dx / L * (L - 1.05), p.dz + dz / L * (L - 1.05)); dx = v.dx - p.dx; dz = v.dz - p.dz; L = Math.hypot(dx, dz); }
+  if (L > 1.35){ await gallopLeap(p, p.dx + dx / L * (L - 1.15), p.dz + dz / L * (L - 1.15)); dx = v.dx - p.dx; dz = v.dz - p.dz; L = Math.hypot(dx, dz); }
   const ux = dx / L, uz = dz / L;
-  ch.faceTowards(v.dx, v.dz, 2600);
-  ch.play('attack', { dur:1000, key:0.35 });
-  ch.play('walk', { rate:0.035 });
+  ch.faceTowards(v.dx, v.dz, 3400);
   snd('galope');
-  const fx = p.dx, fz = p.dz, over = 0.32;
+  const fx = p.dx, fz = p.dz, reach = Math.max(0, L - 0.9), D0 = 1150;
   let hitP = null;
-  await tween(360, k => {
-    const d = (L + over) * k;
-    p.dx = fx + ux * d; p.dz = fz + uz * d;
-    if (!hitP && d > L - 0.35){ snd('carga_lanca'); hitP = slay(v, 'lance', p.side, { x:ux * 0.4, z:uz * 0.4 }); }
-  }, k => k * (2 - k));
+  const act = ch.play('charge', { dur:D0, key:0.58 });
+  await tween(D0, k => {
+    const f = seg(k, 0.42, 0.6);
+    p.dx = fx + ux * reach * f; p.dz = fz + uz * reach * f;
+    if (!hitP && k >= 0.58){
+      snd('carga_lanca'); shake(0.08);
+      if (GLOK && ch.anchor){ const tp = ch.anchor('lance'); sparks.burst(tp, 30, ['#fff6d8', '#ffd27a', '#ff9a3a'], 2.8, { life:520, size:0.06, grav:-5 }); flashLight(tp, 0xffb060, 2.6, 380); }
+      hitP = slay(v, 'lance', p.side, { x:ux * 0.45, z:uz * 0.45 });
+    }
+  }, linE);
+  await act;
+  ch.play('walk', { rate:0.035 });
   dustAt(p.dx, p.dz, 10, 0.9);
   const bx = p.dx, bz = p.dz;
   await tween(280, k => { p.dx = mix(bx, tx, k); p.dz = mix(bz, tz, k); }, easeSine);
@@ -6770,6 +7085,7 @@ function updateEnv(now, dt){
     snd('rugido_dragao', { vol:0.7 });
     snd('sopro_fogo', { vol:0.55, delay:0.9 });
     if (!RM){ drawFireBurst(); ENVX.burst = { t0:now + 900 }; }
+    if (ENVX.dragons) dragonBreath(now + 900);
   }
   let fb = 0;
   if (ENVX.burst){
@@ -6777,6 +7093,7 @@ function updateEnv(now, dt){
     if (k > 1) ENVX.burst = null;
     else if (k > 0) fb = (k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88) * (0.85 + 0.15 * Math.sin(now * 0.05));
   }
+  if (ENVX.dragons) updateDragons(now, dt);
   // o dragão plana pelo céu de vez em quando
   const G1 = ENVX.glider;
   if (G1){
@@ -6847,6 +7164,7 @@ function frame(now){
     drawOverlay();
     updateHud();
     pvTick(now);
+    mmTick();
   } catch (err){
     // um erro de desenho não pode travar o jogo: registra uma vez e segue
     if (!frame.warned){ frame.warned = true; console.error(err); }
@@ -7251,7 +7569,7 @@ function pvTick(now){
   if (!PV.drag && now - PV.dragAt > 2000 && !RM) PV.tt.rotation.y += dt * 0.000349;
   if (PV.ch.kind === 'proc' && GLB[PV.key[0]]){ const k = PV.key; PV.key = ''; pvShow(k[0], k[1], PV.label.textContent); return; }
   const c = PV.ch;
-  c.setHidden(false); c.setOpacity(1); c.setFlash(0); c.setSink(0); c.setSelected(false); c.setAlert(false);
+  c.setHidden(false); c.setOpacity(1); c.setFlash(0); c.setSink(0); c.setSelected(true); c.setAlert(false);
   c.update(dt, now);
   PV.renderer.render(PV.scene, PV.camera);
 }
@@ -7701,8 +8019,256 @@ document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'v' || e.key === 'V'){ setView(VIEW_ORDER[(VIEW_ORDER.indexOf(VIEW.mode) + 1) % 3]); }
   else if (e.key === 'i' || e.key === 'I'){ setFlip(!VIEW.flip); }
+  else if (e.key === 'm' || e.key === 'M'){ mmSetOpen(!mmIsOpen()); }
 });
 syncViewUI();
+/* ---------- Minimapa ----------
+   Diagrama 2D clássico, sempre em dia com a partida (lido direto das regras, então desfazer, roque, en passant e promoção
+   aparecem na hora, inclusive durante a câmera de combate). Também é um tabuleiro jogável: clicar numa casa equivale a
+   clicar na casa do campo 3D. Segue o lado de quem joga (Inverter campo); na vista Drone mostra para onde a câmera olha.
+   Ganchos: MM.setMarks([{ sq:'e4', kind:'trap'|'rune'|'terrain'|'aura'|'counter', color, label }]) para o Modo Arcano e
+   MM.setArrows([{ from:'e2', to:'e4', color }]) para dicas e lições; mmDraw(ctx, px, opts) desenha qualquer diagrama. */
+const MM_KEY = 'coroa-de-cinzas:minimapa';
+const MM = { open:true, openM:false, big:false, pos:null, posM:null, w:null, wM:null, sig:'', ver:0, marks:[], arrows:[], hover:null, narrow:null, title:null,
+  setMarks(list){ MM.marks = Array.isArray(list) ? list : []; MM.ver++; },
+  setArrows(list){ MM.arrows = Array.isArray(list) ? list : []; MM.ver++; } };
+try { const v = JSON.parse(localStorage.getItem(MM_KEY) || 'null'); if (v && typeof v === 'object') for (const k of ['open', 'openM', 'big']) if (k in v) MM[k] = !!v[k];
+  // posição em fração do espaço livre da cena (sobrevive a mudanças de tamanho) e largura própria, se o jogador mudou
+  for (const k of ['pos', 'posM']) if (v[k] && isFinite(v[k].fx) && isFinite(v[k].fy)) MM[k] = { fx:clamp(+v[k].fx, 0, 1), fy:clamp(+v[k].fy, 0, 1) };
+  for (const k of ['w', 'wM']) if (isFinite(v[k]) && v[k] > 0) MM[k] = +v[k];
+} catch (e){}
+const mmEl = $('mm'), mmCv = $('mm-cv'), mmCtx = mmCv.getContext('2d'), mmFab = $('mm-fab');
+const mmNarrow = () => window.innerWidth < 560;
+const mmIsOpen = () => mmNarrow() ? MM.openM : MM.open;
+function mmSave(){ try { localStorage.setItem(MM_KEY, JSON.stringify({ open:MM.open, openM:MM.openM, big:MM.big, pos:MM.pos, posM:MM.posM, w:MM.w, wM:MM.wM })); } catch (e){} }
+function mmSetOpen(v){
+  if (mmNarrow()) MM.openM = !!v; else MM.open = !!v;
+  mmSave(); mmSyncUI();
+  (v ? $('mm-hide') : mmFab).focus({ preventScroll:true });
+}
+function mmSyncUI(){
+  const o = mmIsOpen() && !TITLE.open;
+  mmEl.hidden = !o; mmFab.hidden = o || TITLE.open;
+  mmEl.classList.toggle('big', MM.big);
+  $('mm-size').setAttribute('aria-pressed', String(MM.big));
+  $('mm-size').setAttribute('aria-label', MM.big ? 'Mapa menor' : 'Mapa maior');
+  mmFab.setAttribute('aria-expanded', String(o));
+  MM.sig = '';
+  mmLayout();
+}
+// posição e tamanho livres: arrastar pelo cabeçalho, redimensionar pela quina, presos dentro da cena
+const mmScene = $('scene'), MM_PAD = 10, MM_SNAP = 26;
+const mmKeyPos = () => mmNarrow() ? 'posM' : 'pos', mmKeyW = () => mmNarrow() ? 'wM' : 'w';
+function mmLimits(){ const r = mmScene.getBoundingClientRect(); return { W:r.width, H:r.height, min:140, max:Math.max(140, Math.min(r.width, r.height) * 0.45) }; }
+function mmLayout(){
+  if (mmEl.hidden) return;
+  const L = mmLimits(), cw = MM[mmKeyW()];
+  if (cw) mmEl.style.setProperty('--mm', clamp(cw, L.min, L.max) + 'px'); else mmEl.style.removeProperty('--mm');
+  const p = MM[mmKeyPos()];
+  if (!p){ mmEl.style.left = mmEl.style.top = ''; mmEl.style.right = ''; return; }
+  const w = mmEl.offsetWidth, h = mmEl.offsetHeight;
+  mmEl.style.right = 'auto';
+  mmEl.style.left = Math.round(p.fx * Math.max(0, L.W - w)) + 'px';
+  mmEl.style.top = Math.round(p.fy * Math.max(0, L.H - h)) + 'px';
+}
+function mmStorePos(x, y){
+  const L = mmLimits(), w = mmEl.offsetWidth, h = mmEl.offsetHeight, fw = Math.max(1, L.W - w), fh = Math.max(1, L.H - h);
+  MM[mmKeyPos()] = { fx:clamp(x / fw, 0, 1), fy:clamp(y / fh, 0, 1) };
+}
+let mmDrag = null;
+$('mm-head').addEventListener('pointerdown', e => {
+  if (e.button !== 0 || e.target.closest('button')) return;
+  e.preventDefault();
+  const r = mmEl.getBoundingClientRect(), sr = mmScene.getBoundingClientRect();
+  mmDrag = { id:e.pointerId, kind:'move', dx:e.clientX - r.left, dy:e.clientY - r.top, sx:sr.left, sy:sr.top };
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err){}
+  mmEl.classList.add('drag');
+});
+$('mm-grip').addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  e.preventDefault(); e.stopPropagation();
+  const r = mmEl.getBoundingClientRect();
+  mmDrag = { id:e.pointerId, kind:'size', x0:e.clientX, y0:e.clientY, w0:r.width };
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err){}
+  mmEl.classList.add('drag');
+});
+function mmDragMove(e){
+  if (!mmDrag || e.pointerId !== mmDrag.id) return;
+  const L = mmLimits();
+  if (mmDrag.kind === 'move'){
+    const w = mmEl.offsetWidth, h = mmEl.offsetHeight;
+    const x = clamp(e.clientX - mmDrag.sx - mmDrag.dx, 0, Math.max(0, L.W - w)), y = clamp(e.clientY - mmDrag.sy - mmDrag.dy, 0, Math.max(0, L.H - h));
+    mmEl.style.right = 'auto'; mmEl.style.left = x + 'px'; mmEl.style.top = y + 'px';
+  } else {
+    const d = Math.max(e.clientX - mmDrag.x0, e.clientY - mmDrag.y0);
+    MM[mmKeyW()] = clamp(mmDrag.w0 + d, L.min, L.max);
+    mmEl.style.setProperty('--mm', MM[mmKeyW()] + 'px');
+    // a quina cresce para baixo e para a direita; se encostar na borda, o painel recua para caber
+    const w = mmEl.offsetWidth, h = mmEl.offsetHeight, r = mmEl.getBoundingClientRect(), sr = mmScene.getBoundingClientRect();
+    mmEl.style.right = 'auto';
+    mmEl.style.left = clamp(r.left - sr.left, 0, Math.max(0, L.W - w)) + 'px';
+    mmEl.style.top = clamp(r.top - sr.top, 0, Math.max(0, L.H - h)) + 'px';
+  }
+}
+function mmDragEnd(e){
+  if (!mmDrag || e.pointerId !== mmDrag.id) return;
+  mmDrag = null;
+  mmEl.classList.remove('drag');
+  const L = mmLimits(), w = mmEl.offsetWidth, h = mmEl.offsetHeight;
+  let x = mmEl.offsetLeft, y = mmEl.offsetTop;
+  // perto de uma borda, encaixa com a mesma folga do canto padrão
+  if (x < MM_SNAP) x = Math.min(MM_PAD, L.W - w); else if (L.W - w - x < MM_SNAP) x = Math.max(0, L.W - w - MM_PAD);
+  if (y < MM_SNAP) y = Math.min(MM_PAD, L.H - h); else if (L.H - h - y < MM_SNAP) y = Math.max(0, L.H - h - MM_PAD);
+  mmStorePos(x, y);
+  mmSave(); mmLayout();
+  MM.sig = '';
+}
+for (const el of [$('mm-head'), $('mm-grip')]){
+  el.addEventListener('pointermove', mmDragMove);
+  el.addEventListener('pointerup', mmDragEnd);
+  el.addEventListener('pointercancel', mmDragEnd);
+}
+$('mm-head').addEventListener('dblclick', e => { if (e.target.closest('button')) return; MM[mmKeyPos()] = null; mmSave(); mmLayout(); });
+window.addEventListener('resize', () => requestAnimationFrame(mmLayout));
+const MM_GLYPH = { k:'♚', q:'♛', r:'♜', b:'♝', n:'♞', p:'♟' };
+const MM_COL = { light:'#d9c69f', dark:'#7b6146', w:['#f8ebc8', '#3a2810'], b:['#c8263e', '#170407'] };
+const MM_MARK = { trap:['!', '#ff9a5a'], rune:['✦', '#c9a8ff'], terrain:['▲', '#9fd47f'], aura:['', '#7fd0ff'], counter:['', '#f0c060'] };
+const _mmd = new THREE.Vector3();
+// desenha um diagrama: board = G.board(); flip põe a Legião embaixo; o resto é opcional
+function mmDraw(ctx, px, o){
+  const s = px / 8, f = !!o.flip;
+  const X = c => (f ? 7 - c : c) * s, Y = r => (f ? 7 - r : r) * s;
+  const cell = (r, c, fill) => { ctx.fillStyle = fill; ctx.fillRect(X(c), Y(r), s, s); };
+  ctx.clearRect(0, 0, px, px);
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) cell(r, c, (r + c) % 2 ? MM_COL.dark : MM_COL.light);
+  if (o.last) for (const [r, c] of [o.last.from, o.last.to]) cell(r, c, 'rgba(232,160,60,.52)');
+  if (o.check){
+    const [r, c] = o.check, cx = X(c) + s / 2, cy = Y(r) + s / 2, g = ctx.createRadialGradient(cx, cy, s * 0.1, cx, cy, s * 0.72);
+    g.addColorStop(0, 'rgba(255,40,50,.95)'); g.addColorStop(0.55, 'rgba(210,30,45,.6)'); g.addColorStop(1, 'rgba(210,30,45,0)');
+    ctx.fillStyle = g; ctx.fillRect(X(c), Y(r), s, s);
+  }
+  if (o.sel) cell(o.sel[0], o.sel[1], 'rgba(246,190,80,.8)');
+  for (const m of o.marks || []){
+    if (m.kind !== 'aura' && m.kind !== 'terrain') continue;
+    const [r, c] = rcOf(m.sq), col = m.color || MM_MARK[m.kind][1];
+    if (m.kind === 'terrain'){ ctx.fillStyle = col; ctx.globalAlpha = 0.28; ctx.fillRect(X(c), Y(r), s, s); ctx.globalAlpha = 1; }
+    else { ctx.strokeStyle = col; ctx.lineWidth = Math.max(1.5, s * 0.08); ctx.beginPath(); ctx.arc(X(c) + s / 2, Y(r) + s / 2, s * 0.46, 0, TAU); ctx.stroke(); }
+  }
+  // coordenadas a–h e 1–8 dentro das casas da borda (como num diagrama impresso)
+  const fsz = Math.max(7, Math.round(s * 0.27));
+  ctx.font = `600 ${fsz}px "Alegreya Sans", system-ui, sans-serif`;
+  for (let i = 0; i < 8; i++){
+    const c = f ? 7 - i : i, r = f ? i : 7 - i;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    const br = f ? 0 : 7;
+    ctx.fillStyle = (br + c) % 2 ? MM_COL.light : MM_COL.dark;
+    ctx.fillText('abcdefgh'[c], X(c) + s - 2, Y(br) + s - 1);
+    const lc = f ? 7 : 0;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = (r + lc) % 2 ? MM_COL.light : MM_COL.dark;
+    ctx.fillText(String(8 - r), X(lc) + 2, Y(r) + 1);
+  }
+  // peças: o glifo cheio, contornado e pintado na cor da facção
+  if (o.board){
+    ctx.font = `${Math.round(s * 0.84)}px "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.lineWidth = Math.max(1.4, s * 0.1);
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
+      const q = o.board[r][c]; if (!q) continue;
+      const g = MM_GLYPH[q.type] + '︎', cx = X(c) + s / 2, cy = Y(r) + s * 0.53, [fill, line] = MM_COL[q.color];
+      ctx.strokeStyle = line; ctx.strokeText(g, cx, cy);
+      ctx.fillStyle = fill; ctx.fillText(g, cx, cy);
+    }
+  }
+  // lances possíveis da peça escolhida: ponto nas casas livres, anel nas capturas
+  for (const a of o.acts || []){
+    const cx = X(a.c) + s / 2, cy = Y(a.r) + s / 2;
+    if (a.type === 'capture'){ ctx.strokeStyle = 'rgba(200,30,40,.85)'; ctx.lineWidth = Math.max(1.5, s * 0.09); ctx.beginPath(); ctx.arc(cx, cy, s * 0.43, 0, TAU); ctx.stroke(); }
+    else { ctx.fillStyle = 'rgba(40,24,10,.55)'; ctx.beginPath(); ctx.arc(cx, cy, s * 0.15, 0, TAU); ctx.fill(); }
+  }
+  if (o.hover){ ctx.strokeStyle = 'rgba(255,244,214,.95)'; ctx.lineWidth = Math.max(1.5, s * 0.07); ctx.strokeRect(X(o.hover.c) + 1, Y(o.hover.r) + 1, s - 2, s - 2); }
+  for (const m of o.marks || []){
+    if (m.kind === 'aura' || m.kind === 'terrain') continue;
+    const [r, c] = rcOf(m.sq), d = MM_MARK[m.kind] || ['?', '#fff'], col = m.color || d[1], bx = X(c) + s * 0.8, by = Y(r) + s * 0.2, rr = s * 0.17;
+    ctx.fillStyle = 'rgba(10,6,4,.85)'; ctx.beginPath(); ctx.arc(bx, by, rr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = col; ctx.font = `700 ${Math.round(rr * 1.5)}px "Alegreya Sans", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(m.label != null ? String(m.label) : d[0], bx, by + 0.5);
+  }
+  for (const a of o.arrows || []){
+    const [r0, c0] = rcOf(a.from), [r1, c1] = rcOf(a.to);
+    const x0 = X(c0) + s / 2, y0 = Y(r0) + s / 2, x1 = X(c1) + s / 2, y1 = Y(r1) + s / 2, an = Math.atan2(y1 - y0, x1 - x0), hl = s * 0.42;
+    ctx.strokeStyle = ctx.fillStyle = a.color || 'rgba(120,200,110,.85)';
+    ctx.lineWidth = s * 0.16; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - Math.cos(an) * hl * 0.8, y1 - Math.sin(an) * hl * 0.8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - Math.cos(an - 0.5) * hl, y1 - Math.sin(an - 0.5) * hl); ctx.lineTo(x1 - Math.cos(an + 0.5) * hl, y1 - Math.sin(an + 0.5) * hl); ctx.fill();
+    ctx.lineCap = 'butt';
+  }
+  // câmera do Drone: um leque que sai da posição da câmera (presa à borda) na direção para onde ela olha
+  if (o.cam){
+    const m = v => (f ? 4 - v : v + 4) * s;
+    let ax = clamp(m(o.cam.x), s * 0.35, px - s * 0.35), ay = clamp(m(o.cam.z), s * 0.35, px - s * 0.35);
+    const dx = f ? -o.cam.dx : o.cam.dx, dz = f ? -o.cam.dz : o.cam.dz, an = Math.atan2(dz, dx), half = o.cam.half, L = s * 2.2;
+    ctx.fillStyle = 'rgba(255,226,160,.26)'; ctx.strokeStyle = 'rgba(227,165,72,.95)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.arc(ax, ay, L, an - half, an + half); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e3a548'; ctx.beginPath(); ctx.arc(ax, ay, Math.max(2.5, s * 0.13), 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#1a1208'; ctx.lineWidth = 1; ctx.stroke();
+  }
+}
+function mmTick(){
+  const narrow = mmNarrow();
+  if (narrow !== MM.narrow || TITLE.open !== MM.title){ MM.narrow = narrow; MM.title = TITLE.open; mmSyncUI(); }
+  if (mmEl.hidden || !G || !S) return;
+  const css = mmCv.clientWidth; if (!css) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1), px = Math.round(css * dpr);
+  let cam0 = null;
+  if (VIEW.mode === 'drone' && GLOK){
+    camera.getWorldDirection(_mmd);
+    const hl = Math.hypot(_mmd.x, _mmd.z) || 1;
+    cam0 = { x:camera.position.x, z:camera.position.z, dx:_mmd.x / hl, dz:_mmd.z / hl, half:Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect) };
+  }
+  const hov = MM.hover || (ui.kb ? ui.cursor : ui.hover);
+  const showSel = ui.sel != null && !busy && S.pieces[ui.sel];
+  const fen = G.fen();
+  const sig = [fen, S.last ? S.last.from + '>' + S.last.to : '', showSel ? ui.sel + ':' + ui.acts.length : '', VIEW.flip, hov ? hov.r * 8 + hov.c : '', px, MM.ver,
+    cam0 ? [cam0.x, cam0.z, cam0.dx, cam0.dz].map(v => v.toFixed(2)).join() : ''].join('|');
+  if (sig === MM.sig) return;
+  MM.sig = sig;
+  if (mmCv.width !== px){ mmCv.width = px; mmCv.height = px; }
+  let check = null;
+  if (G.in_check()){ const b = G.board(), t = G.turn(); for (let r = 0; r < 8 && !check; r++) for (let c = 0; c < 8; c++){ const q = b[r][c]; if (q && q.type === 'k' && q.color === t){ check = [r, c]; break; } } }
+  const sp = showSel ? S.pieces[ui.sel] : null;
+  mmDraw(mmCtx, px, { board:G.board(), flip:VIEW.flip, last:S.last, check, sel:sp ? [sp.r, sp.c] : null, acts:sp ? ui.acts : [], hover:hov, marks:MM.marks, arrows:MM.arrows, cam:cam0 });
+}
+function mmCell(e){
+  const b = mmCv.getBoundingClientRect(), k = b.width / 8;
+  let c = Math.floor((e.clientX - b.left) / k), r = Math.floor((e.clientY - b.top) / k);
+  if (c < 0 || c > 7 || r < 0 || r > 7) return null;
+  if (VIEW.flip){ c = 7 - c; r = 7 - r; }
+  return { r, c };
+}
+// os toques no mapa não chegam à cena (não pulam a câmera de combate nem giram a vista)
+for (const ev of ['pointerdown', 'pointerup', 'click', 'wheel']) mmEl.addEventListener(ev, e => e.stopPropagation());
+mmCv.addEventListener('click', e => {
+  const t = mmCell(e); if (!t) return;
+  audio(); ui.kb = false;
+  handleTile(t.r, t.c);
+  MM.sig = '';
+});
+mmCv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch') return;
+  const t = mmCell(e);
+  MM.hover = t; ui.hover = t; ui.kb = false;
+  if (ui.sel == null){ const q = t ? pieceAt(t.r, t.c) : null, hid = q ? q.id : null; if (hid !== ui.hoverId){ ui.hoverId = hid; renderCard(); } }
+});
+mmCv.addEventListener('pointerleave', () => {
+  MM.hover = null; ui.hover = null;
+  if (ui.sel == null && ui.hoverId != null){ ui.hoverId = null; renderCard(); }
+});
+$('mm-hide').addEventListener('click', () => mmSetOpen(false));
+mmFab.addEventListener('click', () => { audio(); mmSetOpen(true); });
+$('mm-size').addEventListener('click', () => { MM.big = !MM.big; MM[mmKeyW()] = null; mmSave(); mmSyncUI(); });
+mmSyncUI();
 // Câmera de combate: Cinematográfica, Rápida ou Desligada (lembrada neste navegador)
 const CINE_KEY = 'coroa-de-cinzas:camera-de-combate';
 (() => {
