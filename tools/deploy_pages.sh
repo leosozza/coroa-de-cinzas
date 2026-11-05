@@ -5,6 +5,8 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SNAP="$1"; W="$2/cf-site"
+# o motor embutido no HTML precisa ser igual a engine/arcano-rules.js (o servidor usará o módulo)
+node "$ROOT/tools/engine-sync-check.js" "$SNAP" "$ROOT/engine/arcano-rules.js"
 rm -rf "$W"; mkdir -p "$W/assets/audio"
 cp "$ROOT"/assets/audio/*.mp3 "$W/assets/audio/"
 mkdir -p "$W/assets/cards/web" && cp "$ROOT"/assets/cards/web/*.jpg "$W/assets/cards/web/"
