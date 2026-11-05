@@ -35,3 +35,17 @@
 - Tarefas longas em segundo plano (geração em paralelo) e um "monitor" que avisa quando todas terminam.
 - Tarefas agendadas por um laço de espera morrem se o app fechar; confira e reinicie.
 - Os arquivos de uma sessão sem pasta ficam numa pasta temporária do app: mova o projeto para uma pasta permanente cedo.
+
+## Lições da segunda etapa (arenas, modos e cartas)
+- O usuário manda imagens de referência para ilustrar a ideia, não para copiar: melhore a composição e mantenha o tabuleiro legível.
+- Tingir os exércitos com a cor do tema destrói a leitura das peças. As peças ficam sempre com a textura e a cor da facção, e o tema muda o entorno e os efeitos.
+- Blocos cinza sem textura deixam a arena com cara de rascunho. Menos objetos e mais bem feitos.
+- Todas as peças se mexendo ao mesmo tempo cansa. Anime só a peça selecionada.
+- Torre e Cavalo pequenos demais perto do Peão: componha (torre + arqueiro do tamanho do Peão, cavalo + cavaleiro proporcional) e teste a altura total contra as peças vizinhas.
+- Uma lança fundida no modelo não abaixa. Gere o modelo com a mão vazia e faça a lança no jogo.
+- Um dragão "no céu" com a câmera inclinada demais quase não aparece: ponha os dragões voando na faixa visível, acompanhando a câmera.
+- Imagens coladas só no chat não viram arquivo: descreva-as em texto para o subagente.
+- O subagente não lê documentos Claude Docs: exporte as decisões para `data/*.md` e `data/*.json`.
+- A conexão com o Gemini cai em lotes grandes ("Broken pipe"): repita por item e retome de onde parou.
+- O Gemini (Interactions API) só devolve `image/jpeg` em `response_format`.
+- Publicar um arquivo de outro caminho sem `url` cria um Artifact novo. Para atualizar, passe a `url`.

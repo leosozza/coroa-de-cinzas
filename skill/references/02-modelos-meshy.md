@@ -22,6 +22,7 @@ Parâmetros do image-to-3d que funcionaram bem:
  "pose_mode": "a-pose", "target_formats": ["glb"]}
 ```
 - `pose_mode: "a-pose"` **só para humanoides**; para cavalo, torre etc. use `""`.
+- Composições: um modelo estático (torre, cavalo) + um humanoide com rig por cima (arqueiro) ou um adereço procedural (lança). Gere o estático já sem a parte que precisa animar.
 - Resultado: `model_urls.glb`, `thumbnail_url`. Rig: `result.rigged_character_glb_url` e `result.basic_animations.walking_armature_glb_url` (só o clipe, ~88 KB). Animação: `result.animation_glb_url`.
 
 ## Custos (meshy-6-lite)
@@ -52,6 +53,7 @@ O Coroa de Cinzas inteiro (6 peças + 1 teste) custou ~149 créditos. Sempre lei
 | Andar de luta | 21 Walk Fight Forward |
 | Andar pesado (golem, ogro) | 119 Slow Orc Walk |
 | Vitória | 59 Victory Cheer, 412 victory |
+| Tiro com arco | 224 Archery Shot (também 225–227), 228 Walk Forward with Bow Aimed |
 
 Ordem no GLB final: a mesma de `action_ids`. No jogo os clipes são mapeados por nome, com a ordem como reserva.
 

@@ -1,95 +1,94 @@
 ---
 name: jogo-3d-com-ia
-description: Receita completa para criar um jogo 3D no navegador (Three.js, publicado como Artifact) com personagens, arte e som gerados por IA — arte-conceito no Gemini, modelos 3D com rig e animações no Meshy, efeitos sonoros, narrador e música no ElevenLabs — e com animações de ataque, efeitos, câmera cinematográfica estilo fatality, cemitério, vistas de câmera e IA. Baseada no jogo "Coroa de Cinzas" (xadrez com personagens de RPG). Use quando o usuário quiser criar outro jogo 3D, um jogo de tabuleiro com personagens, um RPG/tático no navegador, gerar personagens 3D com IA, usar Meshy, Gemini ou ElevenLabs num jogo, ou reaproveitar o pipeline do Coroa de Cinzas.
+description: Receita completa para criar um jogo 3D no navegador (Three.js, publicado como Artifact) com personagens, arte e som gerados por IA — arte-conceito e ilustrações de cartas no Gemini, modelos 3D com rig e animações no Meshy, efeitos, narrador e músicas no ElevenLabs — com animações de ataque, efeitos, câmera de combate estilo fatality, arenas temáticas, tela inicial, modos de jogo (padrão, espectador IA x IA, aprendiz, cartas estilo TCG), minimapa, cemitério e IA. Baseada no Arcane Chess (antes Coroa de Cinzas), xadrez com personagens de RPG. Use quando o usuário quiser criar outro jogo 3D, um jogo de tabuleiro ou de cartas com personagens, um RPG/tático no navegador, gerar personagens, cartas ou arenas com IA, usar Meshy, Gemini ou ElevenLabs num jogo, ou reaproveitar o pipeline do Arcane Chess.
 ---
 
-# Jogo 3D com IA (pipeline do Coroa de Cinzas)
+# Jogo 3D com IA (pipeline do Arcane Chess)
 
-Esta skill registra como o jogo **Coroa de Cinzas** foi feito do zero: xadrez clássico em 3D, cada peça um personagem com poderes, capturas em câmera cinematográfica, cemitério ao lado da arena, narrador e trilha sonora. Use-a como roteiro para o próximo jogo.
+Esta skill registra como o **Arcane Chess** foi feito do zero: xadrez clássico em 3D em que cada peça é um personagem com poderes, as capturas viram cenas de combate, há 10 arenas temáticas, tela inicial com modos de jogo, minimapa 2D, narrador e trilha sonora, além de um modo de cartas no estilo Yu-Gi-Oh ou Magic. Use-a como roteiro para o próximo jogo.
 
-O jogo completo está em [exemplo/coroa-de-cinzas.html](exemplo/coroa-de-cinzas.html) (~4.500 linhas, um arquivo só). Os scripts que geraram todos os assets estão em [scripts/](scripts/).
+- **O jogo completo:** [exemplo/arcane-chess.html](exemplo/arcane-chess.html), um arquivo só, com ~520 KB.
+- **Os dados de design:** [exemplo/dados/](exemplo/dados/) (`regras.md` e `cartas.json`).
+- **Os scripts que geraram todos os assets:** [scripts/](scripts/).
+- **Publicado em:** https://claude.ai/artifact/21JC5PUcNBUKDAEPDuqCf6
+- **Repositório:** github.com/leosozza/coroa-de-cinzas (privado).
 
-## O pipeline em 7 etapas
+## O pipeline
 
 | # | Etapa | Ferramenta | Referência |
 |---|-------|------------|------------|
-| 1 | Conceito, regras e identidade de cada personagem | conversa com o usuário | abaixo |
-| 2 | Arte-conceito de cada personagem (estilo coerente) | Gemini (API de imagem) | [01-arte-gemini.md](references/01-arte-gemini.md) |
-| 3 | Modelo 3D + textura + rig + animações | Meshy (API ou MCP) | [02-modelos-meshy.md](references/02-modelos-meshy.md) |
-| 4 | Otimizar e preparar para publicar | gltf-transform + glb→json | [03-otimizacao-e-publicacao.md](references/03-otimizacao-e-publicacao.md) |
-| 5 | Cena, personagens, ataques, efeitos e câmera | Three.js r128 | [04-threejs-personagens.md](references/04-threejs-personagens.md), [05-ataques-efeitos-camera.md](references/05-ataques-efeitos-camera.md) |
-| 6 | Efeitos sonoros, narrador e música | ElevenLabs | [06-audio-elevenlabs.md](references/06-audio-elevenlabs.md) |
-| 7 | Regras, IA, interface, testes e publicação | chess.js, Worker, Artifact | [07-regras-ia-interface.md](references/07-regras-ia-interface.md) |
+| 1 | Conceito, regras e identidade de cada personagem | conversa + documento Claude Docs | abaixo, [10](references/10-modos-cartas-interface.md) |
+| 2 | Arte-conceito dos personagens e das cartas (estilo coerente) | Gemini | [01](references/01-arte-gemini.md), [10](references/10-modos-cartas-interface.md) |
+| 3 | Modelo 3D + textura + rig + animações | Meshy (API ou MCP) | [02](references/02-modelos-meshy.md) |
+| 4 | Otimizar e preparar para publicar | gltf-transform + glb→json | [03](references/03-otimizacao-e-publicacao.md) |
+| 5 | Cena, personagens, ataques, efeitos e câmera | Three.js r128 | [04](references/04-threejs-personagens.md), [05](references/05-ataques-efeitos-camera.md) |
+| 6 | Arenas temáticas | construtores compartilhados | [09](references/09-arenas-tematicas.md) |
+| 7 | Efeitos, narrador e músicas | ElevenLabs | [06](references/06-audio-elevenlabs.md) |
+| 8 | Regras, IA, modos, cartas e interface | chess.js, motor 0x88, Worker | [07](references/07-regras-ia-interface.md), [10](references/10-modos-cartas-interface.md) |
+| 9 | Subagente, publicação e GitHub | Artifact, git | [11](references/11-fluxo-de-trabalho.md) |
 
 Antes de começar, leia [08-licoes-aprendidas.md](references/08-licoes-aprendidas.md): ela evita os erros que custaram tempo e créditos.
 
-## Etapa 1 — Conceito (decidir antes de gastar créditos)
+## Etapa 1 — Conceito (antes de gastar créditos)
 
-Feche com o usuário, por escrito:
-- **Regras**: o jogo usa regras conhecidas (ex.: xadrez padrão) ou mecânicas próprias? No Coroa de Cinzas o usuário quis "regras iguais ao xadrez, só os gráficos de RPG" — a primeira versão com PV/dano/níveis foi descartada.
-- **Elenco**: quais personagens, se os dois lados usam os mesmos modelos (mais barato: 1 modelo, tingido por lado) ou modelos diferentes.
-- **Identidade de cada personagem**: aparência, elemento/poder, como se move e como ataca. Exemplo do Coroa de Cinzas:
-  - Peão: soldado com elmo, escudo e lança — estocada.
-  - Cavalo: cavalo de guerra com cavaleiro montado — galopa, salta em arco, carga de lança.
-  - Torre: torre de pedra com arqueiro no topo, domina a terra — afunda e brota na casa de destino; ataca com flechas e espinhos de terra.
-  - Bispo: mestre da magia — círculo de runas, teleporte, mísseis arcanos.
-  - Dama: eletricidade, rápida como a luz — vira um raio e cruza o tabuleiro.
-  - Rei: rei de armadura com espada.
-- **Humanoide ou não?** Personagem humanoide bípede → Meshy com rig e animações. Não humanoide (cavalo montado, torre, veículo, criatura) → só o modelo estático, animado pelo jogo inteiro (salto, afundar, inclinar). Isso economiza créditos.
-- **Estilo visual** e paleta (ex.: fantasia sombria; marfim/ouro/aço/vermelho para um lado, ferro enegrecido/osso/carmesim para o outro).
+Feche com o usuário, por escrito, num documento Claude Docs com uma tabela de decisões:
+- **Regras:** as do jogo original ou mecânicas próprias? O usuário do Arcane Chess quis "regras iguais ao xadrez, só os gráficos de RPG", e as mecânicas de cartas ficaram num modo separado (Arcano).
+- **Modos:** Padrão (níveis, cor, relógio), Espectador (IA x IA), Aprendiz (lições guiadas) e Arcano (cartas).
+- **Elenco:** os dois lados usam os mesmos modelos, tingidos por lado? Fica mais barato.
+- **Identidade de cada personagem:** aparência, elemento ou poder, como se move e como ataca. No Arcane Chess:
+  - Torre: torre com arqueiro, que domina a terra.
+  - Cavalo: cavaleiro montado, com carga de lança estilo São Jorge.
+  - Dama: o relâmpago.
+  - Bispo: a magia.
+- **Humanoide ou não?** Humanoide recebe rig e animações no Meshy. Não humanoide é um modelo estático animado inteiro, e composições como torre + arqueiro ou cavalo + lança procedural cobrem o resto.
+- **Arenas:** cada uma com clima, paleta, objetos, céu, música e um gancho de captura próprio.
 
-## Etapa 2 a 4 — Assets (resumo)
+## Etapas 2 a 4 — Assets
 
-1. Gere **um** personagem no Gemini, aprove com o usuário e use essa imagem como **referência de estilo** para os demais (`scripts/gemini_images.py`).
-2. Mande cada imagem ao Meshy com `image-to-3d` (meshy-6-lite, ~8 mil polígonos, `pose_mode: a-pose` só para humanoides), depois rig e animações (`scripts/meshy_gen.py --from-image`). Rode as peças em paralelo.
-3. O A-pose remove o que o personagem segura: espadas, cajados e escudos voltam como **adereços procedurais presos aos ossos da mão**.
-4. Otimize (texturas 1024 WebP) e converta cada `.glb` para `.gltf.json` (`scripts/glb_to_json.py`), porque Artifacts não servem `.glb`.
+1. **Gemini:** gere 1 personagem, aprove e use-o como referência de estilo dos demais (`scripts/gemini_images.py`). As cartas saem de `cartas.json` com `scripts/gemini_cards.py`.
+2. **Meshy:** image-to-3D com meshy-6-lite (~8 mil polígonos).
+   - `pose_mode: "a-pose"` só para humanoides.
+   - Rig e animações para humanoides.
+   - `scripts/meshy_gen.py --from-image <slug>`, com as peças em paralelo.
+3. **O A-pose remove o que o personagem segura:** espadas, cajados, escudos e lanças voltam como adereços procedurais presos aos ossos da mão.
+4. **Otimize e converta para o Artifact:** texturas em 1024 WebP e `.glb` → `.gltf.json` (`scripts/glb_to_json.py`).
 
-Custos de referência (Meshy, novembro/2026): humanoide da imagem ≈ 29 créditos (15 modelo+textura, 5 rig, 3×3 animações; a caminhada vem grátis no rig); estático ≈ 15. Confirme o saldo antes e mostre o custo ao usuário.
+**Custos de referência (Meshy):** humanoide ≈ 29 créditos e estático ≈ 15. Confirme o saldo e mostre o custo antes de gastar.
 
 ## Etapa 5 — Arquitetura do jogo (um arquivo HTML)
 
-- **Lógica separada da animação**: a lógica aplica a jogada e gera uma lista de eventos (`move`, `capture`, `castle`, `promo`, `check`, `mate`); `play(ev)` anima cada evento com `await`. A IA só pensa depois que a animação termina.
-- **Adaptador de personagem** `makeCharacter(type, side)` com `play(nome)` (Promise que resolve no quadro de impacto), `faceTowards`, `setFlash`, `setSelected`, `anchor('tip')`, `headHeight`. Primeiro um modelo procedural; os GLB substituem cada peça quando terminam de carregar — o jogo nunca espera o download.
-- **Coreografia por tipo de peça** (movimento e captura), câmera de combate, partículas, decalques e luzes de efeito: ver [05-ataques-efeitos-camera.md](references/05-ataques-efeitos-camera.md).
+- **A lógica gera eventos e `play(ev)` os anima com `await`.** A IA pensa num Web Worker e só depois que a animação termina.
+- **Adaptador `makeCharacter(type, side)`:** o modelo procedural vem primeiro, e os GLB substituem cada peça quando terminam de carregar.
+- **Só a peça selecionada fica animada;** as outras ficam em pose de descanso.
+- **Coreografia por tipo de peça** (movimento e captura), mais a câmera de combate (close, câmera lenta, faixas de cinema, legenda e voz), o cemitério, as vistas Padrão, Drone e Aérea, o minimapa 2D arrastável e a ficha da peça com o personagem em 3D girando.
 
-## Etapa 6 — Som
+## Etapa 6 — Arenas
 
-ElevenLabs gera ~25 efeitos sob medida para cada poder, 1 ambiente em loop, 1 música tema e as falas do narrador (`scripts/elevenlabs_audio.py`). No jogo: Web Audio com 4 barramentos (música, ambiente, efeitos, voz), carregamento só no primeiro gesto, música abaixando durante cenas e falas, e fallback sintetizado.
+Construtores compartilhados: pátio de castelo, santuário com selos, estátuas de cristal e céu noturno. Também valem dados de tema, 13 luzes fixas, descarte na troca e câmera, áudio e gancho de captura por arena. Detalhes em [09](references/09-arenas-tematicas.md).
 
-## Etapa 7 — Publicar como Artifact
+## Etapa 7 — Som
 
-- Página sem `<html>/<head>/<body>`; scripts só de cdnjs/jsDelivr com versão fixa; assets publicados em `files` com caminhos relativos.
-- Tipos servidos: `.mp3`, `.json`, `.webp`, `.png`… **não `.glb`**.
-- A CSP bloqueia `fetch()` de `blob:` → troque o `ImageBitmapLoader` para carregar texturas por `<img>` (trecho em [03](references/03-otimizacao-e-publicacao.md)).
-- Teste localmente com um servidor que imita a CSP (`scripts/servidor_csp.py`) e depois abra o link publicado.
+- **ElevenLabs** gera os efeitos de cada poder e de cada arena, o ambiente e a música de cada arena, as falas do narrador (voz brasileira profissional) e as falas das lições (`scripts/elevenlabs_audio.py aprendiz`).
+- **No jogo:** Web Audio com 4 barramentos, carregamento só no primeiro gesto, música abaixando nas cenas de combate e reserva sintetizada.
+
+## Etapa 8 — Publicar
+
+- **Snapshot + teste com a CSP + publicação com `url`** e só os assets novos em `files`.
+- Tipos servidos: `.mp3`, `.json`, `.jpg`, `.webp`… **não `.glb`**.
+- Patch do `ImageBitmapLoader` para as texturas embutidas.
+- Push automático para o GitHub com varredura de chaves ([11](references/11-fluxo-de-trabalho.md)).
 
 ## Chaves e segurança
 
-- Guarde as chaves no Keychain do macOS e leia nos scripts sem imprimir:
-  `security add-generic-password -a "$USER" -s meshy-api-key -w` (idem `gemini-api-key`, `elevenlabs-api-key`). Cole a chave **só quando o terminal pedir**; digitada solta, ela vai para o histórico do shell.
-- O MCP do Meshy está instalado (`~/.config/meshy/meshy-mcp.sh`, lê a chave do Keychain); em sessões novas as ferramentas `mcp__meshy__*` também servem.
-- Nunca use vozes clonadas de pessoas reais; use vozes profissionais ou premade da biblioteca.
-
-## Arquivos da skill
-
-| Arquivo | Para quê |
-|---|---|
-| `scripts/gemini_images.py` | artes-conceito (lê `gemini-api-key` do Keychain; saída em `assets/concepts/<slug>.jpg`) |
-| `scripts/meshy_gen.py` | imagem → modelo → rig → animações (`--from-image <slug>`; saída em `assets/meshy/<slug>/`) |
-| `scripts/glb_to_json.py` | `.glb` → `.gltf.json` para o Artifact |
-| `scripts/elevenlabs_audio.py` | efeitos, narrador e música (saída em `assets/audio/`) |
-| `scripts/servidor_csp.py` | servidor local com a CSP do Artifact |
-| `scripts/chess_ai_harness.js` | teste da lógica e IA do xadrez em Node (perft + partidas IA×IA) |
-| `exemplo/coroa-de-cinzas.html` | o jogo completo, para copiar cena, efeitos, câmera e áudio |
-| `exemplo/arte/` | as 6 artes-conceito, como referência de estilo |
-
-Os scripts Python usam a pasta-mãe de `tools/` como raiz do projeto: copie-os para `<projeto>/tools/`.
+- **Keychain do macOS:** `security add-generic-password -a "$USER" -s <meshy-api-key|gemini-api-key|elevenlabs-api-key> -w`. Cole a chave **só quando o terminal pedir**.
+- **Os scripts leem a chave do Keychain** e nunca a imprimem. Antes de cada push, procure chaves nos arquivos.
+- **MCP do Meshy:** `~/.config/meshy/meshy-mcp.sh`, com o servidor instalado localmente e a chave lida do Keychain.
+- **Vozes:** nunca use vozes clonadas de pessoas reais. **Arte:** nada de identidade de franquia (brasões, castelos reconhecíveis).
 
 ## Como usar esta skill num jogo novo
 
-1. Leia a etapa 1 e feche o conceito com o usuário.
-2. Copie os scripts para a pasta do projeto (`tools/`) e ajuste os dicionários de personagens, prompts e sons.
-3. Gere a arte, aprove, gere os modelos, otimize e converta.
-4. Construa o jogo partindo do exemplo: reaproveite cena, adaptador de personagem, sistema de efeitos, câmera de combate, áudio e vistas; troque regras, personagens e coreografias.
-5. Teste (lógica em Node, navegador desktop e 375 px, CSP simulada) e publique com todos os assets em `files`.
+1. Feche o conceito e as decisões num documento. Exporte para `data/regras.md` e, se houver cartas, `data/cartas.json`.
+2. Copie `scripts/` para `<projeto>/tools/`. A raiz do projeto é a pasta acima de `tools/`. Ajuste os dicionários de personagens, peças, sons e arenas.
+3. Gere a arte e aprove; gere os modelos, otimize e converte; gere os sons.
+4. Construa partindo do exemplo. Reaproveite cena, adaptador de personagem, efeitos, câmera de combate, arenas, áudio, vistas, minimapa e tela inicial, e troque regras, personagens, coreografias e cartas.
+5. Teste (lógica em Node; navegador a 1280 e 375 px; CSP simulada), publique e envie ao GitHub.
