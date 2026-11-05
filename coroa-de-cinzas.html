@@ -117,6 +117,96 @@ canvas{display:block; width:100%}
 #cv:focus-visible{outline:2px solid var(--ember); outline-offset:-2px}
 #ov{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none}
 .hint{font-size:.88rem; color:var(--ash); font-style:italic; margin:0}
+/* Tela cheia, modo imersivo e painel recolhível */
+.icon-btn{display:inline-grid; place-items:center; min-width:44px; min-height:44px; padding:0 10px}
+.icon-btn svg, .fs-scene svg, .rail-ic svg, .rail-toggle svg{width:20px; height:20px; display:block}
+.fs-btn .i-out, .fs-scene .i-out{display:none}
+body.imm .fs-btn .i-in, body.imm .fs-scene .i-in{display:none}
+body.imm .fs-btn .i-out, body.imm .fs-scene .i-out{display:block}
+.fs-scene{position:absolute; right:10px; bottom:10px; z-index:3; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid rgba(227,165,72,.45); border-radius:6px; background:var(--hud); color:var(--ember); cursor:pointer}
+.fs-scene:hover, .fs-scene:focus-visible{border-color:var(--ember)}
+.stage{transition:grid-template-columns .25s ease}
+.stage.pcol{grid-template-columns:minmax(0, 1fr) 56px}
+.panel-rail{display:flex; align-items:center; justify-content:flex-end; gap:6px}
+.rail-grip{display:none}
+.rail-toggle, .rail-ic{display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid var(--seam); border-radius:6px; background:rgba(0,0,0,.35); color:var(--ash); cursor:pointer}
+.rail-toggle:hover, .rail-ic:hover, .rail-toggle:focus-visible, .rail-ic:focus-visible{color:var(--ember); border-color:var(--ember-deep)}
+.rail-toggle .chev{transition:transform .25s ease}
+.rail-ic{display:none}
+.panel-body{display:flex; flex-direction:column; gap:16px; min-width:0}
+.stage.pcol .panel-body{display:none}
+.stage.pcol .panel-rail{flex-direction:column; justify-content:flex-start; position:sticky; top:12px; padding:6px 5px; border:1px solid var(--seam); border-radius:6px; background:linear-gradient(180deg, var(--crypt), var(--basalt))}
+.stage.pcol .rail-ic{display:grid}
+.stage.pcol .rail-toggle .chev{transform:rotate(180deg)}
+.acc h2{margin:0}
+.acc-h{display:flex; align-items:center; justify-content:space-between; width:100%; min-height:32px; padding:0; border:0; background:none; color:var(--ash); font:inherit; letter-spacing:inherit; text-transform:inherit; cursor:pointer; text-align:left}
+.acc-h:hover, .acc-h:focus-visible{color:var(--bone)}
+.acc-h .chev{width:16px; height:16px; transform:rotate(90deg); transition:transform .25s ease}
+.acc.closed .acc-h .chev{transform:rotate(0deg)}
+.acc-b{margin-top:10px}
+.acc.closed .acc-b{display:none}
+#card .empty h2{display:none}
+@media (prefers-reduced-motion: reduce){ .stage, .panel, .chev, .rail-toggle .chev{transition:none !important} }
+/* celular e tablet: o painel vira gaveta (de baixo em pé, lateral deitado) */
+@media (max-width:900px){
+  .stage{grid-template-columns:minmax(0, 1fr) !important}
+  .app{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
+  .stage .panel{position:fixed; left:0; right:0; bottom:0; z-index:30; max-height:min(74dvh, 680px); display:flex; flex-direction:column; gap:0;
+    background:linear-gradient(180deg, #1c1813, var(--basalt)); border-top:1px solid var(--ember-deep); border-radius:14px 14px 0 0; box-shadow:0 -14px 34px rgba(0,0,0,.65);
+    padding:0 max(10px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(10px, env(safe-area-inset-left, 0px));
+    transform:translateY(calc(100% - 58px - env(safe-area-inset-bottom, 0px))); transition:transform .25s ease}
+  .stage .panel.open{transform:none}
+  .panel-rail{position:relative; justify-content:center; min-height:58px; padding:8px 0 4px; flex:none}
+  .rail-grip{display:block; position:absolute; top:5px; left:50%; width:46px; height:5px; margin-left:-23px; border-radius:3px; background:var(--seam)}
+  .rail-ic{display:grid}
+  .rail-toggle .chev{transform:rotate(-90deg)}
+  .panel.open .rail-toggle .chev{transform:rotate(90deg)}
+  .panel-body{display:flex !important; overflow-y:auto; overscroll-behavior:contain; padding-bottom:12px; gap:12px}
+}
+@media (max-width:900px) and (orientation:landscape) and (max-height:540px){
+  .app{padding-bottom:22px; padding-right:calc(70px + env(safe-area-inset-right, 0px))}
+  .stage .panel{left:auto; top:0; bottom:0; width:min(380px, 48vw); max-height:none; flex-direction:row; border-top:0; border-left:1px solid var(--ember-deep); border-radius:14px 0 0 14px;
+    padding:env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0;
+    transform:translateX(calc(100% - 58px - env(safe-area-inset-right, 0px)))}
+  .panel-rail{flex-direction:column; justify-content:flex-start; width:58px; min-height:0; padding:12px 7px}
+  .rail-grip{top:50%; left:5px; width:5px; height:46px; margin:-23px 0 0}
+  .rail-toggle .chev{transform:rotate(180deg)}
+  .panel.open .rail-toggle .chev{transform:none}
+  .stage .panel.open{transform:none}
+  .panel-body{flex:1; padding:12px 10px 12px 0}
+}
+/* modo imersivo (tela cheia de verdade ou, sem a API, em CSS): a cena ocupa tudo e os controles flutuam por cima */
+body.imm{overflow:hidden}
+body.imm .app{max-width:none; padding:0; height:100dvh}
+body.imm .top{position:fixed; z-index:20; top:max(8px, env(safe-area-inset-top, 0px)); left:max(8px, env(safe-area-inset-left, 0px)); display:flex; gap:6px; align-items:center}
+body.imm .top .brand, body.imm .top .field, body.imm #newgame, body.imm #undo{display:none}
+body.imm .top .controls{gap:6px; align-items:center}
+body.imm .top button{min-height:44px; background:var(--hud); backdrop-filter:blur(3px)}
+body.imm .stage{display:block; margin:0}
+body.imm .scene{position:fixed; inset:0; z-index:1; border:0; border-radius:0; box-shadow:none}
+body.imm .hud-phase, body.imm .hint{display:none}
+body.imm .turn{position:fixed; z-index:6; top:max(10px, env(safe-area-inset-top, 0px)); left:50%; transform:translateX(-50%); max-width:min(560px, calc(100vw - 300px));
+  padding:6px 14px; border:1px solid var(--seam); border-radius:999px; background:var(--hud); backdrop-filter:blur(3px)}
+body.imm .views{position:fixed; z-index:6; left:50%; transform:translateX(-50%); bottom:calc(var(--drawer, 0px) + max(10px, env(safe-area-inset-bottom, 0px)));
+  padding:6px 8px; border:1px solid var(--seam); border-radius:10px; background:var(--hud); backdrop-filter:blur(3px); max-width:calc(100vw - 24px); flex-wrap:nowrap; overflow-x:auto}
+body.imm .arc{position:fixed; z-index:6; left:max(8px, env(safe-area-inset-left, 0px)); right:calc(var(--rail, 72px) + env(safe-area-inset-right, 0px));
+  bottom:calc(var(--drawer, 0px) + 68px + env(safe-area-inset-bottom, 0px)); background:rgba(18,15,22,.72); backdrop-filter:blur(4px); padding:6px 10px 8px; gap:4px}
+body.imm .arc-hand{min-height:0; padding-top:8px}
+body.imm .acard{width:80px; height:114px}
+body.imm .acard .art span{font-size:1.9rem}
+body.imm .arc-msg{display:none}
+body.imm .specbar, body.imm .lesson{position:fixed; z-index:6; left:50%; transform:translateX(-50%); top:calc(58px + env(safe-area-inset-top, 0px)); width:min(720px, calc(100vw - 24px)); background:rgba(18,15,22,.82); backdrop-filter:blur(4px); padding:8px 10px; border-radius:8px}
+body.imm .fs-scene{bottom:auto; top:max(10px, env(safe-area-inset-top, 0px)); right:auto; left:auto; display:none}
+body.imm .mm{top:calc(10px + env(safe-area-inset-top, 0px))}
+@media (min-width:901px){
+  body.imm .panel{position:fixed; z-index:7; top:calc(64px + env(safe-area-inset-top, 0px)); right:max(10px, env(safe-area-inset-right, 0px)); bottom:calc(76px + env(safe-area-inset-bottom, 0px)); width:min(360px, 36vw);
+    overflow-y:auto; padding:10px; border:1px solid var(--seam); border-radius:10px; background:rgba(14,11,10,.86); backdrop-filter:blur(4px)}
+  body.imm .stage.pcol .panel{top:50%; bottom:auto; transform:translateY(-50%); width:auto; padding:0; border:0; background:none; overflow:visible}
+  body.imm .stage.pcol .panel-rail{position:static; background:rgba(14,11,10,.8)}
+  body.imm .mm{right:calc(72px + env(safe-area-inset-right, 0px))}
+}
+@media (max-width:900px){ body.imm{--drawer:58px; --rail:8px} }
+@media (max-width:900px) and (orientation:landscape) and (max-height:540px){ body.imm{--drawer:0px; --rail:66px} body.imm .views{left:calc(50% - 30px)} body.imm .turn{max-width:calc(100vw - 260px)} }
 /* Modo Arcano: mão, essência e passe o aparelho */
 .arc{display:grid; gap:8px; padding:10px 12px 12px; border:1px solid var(--seam); border-top:2px solid var(--void); border-radius:4px; background:linear-gradient(180deg, rgba(30,24,44,.9), rgba(18,15,22,.94))}
 .arc-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
@@ -416,6 +506,28 @@ details.rules[open] summary::before{content:"▾ "}
 @media (max-width:560px){ .logo-sub{letter-spacing:.2em} .modes{grid-template-columns:1fr 1fr} .mode-card{min-height:96px; padding:14px 12px 12px} .mode-card span{font-size:.82rem} }
 @media (prefers-reduced-motion: reduce){ .logo-word::after{animation:none; opacity:.7} }
 @media (prefers-reduced-motion: reduce){ .thinking .sigil, .hud-phase.check b, .hud-phase.think b::after, .cine .flash.go{animation:none} .meter > i, .cine .bar, .cine .vig, .cine .cap{transition:none} }
+/* alvos de toque: no celular e no tablet, nada abaixo de 44 px (no fim, para vencer as regras base) */
+@media (max-width:900px), (pointer:coarse){
+  button, select{min-height:44px}
+  .seg button{min-height:44px}
+  .mm-fab{width:44px; height:44px}
+  .mm-head button{min-width:44px; height:44px}
+  .acc-h, #flip{min-height:44px}
+  details > summary{min-height:44px; display:flex; align-items:center}
+}
+/* celular deitado: faixa de cartas baixa, a cena continua visível */
+@media (max-height:540px) and (orientation:landscape){
+  .arc{padding:6px 10px 6px; gap:4px}
+  .arc-info{display:none}
+  .arc-hand{min-height:0; padding-top:6px}
+  .acard, body.imm .acard{width:64px; height:88px}
+  .acard .art span, body.imm .acard .art span{font-size:1.4rem}
+  .acard, body.imm .acard{width:62px; height:80px}
+  .acard .ty{display:none}
+  .acard .nm{padding:12px 4px 4px; font-size:.6rem; hyphens:auto; overflow-wrap:anywhere}
+  .arc-who{font-size:.8rem}
+  body.imm .arc{bottom:calc(60px + env(safe-area-inset-bottom, 0px)); max-width:calc(100vw - 340px); right:auto}
+}
 </style>
 
 <div class="app">
@@ -455,6 +567,7 @@ details.rules[open] summary::before{content:"▾ "}
         </select>
       </div>
       <button id="newgame" class="btn-main" type="button">Nova partida</button>
+      <button id="fs-btn" class="icon-btn fs-btn" type="button" aria-pressed="false" aria-label="Tela cheia" title="Tela cheia (Shift+F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="i-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
       <button id="undo" type="button">Desfazer jogada</button>
       <div class="audio" id="audio">
         <button id="audio-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="audio-panel" aria-pressed="true">Áudio</button>
@@ -506,7 +619,7 @@ details.rules[open] summary::before{content:"▾ "}
         <div class="field"><label for="s-b">Legião Cinzenta</label><select id="s-b"><option value="1">Easy · Recruta</option><option value="2" selected>Medium · Veterano</option><option value="3">Expert · Mestre</option></select></div>
         <div class="field"><label for="s-speed">Velocidade</label><select id="s-speed"><option value="slow">Lenta</option><option value="normal" selected>Normal</option><option value="fast">Rápida (pula as cenas)</option></select></div>
         <div class="field"><label for="s-series">Série</label><select id="s-series"><option value="1">Partida única</option><option value="3">Melhor de 3</option><option value="5">Melhor de 5</option></select></div>
-        <div class="field"><label for="s-rules">Regras</label><select id="s-rules"><option value="padrao">Padrão</option><option value="arcano" disabled>Arcano (em breve)</option></select></div>
+        <div class="field"><label for="s-rules">Regras</label><select id="s-rules"><option value="padrao">Padrão</option><option value="arcano">Arcano</option></select></div>
       </div>
       <div class="acts"><button class="btn-main" id="s-start" type="button">Assistir</button><button id="t-back2" type="button">Voltar</button></div>
     </div>
@@ -515,7 +628,9 @@ details.rules[open] summary::before{content:"▾ "}
       <div class="row">
         <div class="field"><label for="a-deck-w">Grimório da Aurora</label><select id="a-deck-w"><option value="tempestade">Tempestade</option><option value="cinzas">Cinzas</option><option value="arcano">Arcano</option></select></div>
         <div class="field"><label for="a-deck-b">Grimório da Legião</label><select id="a-deck-b"><option value="cinzas">Cinzas</option><option value="tempestade">Tempestade</option><option value="arcano">Arcano</option></select></div>
-        <div class="field"><label for="a-opp">Adversário</label><select id="a-opp"><option value="pvp">Dois jogadores (passe o aparelho)</option><option value="ai" disabled>Contra a IA (em breve)</option></select></div>
+        <div class="field"><label for="a-opp">Adversário</label><select id="a-opp"><option value="pvp">Dois jogadores (passe o aparelho)</option><option value="ai">Contra a IA</option></select></div>
+        <div class="field" id="a-diff-f" hidden><label for="a-diff">Nível da IA</label><select id="a-diff"><option value="1">Easy · Recruta</option><option value="2" selected>Medium · Veterano</option><option value="3">Expert · Mestre</option></select></div>
+        <div class="field" id="a-color-f" hidden><label for="a-color">Sua cor</label><select id="a-color"><option value="w">Ordem da Aurora</option><option value="b">Legião Cinzenta</option><option value="r">Sortear</option></select></div>
       </div>
       <p class="hint">Cada turno: +1 essência, um lance de xadrez e até uma carta. Capturar dá +2 essência e o artefato da peça. As 4 casas centrais são runas: terminar o turno numa delas dá uma carta.</p>
       <div class="acts"><button class="btn-main" id="a-start" type="button">Começar</button><button id="t-back4" type="button">Voltar</button></div>
@@ -530,7 +645,7 @@ details.rules[open] summary::before{content:"▾ "}
   </div>
 </div>
 
-  <main class="stage">
+  <main class="stage" id="stage">
     <section class="board-col">
       <div class="turn" id="turn" aria-live="polite"></div>
       <div class="specbar" id="specbar" hidden>
@@ -559,6 +674,7 @@ details.rules[open] summary::before{content:"▾ "}
         <div class="cine" id="cine" aria-hidden="true"><i class="vig"></i><i class="bar t"></i><i class="bar b"></i><i class="flash" id="cine-flash"></i><div class="cap" id="cine-cap"><b></b><span></span></div><span class="skip">Toque ou Esc para pular</span></div>
         <p class="sr-only" id="cine-live" aria-live="polite"></p>
         <div class="view-hint" id="view-hint" aria-hidden="true" hidden>arraste: girar • pinça ou roda: zoom</div>
+        <button type="button" class="fs-scene" id="fs-scene" aria-label="Tela cheia" title="Tela cheia (Shift+F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="i-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         <div class="mm" id="mm" role="region" aria-label="Minimapa" hidden>
           <div class="mm-head" id="mm-head" title="Arraste para mover; toque duplo volta ao canto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="t">Mapa</span>
             <button type="button" id="mm-size" aria-pressed="false" title="Mapa maior ou menor" aria-label="Mapa maior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V4h6M20 14v6h-6M4 4l6 6m10 10-6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
@@ -607,20 +723,29 @@ details.rules[open] summary::before{content:"▾ "}
       <p class="hint" id="hint"></p>
     </section>
 
-    <aside class="panel">
-      <div class="box">
-        <h2>Forças em campo</h2>
-        <div class="forces" id="forces"></div>
+    <aside class="panel" id="panel" aria-label="Painel da partida">
+      <div class="panel-rail" id="panel-rail">
+        <span class="rail-grip" aria-hidden="true"></span>
+        <button type="button" class="rail-toggle" id="panel-toggle" aria-controls="panel-body" aria-expanded="true" aria-label="Recolher o painel" title="Recolher o painel"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="button" class="rail-ic" data-sec="forces" aria-label="Forças em campo" title="Forças em campo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button><button type="button" class="rail-ic" data-sec="card" aria-label="Ficha da peça" title="Ficha da peça"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button><button type="button" class="rail-ic" data-sec="moves" aria-label="Lances" title="Lances"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h11M8 12h11M8 18h11M4 6h.5M4 12h.5M4 18h.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button type="button" class="rail-ic" data-sec="chron" aria-label="Crônica da batalha" title="Crônica da batalha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 9h6M9 13h6M9 17h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       </div>
-      <div class="box" id="card"></div>
-      <div class="box moves">
-        <h2>Lances</h2>
-        <ol id="moves"></ol>
-      </div>
-      <div class="box chron">
-        <h2>Crônica da batalha</h2>
-        <ol id="log"></ol>
-      </div>
+      <div class="panel-body" id="panel-body">
+      <section class="box acc " data-sec="forces">
+        <h2><button type="button" class="acc-h" aria-expanded="true">Forças em campo<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></h2>
+        <div class="acc-b"><div class="forces" id="forces"></div></div>
+      </section>
+      <section class="box acc card-box" data-sec="card">
+        <h2><button type="button" class="acc-h" aria-expanded="true">Ficha da peça<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></h2>
+        <div class="acc-b"><div id="card"></div></div>
+      </section>
+      <section class="box acc moves" data-sec="moves">
+        <h2><button type="button" class="acc-h" aria-expanded="true">Lances<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></h2>
+        <div class="acc-b"><ol id="moves"></ol></div>
+      </section>
+      <section class="box acc chron" data-sec="chron">
+        <h2><button type="button" class="acc-h" aria-expanded="true">Crônica da batalha<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></h2>
+        <div class="acc-b"><ol id="log"></ol></div>
+      </section>
       <details class="box rules">
         <summary>Como jogar</summary>
         <ul>
@@ -640,6 +765,7 @@ details.rules[open] summary::before{content:"▾ "}
           </table>
         </div>
       </details>
+      </div>
     </aside>
   </main>
 </div>
@@ -1871,10 +1997,126 @@ const arcanoRules = (catalog = []) => {
     }
     return out;
   }
+
+  /* ---- IA do Arcano (pura, roda no Worker ou num servidor) ----
+     choose(state, side, nivel) → { action } dentro do orçamento de tempo. A IA enxerga só o que o jogador enxergaria:
+     as armadilhas escondidas do rival somem da cópia em que ela pensa. Avaliação: material + centro + avanço dos Peões +
+     segurança do Rei + valor dos efeitos de carta nas peças + essência e mão. No lance, nível 1 olha 1 lance com ruído,
+     nível 2 pune peças penduradas, nível 3 olha a melhor resposta do rival (2 lances). Na fase de cartas compara cada
+     carta jogável (com alvos) com não jogar nada. Com o Oráculo garantido, a IA joga o lance revelado. */
+  const AI_LV = { 1:{ ms:250, noise:70, cardP:0.45 }, 2:{ ms:700, noise:12, cardP:1 }, 3:{ ms:1400, noise:0, cardP:1 } };
+  const FX_VAL = { escudo:90, martir:80, golem:120, heranca:90, coroa:140, coroa_raio:70, coroa_herdada:160, alcance:60, vinganca:40, salto_herdado:60, visao_arcana:50, muralha_viva:120,
+    oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanca:30, ferradura:25, paralisado:-1, nevoa:-30 };
+  function aiView(s, me){ const v = clone(s); v.arc.traps = v.arc.traps.filter(t => t.side === me || t.seen); return v; }
+  function evalFor(s, me){
+    if (s.over) return s.over.kind === 'mate' ? (s.over.winner === me ? 100000 : -100000) : 0;
+    let v = 0;
+    const center = i => 3.5 - Math.max(Math.abs((i >> 4) - 3.5), Math.abs((i & 7) - 3.5));
+    for (const i of ALL){
+      const p = s.board[i];
+      if (!p) continue;
+      const sg = p.c === me ? 1 : -1;
+      let x = VAL[p.t] * 100;
+      if (p.t === 'p') x += (p.c === 'w' ? 6 - (i >> 4) : (i >> 4) - 1) * 8;
+      if (p.t === 'n' || p.t === 'b') x += center(i) * 8;
+      if (p.t === 'q' || p.t === 'r') x += center(i) * 2;
+      if (p.t === 'k') x += (s.hist.length < 50 ? -center(i) * 10 : center(i) * 6);
+      for (const f of p.fx) x += f.id === 'paralisado' ? -VAL[p.t] * 35 : (FX_VAL[f.id] || 20) * (f.turns != null ? Math.min(1, 0.35 + f.turns * 0.25) : 1);
+      v += sg * x;
+    }
+    for (const c of ['w', 'b']){ const sg = c === me ? 1 : -1; v += sg * (s.arc.ess[c] * 9 + s.arc.hand[c].length * 18 + s.arc.traps.filter(t => t.side === c).length * 35); }
+    if (inCheck(s, me)) v -= 60;
+    if (inCheck(s, other(me))) v += 40;
+    return v;
+  }
+  // peças minhas atacadas e sem defesa (ou atacadas por peça mais barata), do ponto de vista de "me"
+  function hanging(s, me){
+    let worst = 0;
+    for (const i of ALL){
+      const p = s.board[i];
+      if (!p || p.c !== me || p.t === 'k' || has(p, 'escudo') || has(p, 'martir') || has(p, 'golem')) continue;
+      if (!attacked(s, i, other(me))) continue;
+      const q = s.board[i]; s.board[i] = { t:'p', c:other(me), id:-2, fx:[] };
+      const def = attacked(s, i, me);
+      s.board[i] = q;
+      const loss = def ? VAL[p.t] * 100 * 0.35 : VAL[p.t] * 100;
+      if (loss > worst) worst = loss;
+    }
+    return worst;
+  }
+  function choose(s0, side, level = 2, o = {}){
+    const L = AI_LV[level] || AI_LV[2], t0 = Date.now(), deadline = t0 + (o.ms || L.ms);
+    const me = side || actor(s0);
+    if (!me || s0.over) return { action:null };
+    const s = aiView(s0, me);
+    const rnd01 = () => rnd(s);
+    if (s.arc.phase === 'move'){
+      const ms = legalMoves(s);
+      if (!ms.length) return { action:null };
+      // Oráculo garantido contra a IA: ela cumpre o lance revelado
+      const orc = s0.arc.oracle;
+      if (orc && orc.side === me && orc.guaranteed && orc.moves[0]){ const m = ms.find(x => x.from === orc.moves[0].from && x.to === orc.moves[0].to); if (m) return { action:{ type:'move', from:m.from, to:m.to, promotion:m.promotion }, oracle:true }; }
+      const scored = [];
+      const order = ms.slice().sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0));
+      for (const m of order){
+        const r = applyMove(s, m);
+        if (!r.ok) continue;
+        let v = evalFor(r.state, me);
+        if (r.state.over && r.state.over.kind === 'mate'){ scored.push({ m, v:1e6 }); break; }
+        if (level >= 2) v -= hanging(r.state, me) * (level >= 3 ? 0.5 : 0.9);
+        if (level >= 3 && Date.now() < deadline){
+          // melhor resposta do rival (depois da fase de cartas vazia)
+          const e = endTurn(r.state);
+          if (e.ok && !e.state.over){
+            const op = legalMoves(e.state).sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0)).slice(0, 14);
+            let worst = Infinity;
+            for (const om of op){
+              if (Date.now() > deadline) break;
+              const r2 = applyMove(e.state, om);
+              if (!r2.ok) continue;
+              const v2 = evalFor(r2.state, me);
+              if (v2 < worst) worst = v2;
+            }
+            if (worst !== Infinity) v = Math.min(v, worst + 15);
+          } else if (e.ok && e.state.over) v = evalFor(e.state, me);
+        }
+        v += (rnd01() - 0.5) * 2 * L.noise;
+        scored.push({ m, v });
+        if (Date.now() > deadline + 600) break;
+      }
+      scored.sort((a, b) => b.v - a.v);
+      // a IA pensou sem ver as armadilhas do rival: confere o lance no estado real
+      for (const x of scored){ const a = { type:'move', from:x.m.from, to:x.m.to, promotion:x.m.promotion }; if (applyMove(s0, a).ok) return { action:a, score:x.v, ms:Date.now() - t0 }; }
+      const real = legalMoves(s0)[0];
+      return { action:real ? { type:'move', from:real.from, to:real.to, promotion:real.promotion } : null, ms:Date.now() - t0 };
+    }
+    if (s.arc.phase === 'cards'){
+      const acts = legalActions(s, me, { cap:o.cap || (level >= 3 ? 14 : 8) });
+      const base = evalFor(s, me) - (level >= 2 ? hanging(s, me) * 0.8 : 0);
+      const okReal = a => a.type === 'end' || playCard(s0, a.uid, a.picks).ok;
+      let best = { a:{ type:'end' }, v:base };
+      if (rnd01() > L.cardP) return { action:best.a };
+      const cardsOnly = acts.filter(a => a.type === 'card');
+      if (level === 1 && cardsOnly.length){ const a = cardsOnly[Math.floor(rnd01() * cardsOnly.length)], x = { type:'card', uid:a.uid, picks:a.picks }; return { action:okReal(x) ? x : { type:'end' } }; }
+      for (const a of cardsOnly){
+        if (Date.now() > deadline) break;
+        const r = playCard(s, a.uid, a.picks);
+        if (!r.ok) continue;
+        const cost = (CARD[a.id] || {}).custo || 0;
+        // a essência gasta já sai da avaliação; um pequeno bônus para cartas que viram valor no tabuleiro
+        let v = evalFor(r.state, me) - (level >= 2 ? hanging(r.state, me) * 0.8 : 0) + cost * 4;
+        if (r.state.over && r.state.over.kind === 'mate' && r.state.over.winner === me) v = 1e6;
+        v += (rnd01() - 0.5) * 2 * L.noise;
+        if (v > best.v + 8){ const x = { type:'card', uid:a.uid, picks:a.picks }; if (okReal(x)) best = { a:x, v }; }
+      }
+      return { action:best.a, score:best.v, ms:Date.now() - t0 };
+    }
+    return { action:null };
+  }
   const board8 = s => { const out = []; for (let r = 0; r < 8; r++){ const row = []; for (let c = 0; c < 8; c++){ const p = s.board[r * 16 + c]; row.push(p ? { type:p.t, color:p.c, eid:p.id } : null); } out.push(row); } return out; };
   const pieceAt = (s, q) => s.board[fromS(q)];
   const perft = (s, d) => { if (!d) return 1; let n = 0; for (const m of legalRaw(s, s.turn)){ const u = makeBoard(s, m), t = s.turn; s.turn = other(t); n += perft(s, d - 1); s.turn = t; unmakeBoard(s, u); } return n; };
-  return { create, legalMoves, legalActions, apply, actor, applyMove, cardOptions, playCard, endTurn, status, fen, viewFor, board8, pieceAt, predict, trapGlows,
+  return { create, legalMoves, legalActions, apply, actor, choose, evalFor, applyMove, cardOptions, playCard, endTurn, status, fen, viewFor, board8, pieceAt, predict, trapGlows,
     perft:(fenStr, d) => { const s = { nextId:0, arc:{ blocked:{}, portals:[], traps:[] } }; loadFen(s, fenStr); return perft(s, d); },
     implemented, DECKS, RUNES, LOOT, ESS_MAX, HAND_MAX, MOVE_MODS, FX, card:id => CARD[id], other, NAME };
 };
@@ -6240,7 +6482,12 @@ function webpOK(){
     im.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
   });
 }
+// assets/meshy/manifest.json (gerado por tools/meshy-manifest.js) lista os arquivos que existem; sem ele, tenta todos
+let MESHY_FILES = null;
+const GLTF_SHARED = new Map();
 function loadGltf(loader, urls){
+  if (MESHY_FILES) urls = urls.filter(u => !u.startsWith('assets/meshy/') || MESHY_FILES.has(u.slice('assets/meshy/'.length)));
+  if (!urls.length) return Promise.resolve(null);
   return new Promise(res => {
     const next = i => {
       if (i >= urls.length) return res(null);
@@ -6280,6 +6527,8 @@ function findImpact(scene, clip){
   const hand = findBone(scene, /right.?hand|hand.?r\b|r.?hand/i) || findBone(scene, /right.?fore/i);
   const hips = findBone(scene, /hips|pelvis/i);
   if (!hand) return clip.duration * 0.45;
+  // guarda a pose local dos ossos: skeleton.pose() reescreveria o osso-raiz (filho do Armature) com a escala do mundo
+  const saved = []; scene.traverse(o => { if (o.isBone) saved.push([o, o.position.clone(), o.quaternion.clone(), o.scale.clone()]); });
   const mixer = new THREE.AnimationMixer(scene), act = mixer.clipAction(clip);
   act.play();
   const v = new THREE.Vector3(), h = new THREE.Vector3();
@@ -6294,7 +6543,7 @@ function findImpact(scene, clip){
     if (f > best){ best = f; bt = t; }
   }
   act.stop(); mixer.uncacheRoot(scene);
-  scene.traverse(o => { if (o.isSkinnedMesh) o.skeleton.pose(); });
+  for (const [o, p, q, s] of saved){ o.position.copy(p); o.quaternion.copy(q); o.scale.copy(s); }
   scene.updateMatrixWorld(true);
   return bt;
 }
@@ -6358,7 +6607,57 @@ function prepAsset(type, gltf, walkGltf){
 }
 // torre composta: a base estática (TOWER_BASE_H) e o arqueiro (com rig) de pé no parapeito, na escala do Peão: ≈ 2,2 no total
 const TOWER_BASE_H = 1.25;
-function composeTower(baseG, riderG, walkG){
+// corta a Torre atual nas ameias: tudo acima da última faixa larga (o arqueiro fundido) é descartado; um disco de pedra tampa a borda
+function cutTowerTop(scene){
+  scene.updateMatrixWorld(true);
+  const box = measure(scene), size = box.getSize(new THREE.Vector3()), y0 = box.min.y, H = size.y, N = 48;
+  const cx = (box.min.x + box.max.x) / 2, cz = (box.min.z + box.max.z) / 2, rad = new Float32Array(N), v = new THREE.Vector3();
+  scene.traverse(o => {
+    if (!o.isMesh) return;
+    const pos = o.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++){ v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld); const k = clamp(Math.floor((v.y - y0) / H * N), 0, N - 1); rad[k] = Math.max(rad[k], Math.hypot(v.x - cx, v.z - cz)); }
+  });
+  const mid = Array.from(rad.slice(Math.floor(N * 0.2), Math.floor(N * 0.7))).sort((a, b) => a - b), body = mid[Math.floor(mid.length / 2)] || 1;
+  let top = Math.floor(N * 0.6);
+  for (let k = N - 1; k >= Math.floor(N * 0.35); k--) if (rad[k] > body * 0.85){ top = k; break; }
+  const cutY = y0 + (top + 1) / N * H;
+  // só troca o índice (os atributos podem vir intercalados ou quantizados): triângulos acima do corte saem da lista
+  const wy = new Map();
+  scene.traverse(o => {
+    if (!o.isMesh) return;
+    const g = o.geometry.clone(), pos = g.attributes.position, idx = g.index, n = idx ? idx.count : pos.count, keep = [];
+    const yAt = i => { v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld); return v.y; };
+    for (let t = 0; t < n; t += 3){
+      const a = idx ? idx.getX(t) : t, b = idx ? idx.getX(t + 1) : t + 1, c = idx ? idx.getX(t + 2) : t + 2;
+      if (Math.max(yAt(a), yAt(b), yAt(c)) <= cutY + H * 0.004) keep.push(a, b, c);
+    }
+    // compacta: só os vértices usados (para a medida da altura não contar o arqueiro descartado)
+    const remap = new Map(), used = [];
+    const nk = keep.map(i => { let j = remap.get(i); if (j === undefined){ j = used.length; remap.set(i, j); used.push(i); } return j; });
+    const ng = new THREE.BufferGeometry();
+    const get = (a, i, k) => k === 0 ? a.getX(i) : k === 1 ? a.getY(i) : k === 2 ? a.getZ(i) : a.getW(i);
+    for (const name of Object.keys(g.attributes)){
+      const a = g.attributes[name], n = a.itemSize, arr = new a.array.constructor(used.length * n);
+      for (let j = 0; j < used.length; j++) for (let k = 0; k < n; k++) arr[j * n + k] = get(a, used[j], k);
+      ng.setAttribute(name, new THREE.BufferAttribute(arr, n, a.normalized));
+    }
+    ng.setIndex(nk);
+    ng.computeBoundingSphere(); ng.computeBoundingBox();
+    o.geometry = ng; g.dispose();
+  });
+  void wy;
+  // tampa de pedra um pouco abaixo da borda cortada (em coordenadas da cena)
+  const capR = Math.max(rad[top], body) * 0.9, cap = new THREE.Mesh(new THREE.CylinderGeometry(capR, capR, H * 0.014, 28), new THREE.MeshStandardMaterial({ color:C(0x6f675c), roughness:0.92, flatShading:true }));
+  const inv = new THREE.Matrix4().copy(scene.matrixWorld).invert();
+  cap.position.copy(new THREE.Vector3(cx, cutY - H * 0.03, cz).applyMatrix4(inv));
+  cap.castShadow = true;
+  scene.add(cap);
+  scene.updateMatrixWorld(true);
+  glbLog.push(`torre provisória: topo cortado a ${(cutY - y0) / H * 100 | 0}% da altura`);
+  return cutY;
+}
+function composeTower(baseG, riderG, walkG, o = {}){
+  if (o.cutTop) cutTowerTop(baseG.scene);
   const fit = (scene, h, w, stretch = 1) => {
     scene.updateMatrixWorld(true);
     const box = measure(scene), size = box.getSize(new THREE.Vector3());
@@ -6375,14 +6674,19 @@ function composeTower(baseG, riderG, walkG){
   const head = findBone(rs, /^head$/i) || findBone(rs, /head/i), front = findBone(rs, /headfront|head_front|nose/i);
   rs.updateMatrixWorld(true);
   if (head && front){ const a = head.getWorldPosition(new THREE.Vector3()), b = front.getWorldPosition(new THREE.Vector3()); if (Math.hypot(b.x - a.x, b.z - a.z) > 1e-4) rs.rotation.y = -Math.atan2(b.x - a.x, b.z - a.z); }
-  const B = fit(baseG.scene, TOWER_BASE_H, GLB_SPEC.r.w, GLB_SPEC.r.stretch), R = fit(rs, GLB_SPEC.p.h, GLB_SPEC.p.w);
+  const B = fit(baseG.scene, TOWER_BASE_H, GLB_SPEC.r.w, o.cutTop ? 1.9 : GLB_SPEC.r.stretch), R = fit(rs, GLB_SPEC.p.h, GLB_SPEC.p.w);
   R.holder.position.y = B.h * 0.97;
   const scene = new THREE.Group(); scene.add(B.holder, R.holder);
   const mats = new Set();
   scene.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = false; if (o.isSkinnedMesh) o.frustumCulled = false; for (const m of [].concat(o.material)) mats.add(m); } });
   for (const m of mats){ if ('envMapIntensity' in m) m.envMapIntensity = 0.9; if (m.map) m.map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy()); }
   const clips = mapClips(riderG.animations || [], walkG && walkG.animations);
-  const A = { type:'r', rigged:!!clips.idle, scene, clips, scale:1, off:new THREE.Vector3(), height:B.h * 0.97 + R.h, radius:Math.max(B.r, R.r), impact:findImpact(rs, clips.attack), frames:[], composite:true, tipY:B.h * 0.97 + R.h * 0.62 };
+  // arqueiro provisório: o Peão em couro verde e marrom, sem lança nem escudo, com arco na mão esquerda e aljava nas costas
+  if (o.archer){
+    R.holder.traverse(m => { if (!m.isMesh) return; m.material = [].concat(m.material).map(x => { const c = x.clone(); if (c.color) c.color.multiply(new THREE.Color(0.62, 0.78, 0.5)); return c; }); if (m.material.length === 1) m.material = m.material[0]; });
+  }
+  const A = { type:'r', rigged:!!clips.idle, scene, clips, scale:1, off:new THREE.Vector3(), height:B.h * 0.97 + R.h, radius:Math.max(B.r, R.r), impact:findImpact(rs, clips.attack), frames:o.archer ? propFrames(scene, 'archer') : [], composite:true, tipY:B.h * 0.97 + R.h * 0.62,
+    archerPose:!!o.archer, quiverY:B.h * 0.97 + R.h * 0.62 };
   glbLog.push(`torre composta: base ${B.h.toFixed(2)} + arqueiro ${R.h.toFixed(2)}, clipes ${Object.entries(clips).map(([k, c]) => k + '=' + (c ? c.name : '-')).join(', ')}`);
   return A;
 }
@@ -6392,6 +6696,7 @@ const PROP_DEF = {
   k:[{ kind:'sword', bone:'RightHand', parent:'RightForeArm', dir:[0, -0.3, 1], off:0.05 }],
   b:[{ kind:'crozier', bone:'RightHand', parent:'RightForeArm', dir:[0, 1, 0.12], off:0.05 }],
   q:[{ kind:'zap', bone:'RightHand', parent:'RightForeArm', dir:[0, 1, 0], off:0.07 }],
+  archer:[{ kind:'bow', bone:'LeftHand', parent:'LeftForeArm', dir:[0, 1, 0], off:0.04 }],
 };
 function propFrames(scene, type){
   const defs = PROP_DEF[type];
@@ -6455,6 +6760,13 @@ function buildProp(kind, side){
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(M.hex), transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, depthWrite:false }));
     sp.scale.setScalar(0.4); sp.position.copy(fl.position); g.add(sp);
     tip = new THREE.Object3D(); tip.position.copy(fl.position); g.add(tip);
+  } else if (kind === 'bow'){
+    // arco recurvo: madeira em arco, corda fina e empunhadura de couro
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.013, 6, 24, Math.PI * 0.78), M.wood);
+    arc.rotation.z = Math.PI / 2 + Math.PI * 0.11; arc.position.x = -0.14; arc.castShadow = true; g.add(arc);
+    const str = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.48, 4), M.face); str.position.x = -0.2; g.add(str);
+    add(new THREE.CylinderGeometry(0.018, 0.018, 0.07, 6), M.gold, 0.1, 0, 0);
+    tip = new THREE.Object3D(); tip.position.set(-0.05, 0, 0.1); g.add(tip);
   } else if (kind === 'zap'){
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(FXC[side].bolt[1]), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
     sp.scale.setScalar(0.3); g.add(sp); g.userData.glow = sp;
@@ -6481,25 +6793,32 @@ async function loadModels(){
     THREE.ImageBitmapLoader.prototype.__viaImg = true;
   }
   const loader = new THREE.GLTFLoader();
+  try { const r = await fetch('assets/meshy/manifest.json', { cache:'no-cache' }); if (r.ok){ const j = await r.json(); if (Array.isArray(j.files)) MESHY_FILES = new Set(j.files); } } catch (e){}
   const opt = await webpOK();
+  // o mesmo glTF pedido por dois tipos (Peão e o arqueiro provisório) carrega uma vez só
+  const shared = list => { const k = list.join('|'); if (!GLTF_SHARED.has(k)) GLTF_SHARED.set(k, loadGltf(loader, list)); return GLTF_SHARED.get(k); };
   // Publicado como glTF JSON (.gltf.json): os Artifacts não servem .glb. O .glb fica como reserva local.
   const urls = (slug, name) => (opt ? [`assets/meshy/${slug}/${name}.opt.gltf.json`, `assets/meshy/${slug}/${name}.opt.glb`] : []).concat([`assets/meshy/${slug}/${name}.glb`]);
   await Promise.all(Object.keys(GLB_SPEC).map(async type => {
     const slug = GLB_SLUG[type], spec = GLB_SPEC[type];
     if (type === 'r'){
-      // quando chegarem a base sem arqueiro e o arqueiro com rig, a torre vira composta
+      // torre composta: base sem arqueiro + arqueiro com rig. Enquanto a Meshy não manda os dois, versões provisórias:
+      // a Torre atual com o topo cortado nas ameias e o Peão rigado vestido de arqueiro (arco, aljava, pose de disparo)
       const base = await loadGltf(loader, urls('torre_base', 'model'));
-      const rider = base ? await loadGltf(loader, urls('arqueiro', 'animated')) : null;
-      if (base && rider){
-        const walk = await loadGltf(loader, ['assets/meshy/arqueiro/walk.gltf.json', 'assets/meshy/arqueiro/walk.glb']);
-        try { GLB.r = composeTower(base, rider, walk); glbPending.add('r'); return; } catch (e){ glbLog.push(`torre composta: falha (${e.message})`); }
+      const rider = await loadGltf(loader, urls('arqueiro', 'animated'));
+      const walk = rider ? await loadGltf(loader, ['assets/meshy/arqueiro/walk.gltf.json', 'assets/meshy/arqueiro/walk.glb']) : null;
+      const baseG = base || await loadGltf(loader, urls('torre', 'model'));
+      let riderG = rider;
+      if (!riderG){ const pg = await shared(urls('peao', 'animated')); if (pg) riderG = { scene:THREE.SkeletonUtils.clone(pg.scene), animations:pg.animations }; }
+      if (baseG && riderG){
+        try { GLB.r = composeTower(baseG, riderG, walk, { cutTop:!base, archer:!rider }); glbPending.add('r'); return; } catch (e){ glbLog.push(`torre composta: falha (${e.message})`); }
       }
     }
     if (type === 'n'){
       const mounted = await loadGltf(loader, urls('cavalo_montado', 'model'));
       if (mounted){ try { GLB.n = prepAsset('n', mounted, null); GLB.n.lance = true; glbPending.add('n'); return; } catch (e){ glbLog.push(`cavalo montado: falha (${e.message})`); } }
     }
-    const main = await loadGltf(loader, urls(slug, spec.rigged ? 'animated' : 'model'));
+    const main = await (type === 'p' ? shared(urls(slug, 'animated')) : loadGltf(loader, urls(slug, spec.rigged ? 'animated' : 'model')));
     if (!main){ glbLog.push(`${slug}: sem arquivo, mantém o procedural`); return; }
     // walk.glb só traz o clipe (sem textura), então não há cópia otimizada
     const walk = spec.rigged && spec.walk !== false ? await loadGltf(loader, [`assets/meshy/${slug}/walk.gltf.json`, `assets/meshy/${slug}/walk.glb`]) : null;
@@ -6607,6 +6926,14 @@ function makeGlbCharacter(type, side, A){
   // lança procedural do cavaleiro (modelo montado com a mão vazia): de pé em repouso, deitada e cravada no ataque
   const lance = A.lance ? buildLance(side, A.height) : null;
   if (lance) holder.add(lance);
+  // aljava nas costas do arqueiro provisório (no corpo, atrás do peito)
+  if (A.archerPose){
+    const PM = propMats(side), q = new THREE.Group();
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.038, 0.26, 8), PM.wood); tube.castShadow = true; q.add(tube);
+    for (let i = 0; i < 4; i++){ const f = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.05, 4), PM.gold); f.position.set((i % 2 - 0.5) * 0.03, 0.15, (i >> 1) * 0.02 - 0.01); q.add(f); }
+    q.position.set(0.05, A.quiverY, -0.12); q.rotation.set(-0.25, 0, 0.35);
+    holder.add(q);
+  }
   const props = [];
   // as trilhas de escala dos clipes mudam a escala dos ossos: a compensação é refeita a cada quadro
   const fitProps = () => {
@@ -6730,6 +7057,12 @@ function makeGlbCharacter(type, side, A){
         add(boneBy(sd + 'Arm'), /ForeArm/, Dn([U, -0.92], [F, 0.32], [S2, 0.12]));
         add(boneBy(sd + 'ForeArm'), /Hand/, Dn([U, -0.72], [F, 0.66]));
       }
+    } else if (name === 'shoot'){
+      add(boneBy('LeftArm'), /ForeArm/, Dn([F, 0.95], [U, 0.12], [Lf, 0.15]));
+      add(boneBy('LeftForeArm'), /Hand/, Dn([F, 1], [U, 0.08]));
+      add(boneBy('RightArm'), /ForeArm/, Dn([F, 0.35], [Rt, 0.85], [U, 0.1]));
+      add(boneBy('RightForeArm'), /Hand/, Dn([F, 0.75], [Lf, 0.55], [U, 0.12]));
+      add(head, /top|end/i, Dn([U, 0.85], [F, 0.5]), /front/i);
     } else {
       const k = alt ? 1 : 0;
       sp.forEach(b => add(b, /spine|neck/i, Dn([U, 0.98], [F, -0.12 - 0.06 * k]), /shoulder|arm/i));
@@ -6815,6 +7148,13 @@ function makeGlbCharacter(type, side, A){
           return;
         }
         if (name === 'hit'){ resolve(st.hit); st.hit = { res, t:0, dur:300 * SPD }; return; }
+        if (name === 'attack' && A.archerPose && mixer){
+          // braço esquerdo estendido segurando o arco, o direito puxando a corda; solta no meio do gesto
+          api.setPose('shoot', { dur:170 });
+          setTimeout(() => res(), 420 * SPD);
+          setTimeout(() => { if (st.pose && st.pose.name === 'shoot') api.setPose(null); }, 720 * SPD);
+          return;
+        }
         if ((name === 'attack' || name === 'cast' || name === 'raise') && acts.attack && !opts.procedural){
           resolve(st.shot);
           const a = acts.attack.reset();
@@ -8446,6 +8786,18 @@ function arrowDelta(key){
 function layout(){
   const w = Math.round(scene.clientWidth);
   if (!w) return;
+  if (document.body.classList.contains('imm')){
+    // modo imersivo: a cena é a tela inteira (a imagem nunca estica: renderer e câmera seguem o tamanho real)
+    const vv = window.visualViewport, h = Math.round(vv ? vv.height : window.innerHeight), dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (w === W && h === H && dpr === DPR) return;
+    W = w; H = h; DPR = dpr;
+    cv.style.height = H + 'px';
+    ov.width = Math.round(W * DPR); ov.height = Math.round(H * DPR);
+    if (!GLOK) return;
+    renderer.setPixelRatio(DPR); renderer.setSize(W, H, false);
+    fitCamera();
+    return;
+  }
   const ratio = w < 560 ? 0.95 : w < 760 ? 0.88 : 0.78;
   // no Arcano a cena encolhe um pouco em telas largas para a mão de cartas caber abaixo sem rolar
   const hMax = cfg.arc && w >= 560 ? Math.max(340, window.innerHeight - 380) : Math.max(340, window.innerHeight * 0.86);
@@ -9134,7 +9486,7 @@ function pvShow(t, side, label){
   pvResize();
 }
 function pvTick(now){
-  if (!PV.ok || !PV.ch || !PV.visible || document.hidden || !PV.wrap.isConnected) return;
+  if (!PV.ok || !PV.ch || !PV.visible || document.hidden || !PV.wrap.isConnected || panelPaused()) return;
   if (now - PV.last < 32) return;
   const dt = Math.min(100, now - PV.last);
   PV.last = now;
@@ -9169,6 +9521,7 @@ function updateUndo(){
   $('undo').textContent = cfg.undoLeft <= 0 && cfg.mode === 'ai' ? 'Desfazer (desligado)' : lim ? `Desfazer jogada (${cfg.undoLeft})` : 'Desfazer jogada';
   const sb = $('specbar');
   sb.hidden = !spec;
+  if (cfg.arc) $('spec-back').disabled = true;
   if (spec){
     $('spec-pause').textContent = cfg.paused ? 'Continuar' : 'Pausar';
     $('spec-back').disabled = !cfg.paused || busy || !G.history().length;
@@ -9340,6 +9693,7 @@ function aiThink(fen, diff){
   }).then(r => r === undefined ? local() : r);
 }
 function maybeAI(){
+  if (cfg.arc){ arcAIContinue(); return; }
   if (S.over || human(S.turn) || cfg.paused || TITLE.open || (APR.on && APR.scripted)) return;
   busy = true; CLK.thinking = true;
   renderAll();
@@ -9415,6 +9769,7 @@ function showEnd(){
 
 function handleTile(r, c){
   if (promoResolve) return;
+  if (panelMobile()) setTimeout(() => { if (ui.sel == null && ui.inspect != null && S.pieces[ui.inspect] && !S.pieces[ui.inspect].dead) panelShow('card'); }, 0);
   if (aprTap(r, c)) return;
   if (arcTile(r, c)) return;
   const q = pieceAt(r, c);
@@ -9620,6 +9975,92 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'm' || e.key === 'M'){ mmSetOpen(!mmIsOpen()); }
 });
 syncViewUI();
+/* ---------- Painel recolhível, gaveta do celular e tela cheia ----------
+   Desktop: o chevron recolhe o painel numa barra fina com um ícone por seção (a cena cresce); cada seção abre e fecha.
+   Até 900 px o painel é uma gaveta (de baixo em pé, lateral deitado) com puxador. Tela cheia: Fullscreen API na página;
+   se ela falhar (iframe do Artifact, iPhone), o mesmo modo imersivo em CSS. Shift+F alterna; Esc ou o botão saem. */
+const PANEL_KEY = 'coroa-de-cinzas:painel';
+const PANEL = { collapsed:false, drawer:false, immCol:true, open:{ forces:true, card:true, moves:true, chron:true } };
+try { const v = JSON.parse(localStorage.getItem(PANEL_KEY) || 'null'); if (v && typeof v === 'object'){ if ('collapsed' in v) PANEL.collapsed = !!v.collapsed; if (v.open && typeof v.open === 'object') for (const k of Object.keys(PANEL.open)) if (k in v.open) PANEL.open[k] = !!v.open[k]; } } catch (e){}
+const IMM = { on:false, native:false };
+const panelMobile = () => window.innerWidth <= 900;
+const panelCollapsed = () => IMM.on && !panelMobile() ? PANEL.immCol : PANEL.collapsed;
+function panelSave(){ try { localStorage.setItem(PANEL_KEY, JSON.stringify({ collapsed:PANEL.collapsed, open:PANEL.open })); } catch (e){} }
+function panelPaused(){ return (panelMobile() ? !PANEL.drawer : panelCollapsed()) || !PANEL.open.card; }
+function panelApply(){
+  const mob = panelMobile(), col = panelCollapsed();
+  $('stage').classList.toggle('pcol', !mob && col);
+  $('panel').classList.toggle('open', mob && PANEL.drawer);
+  const exp = mob ? PANEL.drawer : !col, t = $('panel-toggle');
+  t.setAttribute('aria-expanded', String(exp));
+  const lab = mob ? (exp ? 'Fechar a gaveta' : 'Abrir a gaveta do painel') : (exp ? 'Recolher o painel' : 'Expandir o painel');
+  t.setAttribute('aria-label', lab); t.title = lab;
+  for (const sec of document.querySelectorAll('.acc')){
+    const k = sec.dataset.sec, open = !!PANEL.open[k];
+    sec.classList.toggle('closed', !open);
+    sec.querySelector('.acc-h').setAttribute('aria-expanded', String(open));
+  }
+}
+function panelToggle(){
+  if (panelMobile()) PANEL.drawer = !PANEL.drawer;
+  else if (IMM.on) PANEL.immCol = !PANEL.immCol;
+  else { PANEL.collapsed = !PANEL.collapsed; panelSave(); }
+  panelApply();
+}
+// abre o painel (ou a gaveta) numa seção
+function panelShow(k){
+  if (panelMobile()) PANEL.drawer = true;
+  else if (IMM.on) PANEL.immCol = false;
+  else { PANEL.collapsed = false; panelSave(); }
+  if (k && !PANEL.open[k]){ PANEL.open[k] = true; panelSave(); }
+  panelApply();
+  const sec = k && document.querySelector(`.acc[data-sec="${k}"]`);
+  if (sec) setTimeout(() => sec.scrollIntoView({ block:'nearest', behavior:RM ? 'auto' : 'smooth' }), RM ? 0 : 260);
+}
+$('panel-toggle').addEventListener('click', () => { audio(); panelToggle(); });
+for (const b of document.querySelectorAll('.rail-ic')) b.addEventListener('click', () => { audio(); panelShow(b.dataset.sec); });
+for (const sec of document.querySelectorAll('.acc')) sec.querySelector('.acc-h').addEventListener('click', () => { const k = sec.dataset.sec; PANEL.open[k] = !PANEL.open[k]; panelSave(); panelApply(); });
+// no celular, tocar no puxador (fora dos botões) também abre e fecha a gaveta
+$('panel-rail').addEventListener('click', e => { if (panelMobile() && e.target === e.currentTarget){ PANEL.drawer = !PANEL.drawer; panelApply(); } });
+function fsSync(){
+  for (const id of ['fs-btn', 'fs-scene']){
+    const b = $(id); if (!b) continue;
+    b.setAttribute('aria-label', IMM.on ? 'Sair da tela cheia' : 'Tela cheia');
+    b.title = IMM.on ? 'Sair da tela cheia (Shift+F ou Esc)' : 'Tela cheia (Shift+F)';
+    if (id === 'fs-btn') b.setAttribute('aria-pressed', String(IMM.on));
+  }
+}
+async function immEnter(){
+  if (IMM.on) return;
+  IMM.on = true; PANEL.immCol = true; PANEL.drawer = false;
+  document.body.classList.add('imm');
+  IMM.native = false;
+  const el = document.documentElement;
+  try { if (el.requestFullscreen && !document.fullscreenElement){ await el.requestFullscreen({ navigationUI:'hide' }); IMM.native = !!document.fullscreenElement; } } catch (e){ IMM.native = false; }
+  fsSync(); panelApply();
+  requestAnimationFrame(() => { layout(); mmLayout(); });
+}
+function immExit(){
+  if (!IMM.on) return;
+  IMM.on = false;
+  document.body.classList.remove('imm');
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  IMM.native = false;
+  fsSync(); panelApply();
+  requestAnimationFrame(() => { layout(); mmLayout(); });
+}
+const immToggle = () => IMM.on ? immExit() : immEnter();
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && IMM.on && IMM.native) immExit(); setTimeout(layout, 60); });
+$('fs-btn').addEventListener('click', () => { audio(); immToggle(); });
+$('fs-scene').addEventListener('click', e => { e.stopPropagation(); audio(); immToggle(); });
+$('fs-scene').addEventListener('pointerdown', e => e.stopPropagation());
+// Shift+F alterna; Esc sai do modo imersivo em CSS (na tela cheia de verdade o próprio navegador sai e avisa)
+window.addEventListener('keydown', e => {
+  if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && (e.key === 'F' || e.key === 'f')){ e.preventDefault(); e.stopImmediatePropagation(); immToggle(); return; }
+  if (e.key === 'Escape' && IMM.on && !IMM.native && !cine.active && !promoResolve && $('end').hidden && !TITLE.open){ e.preventDefault(); e.stopImmediatePropagation(); immExit(); }
+}, true);
+panelApply(); fsSync();
 /* ---------- Minimapa ----------
    Diagrama 2D clássico, sempre em dia com a partida (lido direto das regras, então desfazer, roque, en passant e promoção
    aparecem na hora, inclusive durante a câmera de combate). Também é um tabuleiro jogável: clicar numa casa equivale a
@@ -10002,7 +10443,7 @@ function seriesEnd(){
   const done = SERIES.w >= need || SERIES.b >= need || SERIES.w + SERIES.b + SERIES.d >= SERIES.n + 4;
   if (!done && SERIES.n > 1){
     $('end-text').textContent += ` Placar: Aurora ${SERIES.w} × ${SERIES.b} Legião. A próxima partida começa em instantes.`;
-    clearTimeout(SERIES.t); SERIES.t = setTimeout(() => { if (cfg.mode === 'spec' && S.over && !TITLE.open) newGame(); }, 4200);
+    clearTimeout(SERIES.t); SERIES.t = setTimeout(() => { if (cfg.mode === 'spec' && S.over && !TITLE.open) (cfg.arc ? arcNewGame() : newGame()); }, 4200);
   } else if (SERIES.n > 1){
     const w = SERIES.w > SERIES.b ? 'w' : SERIES.b > SERIES.w ? 'b' : null;
     $('end-title').textContent = w ? `Série: ${FACTION[w]}` : 'Série empatada';
@@ -10066,6 +10507,7 @@ function startPadrao(){
 }
 function startSpec(){
   arcExit();
+  if (cfg.arc) cfg.arc = false;
   aprExit();
   if (cfg.mode !== 'spec'){ SERIES.cine = cine.mode; SERIES.view = VIEW.mode; }
   cfg.mode = 'spec'; cfg.diffW = +$('s-w').value; cfg.diffB = +$('s-b').value; cfg.speed = $('s-speed').value; cfg.paused = false; cfg.clock = 'none'; cfg.undoLeft = Infinity;
@@ -10076,11 +10518,22 @@ function startSpec(){
   closeTitle();
   setFlip(false);
   setView('focus');
+  if ($('s-rules').value === 'arcano'){
+    if (AC) for (const id of ARC_SFX) loadOne(id);
+    const ds = Object.keys(ARC.DECKS), dw = ds[Math.floor(Math.random() * ds.length)];
+    let db = ds[Math.floor(Math.random() * ds.length)];
+    if (db === dw) db = ds[(ds.indexOf(dw) + 1) % ds.length];
+    Object.assign(cfg, { arc:true, undoLeft:0, arcDecks:{ w:dw, b:db } });
+    arcNewGame();
+    syncViewUI();
+    return;
+  }
   newGame();
 }
 function specPause(){
   if (cfg.mode !== 'spec') return;
   cfg.paused = !cfg.paused;
+  if (cfg.arc){ if (cfg.paused) ARCAI.tok++; ARCAI.running = false; renderAll(); if (!cfg.paused) arcAIContinue(); return; }
   if (cfg.paused){ aiToken++; if (CLK.thinking){ busy = false; CLK.thinking = false; } }
   renderAll();
   if (!cfg.paused) maybeAI();
@@ -10105,6 +10558,7 @@ function specTake(side){
   aiToken++; if (CLK.thinking){ busy = false; CLK.thinking = false; }
   setFlip(side === 'b');
   pushLog(`<i>Você assume a</i> <b class="${side}">${FACTION[side]}</b>.`);
+  if (cfg.arc){ ARCAI.tok++; ARCAI.running = false; cfg.undoLeft = 0; arcRender(); arcMarks(); }
   renderAll(); syncViewUI();
   if (!busy) maybeAI();
 }
@@ -10229,15 +10683,15 @@ function arcRender(){
   const on = cfg.arc && G && G.s && !TITLE.open;
   $('arc').hidden = !on;
   if (!on) return;
-  const s = G.s, act = ARC.actor(s) || s.turn, op = other(act);
+  const s = G.s, actor = ARC.actor(s) || s.turn, act = cfg.mode === 'ai' ? cfg.human : actor, op = other(act);
   const who = $('arc-who');
   who.className = 'arc-who ' + act;
-  who.textContent = s.over ? 'Partida encerrada' : `${FACTION[act]} · ${s.arc.phase === 'cards' ? 'fase de cartas' : 'faça o seu lance'}`;
+  who.textContent = s.over ? 'Partida encerrada' : arcIsAI(actor) ? `A ${FACTION[actor]} ${s.arc.phase === 'cards' ? 'escolhe as cartas' : 'pensa no lance'}…` : `${FACTION[act]} · ${s.arc.phase === 'cards' ? 'fase de cartas' : 'faça o seu lance'}`;
   const e = s.arc.ess[act];
   $('arc-ess').innerHTML = Array.from({ length:ARC.ESS_MAX }, (_, i) => `<i class="${i < e ? 'on' : ''}"></i>`).join('') + `<b>${e}</b>`;
   $('arc-ess').setAttribute('aria-label', `Essência: ${e} de ${ARC.ESS_MAX}`);
   $('arc-info').textContent = `Grimório ${s.arc.deck[act].length} · ${op === 'w' ? 'Aurora' : 'Legião'}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
-  const cardsPhase = s.arc.phase === 'cards' && !busy && !s.over;
+  const cardsPhase = s.arc.phase === 'cards' && !busy && !s.over && !arcIsAI(actor) && actor === act;
   $('arc-end').hidden = !cardsPhase;
   $('arc-end').disabled = !!ARCUI.sel && ARCUI.picks.length > 0;
   const box = $('arc-hand');
@@ -10306,7 +10760,7 @@ const ARCW = { g:null, sig:'', items:[], acc:new Map() };
 function arcWorldTick(now){
   if (!GLOK) return;
   const on = cfg.arc && G && G.s && !TITLE.open;
-  const act = on ? ARC.actor(G.s) : null;
+  const act = on ? arcViewer() : null;
   const sig = !on ? '' : JSON.stringify([G.s.arc.blocked, G.s.arc.portals, G.s.arc.trails, G.s.arc.anchors.map(a => a.sq), ARCUI.hidden ? [] : G.s.arc.traps.filter(t => t.side === act).map(t => t.sq), ARCUI.hidden ? [] : ARC.trapGlows(G.s, act), ARCUI.reveal]);
   if (sig !== ARCW.sig){
     ARCW.sig = sig;
@@ -10439,7 +10893,7 @@ function arcReplyTick(){
 function arcMarks(){
   if (!cfg.arc || !G || !G.s) return;
   MM.setArrows([...ARCUI.arrows.map(m => ({ from:m.from, to:m.to, color:'rgba(169,133,255,.8)' })), ...(ARCUI.reply ? [{ from:ARCUI.reply.from, to:ARCUI.reply.to, color:'rgba(255,110,90,.85)' }] : [])]);
-  const act = ARC.actor(G.s);
+  const act = arcViewer();
   const own = act && !ARCUI.hidden ? G.s.arc.traps.filter(t => t.side === act && t.sq).map(t => ({ sq:t.sq, kind:'trap', color:'#b48cff' })) : [];
   const glow = act && !ARCUI.hidden ? ARC.trapGlows(G.s, act).map(sq => ({ sq, kind:'trap', color:'#ff7ad2', label:'?' })) : [];
   const terr = Object.entries(G.s.arc.blocked).map(([sq, b]) => ({ sq, kind:'terrain', color:b.kind === 'lava' ? '#ff6a20' : '#b8a888' }));
@@ -10447,6 +10901,7 @@ function arcMarks(){
 }
 function arcSelect(uid){
   if (!G || !G.s) return;
+  if (arcIsAI(ARC.actor(G.s)) && !ARCAI.running && !(ARCUI.sel === uid)) { /* a vez é da IA: só mostra a carta */ }
   if (ARCUI.sel === uid){ arcCancel(); return; }
   ARCUI.sel = uid; ARCUI.picks = [];
   arcRefreshOpts();
@@ -10628,7 +11083,8 @@ async function arcEvents(ev){
       snd('carta_jogar'); snd(ARC_CARD_SND[e.card.id] || 'arcano_carga', { delay:0.15 });
       pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> usa a carta <b>${d.nome}</b>.`);
       arcMsg(`${d.nome}!`);
-      const at = e.picks && /^[a-h][1-8]$/.test(e.picks[0] || '') ? arcPieceAt(e.picks[0]) : null;
+      const secret = d.tipo === 'armadilha' && e.side !== arcViewer();
+      const at = !secret && e.picks && /^[a-h][1-8]$/.test(e.picks[0] || '') ? arcPieceAt(e.picks[0]) : null;
       const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side === e.side);
       const tgt = at || k;
       if (tgt) floatText(tgt, d.nome.toUpperCase(), '#cbb8ff', 0.3, 12, 0.3);
@@ -10701,7 +11157,7 @@ async function arcEvents(ev){
     } else if (e.k === 'phoenix'){
       sceneAfter = { kind:'phoenix', eid:e.id, side:e.side };
     } else if (e.k === 'oracle'){
-      ARCUI.arrows = e.moves.slice(); arcMarks();
+      if (cfg.mode !== 'ai' || e.side === cfg.human){ ARCUI.arrows = e.moves.slice(); arcMarks(); }
       pushLog(`O Oráculo revela ${e.moves.length} lances prováveis da ${e.side === 'w' ? 'Legião' : 'Aurora'}.`);
     } else if (e.k === 'oracleEnd'){
       ARCUI.arrows = [];
@@ -10715,7 +11171,7 @@ async function arcEvents(ev){
       const id = arcEidAt(e.to); if (id != null) hints[id] = 'blink';
       snd('ancora');
     } else if (e.k === 'trap'){
-      if (GLOK && e.sq){ const [r, c] = rcOf(e.sq), [x, z] = tc(r, c); spawnRing(x, z, 0xa985ff, 0.7, 420); }
+      if (GLOK && e.sq && e.side === arcViewer()){ const [r, c] = rcOf(e.sq), [x, z] = tc(r, c); spawnRing(x, z, 0xa985ff, 0.7, 420); }
       pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> arma uma armadilha.`);
     } else if (e.k === 'trapFire'){
       const name = arcCard(e.id).nome;
@@ -10816,7 +11272,13 @@ function arcEnterCards(){
   ARCUI.sel = null; ARCUI.picks = []; ARCUI.opts = []; ARCUI.hidden = false; ARCUI.reply = null;
   const ev = G.events || [];
   G.events = [];
-  arcEvents(ev).then(() => { arcRender(); arcMarks(); arcMsg('Fase de cartas: jogue até uma carta ou encerre o turno.'); });
+  busy = true;
+  arcEvents(ev).then(() => {
+    busy = false;
+    arcRender(); arcMarks();
+    if (arcIsAI(G.s.arc.cardSide)) { arcMsg(`A ${FACTION[G.s.arc.cardSide]} escolhe as cartas…`); arcAIContinue(); }
+    else arcMsg('Fase de cartas: jogue até uma carta ou encerre o turno.');
+  });
 }
 async function arcEndTurn(){
   if (!G || !G.s || G.s.arc.phase !== 'cards' || busy) return;
@@ -10827,8 +11289,81 @@ async function arcEndTurn(){
   await arcEvents(r.events);
   S.turn = G.turn(); S.inCheck = G.in_check();
   if (G.s.over){ S.over = outcome(); renderAll(); arcRender(); showEnd(); return; }
-  // a dois no mesmo aparelho: cobre a tela e esconde a mão até o próximo jogador assumir
-  arcPass(G.s.turn);
+  // a dois no mesmo aparelho: cobre a tela e esconde a mão até o próximo jogador assumir; contra a IA ou no Espectador, segue direto
+  if (cfg.mode === 'pvp') arcPass(G.s.turn);
+  else {
+    ARCUI.hidden = false; ARCUI.reveal = false; ARCUI.arrows = cfg.mode === 'ai' && G.s.arc.oracle && G.s.arc.oracle.by === cfg.human ? ARCUI.arrows : [];
+    renderAll(); arcRender(); arcMarks();
+    if (!arcIsAI(G.s.turn)) arcMsg(`${FACTION[G.s.turn]}: +1 essência. Faça o seu lance.`);
+    arcAIContinue();
+  }
+}
+/* IA do Arcano: pensa num Worker criado do próprio motor (o mesmo código que validaria no servidor); sem Worker, pensa aqui */
+let arcWorker = null, arcSeq = 0;
+const arcWaitMap = new Map();
+const ARCAI = { tok:0, running:false };
+function arcInitWorker(){
+  if (arcWorker) return;
+  try {
+    const src = 'const ARC = (' + arcanoRules.toString() + ')(' + JSON.stringify(ARC_CATALOG) + ');\n' +
+      'self.onmessage = e => { const d = e.data; let r = null; try { r = ARC.choose(d.state, d.side, d.level, d.o || {}); } catch (err) { r = { action:null, err:String(err) }; } self.postMessage({ id:d.id, r }); };';
+    const w = new Worker(URL.createObjectURL(new Blob([src], { type:'text/javascript' })));
+    w.onmessage = e => { const f = arcWaitMap.get(e.data.id); if (f){ arcWaitMap.delete(e.data.id); f(e.data.r); } };
+    w.onerror = e => { if (e && e.preventDefault) e.preventDefault(); try { w.terminate(); } catch (err){} arcWorker = null; for (const f of arcWaitMap.values()) f(undefined); arcWaitMap.clear(); };
+    arcWorker = w;
+  } catch (e){ arcWorker = null; }
+}
+function arcThink(state, side, level){
+  arcInitWorker();
+  const local = () => ARC.choose(state, side, level);
+  if (!arcWorker) return Promise.resolve(local());
+  return new Promise(res => {
+    const id = ++arcSeq;
+    const to = setTimeout(() => { if (arcWaitMap.has(id)){ arcWaitMap.delete(id); res(undefined); } }, 9000);
+    arcWaitMap.set(id, r => { clearTimeout(to); res(r); });
+    arcWorker.postMessage({ id, state, side, level });
+  }).then(r => r === undefined || (r && r.err) ? local() : r);
+}
+const arcIsAI = side => cfg.arc && (cfg.mode === 'spec' || (cfg.mode === 'ai' && side !== cfg.human));
+// de quem é a mão e as armadilhas mostradas: contra a IA, sempre as do jogador; a dois ou no Espectador, de quem age
+const arcViewer = () => !G || !G.s ? null : cfg.mode === 'ai' ? cfg.human : ARC.actor(G.s);
+const arcGap = () => cfg.mode === 'spec' ? ({ slow:1400, normal:800, fast:200 })[cfg.speed] || 800 : 520;
+// a IA age quando é a vez dela (lance ou cartas); chamada depois de cada passo e ao voltar do menu
+async function arcAIContinue(){
+  if (!cfg.arc || !G || !G.s || G.s.over || TITLE.open || busy || ARCAI.running || cfg.paused) return;
+  const side = ARC.actor(G.s);
+  if (!arcIsAI(side)) return;
+  const tok = ++ARCAI.tok, lvl = cfg.mode === 'spec' ? (side === 'w' ? cfg.diffW : cfg.diffB) : cfg.diff;
+  ARCAI.running = true; CLK.thinking = true; renderAll();
+  try {
+    await new Promise(r => setTimeout(r, arcGap() * SPD));
+    if (tok !== ARCAI.tok || G.s.over) return;
+    const phase = G.s.arc.phase;
+    const r = await arcThink(G.s, side, lvl);
+    if (tok !== ARCAI.tok || !cfg.arc || G.s.over) return;
+    CLK.thinking = false;
+    const act = r && r.action;
+    if (phase === 'move'){
+      const legal = G.moves({ verbose:true });
+      const m = act && act.type === 'move' && legal.find(x => x.from === act.from && x.to === act.to && (x.promotion || '') === (act.promotion || '')) || legal[0];
+      if (r && r.oracle) pushLog(`A ${FACTION[side]} cumpre a visão do Oráculo.`);
+      ARCAI.running = false;
+      if (m) doMove(m);
+      return;
+    }
+    if (phase === 'cards'){
+      if (act && act.type === 'card'){
+        ARCUI.sel = act.uid; ARCUI.picks = act.picks.slice();
+        ARCAI.running = false;
+        await arcPlay();
+        if (tok !== ARCAI.tok || G.s.over) return;
+        await new Promise(r2 => setTimeout(r2, arcGap() * 0.6 * SPD));
+      }
+      ARCAI.running = false;
+      if (!G.s.over && G.s.arc.phase === 'cards') arcEndTurn();
+      return;
+    }
+  } finally { ARCAI.running = false; CLK.thinking = false; }
 }
 function arcPass(side){
   ARCUI.hidden = true; ARCUI.reveal = false; ARCUI.arrows = []; arcMarks(); arcRender();
@@ -10849,7 +11384,8 @@ function arcReady(){
 function arcNewGame(){
   aiToken++;
   const seed = (Math.random() * 4294967296) >>> 0;
-  G = new ArcanoG(ARC.create({ seed, decks:{ w:cfg.arcDecks ? cfg.arcDecks.w : 'tempestade', b:cfg.arcDecks ? cfg.arcDecks.b : 'cinzas' } }));
+  ARCAI.tok++; ARCAI.running = false;
+  G = new ArcanoG(ARC.create({ seed, decks:{ w:cfg.arcDecks ? cfg.arcDecks.w : 'tempestade', b:cfg.arcDecks ? cfg.arcDecks.b : 'cinzas' }, oracle:cfg.mode === 'ai' ? 'garantido' : 'previsto' }));
   LOG = [];
   resetUI(); busy = false; resetFx();
   syncState();
@@ -10862,13 +11398,17 @@ function arcNewGame(){
   setFlip(false);
   layout();
   renderAll(); arcRender(); arcMarks();
-  arcMsg('A Aurora começa: +1 essência. Faça o seu lance; depois vem a fase de cartas.');
+  arcMsg(arcIsAI('w') ? 'A Aurora começa.' : 'A Aurora começa: +1 essência. Faça o seu lance; depois vem a fase de cartas.');
+  if (cfg.mode === 'ai') setFlip(cfg.human === 'b');
+  if (cfg.mode === 'spec') setFlip(false);
+  arcAIContinue();
 }
 function startArcano(){
   aprExit(); leaveSpec();
   if (AC) for (const id of ARC_SFX) loadOne(id);
-  Object.assign(cfg, { mode:'pvp', arc:true, human:'w', clock:'none', undoLeft:0, paused:false, arcDecks:{ w:$('a-deck-w').value, b:$('a-deck-b').value } });
-  $('mode').value = 'pvp';
+  const opp = $('a-opp').value, col = $('a-color').value;
+  Object.assign(cfg, { mode:opp, arc:true, human:opp === 'ai' ? (col === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : col) : 'w', diff:+$('a-diff').value, clock:'none', undoLeft:0, paused:false, arcDecks:{ w:$('a-deck-w').value, b:$('a-deck-b').value } });
+  $('mode').value = opp;
   clockStart();
   closeTitle();
   arcNewGame();
@@ -10885,6 +11425,7 @@ function arcExit(){
   setTimeout(layout, 0);
 }
 $('a-start').addEventListener('click', () => { audio(); startArcano(); });
+$('a-opp').addEventListener('change', () => { const ai = $('a-opp').value === 'ai'; $('a-diff-f').hidden = !ai; $('a-color-f').hidden = !ai; });
 $('t-back4').addEventListener('click', () => showSetup(null));
 $('arc-end').addEventListener('click', () => { audio(); arcEndTurn(); });
 $('arc-play').addEventListener('click', () => { audio(); arcPlay(); });
@@ -11296,6 +11837,9 @@ if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => serialize());
 if (hot && typeof hot.ready === 'function') hot.ready(d => { start(d); openTitle(); }); else { start((hot && hot.data) || {}); openTitle(); }
 
 new ResizeObserver(() => layout()).observe(scene);
+window.addEventListener('resize', () => requestAnimationFrame(() => { layout(); panelApply(); }));
+window.addEventListener('orientationchange', () => setTimeout(() => { layout(); panelApply(); }, 120));
+if (window.visualViewport) visualViewport.addEventListener('resize', () => requestAnimationFrame(layout));
 layout();
 Promise.race([document.fonts.load('700 24px "Alegreya Sans SC"', 'a'), new Promise(r => setTimeout(r, 2500))]).catch(() => {}).then(() => {
   fontsReady = true;

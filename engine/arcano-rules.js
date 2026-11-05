@@ -906,10 +906,126 @@ const arcanoRules = (catalog = []) => {
     }
     return out;
   }
+
+  /* ---- IA do Arcano (pura, roda no Worker ou num servidor) ----
+     choose(state, side, nivel) → { action } dentro do orçamento de tempo. A IA enxerga só o que o jogador enxergaria:
+     as armadilhas escondidas do rival somem da cópia em que ela pensa. Avaliação: material + centro + avanço dos Peões +
+     segurança do Rei + valor dos efeitos de carta nas peças + essência e mão. No lance, nível 1 olha 1 lance com ruído,
+     nível 2 pune peças penduradas, nível 3 olha a melhor resposta do rival (2 lances). Na fase de cartas compara cada
+     carta jogável (com alvos) com não jogar nada. Com o Oráculo garantido, a IA joga o lance revelado. */
+  const AI_LV = { 1:{ ms:250, noise:70, cardP:0.45 }, 2:{ ms:700, noise:12, cardP:1 }, 3:{ ms:1400, noise:0, cardP:1 } };
+  const FX_VAL = { escudo:90, martir:80, golem:120, heranca:90, coroa:140, coroa_raio:70, coroa_herdada:160, alcance:60, vinganca:40, salto_herdado:60, visao_arcana:50, muralha_viva:120,
+    oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanca:30, ferradura:25, paralisado:-1, nevoa:-30 };
+  function aiView(s, me){ const v = clone(s); v.arc.traps = v.arc.traps.filter(t => t.side === me || t.seen); return v; }
+  function evalFor(s, me){
+    if (s.over) return s.over.kind === 'mate' ? (s.over.winner === me ? 100000 : -100000) : 0;
+    let v = 0;
+    const center = i => 3.5 - Math.max(Math.abs((i >> 4) - 3.5), Math.abs((i & 7) - 3.5));
+    for (const i of ALL){
+      const p = s.board[i];
+      if (!p) continue;
+      const sg = p.c === me ? 1 : -1;
+      let x = VAL[p.t] * 100;
+      if (p.t === 'p') x += (p.c === 'w' ? 6 - (i >> 4) : (i >> 4) - 1) * 8;
+      if (p.t === 'n' || p.t === 'b') x += center(i) * 8;
+      if (p.t === 'q' || p.t === 'r') x += center(i) * 2;
+      if (p.t === 'k') x += (s.hist.length < 50 ? -center(i) * 10 : center(i) * 6);
+      for (const f of p.fx) x += f.id === 'paralisado' ? -VAL[p.t] * 35 : (FX_VAL[f.id] || 20) * (f.turns != null ? Math.min(1, 0.35 + f.turns * 0.25) : 1);
+      v += sg * x;
+    }
+    for (const c of ['w', 'b']){ const sg = c === me ? 1 : -1; v += sg * (s.arc.ess[c] * 9 + s.arc.hand[c].length * 18 + s.arc.traps.filter(t => t.side === c).length * 35); }
+    if (inCheck(s, me)) v -= 60;
+    if (inCheck(s, other(me))) v += 40;
+    return v;
+  }
+  // peças minhas atacadas e sem defesa (ou atacadas por peça mais barata), do ponto de vista de "me"
+  function hanging(s, me){
+    let worst = 0;
+    for (const i of ALL){
+      const p = s.board[i];
+      if (!p || p.c !== me || p.t === 'k' || has(p, 'escudo') || has(p, 'martir') || has(p, 'golem')) continue;
+      if (!attacked(s, i, other(me))) continue;
+      const q = s.board[i]; s.board[i] = { t:'p', c:other(me), id:-2, fx:[] };
+      const def = attacked(s, i, me);
+      s.board[i] = q;
+      const loss = def ? VAL[p.t] * 100 * 0.35 : VAL[p.t] * 100;
+      if (loss > worst) worst = loss;
+    }
+    return worst;
+  }
+  function choose(s0, side, level = 2, o = {}){
+    const L = AI_LV[level] || AI_LV[2], t0 = Date.now(), deadline = t0 + (o.ms || L.ms);
+    const me = side || actor(s0);
+    if (!me || s0.over) return { action:null };
+    const s = aiView(s0, me);
+    const rnd01 = () => rnd(s);
+    if (s.arc.phase === 'move'){
+      const ms = legalMoves(s);
+      if (!ms.length) return { action:null };
+      // Oráculo garantido contra a IA: ela cumpre o lance revelado
+      const orc = s0.arc.oracle;
+      if (orc && orc.side === me && orc.guaranteed && orc.moves[0]){ const m = ms.find(x => x.from === orc.moves[0].from && x.to === orc.moves[0].to); if (m) return { action:{ type:'move', from:m.from, to:m.to, promotion:m.promotion }, oracle:true }; }
+      const scored = [];
+      const order = ms.slice().sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0));
+      for (const m of order){
+        const r = applyMove(s, m);
+        if (!r.ok) continue;
+        let v = evalFor(r.state, me);
+        if (r.state.over && r.state.over.kind === 'mate'){ scored.push({ m, v:1e6 }); break; }
+        if (level >= 2) v -= hanging(r.state, me) * (level >= 3 ? 0.5 : 0.9);
+        if (level >= 3 && Date.now() < deadline){
+          // melhor resposta do rival (depois da fase de cartas vazia)
+          const e = endTurn(r.state);
+          if (e.ok && !e.state.over){
+            const op = legalMoves(e.state).sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0)).slice(0, 14);
+            let worst = Infinity;
+            for (const om of op){
+              if (Date.now() > deadline) break;
+              const r2 = applyMove(e.state, om);
+              if (!r2.ok) continue;
+              const v2 = evalFor(r2.state, me);
+              if (v2 < worst) worst = v2;
+            }
+            if (worst !== Infinity) v = Math.min(v, worst + 15);
+          } else if (e.ok && e.state.over) v = evalFor(e.state, me);
+        }
+        v += (rnd01() - 0.5) * 2 * L.noise;
+        scored.push({ m, v });
+        if (Date.now() > deadline + 600) break;
+      }
+      scored.sort((a, b) => b.v - a.v);
+      // a IA pensou sem ver as armadilhas do rival: confere o lance no estado real
+      for (const x of scored){ const a = { type:'move', from:x.m.from, to:x.m.to, promotion:x.m.promotion }; if (applyMove(s0, a).ok) return { action:a, score:x.v, ms:Date.now() - t0 }; }
+      const real = legalMoves(s0)[0];
+      return { action:real ? { type:'move', from:real.from, to:real.to, promotion:real.promotion } : null, ms:Date.now() - t0 };
+    }
+    if (s.arc.phase === 'cards'){
+      const acts = legalActions(s, me, { cap:o.cap || (level >= 3 ? 14 : 8) });
+      const base = evalFor(s, me) - (level >= 2 ? hanging(s, me) * 0.8 : 0);
+      const okReal = a => a.type === 'end' || playCard(s0, a.uid, a.picks).ok;
+      let best = { a:{ type:'end' }, v:base };
+      if (rnd01() > L.cardP) return { action:best.a };
+      const cardsOnly = acts.filter(a => a.type === 'card');
+      if (level === 1 && cardsOnly.length){ const a = cardsOnly[Math.floor(rnd01() * cardsOnly.length)], x = { type:'card', uid:a.uid, picks:a.picks }; return { action:okReal(x) ? x : { type:'end' } }; }
+      for (const a of cardsOnly){
+        if (Date.now() > deadline) break;
+        const r = playCard(s, a.uid, a.picks);
+        if (!r.ok) continue;
+        const cost = (CARD[a.id] || {}).custo || 0;
+        // a essência gasta já sai da avaliação; um pequeno bônus para cartas que viram valor no tabuleiro
+        let v = evalFor(r.state, me) - (level >= 2 ? hanging(r.state, me) * 0.8 : 0) + cost * 4;
+        if (r.state.over && r.state.over.kind === 'mate' && r.state.over.winner === me) v = 1e6;
+        v += (rnd01() - 0.5) * 2 * L.noise;
+        if (v > best.v + 8){ const x = { type:'card', uid:a.uid, picks:a.picks }; if (okReal(x)) best = { a:x, v }; }
+      }
+      return { action:best.a, score:best.v, ms:Date.now() - t0 };
+    }
+    return { action:null };
+  }
   const board8 = s => { const out = []; for (let r = 0; r < 8; r++){ const row = []; for (let c = 0; c < 8; c++){ const p = s.board[r * 16 + c]; row.push(p ? { type:p.t, color:p.c, eid:p.id } : null); } out.push(row); } return out; };
   const pieceAt = (s, q) => s.board[fromS(q)];
   const perft = (s, d) => { if (!d) return 1; let n = 0; for (const m of legalRaw(s, s.turn)){ const u = makeBoard(s, m), t = s.turn; s.turn = other(t); n += perft(s, d - 1); s.turn = t; unmakeBoard(s, u); } return n; };
-  return { create, legalMoves, legalActions, apply, actor, applyMove, cardOptions, playCard, endTurn, status, fen, viewFor, board8, pieceAt, predict, trapGlows,
+  return { create, legalMoves, legalActions, apply, actor, choose, evalFor, applyMove, cardOptions, playCard, endTurn, status, fen, viewFor, board8, pieceAt, predict, trapGlows,
     perft:(fenStr, d) => { const s = { nextId:0, arc:{ blocked:{}, portals:[], traps:[] } }; loadFen(s, fenStr); return perft(s, d); },
     implemented, DECKS, RUNES, LOOT, ESS_MAX, HAND_MAX, MOVE_MODS, FX, card:id => CARD[id], other, NAME };
 };

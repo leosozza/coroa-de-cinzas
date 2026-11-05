@@ -10,6 +10,7 @@ node "$ROOT/tools/engine-sync-check.js" "$SNAP" "$ROOT/engine/arcano-rules.js"
 rm -rf "$W"; mkdir -p "$W/assets/audio"
 cp "$ROOT"/assets/audio/*.mp3 "$W/assets/audio/"
 mkdir -p "$W/assets/cards/web" && cp "$ROOT"/assets/cards/web/*.jpg "$W/assets/cards/web/"
+mkdir -p "$W/assets/meshy" && cp "$ROOT/assets/meshy/manifest.json" "$W/assets/meshy/manifest.json"
 (cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*") | while read -r f; do
   mkdir -p "$W/assets/meshy/$(dirname "$f")"; cp "$ROOT/assets/meshy/$f" "$W/assets/meshy/$f"
 done

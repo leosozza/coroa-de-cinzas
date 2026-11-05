@@ -1,48 +1,48 @@
-// Harness de balanceamento do Arcano: lotes de partidas IA x IA e taxa de vitória por deck e por carta.
-// node balance.js <html|motor.js> <cartas.json> [partidas=200] [plies=240] [seed=1]
-// Política provisória (a IA com cartas é a Fase E): captura a peça mais valiosa, dá xeque quando pode, senão sorteia;
-// joga uma carta jogável com 60% de chance. Critério da Fase E: nenhum deck nem carta acima de 55% de vitória.
+// Balanceamento do Arcano com a IA de verdade (ARC.choose nos dois lados).
+// Lote:   node tools/arcano-balance.js run <html|engine/arcano-rules.js> data/cartas.json <partidas> <nível> <semente> > lote.json
+// Tabela: node tools/arcano-balance.js merge lote1.json lote2.json ... > relatorio.md
+// Os grimórios giram nas 9 combinações (com espelho) e trocam de lado. Meta: nenhum deck nem carta acima de 55%.
 const fs = require('fs');
-const [, , SRC, CATF, N = '200', MAXP = '240', SEED = '1'] = process.argv;
-const src = fs.readFileSync(SRC, 'utf8');
-const code = SRC.endsWith('.html') ? src.slice(src.indexOf('/* ---------- Motor do Modo Arcano'), src.indexOf('/* ---------- fim do motor do Arcano')) : src;
-const ARC = new Function(code + '\nreturn arcanoRules;')()(JSON.parse(fs.readFileSync(CATF, 'utf8')).cartas);
-const VAL = { p:1, n:3, b:3, r:5, q:9, k:0 };
-let seed = +SEED >>> 0;
-const R = () => { seed = (seed + 0x6D2B79F5) >>> 0; let x = Math.imul(seed ^ (seed >>> 15), seed | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
-const decks = Object.keys(ARC.DECKS), deckStat = {}, cardStat = {}, kinds = {};
-const bump = (o, k, w) => { const e = o[k] || (o[k] = { jogos:0, vitorias:0, empates:0 }); e.jogos++; if (w === 1) e.vitorias++; else if (w === 0.5) e.empates++; };
-for (let g = 0; g < +N; g++){
-  const dw = decks[g % decks.length], db = decks[Math.floor(g / decks.length) % decks.length];
-  let s = ARC.create(1000 + g, { w:dw, b:db });
-  const played = { w:new Set(), b:new Set() };
-  for (let ply = 0; ply < +MAXP * 3 && !s.over; ply++){
-    const acts = ARC.legalActions(s);
-    if (!acts.length) break;
-    let a;
-    if (acts[0].type === 'move'){
-      const caps = acts.filter(x => /x/.test(x.san)).sort((x, y) => VAL[(ARC.status(s), 'p')] - 0);
-      const best = acts.map(x => ({ x, v:(/#/.test(x.san) ? 100 : 0) + (/\+/.test(x.san) ? 2 : 0) + (/x/.test(x.san) ? 3 : 0) + R() })).sort((p, q) => q.v - p.v);
-      a = best[0].x; void caps;
-    } else {
-      const cards = acts.filter(x => x.type === 'card');
-      a = cards.length && R() < 0.6 ? cards[Math.floor(R() * cards.length)] : acts[0];
-      if (a.type === 'card') played[ARC.actor(s)].add(a.id);
+const [, , MODE, ...args] = process.argv;
+if (MODE === 'run'){
+  const [SRC, CATF, N = '36', LV = '2', SEED = '1'] = args;
+  const src = fs.readFileSync(SRC, 'utf8'), A = '/* ---------- Motor do Modo Arcano', Z = '/* ---------- fim do motor do Arcano';
+  const ARC = new Function(src.slice(src.indexOf(A), src.indexOf(Z)) + '\nreturn arcanoRules;')()(JSON.parse(fs.readFileSync(CATF, 'utf8')).cartas);
+  const decks = Object.keys(ARC.DECKS), games = [];
+  for (let g = 0; g < +N; g++){
+    const k = (g + +SEED) % 9, dw = decks[k % 3], db = decks[Math.floor(k / 3)];
+    let s = ARC.create(1000 * +SEED + g, { w:dw, b:db });
+    const played = { w:[], b:[] };
+    for (let step = 0; step < 900 && !s.over && s.hist.length < 200; step++){
+      const side = ARC.actor(s), r = ARC.choose(s, side, +LV);
+      if (!r.action) break;
+      if (r.action.type === 'card'){ const c = s.arc.hand[side].find(x => x.uid === r.action.uid); if (c) played[side].push(c.id); }
+      const x = ARC.apply(s, r.action);
+      if (!x.ok) throw new Error(`ação inválida: ${JSON.stringify(r.action)} ${x.err}`);
+      s = x.state;
     }
-    const r = ARC.apply(s, a);
-    if (!r.ok) throw new Error('ação recusada: ' + JSON.stringify(a) + ' ' + r.err);
-    s = r.state;
-    if (s.hist.length >= +MAXP) break;
+    const o = s.over;
+    games.push({ w:dw, b:db, res:o && o.kind === 'mate' ? (o.winner === 'w' ? 1 : 0) : 0.5, fim:o ? o.kind : 'limite', lances:s.hist.length, played });
   }
-  const o = s.over, res = o && o.kind === 'mate' ? (o.winner === 'w' ? 1 : 0) : 0.5;
-  kinds[o ? o.kind : 'limite'] = (kinds[o ? o.kind : 'limite'] || 0) + 1;
-  bump(deckStat, dw, res); bump(deckStat, db, 1 - res);
-  for (const id of played.w) bump(cardStat, id, res);
-  for (const id of played.b) bump(cardStat, id, 1 - res);
+  console.log(JSON.stringify({ nivel:+LV, games }));
+} else if (MODE === 'merge'){
+  const all = []; let lv = null;
+  for (const f of args){ const d = JSON.parse(fs.readFileSync(f, 'utf8')); lv = d.nivel; all.push(...d.games); }
+  const st = {}, cs = {}, sideS = { w:0, n:0 }, fins = {};
+  const add = (o, k, pts) => { const e = o[k] || (o[k] = { j:0, p:0 }); e.j++; e.p += pts; };
+  for (const g of all){
+    add(st, g.w, g.res); add(st, g.b, 1 - g.res);
+    sideS.w += g.res; sideS.n++;
+    fins[g.fim] = (fins[g.fim] || 0) + 1;
+    for (const id of new Set(g.played.w)) add(cs, id, g.res);
+    for (const id of new Set(g.played.b)) add(cs, id, 1 - g.res);
+  }
+  const pct = e => (e.p / e.j * 100).toFixed(1);
+  const flag = e => e.j < 15 ? 'amostra pequena' : +pct(e) > 55 ? 'ACIMA de 55%' : +pct(e) < 45 ? 'abaixo de 45%' : 'ok';
+  const out = [`# Balanceamento do Arcano (IA nível ${lv}, ${all.length} partidas)`, '', `Fins: ${Object.entries(fins).map(([k, v]) => `${k} ${v}`).join(', ')}. Pontos das Brancas: ${(sideS.w / sideS.n * 100).toFixed(1)}% (vitória 1, empate 0,5).`, '',
+    '| Grimório | Jogos | Pontos | Critério |', '|---|---|---|---|'];
+  for (const [k, e] of Object.entries(st)) out.push(`| ${k} | ${e.j} | ${pct(e)}% | ${flag(e)} |`);
+  out.push('', '| Carta | Partidas em que foi jogada | Pontos de quem jogou | Critério |', '|---|---|---|---|');
+  for (const [k, e] of Object.entries(cs).sort((a, b) => b[1].p / b[1].j - a[1].p / a[1].j)) out.push(`| ${k} | ${e.j} | ${pct(e)}% | ${flag(e)} |`);
+  console.log(out.join('\n'));
 }
-const pct = e => ((e.vitorias + e.empates / 2) / e.jogos * 100).toFixed(1);
-const row = (k, e) => `| ${k} | ${e.jogos} | ${e.vitorias} | ${e.empates} | ${pct(e)}% | ${+pct(e) > 55 ? 'ACIMA de 55%' : 'ok'} |`;
-console.log(`Partidas: ${N} · fins: ${JSON.stringify(kinds)}\n\n| Deck | Jogos | Vitórias | Empates | Pontos | Critério |\n|---|---|---|---|---|---|`);
-for (const [k, e] of Object.entries(deckStat)) console.log(row(k, e));
-console.log('\n| Carta | Jogos em que foi jogada | Vitórias | Empates | Pontos | Critério |\n|---|---|---|---|---|---|');
-for (const [k, e] of Object.entries(cardStat).sort((a, b) => b[1].jogos - a[1].jogos)) console.log(row(k, e));

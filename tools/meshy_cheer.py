@@ -51,4 +51,6 @@ if __name__ == "__main__":
         sys.exit("Saldo insuficiente para a comemoração; nada foi gerado.")
     for slug in todo:
         cheer(slug)
+    # o jogo só tenta carregar o que está no manifesto (evita 404): atualize-o com os arquivos novos
+    subprocess.run(["node", str(M.ROOT / "tools" / "meshy-manifest.js")], check=False)
     print(f"saldo restante: {M.call('GET', '/openapi/v1/balance').get('balance')} créditos", flush=True)

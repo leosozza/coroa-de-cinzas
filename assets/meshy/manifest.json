@@ -1,0 +1,33 @@
+{
+ "gerado": "2026-11-05T23:05:58.954Z",
+ "files": [
+  "bispo/animated.glb",
+  "bispo/animated.opt.glb",
+  "bispo/animated.opt.gltf.json",
+  "bispo/rigged.glb",
+  "bispo/walk.glb",
+  "bispo/walk.gltf.json",
+  "cavalo/model.glb",
+  "cavalo/model.opt.glb",
+  "cavalo/model.opt.gltf.json",
+  "dama/animated.glb",
+  "dama/animated.opt.glb",
+  "dama/animated.opt.gltf.json",
+  "dama/rigged.glb",
+  "dama/walk.glb",
+  "dama/walk.gltf.json",
+  "peao/animated.glb",
+  "peao/animated.opt.glb",
+  "peao/animated.opt.gltf.json",
+  "peao/rigged.glb",
+  "rei/animated.glb",
+  "rei/animated.opt.glb",
+  "rei/animated.opt.gltf.json",
+  "rei/rigged.glb",
+  "rei/walk.glb",
+  "rei/walk.gltf.json",
+  "torre/model.glb",
+  "torre/model.opt.glb",
+  "torre/model.opt.gltf.json"
+ ]
+}
