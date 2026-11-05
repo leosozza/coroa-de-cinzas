@@ -523,7 +523,7 @@ details.rules[open] summary::before{content:"▾ "}
       </div>
       <div class="views" id="views">
         <div class="seg" role="group" aria-label="Vista da câmera">
-          <button type="button" data-view="std" aria-pressed="true">Padrão</button><button type="button" data-view="drone" aria-pressed="false">Drone</button><button type="button" data-view="aerial" aria-pressed="false">Aérea</button>
+          <button type="button" data-view="std" aria-pressed="true">Padrão</button><button type="button" data-view="drone" aria-pressed="false">Drone</button><button type="button" data-view="aerial" aria-pressed="false">Aérea</button><button type="button" data-view="focus" aria-pressed="false" title="Acompanha as jogadas (atalho: F)">Foco</button>
         </div>
         <button type="button" id="flip" aria-pressed="false" title="Atalho: I">Inverter campo</button>
         <label class="turnflip" id="turnflip-wrap" hidden><input type="checkbox" id="turnflip"> Girar a cada turno</label>
@@ -5508,7 +5508,23 @@ async function loadModels(){
     const walk = spec.rigged && spec.walk !== false ? await loadGltf(loader, [`assets/meshy/${slug}/walk.gltf.json`, `assets/meshy/${slug}/walk.glb`]) : null;
     try { GLB[type] = prepAsset(type, main, walk); glbPending.add(type); }
     catch (e){ glbLog.push(`${slug}: falha ao preparar (${e.message})`); }
+    // clipes extras no mesmo esqueleto, em segundo plano (sem o arquivo, fica a pose procedural)
+    if (spec.rigged && GLB[type]) loadExtraClip(loader, type, 'cheer');
   }));
+}
+// assets/meshy/<slug>/<nome>.gltf.json (reserva .glb): só o clipe interessa, o modelo de 16 px é descartado
+async function loadExtraClip(loader, type, name){
+  const A = GLB[type], slug = GLB_SLUG[type];
+  if (!A || !A.rigged) return null;
+  const g = await loadGltf(loader, [`assets/meshy/${slug}/${name}.gltf.json`, `assets/meshy/${slug}/${name}.glb`]);
+  const clip = g && g.animations && g.animations[0];
+  if (g) g.scene.traverse(o => { if (o.isMesh){ o.geometry.dispose(); for (const m of [].concat(o.material)){ if (m.map) m.map.dispose(); m.dispose(); } } });
+  if (!clip) return null;
+  // trilhas de escala e de posição mudariam o tamanho e o lugar da peça: ficam só as rotações
+  clip.tracks = clip.tracks.filter(t => /\.quaternion$/.test(t.name));
+  A.clips[name] = clip;
+  glbLog.push(`${slug}: clipe extra ${name} (${clip.duration.toFixed(2)}s, ${clip.tracks.length} trilhas)`);
+  return clip;
 }
 
 /* Tinta do lado: a Legião usa os mesmos modelos, escurecidos para ferro, osso e carmesim.
@@ -5785,6 +5801,8 @@ function makeGlbCharacter(type, side, A){
     root, meshes:[proxy], headHeight:A.height, type, side, kind:'glb',
     faceTowards:S0.faceTowards, setAlert:S0.setAlert, setTransform:S0.setTransform, setHidden:S0.setHidden,
     play(name, opts = {}){
+      // personagem já descartado (nova partida no meio de uma animação): não mexe no mixer solto
+      if (st.disposed) return Promise.resolve();
       if (name === 'idle'){ st.walk = false; return Promise.resolve(); }
       if (name === 'walk'){ st.walk = true; return Promise.resolve(); }
       return new Promise(res => {
@@ -5862,8 +5880,20 @@ function makeGlbCharacter(type, side, A){
     setCharge(v){ st.charge = v; },
     // null volta ao normal; 'kneel' (Rei vencido) e 'cheer' (vencedores) misturam ~600 ms e ficam
     setPose(name, o = {}){
+      if (st.disposed) return;
       if (!name){ if (st.pose){ st.pose = null; if (mixer) mixer.update(0); } return; }
       let P0 = { bones:null, drop:0 };
+      if (name === 'cheer' && mixer && A.clips.cheer){
+        // clipe da Meshy: toca em laço a partir do idle; as armas presas nas mãos sobem junto
+        resolve(st.shot); st.shot = null;
+        if (!acts.cheer) acts.cheer = mixer.clipAction(A.clips.cheer);
+        const c = acts.cheer.reset(); c.setLoop(THREE.LoopRepeat, Infinity); c.time = (o.ph || 0) * 0.17 % A.clips.cheer.duration;
+        for (const k in acts) if (k !== 'cheer' && acts[k].isRunning()) acts[k].fadeOut(0.3);
+        c.fadeIn(0.3).play();
+        st.pose = { name, t:0, dur:o.dur || 600, ph:o.ph || 0, bones:null, drop:0, clip:true };
+        st.poseE = 0;
+        return;
+      }
       if (mixer && A.rigged){ resolve(st.shot); st.shot = null; try { P0 = buildPose(name); } catch (e){ P0 = { bones:null, drop:0 }; } }
       st.pose = Object.assign(P0, { name, t:0, dur:o.dur || 600, ph:o.ph || 0 });
       st.poseE = 0;
@@ -5888,7 +5918,8 @@ function makeGlbCharacter(type, side, A){
       const t = now / 1000, amp = RM ? 0.35 : 1;
       S0.tick(dt, now);
       if (st.pose){ st.pose.t += dt; st.poseE = ease3(Math.min(1, st.pose.t / st.pose.dur)); }
-      if (mixer && !st.ghost && st.pose) poseTick(now);
+      if (mixer && !st.ghost && st.pose && st.pose.clip) mixer.update(dt / 1000);
+      else if (mixer && !st.ghost && st.pose) poseTick(now);
       else if (mixer && !st.ghost){
         if (!st.shot && !st.death){
           const want = st.walk && acts.walk ? 'walk' : 'idle';
@@ -5928,7 +5959,7 @@ function makeGlbCharacter(type, side, A){
         const e = st.poseE, P0 = st.pose;
         if (P0.name === 'kneel'){ y -= (P0.drop || 0) * e; if (!A.rigged){ rx += 0.38 * e; y -= 0.1 * e; } }
         else {
-          const hop = RM ? 0 : Math.max(0, Math.sin(t * 6.2 + P0.ph));
+          const hop = RM || P0.clip ? 0 : Math.max(0, Math.sin(t * 6.2 + P0.ph));
           y += 0.07 * hop * e;
           if (!A.rigged && type === 'n') rx -= (0.18 + 0.2 * hop) * e;
         }
@@ -5986,6 +6017,7 @@ function makeGlbCharacter(type, side, A){
       if (zapFx){ if (st.ghost) zapFx.hide(); else zapFx.update(now, st.charge || 0); }
     },
     dispose(){
+      st.disposed = true;
       resolve(st.shot); resolve(st.pshot); resolve(st.hit); resolve(st.death);
       if (mixer){ mixer.stopAllAction(); mixer.uncacheRoot(model); }
       if (own) for (const m of own) m.dispose();
@@ -6054,6 +6086,7 @@ function updateFocusOcc(dt){
   if (hp && !hp.dead) tg.push([hp.dx, hp.dz]);
   const h = ui.kb ? ui.cursor : ui.hover;
   if (h){ const [x, z] = tc(h.r, h.c); tg.push([x, z]); }
+  if (VIEW.mode === 'focus' && FOC.to) for (const q of FOC.pts) tg.push(q);
   const cp = camera.position, H = (GLB.r && GLB.r.height) || 1.2, k = 1 - Math.exp(-dt / 110);
   for (const p of S.pieces){
     let occ = false;
@@ -6325,6 +6358,7 @@ function toGrave(v){
 }
 function resetFx(){
   texts = [];
+  if (typeof FOC !== 'undefined' && VIEW.mode === 'focus' && FOC.to) focusTo(null, 600);
   cineReset();
   mateCleanup();
   if (!GLOK) return;
@@ -7193,7 +7227,7 @@ const _p = V3();
 const VIEW_KEY = 'coroa-de-cinzas:vista';
 const VIEW = { mode:'std', flip:false, turnFlip:false, hinted:false, droneYaw:0, dronePitch:0.9, droneD:16, panX:0, panZ:0, lastInput:0 };
 try { const v = JSON.parse(localStorage.getItem(VIEW_KEY) || 'null'); if (v && typeof v === 'object') for (const k of ['mode', 'flip', 'turnFlip', 'hinted']) if (k in v) VIEW[k] = v[k]; } catch (e){}
-if (!['std', 'drone', 'aerial'].includes(VIEW.mode)) VIEW.mode = 'std';
+if (!['std', 'drone', 'aerial', 'focus'].includes(VIEW.mode)) VIEW.mode = 'std';
 VIEW.droneYaw = VIEW.flip ? Math.PI : 0;
 function saveView(){ try { localStorage.setItem(VIEW_KEY, JSON.stringify({ mode:VIEW.mode, flip:VIEW.flip, turnFlip:VIEW.turnFlip, hinted:VIEW.hinted })); } catch (e){} }
 const PITCH = { std:0.88, aerial:1.48, min:0.35, max:1.45 };
@@ -7243,10 +7277,105 @@ function desiredRig(){
   if (TITLE.open) return { yaw:performance.now() * 0.00005, pitch:0.78, D:18, tx:0, tz:0, offY:0, ytop:0.7 };
   const flipY = VIEW.flip ? Math.PI : 0;
   if (VIEW.mode === 'drone') return { yaw:VIEW.droneYaw, pitch:VIEW.dronePitch, D:VIEW.droneD, tx:VIEW.panX, tz:VIEW.panZ, offY:0, ytop:0.7 };
+  if (VIEW.mode === 'focus') return focusRig();
   if (VIEW.mode === 'aerial'){ const f = fitFor(flipY, PITCH.aerial, true); return { yaw:flipY, pitch:PITCH.aerial, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop }; }
   const P0 = AR().cam && W >= 560 ? AR().cam.pitch : PITCH.std;
   const yaw = cam.yawT + flipY, f = fitFor(yaw, P0, false);
   return { yaw, pitch:P0, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop };
+}
+/* Vista Foco: como uma transmissão. Em repouso, um plano amplo e estável em 3/4 do lado de quem assiste (Aurora no
+   Espectador; o seu lado contra a IA), com uma respiração quase imperceptível. A cada lance que ela acompanha, um dolly
+   (~800 ms, ease) até um quadro com origem e destino, mais fechado na captura; em xeque, um corte curto no Rei com quem
+   dá o xeque; ~1 s depois volta ao plano amplo. O ângulo foge das peças altas, e as Torres na frente ficam translúcidas.
+   Com movimento reduzido, cortes secos. No Espectador Rápido, só o plano amplo. */
+const FOC = { from:null, to:null, t0:0, dur:0, releaseAt:0, pts:[] };
+const FOC_YAW = 0.42;
+function focusReset(){ FOC.from = null; FOC.to = null; FOC.releaseAt = 0; FOC.pts = []; }
+function focusWide(){
+  const base = (VIEW.flip ? Math.PI : 0) + FOC_YAW, P0 = (AR().cam && W >= 560 ? AR().cam.pitch : PITCH.std) + 0.04;
+  const f = fitFor(base, P0, false), t = performance.now() / 1000, br = RM ? 0 : 1;
+  return { yaw:base + 0.018 * Math.sin(t * 0.13) * br, pitch:P0 + 0.006 * Math.sin(t * 0.1 + 1) * br, D:f.D * 1.02, tx:0, tz:0, offY:f.offY, ytop:f.ytop };
+}
+function lerpRig(a, b, e){
+  return { yaw:angTo(a.yaw, b.yaw, e), pitch:mix(a.pitch, b.pitch, e), D:mix(a.D, b.D, e), tx:mix(a.tx, b.tx, e), tz:mix(a.tz, b.tz, e), offY:mix(a.offY, b.offY, e), ytop:mix(a.ytop || 0.7, b.ytop || 0.7, e) };
+}
+function focusRig(){
+  const now = performance.now();
+  if (FOC.to && FOC.releaseAt && now > FOC.releaseAt) focusTo(null, 900);
+  const target = FOC.to || focusWide();
+  if (!FOC.from) return target;
+  const u = FOC.dur > 0 ? Math.min(1, (now - FOC.t0) / FOC.dur) : 1;
+  if (u >= 1 && !FOC.to){ FOC.from = null; return target; }
+  return lerpRig(FOC.from, target, easeIO(u));
+}
+function focusTo(shot, dur){
+  FOC.from = { yaw:rig.yaw, pitch:rig.pitch, D:rig.D, tx:rig.tx, tz:rig.tz, offY:rig.offY, ytop:rig.ytop || 0.7 };
+  FOC.to = shot; FOC.t0 = performance.now(); FOC.dur = RM ? 0 : dur; FOC.releaseAt = 0;
+  if (!shot) FOC.pts = [];
+}
+// quadro que contém as casas pedidas, do ângulo (perto do lado de quem assiste) com menos peças altas na frente
+function focusFrame(sqs, tight){
+  const pts = sqs.map(([r, c]) => tc(r, c));
+  let cx = 0, cz = 0;
+  for (const [x, z] of pts){ cx += x; cz += z; }
+  cx /= pts.length; cz /= pts.length;
+  let rad = 0;
+  for (const [x, z] of pts) rad = Math.max(rad, Math.hypot(x - cx, z - cz));
+  rad += tight ? 0.95 : 1.35;
+  const vf = cam.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * (W / H)), half = Math.min(vf, hf);
+  const D = clamp(rad / Math.sin(half) * 1.05, 6, 17);
+  const pitch = tight ? 0.74 : 0.82, base = VIEW.flip ? Math.PI : 0;
+  let best = null;
+  for (const dy of [FOC_YAW * 0.6, -FOC_YAW * 0.6, 0, FOC_YAW * 1.6, -FOC_YAW * 1.6]){
+    const yaw = base + dy, cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const px = cx + Math.sin(yaw) * cp * D, py = sp * D, pz = cz + Math.cos(yaw) * cp * D;
+    let n = 0;
+    for (const p of S.pieces){
+      if (p.dead || p.removed || p.grave || heightOf(p) < 1.25) continue;
+      for (const [x, z] of pts){
+        if (Math.abs(p.dx - x) < 0.2 && Math.abs(p.dz - z) < 0.2) continue;
+        const vx = x - px, vz = z - pz, L2 = vx * vx + vz * vz || 1, t = ((p.dx - px) * vx + (p.dz - pz) * vz) / L2;
+        if (t <= 0 || t >= 1) continue;
+        const y = py + (0.5 - py) * t;
+        if (Math.hypot(px + vx * t - p.dx, pz + vz * t - p.dz) < 0.42 && y < heightOf(p)) n++;
+      }
+    }
+    const score = n * 2 + Math.abs(dy) * 0.6;
+    if (!best || score < best.score) best = { score, yaw };
+  }
+  FOC.pts = pts;
+  return { yaw:best.yaw, pitch, D, tx:cx, tz:cz, offY:0, ytop:0.7 };
+}
+// a vista acompanha este lance? Espectador: todos (menos no Rápido); contra a IA: só os da IA; a dois: nenhum
+function focusReacts(color){
+  if (VIEW.mode !== 'focus' || !GLOK || TITLE.open) return false;
+  if (cfg.mode === 'spec') return cfg.speed !== 'fast';
+  if (cfg.mode === 'ai') return !human(color);
+  return false;
+}
+function focusMove(res){
+  if (!focusReacts(res.color)) return;
+  const sqs = [rcOf(res.from), rcOf(res.to)];
+  if (/[kq]/.test(res.flags)){ const r = rcOf(res.from)[0], sh = res.flags.includes('k'); sqs.push([r, sh ? 7 : 0], [r, sh ? 5 : 3]); }
+  const tight = !!res.captured || !!res.promotion;
+  let fr = focusFrame(res.promotion ? [rcOf(res.to), rcOf(res.from)] : sqs, tight);
+  // lance comum: só uma aproximação parcial (o plano não salta de casa em casa); captura e promoção fecham de vez
+  if (!tight && !/[kq]/.test(res.flags)){ const w0 = focusWide(); fr = Object.assign(lerpRig(w0, fr, 0.55), { pitch:mix(w0.pitch, fr.pitch, 0.4) }); }
+  focusTo(fr, 820);
+}
+// depois do lance: em xeque, um corte curto no Rei com quem dá o xeque; depois, de volta ao plano amplo
+function focusAfter(res){
+  if (!focusReacts(res.color)) return;
+  if (G.in_check() && !G.in_checkmate()){
+    const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side === G.turn());
+    if (k){
+      const sqs = [[k.r, k.c], ...mateCheckers(k).map(p => [p.r, p.c])];
+      focusTo(focusFrame(sqs, true), 0);
+      FOC.releaseAt = performance.now() + 1100;
+      return;
+    }
+  }
+  FOC.releaseAt = performance.now() + 1000;
 }
 function fitCamera(){
   if (!GLOK || !W) return;
@@ -7276,9 +7405,13 @@ function applyRig(d, force){
   else { backdrop.visible = true; placeBackdrop(Math.min(0.94, (d.ytop || 0.7) + 0.07)); }
 }
 function updateCamera(dt){
-  if (VIEW.mode === 'drone' && performance.now() - VIEW.lastInput > 6000 && !cine.active && !RM) VIEW.droneYaw += dt * 0.00008;
+  if (VIEW.mode === 'drone' && !cine.active && !RM){
+    const idle = performance.now() - VIEW.lastInput;
+    if (idle > 6000) VIEW.droneYaw += dt * 0.000028 * Math.min(1, (idle - 6000) / 5000);
+  }
   const d = desiredRig();
-  const k = 1 - Math.exp(-dt / 160);
+  // no Foco o alvo já vem suavizado (dolly com ease); a câmera só acompanha de perto
+  const k = 1 - Math.exp(-dt / (VIEW.mode === 'focus' && !TITLE.open ? 45 : 160));
   const moving = Math.abs(angTo(rig.yaw, d.yaw, 1) - rig.yaw) > 1e-4 || Math.abs(d.pitch - rig.pitch) > 1e-4 || Math.abs(d.D - rig.D) > 1e-3 || Math.abs(d.tx - rig.tx) + Math.abs(d.tz - rig.tz) > 1e-3 || Math.abs(d.offY - rig.offY) > 0.2;
   if (moving || projDirty || !cam.base){
     rig.yaw = angTo(rig.yaw, d.yaw, k); rig.pitch += (d.pitch - rig.pitch) * k; rig.D += (d.D - rig.D) * k;
@@ -8127,8 +8260,10 @@ async function doMove(m){
   S.last = { from:rcOf(res.from), to:rcOf(res.to) };
   const token = S;
   renderAll();
+  focusMove(res);
   await play(ev);
   if (S !== token) return;
+  focusAfter(res);
   cineReset();
   // a vez só passa quando a animação termina
   S.turn = G.turn(); S.inCheck = G.in_check();
@@ -8411,7 +8546,7 @@ cv.addEventListener('keydown', e => {
 });
 
 // Vista: Padrão, Drone, Aérea; inverter o campo; girar a cada turno no PvP
-const VIEW_ORDER = ['std', 'drone', 'aerial'];
+const VIEW_ORDER = ['std', 'drone', 'aerial', 'focus'];
 let hintTimer = 0;
 function syncViewUI(){
   for (const b of document.querySelectorAll('.seg button')) b.setAttribute('aria-pressed', String(b.dataset.view === VIEW.mode));
@@ -8432,6 +8567,7 @@ function setView(mode){
     }
   } else $('view-hint').hidden = true;
   if (mode === 'std') cam.yawT = 0;
+  if (mode === 'focus') focusReset();
   VIEW.mode = mode;
   saveView(); syncViewUI();
 }
@@ -8449,7 +8585,8 @@ $('turnflip').addEventListener('change', e => { VIEW.turnFlip = e.target.checked
 document.addEventListener('keydown', e => {
   if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === 'v' || e.key === 'V'){ setView(VIEW_ORDER[(VIEW_ORDER.indexOf(VIEW.mode) + 1) % 3]); }
+  if (e.key === 'v' || e.key === 'V'){ setView(VIEW_ORDER[(VIEW_ORDER.indexOf(VIEW.mode) + 1) % VIEW_ORDER.length]); }
+  else if (e.key === 'f' || e.key === 'F'){ setView('focus'); }
   else if (e.key === 'i' || e.key === 'I'){ setFlip(!VIEW.flip); }
   else if (e.key === 'm' || e.key === 'M'){ mmSetOpen(!mmIsOpen()); }
 });
@@ -8904,7 +9041,7 @@ function startSpec(){
   clockStart();
   closeTitle();
   setFlip(false);
-  setView('drone');
+  setView('focus');
   newGame();
 }
 function specPause(){

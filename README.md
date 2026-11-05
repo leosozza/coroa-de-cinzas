@@ -1,5 +1,7 @@
 # Arcane Chess
 
+**Jogue online:** https://arcanechess.pages.dev
+
 Xadrez clássico em 3D com alma de RPG sombrio (antes chamado Coroa de Cinzas). Cada peça é um personagem com poderes próprios, as capturas viram cenas de combate em câmera cinematográfica, as peças abatidas vão para um cemitério ao lado da arena, e há narrador, trilha sonora e uma IA em três níveis.
 
 O jogo é um único arquivo HTML ([coroa-de-cinzas.html](coroa-de-cinzas.html)) feito com Three.js r128 e chess.js. Ele foi publicado como Artifact do Claude.
