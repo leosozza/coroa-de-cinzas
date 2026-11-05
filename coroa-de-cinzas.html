@@ -5082,6 +5082,8 @@ function makeProcCharacter(type, side){
       for (const s of sprites) s.visible = false;
       S0.ghostShell(face);
     },
+    setPose(name, o = {}){ st.pose = name ? { name, t:0, dur:o.dur || 600, ph:o.ph || 0 } : null; },
+    setDesat(v){ if (!st.baseCol) st.baseCol = solid.color.clone(); solid.color.copy(st.baseCol).lerp(C(0x77777c), 0.75 * v); },
     setOpacity(a){
       if (a === st.alpha) return;
       st.alpha = a;
@@ -5097,7 +5099,7 @@ function makeProcCharacter(type, side){
     },
     update(dt, now){
       // respiração e balanço só na peça selecionada ou quando ela está agindo; as outras ficam paradas
-      const live = st.sel || st.act || st.hit || st.death || st.walk || st.walkW > 0.02 || st.actOut > 0;
+      const live = st.sel || st.act || st.hit || st.death || st.walk || st.walkW > 0.02 || st.actOut > 0 || st.pose;
       const ghost = st.ghost, t = ghost ? 0 : now / 1000, amp = ghost || !live ? 0 : RM ? 0.35 : 1;
       const adv = c => { if (!c) return null; c.t += dt; const u = Math.min(1, c.t / c.dur); if (c.res && u >= c.key) finishClip(c); return u; };
       const ua = adv(st.act), uh = adv(st.hit), ud = adv(st.death);
@@ -5153,6 +5155,27 @@ function makeProcCharacter(type, side){
       if (raiseW > 0){ const c = ease3(raiseW); o.aRx = mix(o.aRx, -3.05, c); o.hRx = mix(o.hRx, 1.48, c); o.aLz = mix(o.aLz, 0.5, c); o.tx = mix(o.tx, -0.1, c); headX = -0.2 * c; }
       const rec = st.hit ? Math.sin(Math.PI * Math.min(1, uh * 1.3)) : 0;
       if (rec > 0){ o.tx -= 0.45 * rec; bodyZ -= 0.1 * rec; o.aLz += 0.3 * rec; o.aRz += 0.3 * rec; headX -= 0.3 * rec; if (meta.horse || meta.tower) pitch -= 0.12 * rec; }
+      if (st.pose){
+        st.pose.t += dt;
+        const e = ease3(Math.min(1, st.pose.t / st.pose.dur)), ph = st.pose.ph;
+        if (st.pose.name === 'kneel'){
+          if (meta.horse || meta.tower){ pitch += 0.35 * e; bodyY -= 0.1 * e; }
+          else {
+            hipY = mix(hipY, legH * 0.4, e); lLx = mix(lLx, 1.3, e); lRx = mix(lRx, 1.3, e);
+            o.tx = mix(o.tx, 0.42, e); headX = mix(headX, 0.55, e);
+            o.aLx = mix(o.aLx, 0.35, e); o.aRx = mix(o.aRx, 0.35, e); o.aLz = mix(o.aLz, 0.08, e); o.aRz = mix(o.aRz, 0.08, e);
+          }
+        } else {
+          const tt = now / 1000, hop = RM ? 0 : Math.max(0, Math.sin(tt * 6.2 + ph)), pump = RM ? 0 : 0.5 - 0.5 * Math.cos(tt * 4.4 + ph);
+          if (meta.horse){ pitch -= (0.18 + 0.2 * hop) * e; bodyY += 0.05 * hop * e; o.aRx = mix(o.aRx, -2.6 - 0.2 * pump, e); }
+          else if (meta.tower) bodyY += 0.05 * hop * e;
+          else {
+            o.aLx = mix(o.aLx, -2.75 - 0.25 * pump, e); o.aRx = mix(o.aRx, -2.75 - 0.25 * pump, e);
+            o.aLz = mix(o.aLz, 0.4, e); o.aRz = mix(o.aRz, 0.4, e); o.hRx = mix(o.hRx, 0.6, e);
+            headX = mix(headX, -0.25, e); bodyY += 0.06 * hop * e;
+          }
+        }
+      }
       if (meta.ride){ lLx = 0; lRx = 0; }
       if (meta.tower){ lLx = 0; lRx = 0; }
       P.hips.position.y = hipY;
@@ -5576,6 +5599,7 @@ function makeGlbCharacter(type, side, A){
   const fitProps = () => {
     for (const pr of props){
       let bs = A.scale;
+      if (pr.dropped) continue;
       for (let o = pr.bone; o && o !== model; o = o.parent) bs *= o.scale.x;
       bs *= model.scale.x;
       const k = 1 / Math.max(1e-7, bs);
@@ -5655,6 +5679,108 @@ function makeGlbCharacter(type, side, A){
   const tsAttack = A.clips.attack ? clamp(A.impact / 0.42, 1, 3.5) : 1;
   const tsDeath = A.clips.death ? clamp(A.clips.death.duration / 0.8, 1, 3) : 1;
   const resolve = o => { if (o && o.res){ o.res(); o.res = null; } };
+  // poses do xeque-mate (ajoelhar e comemorar), apontando ossos em direções do mundo a partir do quadro atual
+  const boneBy = (...ns) => { for (const n of ns){ const b = model.getObjectByName(n); if (b && b.isBone) return b; } return null; };
+  const kidOf = (b, re, bad) => { if (!b) return null; const ks = b.children.filter(c => c.isBone && !(bad && bad.test(c.name))); return ks.find(c => re.test(c.name)) || (ks.length === 1 ? ks[0] : null); };
+  const _qa = new THREE.Quaternion(), _qb = new THREE.Quaternion(), _qp = new THREE.Quaternion(), _qc = new THREE.Quaternion(), _va = new THREE.Vector3(), _vb = new THREE.Vector3();
+  function aimBone(b, kid, dir){
+    b.updateWorldMatrix(true, true);
+    b.getWorldPosition(_va); kid.getWorldPosition(_vb);
+    _vb.sub(_va);
+    if (_vb.lengthSq() < 1e-12) return;
+    _vb.normalize();
+    _qa.setFromUnitVectors(_vb, dir);
+    b.getWorldQuaternion(_qb);
+    _qa.multiply(_qb);
+    b.parent.getWorldQuaternion(_qp);
+    b.quaternion.copy(_qp.invert().multiply(_qa));
+    b.updateWorldMatrix(false, true);
+  }
+  function poseTargets(name, alt){
+    const U = new THREE.Vector3(0, 1, 0), F = new THREE.Vector3(0, 0, 1).applyQuaternion(holder.getWorldQuaternion(new THREE.Quaternion()));
+    F.y = 0; if (F.lengthSq() < 1e-6) F.set(0, 0, 1); F.normalize();
+    const Lf = new THREE.Vector3().crossVectors(U, F).normalize(), Rt = Lf.clone().negate();
+    const Dn = (...ws) => { const v = new THREE.Vector3(); for (const [a, w] of ws) v.addScaledVector(a, w); return v.normalize(); };
+    const out = [], add = (b, re, dir, bad) => { const k = kidOf(b, re, bad); if (b && k) out.push([b, k, dir]); };
+    const depth = b => { let n = 0; for (let o = b; o; o = o.parent) n++; return n; };
+    const sp = [boneBy('Spine'), boneBy('Spine01', 'Spine1'), boneBy('Spine02', 'Spine2')].filter(Boolean).sort((a, b) => depth(a) - depth(b));
+    const neck = boneBy('neck', 'Neck'), head = boneBy('Head');
+    if (name === 'kneel'){
+      for (const sd of ['Left', 'Right']){
+        add(boneBy(sd + 'UpLeg'), /Leg$/, Dn([U, -0.95], [F, 0.3]));
+        add(boneBy(sd + 'Leg'), /Foot/, Dn([F, -0.96], [U, -0.28]));
+      }
+      sp.forEach((b, i) => add(b, /spine|neck/i, Dn([U, 0.92 - i * 0.1], [F, 0.3 + i * 0.14]), /shoulder|arm/i));
+      add(neck, /head/i, Dn([U, 0.6], [F, 0.8]));
+      add(head, /top|end/i, Dn([U, 0.42], [F, 0.9]), /front/i);
+      for (const [sd, S2] of [['Left', Lf], ['Right', Rt]]){
+        add(boneBy(sd + 'Arm'), /ForeArm/, Dn([U, -0.92], [F, 0.32], [S2, 0.12]));
+        add(boneBy(sd + 'ForeArm'), /Hand/, Dn([U, -0.72], [F, 0.66]));
+      }
+    } else {
+      const k = alt ? 1 : 0;
+      sp.forEach(b => add(b, /spine|neck/i, Dn([U, 0.98], [F, -0.12 - 0.06 * k]), /shoulder|arm/i));
+      add(head, /top|end/i, Dn([U, 0.95], [F, 0.12]), /front/i);
+      for (const [sd, S2] of [['Left', Lf], ['Right', Rt]]){
+        add(boneBy(sd + 'Arm'), /ForeArm/, Dn([U, 0.88 + 0.1 * k], [S2, 0.42 - 0.18 * k], [F, 0.12]));
+        add(boneBy(sd + 'ForeArm'), /Hand/, Dn([U, 0.98], [S2, 0.12 - 0.08 * k], [F, 0.14 + 0.06 * k]));
+      }
+    }
+    // pais antes dos filhos (a mira de um osso move os de baixo)
+    return out.map((e, i) => [e, i]).sort((a, b) => depth(a[0][0]) - depth(b[0][0]) || a[1] - b[1]).map(e => e[0]);
+  }
+  function buildPose(name){
+    root.updateMatrixWorld(true);
+    const first = poseTargets(name, false), all = new Set(first.map(e => e[0]));
+    const from = new Map([...all].map(b => [b, b.quaternion.clone()]));
+    const restore = () => { for (const [b, q] of from) b.quaternion.copy(q); root.updateMatrixWorld(true); };
+    for (const [b, k, d] of first) aimBone(b, k, d);
+    const to = new Map([...all].map(b => [b, b.quaternion.clone()]));
+    let drop = 0;
+    if (name === 'kneel'){
+      const knee = boneBy('LeftLeg') || boneBy('RightLeg');
+      if (knee){ root.updateMatrixWorld(true); drop = Math.max(0, knee.getWorldPosition(new THREE.Vector3()).y - root.getWorldPosition(new THREE.Vector3()).y - 0.04); }
+    }
+    let to2 = null;
+    if (name === 'cheer'){ restore(); for (const [b, k, d] of poseTargets(name, true)) aimBone(b, k, d); to2 = new Map([...all].map(b => [b, b.quaternion.clone()])); }
+    restore();
+    return { bones:[...all].map(b => ({ b, from:from.get(b), to:to.get(b), to2:to2 ? to2.get(b) : null })), drop };
+  }
+  function poseTick(now){
+    const P0 = st.pose, e = st.poseE;
+    if (!P0.bones) return;
+    const osc = P0.name === 'cheer' && !RM ? 0.5 - 0.5 * Math.cos(now / 1000 * 4.4 + P0.ph) : 0;
+    for (const B of P0.bones){
+      if (B.to2 && osc > 0){ _qc.copy(B.to).slerp(B.to2, osc); B.b.quaternion.slerpQuaternions(B.from, _qc, e); }
+      else B.b.quaternion.slerpQuaternions(B.from, B.to, e);
+    }
+    // na comemoração, lanças, espadas, cajados e raios apontam para o alto
+    if (P0.name === 'cheer'){
+      root.updateMatrixWorld(true);
+      for (const pr of props){
+        if (pr.f.kind === 'shield' || pr.dropped) continue;
+        if (!pr.q0) pr.q0 = pr.g.quaternion.clone();
+        pr.bone.getWorldQuaternion(_qp);
+        _va.set(0.08 * Math.sin(now / 900 + P0.ph), 1, 0.12).normalize();
+        _qa.setFromUnitVectors(_vb.set(0, 1, 0), _va);
+        _qc.copy(_qp.invert().multiply(_qa));
+        pr.g.quaternion.copy(pr.q0).slerp(_qc, e);
+      }
+    }
+  }
+  // o Rei vencido larga a espada ao lado
+  function dropSword(){
+    for (const pr of props){
+      if (pr.f.kind !== 'sword' || pr.dropped) continue;
+      pr.dropped = true;
+      root.add(pr.g);
+      pr.g.scale.setScalar(1);
+      pr.g.position.set(-0.34, 0.03, 0.16);
+      pr.g.quaternion.setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0.5));
+      dustAt(root.position.x, root.position.z, 6, 0.4);
+    }
+  }
+  let desatU = null;
   const api = {
     root, meshes:[proxy], headHeight:A.height, type, side, kind:'glb',
     faceTowards:S0.faceTowards, setAlert:S0.setAlert, setTransform:S0.setTransform, setHidden:S0.setHidden,
@@ -5734,10 +5860,36 @@ function makeGlbCharacter(type, side, A){
       return new THREE.Vector3(root.position.x, A.height * k + st.lift, root.position.z);
     },
     setCharge(v){ st.charge = v; },
+    // null volta ao normal; 'kneel' (Rei vencido) e 'cheer' (vencedores) misturam ~600 ms e ficam
+    setPose(name, o = {}){
+      if (!name){ if (st.pose){ st.pose = null; if (mixer) mixer.update(0); } return; }
+      let P0 = { bones:null, drop:0 };
+      if (mixer && A.rigged){ resolve(st.shot); st.shot = null; try { P0 = buildPose(name); } catch (e){ P0 = { bones:null, drop:0 }; } }
+      st.pose = Object.assign(P0, { name, t:0, dur:o.dur || 600, ph:o.ph || 0 });
+      st.poseE = 0;
+      if (name === 'kneel') setTimeout(dropSword, 280);
+    },
+    // a cor perde a saturação (shader: mistura com a luminância)
+    setDesat(v){
+      if (!desatU){
+        desatU = { value:0 };
+        for (const m of ownMats()){
+          m.onBeforeCompile = sh => {
+            sh.uniforms.uDesat = desatU;
+            sh.fragmentShader = 'uniform float uDesat;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114))) * 0.82, uDesat);');
+          };
+          m.customProgramCacheKey = () => 'desat';
+          m.needsUpdate = true;
+        }
+      }
+      desatU.value = v;
+    },
     update(dt, now){
       const t = now / 1000, amp = RM ? 0.35 : 1;
       S0.tick(dt, now);
-      if (mixer && !st.ghost){
+      if (st.pose){ st.pose.t += dt; st.poseE = ease3(Math.min(1, st.pose.t / st.pose.dur)); }
+      if (mixer && !st.ghost && st.pose) poseTick(now);
+      else if (mixer && !st.ghost){
         if (!st.shot && !st.death){
           const want = st.walk && acts.walk ? 'walk' : 'idle';
           if (want !== loopName && acts[want]){
@@ -5772,6 +5924,15 @@ function makeGlbCharacter(type, side, A){
       // movimentos do corpo inteiro (estáticos e complementos dos rigs)
       st.walkW += ((st.walk ? 1 : 0) - st.walkW) * (1 - Math.exp(-dt * 0.018));
       let y = st.lift, rx = 0, rz = 0, z = 0;
+      if (st.pose){
+        const e = st.poseE, P0 = st.pose;
+        if (P0.name === 'kneel'){ y -= (P0.drop || 0) * e; if (!A.rigged){ rx += 0.38 * e; y -= 0.1 * e; } }
+        else {
+          const hop = RM ? 0 : Math.max(0, Math.sin(t * 6.2 + P0.ph));
+          y += 0.07 * hop * e;
+          if (!A.rigged && type === 'n') rx -= (0.18 + 0.2 * hop) * e;
+        }
+      }
       if (st.sel && !RM) y += 0.03 + 0.025 * Math.sin(now / 280);
       if (st.ghost) rx += 0.08;
       else if (!A.rigged){
@@ -6165,6 +6326,7 @@ function toGrave(v){
 function resetFx(){
   texts = [];
   cineReset();
+  mateCleanup();
   if (!GLOK) return;
   for (const ps of PSYS) ps.L.length = 0;
   fireball.visible = false; fxLight.intensity = 0;
@@ -6438,6 +6600,7 @@ async function gallopLeap(p, tx, tz){
 }
 // Torre: afunda na origem e irrompe no destino
 async function earthMove(p, tx, tz){
+  if (Math.hypot(tx - p.dx, tz - p.dz) < 0.05) return;
   const ch = charOf(p);
   snd('terra_afunda');
   shake(0.06);
@@ -6468,6 +6631,7 @@ async function earthMove(p, tx, tz){
 }
 // Dama: vira um raio e cruza o caminho num instante
 async function lightningDash(p, tx, tz, strike){
+  if (Math.hypot(tx - p.dx, tz - p.dz) < 0.05) return;
   const ch = charOf(p), X = FXC[p.side];
   ch.faceTowards(tx, tz, 900);
   const fx = p.dx, fz = p.dz, a = chestOf(p, 0.55), b = new THREE.Vector3(tx, a.y, tz);
@@ -6501,6 +6665,7 @@ async function reform(p, X){
 }
 // Bispo: círculo rúnico e um salto arcano (piscar)
 async function arcaneBlink(p, tx, tz){
+  if (Math.hypot(tx - p.dx, tz - p.dz) < 0.05) return;
   const ch = charOf(p), X = FXC[p.side];
   ch.faceTowards(tx, tz, 900);
   snd('teleporte');
@@ -6549,6 +6714,7 @@ async function slay(v, kind, killer = 'w', knock){
   }
   if (arena === 'gelo' && killer === 'w') snd('gelo_golpe', { vol:0.85 });
   shake(0.08);
+  if (MATE.target === v){ MATE.target = null; await mateKneel(v, killer, knock); return; }
   if (!ch){ v.alpha = 1; toGrave(v); return; }
   ch.setFlash(1, kind === 'bolt' ? [1.0, 1.0, 1.4] : kind === 'arcane' ? [1.1, 0.8, 1.4] : [1.2, 0.5, 0.35]);
   const kx = v.dx, kz = v.dz;
@@ -6684,8 +6850,147 @@ async function animCapture(p, v, r, c, mate){
   }
   await cineFinish();
 }
-// xeque-mate: o rei vencido cai em câmera lenta
-async function animMate(k){
+/* Xeque-mate como cena: a peça que deu o mate ataca o Rei com a câmera de combate; o golpe o derruba de joelhos
+   (não vai ao cemitério), a cor dele se apaga, um anel da facção vencedora acende sob ele e o exército vencedor
+   comemora com as armas para o alto enquanto a câmera orbita devagar. Só depois vem o diálogo do fim. */
+const MATE = { target:null, ring:null, sounded:false, tok:0 };
+function mateCleanup(){
+  MATE.target = null; MATE.sounded = false; MATE.tok++;
+  if (MATE.ring){ dropDecal(MATE.ring); MATE.ring = null; }
+}
+// peças do vencedor que atacam a casa do Rei (o mate pode ser descoberto)
+function mateCheckers(k){
+  const f = G.fen().split(' ');
+  f[1] = other(k.side); f[3] = '-';
+  const g = new Chess();
+  if (!g.load(f.join(' '))) return [];
+  const ks = sq(k.r, k.c);
+  return g.moves({ verbose:true }).filter(m => m.to === ks).map(m => pieceAt(...rcOf(m.from))).filter(p => p && !p.dead);
+}
+async function mateKneel(v, winner, knock){
+  const ch = chOf(v);
+  if (!ch) return;
+  ch.setFlash(1, [1.2, 0.5, 0.35]);
+  const kx = v.dx, kz = v.dz;
+  await Promise.all([ch.play('hit'), tween(280, q => {
+    v.flash = 1 - q;
+    if (knock){ const b = Math.sin(Math.PI * q) * 0.35; v.dx = kx + knock.x * b; v.dz = kz + knock.z * b; }
+  })]);
+  v.flash = 0; v.dx = kx; v.dz = kz;
+  snd('queda');
+  if (ch.setPose) ch.setPose('kneel');
+  dustAt(v.dx, v.dz, 14, 0.75);
+  if (GLOK){
+    if (MATE.ring) dropDecal(MATE.ring);
+    const ring = MATE.ring = groundDecal(ringTex, v.dx, v.dz, 1.55, CINE_COL[winner], true, 0.017);
+    tween(700, q => { ring.material.opacity = 0.95 * q; ring.scale.set(1.2 + 0.35 * q, 1, 1.2 + 0.35 * q); });
+    sparks.burst(chestOf(v, 0.3), 26, FXC[winner].sparks, 1.6, { life:900, size:0.06, grav:1.2, upward:true });
+  }
+  if (ch.setDesat) tween(1000, q => ch.setDesat(0.85 * q));
+  await wait(620);
+}
+async function animMate(k, mover){
+  if (!k) return;
+  const winner = other(k.side), tok = ++MATE.tok, ch = charOf(k);
+  const cks = mateCheckers(k), atk = cks.includes(mover) ? mover : cks[0] || null;
+  snd('xeque_mate');
+  floatText(k, 'XEQUE-MATE', winner === 'w' ? '#ffcf6a' : '#ff6a5a', 0.42, 15, 0.25);
+  const capt = { mate:true, side:winner, caption:'XEQUE-MATE', sub:`A ${FACTION[winner]} vence a batalha`, voice:'v_xeque_mate' };
+  let on = false;
+  // 1. o golpe completo contra o Rei
+  if (atk && chOf(atk)){
+    const ax = atk.dx, az = atk.dz;
+    ch.faceTowards(atk.dx, atk.dz, 6000);
+    on = await cineBegin(atk, k, capt);
+    if (!on && GLOK) dollyTo(midOf(atk, k), 520);
+    MATE.target = k;
+    try {
+      switch (atk.t){
+        case 'n': await lanceCharge(atk, k, ax, az); break;
+        case 'r': await towerVolley(atk, k, ax, az); break;
+        case 'q': await lightningStrike(atk, k, ax, az); break;
+        case 'b': await arcaneMissiles(atk, k, ax, az); break;
+        default: await meleeCapture(atk, k, ax, az);
+      }
+    } finally { MATE.target = null; }
+    atk.dx = ax; atk.dz = az;
+    const ac = chOf(atk); if (ac) ac.play('idle');
+    if (!chOf(k) || ch !== chOf(k)) return;
+  } else {
+    on = await cineBegin(k, null, capt);
+    if (on){ cine.victim = k; cineImpact(k); } else snd('v_xeque_mate');
+    await mateKneel(k, winner, null);
+  }
+  if (tok !== MATE.tok) return;
+  // 2. a comemoração do vencedor, escalonada
+  const good = cfg.mode === 'ai' ? winner === cfg.human : true;
+  MATE.sounded = true;
+  snd(good ? 'vitoria' : 'derrota', { delay:0.15 });
+  if (!(APR.on && APR.scripted)) snd(good ? 'v_vitoria' : 'v_derrota', { delay:0.9 });
+  const army = S.pieces.filter(p => !p.dead && !p.removed && !p.grave && p.side === winner);
+  army.sort((a, b) => Math.hypot(a.dx - k.dx, a.dz - k.dz) - Math.hypot(b.dx - k.dx, b.dz - k.dz));
+  let at = 0;
+  army.forEach((p, i) => {
+    at += 60 + Math.random() * 60;
+    setTimeout(() => { const c = chOf(p); if (tok === MATE.tok && c && c.setPose) c.setPose('cheer', { ph:i * 0.85 }); }, at);
+  });
+  const specFast = cfg.mode === 'spec' && cfg.speed === 'fast';
+  const off = !cineOn(), dur = off ? (specFast ? 2000 : 0) : cine.mode === 'fast' ? 2000 : 4600;
+  // brasas da vitória subindo do exército
+  if (GLOK && dur > 0){
+    const t0 = performance.now(), cols = FXC[winner].sparks;
+    const emb = () => {
+      if (tok !== MATE.tok || performance.now() - t0 > dur) return;
+      const p = army[Math.floor(Math.random() * army.length)];
+      if (p) sparks.burst(chestOf(p, 1.05), 5, cols, 1.1, { life:900, size:0.05, grav:1.5, upward:true });
+      setTimeout(emb, RM ? 260 : 110);
+    };
+    emb();
+  }
+  // 3. a câmera: órbita lenta com o Rei ajoelhado em primeiro plano e o exército ao fundo (com RM, um corte parado)
+  if (!off && dur > 0){
+    if (!cine.active){ await cineBegin(k, null, capt); cineCap.classList.add('show'); }
+    cine.kT = 1; cine.victim = null; cine.fighters = [k];
+    let cx = 0, cz = 0;
+    for (const p of army){ cx += p.dx; cz += p.dz; }
+    if (army.length){ cx /= army.length; cz /= army.length; } else { cx = k.dx; cz = k.dz + (winner === 'w' ? 3 : -3); }
+    let dx = k.dx - cx, dz = k.dz - cz, L = Math.hypot(dx, dz);
+    if (L < 0.3){ dx = 0; dz = winner === 'w' ? -1 : 1; L = 1; }
+    const a0 = Math.atan2(dz / L, dx / L), sgn = Math.random() < 0.5 ? -1 : 1, sweep = RM ? 0 : cine.mode === 'fast' ? 0.4 : 0.85;
+    const look = new THREE.Vector3(mix(k.dx, cx, 0.32), 0.7, mix(k.dz, cz, 0.32));
+    const R0 = (W / H < 1.15 ? 3.6 : 3.0), y0 = 1.2;
+    cine.pos = new THREE.Vector3(); cine.look = look;
+    const col = C(CINE_COL[winner]);
+    cineSpot.color.copy(col); cineRim.color.copy(col);
+    cineSpot.position.set(k.dx, 3.2, k.dz); cineSpot.target.position.set(k.dx, 0.4, k.dz);
+    const seg3 = new THREE.Line3(), q3 = new THREE.Vector3(), cp3 = new THREE.Vector3();
+    const t0 = performance.now();
+    await new Promise(res => {
+      const step = () => {
+        if (tok !== MATE.tok || cine.skip || !cine.active) return res();
+        const u = Math.min(1, (performance.now() - t0) / dur);
+        const an = a0 + sgn * (-sweep / 2 + sweep * easeIO(u));
+        cine.pos.set(k.dx + Math.cos(an) * R0, y0, k.dz + Math.sin(an) * R0);
+        // o que ficar entre a câmera e o Rei fica translúcido
+        seg3.set(cine.pos, new THREE.Vector3(k.dx, 0.6, k.dz));
+        cine.occ.clear();
+        for (const p of S.pieces){
+          if (p === k || p.dead || p.removed || p.grave) continue;
+          q3.set(p.dx, 0.55, p.dz); seg3.closestPointToPoint(q3, true, cp3);
+          if (cp3.distanceTo(q3) < 0.45) cine.occ.add(p);
+        }
+        if (u >= 1) res(); else requestAnimationFrame(step);
+      };
+      step();
+    });
+    if (tok === MATE.tok){ cineRelease(); await cineFinish(); }
+  } else {
+    if (on){ cineRelease(); await cineFinish(); }
+    if (dur > 0) await realWait(dur);
+  }
+}
+// (antes: o rei vencido caía em câmera lenta)
+async function animMateOld(k){
   snd('xeque_mate');
   const winner = other(k.side);
   const on = await cineBegin(k, null, { mate:true, side:winner, caption:'XEQUE-MATE', sub:`A ${FACTION[winner]} vence a batalha`, voice:null });
@@ -6738,7 +7043,7 @@ async function play(ev){
       case 'castle': await animCastle(e); break;
       case 'capture': await animCapture(p, S.pieces[e.tid], e.r, e.c, e.mate); break;
       case 'promo': await animPromo(p, e.to); break;
-      case 'check': await (e.mate ? animMate(p) : animCheck(p)); break;
+      case 'check': await (e.mate ? animMate(p, e.by != null ? S.pieces[e.by] : null) : animCheck(p)); break;
     }
   }
 }
@@ -7806,7 +8111,7 @@ function eventsFor(res, mover){
     if (k){
       const mate = G.in_checkmate();
       ev.push({ k:'log', html:mate ? `<b>Xeque-mate!</b> O ${who(k)} da ${FACTION[k.side]} cai.` : `<b>Xeque!</b> O ${who(k)} da ${FACTION[k.side]} está ameaçado.` });
-      ev.push({ k:'check', id:k.id, mate });
+      ev.push({ k:'check', id:k.id, mate, by:mover.id });
     }
   }
   return ev;
@@ -7937,7 +8242,8 @@ function showEnd(){
   const capW = hist.filter(m => m.color === 'w' && m.captured).length, capB = hist.filter(m => m.color === 'b' && m.captured).length;
   $('end-stats').innerHTML = `<span><b>${hist.length}</b>lances</span><span><b>${capW}</b>capturas da Aurora</span><span><b>${capB}</b>capturas da Legião</span>`;
   // fanfarra e narrador do ponto de vista de quem joga contra a IA (no PvP, sempre vitória)
-  if (o.kind === 'mate'){ snd(good ? 'vitoria' : 'derrota', { delay:0.5 }); snd(good ? 'v_vitoria' : 'v_derrota', { delay:1.1 }); }
+  // no mate, a fanfarra e o narrador já tocaram na cena (MATE.sounded)
+  if (o.kind === 'mate'){ if (!MATE.sounded){ snd(good ? 'vitoria' : 'derrota', { delay:0.5 }); snd(good ? 'v_vitoria' : 'v_derrota', { delay:1.1 }); } }
   else snd('v_empate', { delay:0.8 });
   updateUndo();
   if (cfg.mode === 'spec') seriesEnd();
