@@ -53,6 +53,24 @@ SFX = {
     "ambiente_fogo_gelo": ("ambience split between howling icy wind with crackling frost and roaring fire with crackling embers", 22.0, True),
     "gelo_estalo":     ("ice crystals cracking and shattering, sharp frosty crunch", 1.2, False),
     "gelo_golpe":      ("frost magic impact, ice shards exploding with a cold whoosh", 1.5, False),
+    # Arena "Zodíaco"
+    "ambiente_zodiaco": ("celestial ambience in a starlit castle courtyard at night: soft shimmering chimes, gentle cosmic hum, light wind, distant thunder", 22.0, True),
+    "estrelas":        ("magical constellation activating, sparkling starlight chime with a rising shimmer", 1.5, False),
+    # Arena "Multiverso"
+    "ambiente_multiverso": ("cosmic void ambience with deep space drone, swirling portal hums, distant echoes of other worlds, soft crackling energy", 22.0, True),
+    "portal":          ("dimensional portal opening, swirling energy whoosh with a deep resonant hum", 1.8, False),
+    # Arena "Mistério Infernal"
+    "ambiente_infernal": ("infernal ritual courtyard ambience: low demonic drone, rattling chains, crackling lava, distant eerie whispers and thunder", 22.0, True),
+    "selo_runico":     ("occult rune seal igniting with a deep magical thrum and crackling hellfire", 1.6, False),
+    # Arena "Celestial"
+    "ambiente_celestial": ("heavenly sanctuary ambience high above the clouds: airy wind, soft angelic shimmer, gentle bells, distant thunder", 22.0, True),
+    "selo_celestial":  ("holy celestial seal igniting, bright choir swell with crystalline chimes", 1.6, False),
+    # Arena "Monte Olimpo"
+    "ambiente_olimpo": ("mountaintop temple ambience above the clouds: strong wind, distant rolling thunder, faint temple bells, eagles far away", 22.0, True),
+    "raio_zeus":       ("divine thunderbolt striking from the sky, blinding electric crack and huge rolling thunder", 2.0, False),
+    # Arena "Pedra Filosofal"
+    "ambiente_alquimia": ("alchemist wizard sanctum ambience: bubbling potions, crackling fireplace, turning book pages, soft magical hum, ticking clockwork", 22.0, True),
+    "transmutacao":    ("alchemical transmutation, sparkling golden magic swirl with a glassy ringing resonance", 1.8, False),
 }
 
 # nome: fala do narrador
@@ -80,6 +98,18 @@ MUSICA = {
                        "brass stabs, low choir, tense and fiery, steady loopable groove, no vocals", 90000),
     "musica_fogo_gelo": ("Dark fantasy orchestral battle theme of fire against ice: cold shimmering celesta and strings answered by "
                          "fiery brass and drums, tense duel, steady loopable groove, no vocals", 90000),
+    "musica_zodiaco": ("Mystical celestial orchestral theme for a chess battle under the zodiac stars: harp and celesta arpeggios, "
+                       "airy choir, soft timpani, wonder and tension, steady loopable groove, no vocals", 90000),
+    "musica_multiverso": ("Epic cosmic orchestral theme for a chess battle at the crossroads of many worlds: pulsing synth pads blended "
+                          "with orchestra, shimmering arpeggios, deep choir, sense of vast scale, steady loopable groove, no vocals", 90000),
+    "musica_infernal": ("Dark occult orchestral theme for a chess battle in a hellish fortress: ominous low brass, dissonant strings, "
+                        "pounding war drums, dark chanting choir without words, menacing and mysterious, steady loopable groove, no vocals", 90000),
+    "musica_celestial": ("Majestic celestial orchestral theme for a chess battle in a heavenly marble sanctuary among the stars: radiant "
+                         "strings, harp, bright brass, soaring wordless choir, noble and tense, steady loopable groove, no vocals", 90000),
+    "musica_olimpo": ("Epic ancient Greek orchestral theme for a chess battle of the gods on Mount Olympus: lyre and harp motifs, "
+                      "heroic brass, thunderous timpani, grand wordless choir, steady loopable groove, no vocals", 90000),
+    "musica_alquimia": ("Mystical wizard orchestral theme for a chess duel in an alchemist's sanctum guarding the philosopher's stone: "
+                        "celesta and harpsichord, woodwinds, soft strings, mysterious wordless choir, steady loopable groove, no vocals", 90000),
 }
 
 

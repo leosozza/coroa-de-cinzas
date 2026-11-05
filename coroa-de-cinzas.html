@@ -202,8 +202,7 @@ canvas{display:block; width:100%}
 .unit-view.side-b{background:radial-gradient(ellipse 80% 70% at 50% 38%, #2e1418 0%, #140c0e 58%, #080606 100%)}
 .unit-view.ar-dragoes{background:radial-gradient(ellipse 80% 70% at 50% 38%, #3e1c0e 0%, #1c0c07 58%, #0a0504 100%)}
 .unit-view.ar-dragoes.side-b{background:radial-gradient(ellipse 80% 70% at 50% 38%, #421410 0%, #1c0808 58%, #0a0404 100%)}
-.unit-view.ar-gelo.side-w{background:radial-gradient(ellipse 80% 70% at 50% 38%, #1e3a4e 0%, #0d1a24 58%, #05090d 100%)}
-.unit-view.ar-gelo.side-b{background:radial-gradient(ellipse 80% 70% at 50% 38%, #46190c 0%, #1e0b06 58%, #0a0403 100%)}
+body[data-arena="fortaleza"]{--glow-top:#1a1e2a; --glow-low:#24140e}
 body[data-arena="dragoes"]{--glow-top:#331509; --glow-low:#3a0d06}
 body[data-arena="gelo"]{--glow-top:#132230; --glow-low:#3a1208}
 .unit-view canvas{display:block; width:100%; touch-action:pan-y; cursor:grab}
@@ -289,6 +288,7 @@ details.rules[open] summary::before{content:"▾ "}
       <div class="field">
         <label for="arena">Arena</label>
         <select id="arena">
+          <option value="fortaleza">Fortaleza Medieval</option>
           <option value="medieval">Ruínas Medievais</option>
           <option value="dragoes">Covil dos Dragões</option>
           <option value="gelo">Fogo x Gelo</option>
@@ -719,11 +719,20 @@ const C = hex => new THREE.Color(hex).convertSRGBToLinear();
    Cada arena troca chão, tabuleiro, céu, luzes, partículas e trilhas de áudio sem reiniciar a partida. */
 const ARENA_KEY = 'coroa-de-cinzas:arena';
 const ARENAS = {
+  fortaleza:{ name:'Fortaleza Medieval', fog:0x181a20, near:20, far:44, exposure:1.3,
+    hemi:[0x7a88a8, 0x3a2c22, 0.7], moon:[0xaebcdc, 1.5], warm:[0xff9040, 0.45],
+    env:[['#4a5468', 0], ['#2a2c32', 0.42], ['#3a2c24', 0.55], ['#121214', 1]],
+    envSpots:[[30, 64, 12, '#ffb060'], [100, 62, 10, '#ff9a40'], [170, 64, 12, '#ffb060'], [230, 62, 10, '#ff9a40'], [80, 18, 34, '#8a96b8']],
+    music:'musica_tema', amb:'ambiente', bolts:[0.6, 0.95], ash:0.012,
+    cam:{ pitch:0.64, pad:1.35, drop:0.5, hz:0.86 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. A Aurora reclama a coroa da fortaleza.',
+    lose:'O seu Rei está cercado no pátio. A Legião Cinzenta toma a fortaleza.',
+    tail:' Os estandartes da fortaleza tremulam sobre o pátio.' },
   medieval:{ name:'Ruínas Medievais', fog:0x17120e, near:17, far:36, exposure:1.2,
     hemi:[0x8d96b4, 0x3d2616, 0.6], moon:[0xd2d8ea, 1.5], warm:[0xff9a50, 0.35],
     env:[['#5a6070', 0], ['#2e2a26', 0.42], ['#4a3220', 0.55], ['#17110c', 1]],
     envSpots:[[30, 64, 14, '#ffb060'], [100, 62, 10, '#ff9a40'], [170, 64, 14, '#ffb060'], [230, 62, 10, '#ff9a40'], [80, 18, 34, '#9aa3b8']],
-    music:'musica_tema', amb:'ambiente',
+    music:'musica_tema', amb:'ambiente', bolts:[0.1, 0.9],
     win:'O Rei da Legião Cinzenta não tem para onde fugir. A Aurora reclama a coroa.',
     lose:'O seu Rei está cercado. A Legião Cinzenta marcha sobre a fortaleza.', tail:'' },
   dragoes:{ name:'Covil dos Dragões', fog:0x1d0d08, near:16, far:35, exposure:1.15,
@@ -734,8 +743,9 @@ const ARENAS = {
     win:'O Rei da Legião Cinzenta não tem para onde fugir. A Aurora reclama a coroa e o tesouro do covil.',
     lose:'O seu Rei está cercado entre rios de lava. A Legião Cinzenta toma o Covil dos Dragões.',
     tail:' No fundo do covil, um dragão ruge sobre o ouro.' },
-  gelo:{ name:'Fogo x Gelo', fog:0x10121a, near:17, far:36, exposure:1.2,
-    hemi:[0x8aa6d4, 0x4a2418, 0.62], moon:[0xc8dcff, 1.45], warm:[0xff5a2a, 0.85],
+  gelo:{ name:'Fogo x Gelo', fog:0x12121a, near:24, far:60, exposure:1.05,
+    hemi:[0x8a9ab8, 0x4a2a1e, 0.6], moon:[0xd8e0f0, 1.35], warm:[0xff6a2a, 0.9], warmPos:[-9, 4, -3],
+    cam:{ pitch:0.7, pad:1.3, drop:0.5, hz:0.86 },
     env:[['#6a7a98', 0], ['#2a2e3a', 0.42], ['#5a2a1a', 0.55], ['#120e0e', 1]],
     envSpots:[[30, 64, 14, '#8fd8ff'], [100, 62, 10, '#ff7a30'], [170, 64, 14, '#8fd8ff'], [230, 62, 10, '#ff7a30'], [80, 18, 34, '#a0c0e0']],
     music:'musica_fogo_gelo', amb:'ambiente_fogo_gelo',
@@ -743,12 +753,12 @@ const ARENAS = {
     lose:'O seu Rei está cercado. As chamas da Legião derretem o reino do gelo.',
     tail:' Na fronteira entre o gelo e o fogo, só o vapor ainda se move.' },
 };
-let arena = 'medieval', arenaPending = null;
+let arena = 'fortaleza', arenaPending = null;
 try { const a = localStorage.getItem(ARENA_KEY); if (ARENAS[a]) arena = a; } catch (e){}
 const AR = () => ARENAS[arena];
 let envRoot = null, envRT = null, warmL = null;
 // estado animado da arena: texturas de lava, luzes que pulsam, dragão no céu, rajadas de fogo
-const ENVX = { tex:[], lights:[], glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
+const ENVX = { tex:[], lights:[], geysers:[], glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
 function mkCanvas(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function canvasTex(c, srgb = true){
   const t = new THREE.CanvasTexture(c);
@@ -940,7 +950,7 @@ function paintBoard(map, emis){
   for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
     const x = BM + c * BT, y = BM + r * BT, light = (r + c) % 2 === 0;
     const j = (rnd() - 0.5) * 14;
-    const base = light ? [104 + j, 96 + j, 84 + j] : [38 + j * 0.6, 35 + j * 0.6, 31 + j * 0.6];
+    const base = arena === 'fortaleza' ? (light ? [150 + j, 140 + j, 122 + j] : [36 + j * 0.6, 34 + j * 0.6, 32 + j * 0.6]) : light ? [104 + j, 96 + j, 84 + j] : [38 + j * 0.6, 35 + j * 0.6, 31 + j * 0.6];
     g.fillStyle = `rgb(${base.map(Math.round).join(',')})`;
     g.fillRect(x, y, BT, BT);
     for (let i = 0; i < 260; i++){
@@ -1004,7 +1014,7 @@ function paintSide(map, emis){
 }
 let boardMapC = null, boardEmisC = null, boardMapT = null;
 function buildBoard(){
-  const dr = arena === 'dragoes', gl = arena === 'gelo';
+  const dr = arena === 'dragoes', gl = arena === 'gelo', fz = arena === 'fortaleza';
   boardMapC = mkCanvas(BS, BS); boardEmisC = mkCanvas(BS, BS);
   paintBoard(boardMapC, boardEmisC);
   const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -1021,12 +1031,18 @@ function buildBoard(){
   slab.position.y = -0.2765;
   slab.receiveShadow = true; slab.castShadow = true;
   envRoot.add(slab);
-  const plMat = new THREE.MeshStandardMaterial(Object.assign({ color:C(dr ? 0x15110f : 0x1b1814), roughness:0.95, flatShading:true }, dr ? { envMapIntensity:0.3 } : null));
-  const plIce = gl ? new THREE.MeshStandardMaterial({ color:C(0x8aa2b8), roughness:0.8, flatShading:true }) : null;
-  const plinth = new THREE.Mesh(new THREE.BoxGeometry(9.9, 0.3, 9.9), gl ? splitBoxMats(0x8aa2b8, 0x1b1412) : plMat);
+  const plMat = new THREE.MeshStandardMaterial(Object.assign({ color:C(dr ? 0x15110f : fz ? 0x1c1c20 : 0x1b1814), roughness:fz ? 0.6 : 0.95, flatShading:true }, dr ? { envMapIntensity:0.3 } : null));
+  const plIce = gl ? new THREE.MeshStandardMaterial({ color:C(0x3a4654), roughness:0.8, flatShading:true }) : null;
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(9.9, 0.3, 9.9), gl ? splitBoxMats(0x3a4654, 0x221a17) : plMat);
   plinth.position.y = GROUND_Y + 0.12;
   plinth.receiveShadow = true;
   envRoot.add(plinth);
+  // estrado da fortaleza: borda fina de bronze em volta do tabuleiro, sem entulho
+  if (fz){
+    const bz = new THREE.MeshStandardMaterial({ color:C(0xb07a32), metalness:0.9, roughness:0.35, envMapIntensity:1.2 });
+    for (const [w, d, x, z] of [[9.16, 0.06, 0, 4.55], [9.16, 0.06, 0, -4.55], [0.06, 9.16, 4.55, 0], [0.06, 9.16, -4.55, 0]]) addMesh(envRoot, new THREE.BoxGeometry(w, 0.05, d), bz, x, 0.012, z);
+    return;
+  }
   // degraus quebrados nos cantos
   const rnd = seeded(5);
   for (let i = 0; i < 14; i++){
@@ -1034,7 +1050,7 @@ function buildBoard(){
     const side = Math.floor(rnd() * 4), t = (rnd() - 0.5) * 9;
     const off = 5.05 + rnd() * 0.25;
     b.position.set(side < 2 ? (side ? off : -off) : t, GROUND_Y + 0.06, side < 2 ? t : (side === 2 ? off : -off));
-    if (plIce && b.position.z > 0) b.material = plIce;
+    if (plIce && b.position.x > 0) b.material = plIce;
     b.rotation.set((rnd() - 0.5) * 0.3, rnd() * 3, (rnd() - 0.5) * 0.3);
     b.castShadow = b.receiveShadow = true;
     envRoot.add(b);
@@ -1125,14 +1141,14 @@ const GRAVE = { w:{ x:-5.75, z0:-0.45, dir:1, face:Math.PI / 2 }, b:{ x:5.75, z0
 function graveyard(side, rnd, style = 'stone'){
   const G0 = GRAVE[side], g = new THREE.Group(), ice = style === 'ice', urn = style === 'urn';
   // cores das chamas: Aurora âmbar e Legião vermelha; no Fogo x Gelo, gelo frio e brasa laranja
-  const fireSide = arena === 'gelo' && side === 'b';
+  const fireSide = arena === 'gelo' && urn;
   const P = ice ? { flame:0xbff0ff, glow:0x6fd0ff, lamp:0x8fe0ff, light:0x6fc4ff }
     : fireSide ? { flame:0xffa040, glow:0xff6a20, lamp:0xff8a30, light:0xff6a2a }
     : { flame:side === 'w' ? 0xffc060 : 0xff5a40, glow:side === 'w' ? 0xffa040 : 0xff3040, lamp:side === 'w' ? 0xffb050 : 0xff3a4a, light:side === 'w' ? 0xffa050 : 0xff4050 };
   const stA = ice ? GY.frost : stoneMat, stB = ice ? GY.ice : darkStoneMat;
   const zc = G0.z0 + G0.dir * 1.72;
   g.position.set(G0.x, GROUND_Y, zc);
-  const soil = new THREE.MeshStandardMaterial({ color:C(ice ? 0xc6d8e6 : urn ? 0x2b2624 : 0x1f1813), roughness:1, flatShading:true });
+  const soil = new THREE.MeshStandardMaterial({ color:C(ice ? 0x7a8ca0 : urn ? 0x2b2624 : 0x1f1813), roughness:1, flatShading:true });
   addMesh(g, new THREE.BoxGeometry(1.55, 0.06, 3.55), soil, 0, 0.03, 0, 0, 0, 0, false).receiveShadow = true;
   for (let i = 0; i < 14; i++) addMesh(g, new THREE.SphereGeometry(0.08 + rnd() * 0.08, 5, 3), soil, (rnd() - 0.5) * 1.4, 0.05, (rnd() - 0.5) * 3.3, 0, rnd() * 3, 0).scale.y = 0.4;
   // borda de pedra quebrada
@@ -1191,7 +1207,7 @@ function graveyard(side, rnd, style = 'stone'){
   const l = new THREE.PointLight(C(P.light), 0.6, 3.5, 2);
   l.position.set(outer * 0.6, 0.7, 0); g.add(l);
   // névoa baixa sobre o canteiro
-  const mist = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 4.2), new THREE.MeshBasicMaterial({ map:glowTex, color:C(ice ? 0xdde8f2 : urn ? 0x6a5a52 : 0x8a8a96), transparent:true, opacity:ice ? 0.22 : 0.16, depthWrite:false }));
+  const mist = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 4.2), new THREE.MeshBasicMaterial({ map:glowTex, color:C(ice ? 0xa8bccc : urn ? 0x6a5a52 : 0x8a8a96), transparent:true, opacity:0.16, depthWrite:false }));
   mist.rotation.x = -Math.PI / 2; mist.position.y = 0.2; mist.renderOrder = 1;
   g.add(mist);
   envRoot.add(g);
@@ -1248,26 +1264,28 @@ function bunker(x, z, rnd){
   for (let i = 0; i < 4; i++) addMesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.6 + rnd() * 0.4, 5), ironMat, -0.8 + i * 0.45, 1.2, (rnd() - 0.5) * 0.6, (rnd() - 0.5) * 0.8, 0, (rnd() - 0.5) * 0.8);
   envRoot.add(g);
 }
-function flameGroup(parent, x, y, z, scale, rnd, lightI){
+function flameGroup(parent, x, y, z, scale, rnd, lightI, pal){
+  const P = pal || FLAME_STD;
   const f = new THREE.Group();
   f.position.set(x, y, z); f.scale.setScalar(scale);
-  const outer = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 7), new THREE.MeshBasicMaterial({ color:C(0xff7a26), transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  const outer = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 7), new THREE.MeshBasicMaterial({ color:C(P.outer), transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
   outer.position.y = 0.22;
-  const inner = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.32, 6), new THREE.MeshBasicMaterial({ color:C(0xffe2a0), transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  const inner = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.32, 6), new THREE.MeshBasicMaterial({ color:C(P.inner), transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
   inner.position.y = 0.15;
-  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xff8a30), transparent:true, opacity:0.6, blending:THREE.AdditiveBlending, depthWrite:false }));
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(P.halo), transparent:true, opacity:0.6, blending:THREE.AdditiveBlending, depthWrite:false }));
   halo.scale.setScalar(1.6); halo.position.y = 0.25;
   f.add(outer, inner, halo);
   parent.add(f);
   let light = null;
   if (lightI){
-    light = new THREE.PointLight(C(0xff9440), lightI, 10, 2);
+    light = new THREE.PointLight(C(P.light), lightI, 10, 2);
     light.position.set(x, y + 0.35 * scale, z);
     parent.add(light);
   }
-  torches.push({ f, outer, inner, halo, light, base:lightI, ph:rnd() * 20, x, y, z, parent });
+  torches.push({ f, outer, inner, halo, light, base:lightI, ph:rnd() * 20, x, y, z, parent, spark:P.spark });
   return f;
 }
+const FLAME_STD = { outer:0xff7a26, inner:0xffe2a0, halo:0xff8a30, light:0xff9440, spark:'#ffb050', coal:0xff5a1a };
 function torch(x, z, rnd){
   const g = new THREE.Group();
   g.position.set(x, GROUND_Y, z);
@@ -1381,7 +1399,7 @@ function placeBackdrop(hzNdc){
   boltMesh.quaternion.copy(camera.quaternion);
   boltMesh.position.copy(backdrop.position).addScaledVector(d, -0.05);
 }
-function drawBolt(){
+function drawBolt(x0 = 0.1, x1 = 0.9){
   const g = boltCanvas.getContext('2d'), w = boltCanvas.width, h = boltCanvas.height;
   g.clearRect(0, 0, w, h);
   const seg = (x, y, len, ang, depth, wid) => {
@@ -1395,7 +1413,7 @@ function drawBolt(){
     g.lineWidth = wid; g.stroke();
   };
   g.strokeStyle = 'rgba(220,228,255,.95)'; g.shadowColor = 'rgba(170,185,255,1)'; g.shadowBlur = 14;
-  seg(w * (0.1 + Math.random() * 0.8), 0, 11, (Math.random() - 0.5) * 0.4, 0, 3);
+  seg(w * (x0 + Math.random() * (x1 - x0)), 0, 11, (Math.random() - 0.5) * 0.4, 0, 3);
   boltTex.needsUpdate = true;
 }
 
@@ -1410,11 +1428,12 @@ function buildArena(){
   hemi.color.copy(C(A.hemi[0])); hemi.groundColor.copy(C(A.hemi[1])); hemi.intensity = A.hemi[2];
   moon.color.copy(C(A.moon[0])); moon.intensity = A.moon[1];
   warmL.color.copy(C(A.warm[0])); warmL.intensity = A.warm[1];
+  warmL.position.set(...(A.warmPos || [8, 4, -6]));
   envRoot = new THREE.Group();
   envRoot.name = 'arena';
   world.add(envRoot);
   torches.length = 0; mists.length = 0;
-  ENVX.tex.length = 0; ENVX.lights.length = 0;
+  ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0;
   ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false;
   const now = performance.now();
   ENVX.nextGlide = now + 7000; ENVX.nextBurst = now + 14000 + Math.random() * 10000;
@@ -1457,12 +1476,13 @@ function bakeInto(src, out){
       g.applyMatrix4(m.matrixWorld);
       parts.push(g); n += g.attributes.position.count;
     }
-    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), withUv = !!mat.map && parts.every(g => g.attributes.uv), uv = withUv ? new Float32Array(n * 2) : null;
     let k = 0;
-    for (const g of parts){ pos.set(g.attributes.position.array, k * 3); nor.set(g.attributes.normal.array, k * 3); k += g.attributes.position.count; g.dispose(); }
+    for (const g of parts){ pos.set(g.attributes.position.array, k * 3); nor.set(g.attributes.normal.array, k * 3); if (uv) uv.set(g.attributes.uv.array, k * 2); k += g.attributes.position.count; g.dispose(); }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    if (uv) geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = list.some(m => m.castShadow); mesh.receiveShadow = list.some(m => m.receiveShadow);
@@ -1474,6 +1494,7 @@ function bakeInto(src, out){
 function buildEnvironment(){
   if (arena === 'dragoes') buildEnvDragon();
   else if (arena === 'gelo') buildEnvSplit();
+  else if (arena === 'fortaleza') buildEnvFortress();
   else buildEnvMedieval();
 }
 
@@ -1561,88 +1582,22 @@ function paintBoardDragon(map, emis){
   boardLabels(g, () => 'rgba(240,214,170,.72)', 'rgba(240,214,170,.72)');
 }
 // Fogo x Gelo: fileiras 1 a 4 congeladas (Aurora), 5 a 8 em brasa (Legião)
-function paintBoardSplit(map, emis){
-  const g = map.getContext('2d'), e = emis.getContext('2d'), rnd = seeded(43), mid = BM + 4 * BT;
-  g.fillStyle = '#150e0c'; g.fillRect(0, 0, BS, mid);
-  g.fillStyle = '#6a8298'; g.fillRect(0, mid, BS, BS - mid);
-  e.fillStyle = '#000'; e.fillRect(0, 0, BS, BS);
-  speckle(g, rnd, 0, 0, BS, mid, 900, r => `rgba(255,190,140,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.1 + r() * 0.1})`, 3);
-  speckle(g, rnd, 0, mid, BS, BS - mid, 900, r => `rgba(255,255,255,${0.08 + r() * 0.12})`, r => `rgba(30,50,80,${0.06 + r() * 0.08})`, 3);
-  const fireLines = [], iceLines = [];
-  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
-    const x = BM + c * BT, y = BM + r * BT, light = (r + c) % 2 === 0, j = (rnd() - 0.5) * 14, ice = r >= 4;
-    if (ice){
-      const base = light ? [184 + j, 208 + j, 226 + j * 0.5] : [76 + j, 106 + j, 140 + j];
-      const rg = g.createRadialGradient(x + BT * 0.4, y + BT * 0.35, 6, x + BT / 2, y + BT / 2, BT * 0.75);
-      rg.addColorStop(0, `rgb(${base.map(v => Math.round(Math.min(255, v + 16))).join(',')})`); rg.addColorStop(1, `rgb(${base.map(Math.round).join(',')})`);
-      g.fillStyle = rg; g.fillRect(x, y, BT, BT);
-      speckle(g, rnd, x, y, BT, BT, 160, r2 => `rgba(255,255,255,${0.1 + r2() * 0.25})`, r2 => `rgba(40,70,110,${0.05 + r2() * 0.08})`, 3);
-      // geada nas bordas e rachaduras finas no gelo
-      for (let i = 0; i < 8; i++){ g.strokeStyle = `rgba(255,255,255,${0.2 * (1 - i / 8)})`; g.lineWidth = 2; g.strokeRect(x + 3 + i * 2, y + 3 + i * 2, BT - 6 - i * 4, BT - 6 - i * 4); }
-      if (rnd() < 0.7){
-        const L = jagLine(rnd, x + rnd() * BT, y + rnd() * 12, x + rnd() * BT, y + BT - rnd() * 12, 7, 26);
-        g.strokeStyle = 'rgba(255,255,255,.55)'; strokePts(g, L, 1.4);
-        g.strokeStyle = 'rgba(40,80,120,.3)'; strokePts(g, L.map((v, i) => v + (i % 2 ? 1.5 : 0)), 1);
-        e.strokeStyle = 'rgba(80,190,255,.4)'; strokePts(e, L, 1.6);
-      }
-    } else {
-      const base = light ? [104 + j, 80 + j, 66 + j] : [36 + j * 0.6, 26 + j * 0.6, 23 + j * 0.6];
-      g.fillStyle = `rgb(${base.map(Math.round).join(',')})`; g.fillRect(x, y, BT, BT);
-      speckle(g, rnd, x, y, BT, BT, 240, r2 => `rgba(255,200,160,${0.02 + r2() * 0.05})`, r2 => `rgba(0,0,0,${0.06 + r2() * 0.1})`);
-      // marcas de fuligem
-      for (let i = 0; i < 2; i++){
-        const px = x + rnd() * BT, py = y + rnd() * BT, rr = 14 + rnd() * 26, rg = g.createRadialGradient(px, py, 0, px, py, rr);
-        rg.addColorStop(0, 'rgba(0,0,0,.35)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
-        g.fillStyle = rg; g.fillRect(px - rr, py - rr, rr * 2, rr * 2);
-      }
-      if (rnd() < 0.4) fireLines.push(tileCrack(rnd, r, c));
-    }
-    g.fillStyle = ice ? 'rgba(255,255,255,.18)' : 'rgba(255,220,190,.08)'; g.fillRect(x, y, BT, 3); g.fillRect(x, y, 3, BT);
-    g.fillStyle = ice ? 'rgba(20,40,70,.35)' : 'rgba(0,0,0,.5)'; g.fillRect(x, y + BT - 3, BT, 3); g.fillRect(x + BT - 3, y, 3, BT);
-  }
-  // juntas: lava na metade de fogo, geada na metade de gelo
-  for (let i = 1; i < 8; i++){
-    fireLines.push(jagLine(rnd, BM + i * BT, BM, BM + i * BT, mid - 6, 20, 4));
-    iceLines.push(jagLine(rnd, BM + i * BT, mid + 6, BM + i * BT, BM + 8 * BT, 20, 3));
-  }
-  for (let i = 1; i < 4; i++) fireLines.push(jagLine(rnd, BM, BM + i * BT, BM + 8 * BT, BM + i * BT, 40, 4));
-  for (let i = 5; i < 8; i++) iceLines.push(jagLine(rnd, BM, BM + i * BT, BM + 8 * BT, BM + i * BT, 40, 3));
-  lavaLines(g, e, fireLines, false);
-  g.lineCap = e.lineCap = 'round';
-  g.strokeStyle = 'rgba(240,250,255,.8)'; for (const L of iceLines) strokePts(g, L, 3);
-  e.shadowColor = 'rgba(90,200,255,1)'; e.shadowBlur = 6;
-  e.strokeStyle = 'rgba(110,210,255,.55)'; for (const L of iceLines) strokePts(e, L, 1.6);
-  e.shadowBlur = 0;
-  // a fronteira: brasa de um lado, gelo derretendo do outro
-  const seam = jagLine(rnd, BM - 4, mid, BM + 8 * BT + 4, mid, 60, 6);
-  g.strokeStyle = 'rgba(30,36,44,.9)'; strokePts(g, seam, 8);
-  g.strokeStyle = 'rgba(220,236,246,.6)'; strokePts(g, seam.map((v, i) => i % 2 ? v + 5 : v), 2);
-  e.shadowColor = 'rgba(255,100,30,1)'; e.shadowBlur = 10;
-  e.strokeStyle = 'rgba(255,120,40,.9)'; strokePts(e, seam.map((v, i) => i % 2 ? v - 4 : v), 2.4);
-  e.shadowColor = 'rgba(90,200,255,1)';
-  e.strokeStyle = 'rgba(120,215,255,.7)'; strokePts(e, seam.map((v, i) => i % 2 ? v + 5 : v), 1.6);
-  e.shadowBlur = 0;
-  g.lineWidth = 3;
-  g.strokeStyle = 'rgba(230,140,70,.65)'; g.strokeRect(BM - 4, BM - 4, BT * 8 + 8, 4 * BT + 4);
-  g.strokeStyle = 'rgba(220,240,255,.75)'; g.strokeRect(BM - 4, mid, BT * 8 + 8, 4 * BT + 4);
-  boardLabels(g, r => r < 4 ? 'rgba(240,214,190,.7)' : 'rgba(16,30,48,.78)', 'rgba(16,30,48,.78)');
-}
 // laterais do bloco do tabuleiro: basalto com veios de lava, gelo com estalactites, pedra em brasa
 function paintSideKind(g, e, x0, w, h, kind, rnd){
   g.save(); e.save();
   g.beginPath(); g.rect(x0, 0, w, h); g.clip();
   e.beginPath(); e.rect(x0, 0, w, h); e.clip();
   const lg = g.createLinearGradient(0, 0, 0, h);
-  if (kind === 'ice'){ lg.addColorStop(0, '#d6e6f2'); lg.addColorStop(0.15, '#98b6cc'); lg.addColorStop(1, '#4a6278'); }
+  if (kind === 'ice'){ lg.addColorStop(0, '#a8bccc'); lg.addColorStop(0.18, '#4c5c6c'); lg.addColorStop(1, '#1c242e'); }
   else if (kind === 'fire'){ lg.addColorStop(0, '#4c3228'); lg.addColorStop(0.15, '#2a1a16'); lg.addColorStop(1, '#120c0a'); }
   else { lg.addColorStop(0, '#3a3430'); lg.addColorStop(0.15, '#201c1a'); lg.addColorStop(1, '#0c0a0a'); }
   g.fillStyle = lg; g.fillRect(x0, 0, w, h);
   const ice = kind === 'ice';
-  speckle(g, rnd, x0, 0, w, h, Math.round(w * 1.2), r => ice ? `rgba(255,255,255,${0.1 + r() * 0.2})` : `rgba(255,210,170,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.1 + r() * 0.12})`, 3);
+  speckle(g, rnd, x0, 0, w, h, Math.round(w * 1.2), r => ice ? `rgba(220,236,255,${0.05 + r() * 0.1})` : `rgba(255,210,170,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.1 + r() * 0.12})`, 3);
   e.fillStyle = '#000'; e.fillRect(x0, 0, w, h);
   if (ice){
     // estalactites de gelo penduradas na borda
-    g.fillStyle = 'rgba(240,250,255,.85)';
+    g.fillStyle = 'rgba(210,232,248,.8)';
     for (let x = x0; x < x0 + w; x += 10 + rnd() * 18){ const iw = 4 + rnd() * 8, ih = 8 + rnd() * 26; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + iw, 0); g.lineTo(x + iw * 0.45, ih); g.closePath(); g.fill(); }
     e.strokeStyle = 'rgba(100,205,255,.55)'; e.lineWidth = 1.5;
     e.beginPath(); e.moveTo(x0, h * 0.62); for (let x = x0; x <= x0 + w; x += 16) e.lineTo(x, h * 0.62 + (rnd() - 0.5) * 6); e.stroke();
@@ -1660,16 +1615,8 @@ function paintSideKind(g, e, x0, w, h, kind, rnd){
 }
 const hexCss = v => '#' + v.toString(16).padStart(6, '0');
 // materiais de uma caixa dividida ao meio: gelo em z > 0 (Aurora), fogo em z < 0 (Legião); ordem da BoxGeometry: +x, -x, +y, -y, +z, -z
-function splitBoxMats(iceHex, fireHex){
-  const tex = (w, h, draw) => { const c = mkCanvas(w, h); draw(c.getContext('2d'), w, h); return canvasTex(c); };
-  const M = o => new THREE.MeshStandardMaterial(Object.assign({ roughness:0.92, flatShading:true, envMapIntensity:0.35 }, o));
-  const ice = hexCss(iceHex), fire = hexCss(fireHex);
-  const lr = leftIce => M({ map:tex(64, 8, (g, w, h) => { g.fillStyle = leftIce ? ice : fire; g.fillRect(0, 0, w / 2, h); g.fillStyle = leftIce ? fire : ice; g.fillRect(w / 2, 0, w / 2, h); }) });
-  const tb = M({ map:tex(8, 64, (g, w, h) => { g.fillStyle = fire; g.fillRect(0, 0, w, h / 2); g.fillStyle = ice; g.fillRect(0, h / 2, w, h / 2); }) });
-  return [lr(true), lr(false), tb, tb, M({ color:C(iceHex) }), M({ color:C(fireHex) })];
-}
 function slabMats(){
-  if (arena === 'medieval'){
+  if (arena === 'medieval' || arena === 'fortaleza'){
     const sm = mkCanvas(1024, 64), se = mkCanvas(1024, 64);
     paintSide(sm, se);
     const s = new THREE.MeshStandardMaterial({ map:canvasTex(sm), emissiveMap:canvasTex(se), emissive:C(0xff9a3a), emissiveIntensity:0.9, roughness:0.9, envMapIntensity:0.35 });
@@ -1687,8 +1634,7 @@ function slabMats(){
     const cap = new THREE.MeshStandardMaterial({ color:C(0x1c1816), roughness:0.85, envMapIntensity:0.35 });
     return [s, s, cap, cap, s, s];
   }
-  const cap = splitBoxMats(0xa8c2d6, 0x2e1e1a)[2];
-  return [mk([[0, 512, 'ice'], [512, 512, 'fire']]), mk([[0, 512, 'fire'], [512, 512, 'ice']]), cap, cap, mk([[0, 1024, 'ice']]), mk([[0, 1024, 'fire']])];
+  return slabMatsSplit();
 }
 
 /* peças de cenário temáticas */
@@ -1900,17 +1846,6 @@ function treasureHeaps(spots, rnd){
   envRoot.add(coins);
   bakeInto(g, envRoot);
 }
-function iceCluster(x, z, n, h, rnd, mat){
-  const g = new THREE.Group();
-  g.position.set(x, GROUND_Y, z);
-  const geo = new THREE.OctahedronGeometry(1, 0);
-  for (let i = 0; i < n; i++){
-    const a = i * 2.2 + rnd(), d = i ? 0.15 + rnd() * 0.5 : 0, hh = h * (i ? 0.35 + rnd() * 0.55 : 1), r = 0.1 + rnd() * 0.08 + (i ? 0 : 0.07);
-    const t = d > 0 ? 0.38 : 0;
-    addMesh(g, geo, mat, Math.cos(a) * d, hh * 0.32, Math.sin(a) * d, Math.sin(a) * t, rnd(), -Math.cos(a) * t).scale.set(r, hh * 0.5, r * 0.9);
-  }
-  bakeInto(g, envRoot);
-}
 function snowDrifts(list, mat){
   const g = new THREE.Group(), geo = new THREE.SphereGeometry(1, 10, 6, 0, TAU, 0, Math.PI / 2);
   for (const [x, z, sx, sz, ry] of list) addMesh(g, geo, mat, x, GROUND_Y - 0.02, z, 0, ry, 0).scale.set(sx, 0.2 + sx * 0.1, sz);
@@ -1935,6 +1870,418 @@ function lavaStrip(x, z, len, wid, ry, mat){
   m.position.set(x, GROUND_Y + 0.012, z); m.rotation.y = ry; m.renderOrder = 1;
   envRoot.add(m);
   return m;
+}
+
+/* Fortaleza Medieval: pátio interno de um castelo. O construtor do pátio recebe um estilo (CY)
+   para que as outras arenas do castelo reaproveitem a mesma planta com outros materiais e chamas. */
+// caixa com UV em escala de mundo: a textura de blocos fica do mesmo tamanho em qualquer muro
+function worldBox(w, h, d, tile = 2){
+  const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+  const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+  for (let f = 0; f < 6; f++) for (let i = 0; i < 4; i++){ const k = f * 4 + i; uv.setXY(k, uv.getX(k) * dims[f][0] / tile, uv.getY(k) * dims[f][1] / tile); }
+  return g;
+}
+function blockCanvas(){
+  if (TEXC.blockC) return TEXC.blockC;
+  const c = mkCanvas(512, 512), g = c.getContext('2d'), rnd = seeded(101);
+  g.fillStyle = '#3a3a3c'; g.fillRect(0, 0, 512, 512);
+  const rows = 8, cols = 4, bh = 512 / rows, bw = 512 / cols;
+  for (let r = 0; r < rows; r++){
+    const tone = []; for (let k = 0; k < cols; k++) tone.push(0.75 + rnd() * 0.5);
+    const off = (r % 2) * bw / 2;
+    for (let k = -1; k <= cols; k++){
+      const x = k * bw + off, y = r * bh, t = tone[((k % cols) + cols) % cols], l = Math.round(150 * t);
+      g.fillStyle = `rgb(${l},${l},${Math.round(l * 1.04)})`; g.fillRect(x + 3, y + 3, bw - 6, bh - 6);
+      g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(x + 3, y + 3, bw - 6, 3);
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x + 3, y + bh - 6, bw - 6, 3);
+    }
+  }
+  speckle(g, rnd, 0, 0, 512, 512, 3500, r => `rgba(255,255,255,${0.03 + r() * 0.06})`, r => `rgba(0,0,0,${0.08 + r() * 0.14})`, 3);
+  for (let i = 0; i < 40; i++){ g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1.2; strokePts(g, jagLine(rnd, rnd() * 512, rnd() * 512, rnd() * 512, rnd() * 512, 5, 30).map(v => v), 1.2); }
+  return (TEXC.blockC = c);
+}
+function blockMat(hex, rough = 0.9){
+  const t = canvasTex(blockCanvas());
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:0.03, color:C(hex), roughness:rough, envMapIntensity:0.4 });
+}
+// calçamento de pedras arredondadas com rejunte escuro
+function paintCobbles(g, rnd){
+  g.fillStyle = '#141416'; g.fillRect(0, 0, 512, 512);
+  const n = 11, s = 512 / n;
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++){
+    const cx = (c + 0.5 + (r % 2) * 0.5) * s + (rnd() - 0.5) * s * 0.2, cy = (r + 0.5) * s + (rnd() - 0.5) * s * 0.2;
+    const rx = s * (0.38 + rnd() * 0.08), ry = s * (0.36 + rnd() * 0.08), l = 44 + rnd() * 30;
+    for (const ox of [-512, 0, 512]){
+      const x = cx + ox, rg = g.createRadialGradient(x - rx * 0.3, cy - ry * 0.3, 1, x, cy, rx * 1.1);
+      rg.addColorStop(0, `rgb(${Math.round(l * 1.25)},${Math.round(l * 1.25)},${Math.round(l * 1.32)})`); rg.addColorStop(1, `rgb(${Math.round(l * 0.7)},${Math.round(l * 0.7)},${Math.round(l * 0.76)})`);
+      g.fillStyle = rg; g.beginPath(); g.ellipse(x, cy, rx, ry, rnd() * 0.6, 0, TAU); g.fill();
+    }
+  }
+  speckle(g, rnd, 0, 0, 512, 512, 2500, r => `rgba(255,255,255,${0.03 + r() * 0.05})`, r => `rgba(0,0,0,${0.1 + r() * 0.12})`, 2);
+}
+// faixa de runas entalhadas no chão; col(u) dá a cor do brilho ao longo da faixa
+function runeBandMat(len, col, seed){
+  const W0 = 1024, H0 = 64, m = mkCanvas(W0, H0), e = mkCanvas(W0, H0), g = m.getContext('2d'), x = e.getContext('2d'), rnd = seeded(seed);
+  g.fillStyle = '#1c1c20'; g.fillRect(0, 0, W0, H0);
+  speckle(g, rnd, 0, 0, W0, H0, 900, r => `rgba(255,255,255,${0.03 + r() * 0.05})`, r => `rgba(0,0,0,${0.1 + r() * 0.1})`, 2);
+  g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(0, 4, W0, 2); g.fillRect(0, H0 - 6, W0, 2);
+  x.fillStyle = '#000'; x.fillRect(0, 0, W0, H0);
+  g.lineCap = x.lineCap = 'round';
+  const n = Math.round(len * 2.6);
+  for (let i = 0; i < n; i++){
+    const cx = (i + 0.5) * W0 / n, seedR = Math.floor(rnd() * 1e6) + 3;
+    g.strokeStyle = 'rgba(0,0,0,.7)'; g.lineWidth = 4; rune(g, cx, H0 / 2, 34, seeded(seedR));
+    x.shadowColor = col(cx / W0); x.shadowBlur = 8; x.strokeStyle = col(cx / W0); x.lineWidth = 2.4; rune(x, cx, H0 / 2, 34, seeded(seedR));
+  }
+  x.shadowBlur = 0;
+  return new THREE.MeshStandardMaterial({ map:canvasTex(m), emissiveMap:canvasTex(e), emissive:C(0xffffff), emissiveIntensity:0.8, roughness:0.85, envMapIntensity:0.3 });
+}
+// anel quadrado de runas em volta do estrado
+function runeRing(inner, outer, col, seed){
+  const w = outer - inner, L = outer * 2;
+  const mat = runeBandMat(L, col, seed);
+  for (const [x, z, ry] of [[0, (inner + outer) / 2, 0], [0, -(inner + outer) / 2, Math.PI], [(inner + outer) / 2, 0, -Math.PI / 2], [-(inner + outer) / 2, 0, Math.PI / 2]]){
+    const geo = new THREE.PlaneGeometry(L, w); geo.rotateX(-Math.PI / 2);
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, GROUND_Y + 0.008, z); m.rotation.y = ry; m.receiveShadow = true;
+    envRoot.add(m);
+  }
+}
+// brasões: leão rampante (estandartes) e grifo (escudos)
+function heraldBeast(g, cx, cy, s, col, griffin){
+  g.save(); g.translate(cx, cy); g.scale(s, s);
+  g.fillStyle = col; g.strokeStyle = col; g.lineCap = 'round'; g.lineJoin = 'round';
+  const limb = (x0, y0, x1, y1, w) => { g.lineWidth = w; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
+  g.beginPath(); g.ellipse(0, 6, 15, 28, -0.35, 0, TAU); g.fill();
+  if (griffin){
+    g.beginPath(); g.arc(10, -28, 11, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(18, -32); g.lineTo(34, -26); g.lineTo(19, -20); g.fill();
+    g.beginPath(); g.moveTo(-4, -10); g.lineTo(-34, -46); g.lineTo(-30, -26); g.lineTo(-40, -30); g.lineTo(-30, -12); g.lineTo(-38, -10); g.lineTo(-14, 8); g.fill();
+  } else {
+    g.beginPath(); g.arc(10, -28, 12, 0, TAU); g.fill();
+    for (let i = 0; i < 9; i++){ const a = -Math.PI * 0.95 + i * 0.3; g.beginPath(); g.moveTo(10 + Math.cos(a) * 9, -28 + Math.sin(a) * 9); g.lineTo(10 + Math.cos(a + 0.15) * 20, -28 + Math.sin(a + 0.15) * 20); g.lineTo(10 + Math.cos(a + 0.3) * 9, -28 + Math.sin(a + 0.3) * 9); g.fill(); }
+    g.lineWidth = 4; g.beginPath(); g.moveTo(-12, 26); g.quadraticCurveTo(-40, 18, -30, -8); g.quadraticCurveTo(-25, -18, -34, -24); g.stroke();
+  }
+  limb(8, -8, 30, -24, 10); limb(6, 2, 30, -4, 9); limb(-4, 28, -16, 50, 11); limb(6, 28, 14, 52, 11);
+  g.restore();
+}
+function bannerTex(o){
+  const c = mkCanvas(128, 256), g = c.getContext('2d');
+  const lg = g.createLinearGradient(0, 0, 128, 0);
+  lg.addColorStop(0, o.dark); lg.addColorStop(0.5, o.field); lg.addColorStop(1, o.dark);
+  g.fillStyle = lg; g.fillRect(0, 0, 128, 256);
+  g.strokeStyle = o.gold; g.lineWidth = 5;
+  g.beginPath(); g.moveTo(8, 6); g.lineTo(120, 6); g.lineTo(120, 238); g.lineTo(64, 206); g.lineTo(8, 238); g.closePath(); g.stroke();
+  if (o.emblem) o.emblem(g); else heraldBeast(g, 62, 112, 1.25, o.gold, false);
+  g.globalCompositeOperation = 'destination-out';
+  g.beginPath(); g.moveTo(0, 256); g.lineTo(64, 214); g.lineTo(128, 256); g.closePath(); g.fill();
+  g.globalCompositeOperation = 'source-over';
+  return canvasTex(c);
+}
+function banner(x, y, z, ry, tex, w = 0.85, h = 1.8){
+  const geo = new THREE.PlaneGeometry(w, h, 1, 8), p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin((p.getY(i) / h + 0.5) * Math.PI * 1.4) * 0.04);
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map:tex, alphaTest:0.5, side:THREE.DoubleSide, roughness:0.85, envMapIntensity:0.3 }));
+  m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true;
+  envRoot.add(m);
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, w + 0.2, 5), ironMat);
+  rod.rotation.z = Math.PI / 2; rod.position.set(0, h / 2 + 0.02, 0); m.add(rod);
+  return m;
+}
+// tocha de parede com chama de verdade (o grupo de chama já tem a luz)
+function wallTorch(parent, x, y, z, ry, rnd, lightI, pal){
+  const g = new THREE.Group();
+  g.position.set(x, y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.BoxGeometry(0.12, 0.24, 0.06), ironMat, 0, 0, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.025, 0.025, 0.42, 5), ironMat, 0, 0.12, 0.2, 0.9, 0, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.11, 0.05, 0.16, 7), ironMat, 0, 0.3, 0.36);
+  parent.add(g);
+  flameGroup(g, 0, 0.36, 0.36, 0.85, rnd, lightI, pal);
+  return g;
+}
+function brazier(x, z, rnd, lightI, pal, stone){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, new THREE.CylinderGeometry(0.34, 0.42, 0.2, 8), stone || darkStoneMat, 0, 0.1, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.16, 0.22, 0.75, 8), stone || stoneMat, 0, 0.55, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.42, 0.2, 0.26, 10), ironMat, 0, 1.05, 0);
+  for (let i = 0; i < 6; i++){ const a = i * TAU / 6; addMesh(g, new THREE.ConeGeometry(0.03, 0.16, 4), ironMat, Math.cos(a) * 0.4, 1.22, Math.sin(a) * 0.4); }
+  addMesh(g, new THREE.SphereGeometry(0.3, 8, 4), new THREE.MeshBasicMaterial({ color:C(pal ? pal.coal : 0xff5a1a), toneMapped:false }), 0, 1.12, 0, 0, 0, 0, false).scale.y = 0.4;
+  envRoot.add(g);
+  flameGroup(g, 0, 1.16, 0, 1.5, rnd, lightI, pal);
+  return g;
+}
+function crenels(g, mat, len, y, z0, along, thick, x0 = 0){
+  for (let s = -len / 2 + 0.3; s < len / 2 - 0.2; s += 0.8){
+    const geo = worldBox(along === 'z' ? thick : 0.45, 0.5, along === 'z' ? 0.45 : thick);
+    addMesh(g, geo, mat, along === 'z' ? x0 : s, y + 0.25, along === 'z' ? z0 + s : 0);
+  }
+}
+// grade de portcullis encaixada no arco (barras cortadas pela curva)
+function archGate(g, mat, iron, x, zc, wid, hRect, faceDir, dark){
+  const r = wid / 2;
+  const shape = new THREE.Shape();
+  shape.moveTo(-r, 0); shape.lineTo(-r, hRect); shape.absarc(0, hRect, r, Math.PI, 0, true); shape.lineTo(r, 0); shape.closePath();
+  const hole = new THREE.Mesh(new THREE.ShapeGeometry(shape, 12), dark);
+  hole.position.set(x + faceDir * 0.01, 0, zc); hole.rotation.y = faceDir * Math.PI / 2;
+  g.add(hole);
+  for (let u = -r + 0.16; u < r - 0.08; u += 0.28){
+    const h = hRect + Math.sqrt(Math.max(0, r * r - u * u)) - 0.06;
+    addMesh(g, new THREE.BoxGeometry(0.05, h, 0.05), iron, x + faceDir * 0.08, h / 2, zc + u);
+  }
+  for (let y = 0.5; y < hRect + r - 0.2; y += 0.42){
+    const half = y > hRect ? Math.sqrt(Math.max(0, r * r - (y - hRect) * (y - hRect))) : r;
+    addMesh(g, new THREE.BoxGeometry(0.04, 0.04, half * 2 - 0.12), iron, x + faceDir * 0.1, y, zc);
+  }
+  // aduelas do arco e ombreiras
+  const ring = addMesh(g, new THREE.TorusGeometry(r + 0.14, 0.16, 5, 14, Math.PI), mat, x + faceDir * 0.06, hRect, zc, 0, Math.PI / 2, 0);
+  ring.scale.z = 1.6;
+  for (const s of [-1, 1]) addMesh(g, worldBox(0.3, hRect, 0.32), mat, x + faceDir * 0.06, hRect / 2, zc + s * (r + 0.14));
+}
+function tower(x, z, w, h, mat, rnd, o = {}){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, worldBox(w, h, w), mat, 0, h / 2, 0);
+  addMesh(g, worldBox(w + 0.3, 0.3, w + 0.3), o.trim || mat, 0, h + 0.15, 0);
+  for (let s = -w / 2; s <= w / 2 + 0.01; s += w / 3){
+    for (const [dx, dz] of [[s, -w / 2], [s, w / 2], [-w / 2, s], [w / 2, s]]) addMesh(g, worldBox(0.36, 0.45, 0.36), mat, dx, h + 0.52, dz);
+  }
+  for (let i = 0; i < 3; i++) addMesh(g, new THREE.BoxGeometry(0.12, 0.42, 0.05), o.window || new THREE.MeshBasicMaterial({ color:C(0x060606) }), (rnd() - 0.5) * w * 0.6, h * (0.4 + i * 0.18), w / 2 + 0.01, 0, 0, 0, false);
+  if (o.pennant !== false){
+    addMesh(g, new THREE.CylinderGeometry(0.025, 0.025, 1.4, 5), ironMat, 0, h + 1.0, 0);
+    const pm = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.3), new THREE.MeshStandardMaterial({ color:C(o.flag || 0x9a1818), side:THREE.DoubleSide, roughness:0.8 }));
+    pm.position.set(0.36, h + 1.55, 0); g.add(pm);
+  }
+  if (o.dome){ addMesh(g, new THREE.SphereGeometry(w * 0.42, 14, 8, 0, TAU, 0, Math.PI / 2), o.dome, 0, h + 0.3, 0); }
+  return g;
+}
+function cart(x, z, ry){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.BoxGeometry(1.4, 0.1, 0.8), woodMat, 0, 0.42, 0);
+  for (const s of [-1, 1]) addMesh(g, new THREE.BoxGeometry(1.4, 0.24, 0.05), woodMat, 0, 0.58, s * 0.4);
+  addMesh(g, new THREE.BoxGeometry(0.05, 0.24, 0.8), woodMat, -0.7, 0.58, 0);
+  for (const s of [-1, 1]){ addMesh(g, new THREE.TorusGeometry(0.3, 0.045, 5, 12), woodMat, 0.2, 0.3, s * 0.46); addMesh(g, new THREE.BoxGeometry(1.3, 0.05, 0.05), woodMat, 1.25, 0.32, s * 0.25, 0, 0, -0.25); }
+  for (let i = 0; i < 3; i++) addMesh(g, new THREE.CylinderGeometry(0.16, 0.16, 0.36, 8), woodMat, -0.35 + i * 0.32, 0.65, (i - 1) * 0.15, Math.PI / 2, 0, 0);
+  bakeInto(g, envRoot);
+}
+function cannon(x, z, ry, bronze){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.BoxGeometry(0.9, 0.18, 0.4), woodMat, 0, 0.26, 0);
+  for (const s of [-1, 1]) addMesh(g, new THREE.CylinderGeometry(0.22, 0.22, 0.06, 12), woodMat, 0.2, 0.22, s * 0.24, Math.PI / 2, 0, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.1, 0.15, 1.1, 12), bronze, 0.15, 0.48, 0, 0, 0, Math.PI / 2 - 0.2);
+  addMesh(g, new THREE.TorusGeometry(0.12, 0.025, 5, 12), bronze, 0.68, 0.59, 0, 0, Math.PI / 2, 0);
+  addMesh(g, new THREE.SphereGeometry(0.13, 8, 6), bronze, -0.42, 0.42, 0);
+  for (let i = 0; i < 4; i++) addMesh(g, new THREE.SphereGeometry(0.08, 7, 5), ironMat, -0.55 + (i % 2) * 0.16, 0.08 + (i > 1 ? 0.13 : 0), 0.45 + (i % 2 ? 0 : 0.08) - (i > 1 ? 0.04 : 0));
+  bakeInto(g, envRoot);
+}
+function catapult(x, z, ry){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  for (const s of [-1, 1]){
+    addMesh(g, new THREE.BoxGeometry(1.8, 0.14, 0.14), woodMat, 0, 0.22, s * 0.42);
+    addMesh(g, new THREE.BoxGeometry(0.12, 1.1, 0.12), woodMat, -0.15, 0.75, s * 0.42, 0, 0, 0.3);
+    addMesh(g, new THREE.BoxGeometry(0.12, 1.1, 0.12), woodMat, 0.25, 0.75, s * 0.42, 0, 0, -0.3);
+    addMesh(g, new THREE.CylinderGeometry(0.2, 0.2, 0.08, 10), woodMat, -0.7, 0.2, s * 0.5, Math.PI / 2, 0, 0);
+    addMesh(g, new THREE.CylinderGeometry(0.2, 0.2, 0.08, 10), woodMat, 0.7, 0.2, s * 0.5, Math.PI / 2, 0, 0);
+  }
+  addMesh(g, new THREE.BoxGeometry(0.14, 0.14, 0.95), woodMat, 0.05, 1.22, 0);
+  for (const xx of [-0.75, 0.75]) addMesh(g, new THREE.BoxGeometry(0.14, 0.14, 0.95), woodMat, xx, 0.22, 0);
+  addMesh(g, new THREE.BoxGeometry(1.9, 0.1, 0.1), woodMat, -0.3, 1.32, 0, 0, 0, 0.55);
+  addMesh(g, new THREE.CylinderGeometry(0.2, 0.14, 0.12, 8), woodMat, -1.08, 1.86, 0, 0, 0, 0.55);
+  addMesh(g, new THREE.BoxGeometry(0.34, 0.34, 0.34), ironMat, 0.52, 0.86, 0);
+  bakeInto(g, envRoot);
+}
+function ballista(x, z, ry){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  for (let i = 0; i < 3; i++){ const a = i * TAU / 3; addMesh(g, new THREE.BoxGeometry(0.08, 0.9, 0.08), woodMat, Math.cos(a) * 0.3, 0.42, Math.sin(a) * 0.3, Math.sin(a) * 0.35, 0, -Math.cos(a) * 0.35); }
+  addMesh(g, new THREE.BoxGeometry(1.3, 0.1, 0.16), woodMat, 0.1, 0.92, 0, 0, 0, 0.12);
+  addMesh(g, new THREE.TorusGeometry(0.55, 0.035, 5, 14, Math.PI * 0.8), woodMat, 0.55, 0.98, 0, Math.PI / 2, 0, Math.PI * 0.6);
+  addMesh(g, new THREE.CylinderGeometry(0.015, 0.015, 1.2, 4), ironMat, 0.2, 1.0, 0, 0, 0, Math.PI / 2 + 0.12);
+  addMesh(g, new THREE.ConeGeometry(0.04, 0.12, 4), ironMat, 0.82, 1.08, 0, 0, 0, -Math.PI / 2 + 0.12);
+  bakeInto(g, envRoot);
+}
+function armorStand(x, z, ry, steel, shieldTex){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.CylinderGeometry(0.28, 0.32, 0.1, 10), woodMat, 0, 0.05, 0);
+  for (const s of [-1, 1]){ addMesh(g, new THREE.CylinderGeometry(0.07, 0.06, 0.75, 8), steel, s * 0.12, 0.48, 0); addMesh(g, new THREE.BoxGeometry(0.12, 0.08, 0.2), steel, s * 0.12, 0.13, 0.04); }
+  addMesh(g, new THREE.CylinderGeometry(0.2, 0.16, 0.5, 10), steel, 0, 1.08, 0);
+  addMesh(g, new THREE.BoxGeometry(0.36, 0.16, 0.26), steel, 0, 0.88, 0);
+  for (const s of [-1, 1]){ addMesh(g, new THREE.SphereGeometry(0.11, 8, 6), steel, s * 0.25, 1.3, 0); addMesh(g, new THREE.CylinderGeometry(0.05, 0.045, 0.55, 7), steel, s * 0.3, 1.02, 0.02); }
+  addMesh(g, new THREE.SphereGeometry(0.13, 10, 8), steel, 0, 1.52, 0);
+  addMesh(g, new THREE.BoxGeometry(0.2, 0.05, 0.1), new THREE.MeshBasicMaterial({ color:C(0x050505) }), 0, 1.53, 0.1, 0, 0, 0, false);
+  addMesh(g, new THREE.ConeGeometry(0.04, 0.2, 5), steel, 0, 1.72, 0);
+  bakeInto(g, envRoot);
+  // escudo com o brasão, apoiado ao lado
+  const sh = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.62), new THREE.MeshStandardMaterial({ map:shieldTex, alphaTest:0.5, side:THREE.DoubleSide, metalness:0.6, roughness:0.4, envMapIntensity:1 }));
+  const lx = Math.cos(ry) * 0.38, lz = -Math.sin(ry) * 0.38;
+  sh.position.set(x + lx + Math.sin(ry) * 0.15, GROUND_Y + 0.36, z + lz + Math.cos(ry) * 0.15); sh.rotation.set(-0.18, ry, 0); sh.castShadow = true;
+  envRoot.add(sh);
+}
+function shieldTex(o){
+  const c = mkCanvas(128, 160), g = c.getContext('2d');
+  g.beginPath(); g.moveTo(6, 6); g.lineTo(122, 6); g.lineTo(122, 70); g.quadraticCurveTo(122, 130, 64, 156); g.quadraticCurveTo(6, 130, 6, 70); g.closePath();
+  g.fillStyle = o.field; g.fill(); g.lineWidth = 7; g.strokeStyle = o.gold; g.stroke();
+  heraldBeast(g, 60, 82, 1.0, o.gold, true);
+  return canvasTex(c);
+}
+function drainGrate(x, z, ry, iron){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.BoxGeometry(0.95, 0.02, 0.62), new THREE.MeshBasicMaterial({ color:C(0x050505) }), 0, 0.005, 0, 0, 0, 0, false);
+  for (const s of [-1, 1]){ addMesh(g, new THREE.BoxGeometry(0.98, 0.05, 0.05), iron, 0, 0.02, s * 0.3); addMesh(g, new THREE.BoxGeometry(0.05, 0.05, 0.62), iron, s * 0.47, 0.02, 0); }
+  for (let i = -3; i <= 3; i++) addMesh(g, new THREE.BoxGeometry(0.035, 0.04, 0.58), iron, i * 0.12, 0.02, 0);
+  bakeInto(g, envRoot);
+}
+/* a planta do pátio: muralha com portão à esquerda, muro quebrado e máquinas de cerco à direita,
+   muro baixo, arcada e torres ao fundo, braseiros nos cantos do estrado */
+function buildCourtyard(CY, rnd){
+  const W = CY.wall, T = CY.trim || CY.wall, pal = CY.flame;
+  const dark = new THREE.MeshBasicMaterial({ color:C(CY.gateDark || 0x07080a) });
+  // muralha da esquerda (face interna em x = -8.2) com portão em arco e portcullis
+  const L = new THREE.Group();
+  const wx = -8.8, wt = 1.2, wh = 5.4, z0 = -10, z1 = 7.5, gz = -0.6, gw = 2.6, gh = 2.0;
+  addMesh(L, worldBox(wt, wh, z1 - z0), W, wx, GROUND_Y + wh / 2, (z0 + z1) / 2);
+  addMesh(L, worldBox(wt + 0.4, 0.3, z1 - z0), T, wx + 0.1, GROUND_Y + wh + 0.15, (z0 + z1) / 2);
+  crenels(L, W, z1 - z0, GROUND_Y + wh + 0.3, (z0 + z1) / 2, 'z', 0.4, wx + wt / 2 - 0.1);
+  for (const z of [-6.8, -3.6, 2.4, 5.4]) addMesh(L, worldBox(0.5, wh + 0.3, 0.8), T, wx + wt / 2 + 0.2, GROUND_Y + (wh + 0.3) / 2, z);
+  const gate = new THREE.Group(); gate.position.y = GROUND_Y; L.add(gate);
+  archGate(gate, T, ironMat, wx + wt / 2, gz, gw, gh, 1, dark);
+  bakeInto(L, envRoot);
+  wallTorch(envRoot, wx + wt / 2 + 0.45, GROUND_Y + 2.3, -2.4, Math.PI / 2, rnd, CY.torchI || 1.9, pal);
+  wallTorch(envRoot, wx + wt / 2 + 0.45, GROUND_Y + 2.3, 1.2, Math.PI / 2, rnd, CY.torchI || 1.9, pal);
+  for (const z of [-5.2, 3.9]) banner(wx + wt / 2 + 0.06, GROUND_Y + 3.6, z, Math.PI / 2, CY.banner);
+  banner(wx + wt / 2 + 0.06, GROUND_Y + 4.35, gz, Math.PI / 2, CY.banner, 0.7, 1.2);
+  // andaime de madeira encostado na muralha
+  const sc = new THREE.Group();
+  for (const z of [-8.6, -7.4]) for (const dx of [0, 0.7]) addMesh(sc, new THREE.BoxGeometry(0.08, 2.4, 0.08), woodMat, wx + wt / 2 + 0.2 + dx, GROUND_Y + 1.2, z);
+  for (const y of [0.9, 1.8]) addMesh(sc, new THREE.BoxGeometry(0.85, 0.06, 1.4), woodMat, wx + wt / 2 + 0.55, GROUND_Y + y, -8.0);
+  addMesh(sc, new THREE.BoxGeometry(0.06, 0.06, 1.8), woodMat, wx + wt / 2 + 0.9, GROUND_Y + 1.3, -8.0, 0.7, 0, 0);
+  bakeInto(sc, envRoot);
+  cart(-7.2, 5.0, 0.4);
+  cannon(-6.7, 6.7, -0.7, CY.bronze);
+  // direita: muro quebrado, arco arruinado, catapulta, balista, armaduras e uma coluna com tocha
+  const R = new THREE.Group();
+  const rx = 9.0;
+  for (let z = -10; z < -1.6; z += 0.9){ const h = 1.6 + rnd() * 2.6 * (z < -5 ? 1 : 0.6); addMesh(R, worldBox(1.0, h, 0.92), rnd() < 0.5 ? W : T, rx, GROUND_Y + h / 2, z + 0.45, 0, (rnd() - 0.5) * 0.04, 0); }
+  for (const z of [-7.6, -5.2]) addMesh(R, worldBox(0.8, 3.6, 0.8), T, rx - 0.7, GROUND_Y + 1.8, z);
+  addMesh(R, new THREE.TorusGeometry(1.2, 0.22, 5, 12, Math.PI * 0.62), T, rx - 0.7, GROUND_Y + 3.6, -6.4, 0, Math.PI / 2, 0).scale.z = 1.7;
+  for (let i = 0; i < 14; i++) addMesh(R, worldBox(0.2 + rnd() * 0.4, 0.15 + rnd() * 0.25, 0.2 + rnd() * 0.4, 1), rnd() < 0.5 ? W : T, rx - 1.2 - rnd() * 1.4, GROUND_Y + 0.08, -9 + rnd() * 7.5, rnd(), rnd(), rnd());
+  addMesh(R, worldBox(1.0, 5.2, 1.0), T, 8.9, GROUND_Y + 2.6, 3.6);
+  addMesh(R, worldBox(1.3, 0.3, 1.3), W, 8.9, GROUND_Y + 5.35, 3.6);
+  bakeInto(R, envRoot);
+  wallTorch(envRoot, 8.38, GROUND_Y + 2.3, 3.6, -Math.PI / 2, rnd, CY.torchI || 1.9, pal);
+  catapult(7.6, -1.6, -0.5);
+  ballista(7.4, 1.6, 2.6);
+  armorStand(6.2, 4.8, -0.6, CY.steel, CY.shield);
+  armorStand(7.1, 5.6, -0.8, CY.steel, CY.shield);
+  armorStand(7.6, 4.3, -1.0, CY.steel, CY.shield);
+  // fundo: muro baixo com ameias, arcada de pedra, torres com flâmulas
+  const B = new THREE.Group();
+  const bz = -9.4, bh = 2.0;
+  for (const [a, b] of [[-8.2, 1.6], [4.4, 8.5]]){
+    addMesh(B, worldBox(b - a, bh, 0.9), W, (a + b) / 2, GROUND_Y + bh / 2, bz);
+    for (let x = a + 0.3; x < b - 0.2; x += 0.8) addMesh(B, worldBox(0.45, 0.45, 0.9), W, x, GROUND_Y + bh + 0.22, bz);
+  }
+  for (const x of [1.9, 4.1]) addMesh(B, worldBox(0.7, 3.8, 1.1), T, x, GROUND_Y + 1.9, bz);
+  addMesh(B, new THREE.TorusGeometry(1.1, 0.3, 6, 14, Math.PI), T, 3.0, GROUND_Y + 3.6, bz, 0, 0, 0).scale.z = 1.8;
+  addMesh(B, worldBox(3.2, 0.5, 1.2), W, 3.0, GROUND_Y + 5.0, bz);
+  B.add(tower(-8.8, -10.2, 2.6, 7.8, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
+  B.add(tower(-3.4, -12.4, 2.2, 6.4, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
+  B.add(tower(7.2, -12.8, 2.0, 7.0, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
+  bakeInto(B, envRoot);
+  // acampamento além do muro: tendas brancas e bandeirolas
+  const camp = new THREE.Group(), canvasM = new THREE.MeshStandardMaterial({ color:C(CY.tent || 0xd8d0c0), roughness:0.9, flatShading:true });
+  for (let i = 0; i < 9; i++){
+    const x = -6 + i * 1.6 + (rnd() - 0.5) * 0.6, z = -11.2 - rnd() * 2.4, s = 0.7 + rnd() * 0.4;
+    addMesh(camp, new THREE.CylinderGeometry(0.5 * s, 0.55 * s, 0.4 * s, 8), canvasM, x, GROUND_Y + 0.2 * s, z);
+    addMesh(camp, new THREE.ConeGeometry(0.6 * s, 0.7 * s, 8), canvasM, x, GROUND_Y + 0.75 * s, z);
+    if (i % 3 === 0) addMesh(camp, new THREE.CylinderGeometry(0.015, 0.015, 1.4, 4), ironMat, x, GROUND_Y + 0.9, z);
+  }
+  bakeInto(camp, envRoot);
+  // braseiros nos cantos de trás do estrado
+  brazier(-5.35, -5.35, rnd, CY.brazierI || 1.7, pal, CY.brazierStone);
+  brazier(5.35, -5.35, rnd, CY.brazierI || 1.7, pal, CY.brazierStone);
+  // ralos de ferro no calçamento
+  for (const [x, z, ry] of [[-3.4, 6.2, 0], [3.4, 6.2, 0], [-6.6, 3.9, 0.3], [6.9, 2.9, -0.3], [-3.2, -6.4, 0], [3.3, -6.4, 0]]) drainGrate(x, z, ry, ironMat);
+}
+function buildEnvFortress(){
+  const rnd = seeded(113);
+  themeMats({ stone:0x6a6a70, dark:0x3a3a40, iron:0x2c2c30, wood:0x3a2616 });
+  const CY = {
+    wall:blockMat(0x8c94a4), trim:blockMat(0x6c7282),
+    bronze:new THREE.MeshStandardMaterial({ color:C(0xb07a32), metalness:0.9, roughness:0.35, envMapIntensity:1.2 }),
+    steel:new THREE.MeshStandardMaterial({ color:C(0x8a8e96), metalness:0.85, roughness:0.35, envMapIntensity:1.2, flatShading:true }),
+    banner:bannerTex({ field:'#8e1616', dark:'#4a0808', gold:'#e0b24a' }),
+    shield:shieldTex({ field:'#24242a', gold:'#d8a540' }),
+    flag:0x9a1818,
+  };
+  const gm = groundMesh(paintCobbles, 37, 80, 80, 0, 0.88);
+  gm.material.map.repeat.set(30, 30);
+  runeRing(5.08, 5.62, () => 'rgba(255,170,80,1)', 9);
+  buildCourtyard(CY, rnd);
+  graveyard('w', rnd); graveyard('b', rnd);
+  buildBackdrop(paintBackdropFortress);
+  const mm = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.MeshBasicMaterial({ map:mistTex, color:C(0x5a6072), transparent:true, opacity:0.22, depthWrite:false }));
+  mm.rotation.x = -Math.PI / 2; mm.position.y = GROUND_Y + 0.3; mm.renderOrder = 1;
+  envRoot.add(mm); mists.push(mm);
+}
+// céu de tempestade ao anoitecer, com a silhueta de torres, acampamento e aqueduto
+function skyline(g, rnd, w, hz, band, col, o = {}){
+  g.fillStyle = col;
+  const tw = (x, ww, hh, pennant) => {
+    g.fillRect(x, hz - hh, ww, hh);
+    const m = ww / 5;
+    for (let k = 0; k < 5; k += 2) g.fillRect(x + k * m, hz - hh - m, m, m);
+    if (pennant){ g.fillRect(x + ww / 2 - 1, hz - hh - m - 22, 2, 22); g.fillStyle = o.flag || '#7a1616'; g.beginPath(); g.moveTo(x + ww / 2 + 1, hz - hh - m - 22); g.lineTo(x + ww / 2 + 16, hz - hh - m - 18); g.lineTo(x + ww / 2 + 1, hz - hh - m - 14); g.fill(); g.fillStyle = col; }
+    if (o.lit) for (let i = 0; i < 2; i++){ g.fillStyle = o.lit; g.fillRect(x + ww * (0.3 + rnd() * 0.4), hz - hh * (0.3 + rnd() * 0.5), 3, 5); g.fillStyle = col; }
+  };
+  // castelo à esquerda
+  g.fillRect(w * 0.04, hz - band * 0.55, w * 0.32, band * 0.55);
+  for (let x = w * 0.04; x < w * 0.36; x += 12) g.fillRect(x, hz - band * 0.55 - 6, 6, 6);
+  tw(w * 0.06, 34, band * 1.1, true); tw(w * 0.15, 46, band * 1.45, true); tw(w * 0.27, 30, band * 0.95, true); tw(w * 0.34, 38, band * 1.2, true);
+  if (o.domes) for (const x of [w * 0.15 + 23, w * 0.34 + 19]){ g.beginPath(); g.arc(x, hz - band * (x > w * 0.3 ? 1.2 : 1.45) - 8, 18, Math.PI, 0); g.fill(); }
+  // acampamento: tendas claras e fogueiras
+  for (let i = 0; i < 26; i++){
+    const x = w * (0.4 + rnd() * 0.25), s = 6 + rnd() * 8;
+    g.fillStyle = o.tent || '#b8b0a4'; g.beginPath(); g.moveTo(x - s, hz); g.lineTo(x, hz - s * 1.1); g.lineTo(x + s, hz); g.fill();
+    if (rnd() < 0.3){ g.fillStyle = o.fire || 'rgba(255,170,80,.9)'; g.fillRect(x + s * 1.3, hz - 3, 3, 3); }
+  }
+  // aqueduto com arcos à direita
+  g.fillStyle = col;
+  const ax = w * 0.72, aw = w * 0.27, ah = band * 0.7;
+  g.fillRect(ax, hz - ah, aw, ah * 0.2);
+  for (let x = ax; x < ax + aw; x += 46){ g.fillRect(x, hz - ah, 12, ah); }
+  g.save(); g.globalCompositeOperation = 'destination-out';
+  for (let x = ax + 12; x < ax + aw - 20; x += 46){ g.beginPath(); g.arc(x + 17, hz - ah * 0.55, 17, Math.PI, 0); g.lineTo(x + 34, hz); g.lineTo(x, hz); g.fill(); }
+  g.restore();
+  g.fillStyle = col;
+  for (let x = ax; x < ax + aw; x += 46) g.fillRect(x, hz - ah * 0.6, 12, ah * 0.6);
+}
+function paintBackdropFortress(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(127), hz = h * 0.8, band = h * 0.5;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#0d1018'); sky.addColorStop(0.45, '#252b3a'); sky.addColorStop(0.8, '#4c5568'); sky.addColorStop(1, '#8a7a6c');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  for (let i = 0; i < 80; i++){
+    const x = rnd() * w, y = rnd() * hz * 0.75, rx = w * (0.03 + rnd() * 0.08), ry = h * (0.03 + rnd() * 0.06), lit = y / hz;
+    g.fillStyle = `rgba(${Math.round(16 + lit * 40)},${Math.round(18 + lit * 42)},${Math.round(26 + lit * 50)},${0.4 + rnd() * 0.4})`;
+    g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, TAU); g.fill();
+    g.fillStyle = `rgba(150,160,190,${0.04 + lit * 0.08})`;
+    g.beginPath(); g.ellipse(x, y + ry * 0.5, rx * 0.8, ry * 0.3, 0, 0, TAU); g.fill();
+  }
+  ridge(g, rnd, w, hz, band, '#2e3240', 0.12, 0.4);
+  skyline(g, rnd, w, hz, band, '#101218', {});
+  const glow = g.createLinearGradient(0, hz - band * 0.3, 0, hz);
+  glow.addColorStop(0, 'rgba(255,170,100,0)'); glow.addColorStop(1, 'rgba(255,160,90,.18)');
+  g.fillStyle = glow; g.fillRect(0, hz - band * 0.3, w, band * 0.3);
+  g.fillStyle = '#16171b'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
 }
 
 /* Covil dos Dragões */
@@ -1981,43 +2328,293 @@ function buildEnvDragon(){
 }
 /* Fogo x Gelo */
 let GY = null;
+/* Fogo x Gelo: a divisão corre da esquerda para a direita (colunas a–d no fogo, e–h no gelo).
+   O tabuleiro continua de pedra legível; lava e geada só avançam pelas bordas. */
+function frostBranch(g, rnd, x, y, a, len, w, depth){
+  g.lineWidth = w; g.beginPath(); g.moveTo(x, y);
+  for (let i = 0; i < 5; i++){
+    a += (rnd() - 0.5) * 0.6; x += Math.cos(a) * len / 5; y += Math.sin(a) * len / 5; g.lineTo(x, y);
+    if (depth < 2 && rnd() < 0.45){ g.stroke(); frostBranch(g, rnd, x, y, a + (rnd() < 0.5 ? -1 : 1) * (0.6 + rnd() * 0.5), len * 0.45, w * 0.7, depth + 1); g.beginPath(); g.moveTo(x, y); }
+  }
+  g.stroke();
+}
+function paintBoardSplit(map, emis){
+  const g = map.getContext('2d'), e = emis.getContext('2d'), rnd = seeded(43);
+  g.fillStyle = '#1c1a19'; g.fillRect(0, 0, BS, BS);
+  e.fillStyle = '#000'; e.fillRect(0, 0, BS, BS);
+  speckle(g, rnd, 0, 0, BS, BS, 2000, r => `rgba(255,240,220,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.08 + r() * 0.1})`, 3);
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
+    const x = BM + c * BT, y = BM + r * BT, light = (r + c) % 2 === 0, j = (rnd() - 0.5) * 12;
+    const base = light ? [134 + j, 126 + j, 114 + j] : [40 + j * 0.5, 37 + j * 0.5, 34 + j * 0.5];
+    g.fillStyle = `rgb(${base.map(Math.round).join(',')})`; g.fillRect(x, y, BT, BT);
+    speckle(g, rnd, x, y, BT, BT, 240, r2 => `rgba(255,240,215,${0.02 + r2() * 0.05})`, r2 => `rgba(0,0,0,${0.05 + r2() * 0.09})`);
+    g.fillStyle = 'rgba(255,232,200,.09)'; g.fillRect(x, y, BT, 3); g.fillRect(x, y, 3, BT);
+    g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(x, y + BT - 3, BT, 3); g.fillRect(x + BT - 3, y, 3, BT);
+  }
+  // brasa: calor na borda da coluna a e fendas de lava que mal entram nas casas
+  const warm = g.createLinearGradient(0, 0, BM + BT * 1.6, 0);
+  warm.addColorStop(0, 'rgba(255,90,20,.22)'); warm.addColorStop(1, 'rgba(255,90,20,0)');
+  g.fillStyle = warm; g.fillRect(0, 0, BM + BT * 1.6, BS);
+  const lines = [];
+  for (let r = 0; r < 8; r++){
+    const y = BM + r * BT + BT * (0.2 + rnd() * 0.6);
+    lines.push(jagLine(rnd, BM - 30, y, BM + BT * (0.3 + rnd() * 0.6), y + (rnd() - 0.5) * 50, 6, 10));
+    if (rnd() < 0.4) lines.push(tileCrack(rnd, r, 0));
+  }
+  for (let i = 1; i < 8; i++) lines.push(jagLine(rnd, BM + BT * (0.3 + rnd() * 0.5), BM + i * BT, BM - 20, BM + i * BT + (rnd() - 0.5) * 30, 5, 6));
+  lavaLines(g, e, lines, false);
+  // geada: cristais que sobem pela borda da coluna h
+  const cold = g.createLinearGradient(BS, 0, BS - BM - BT * 1.6, 0);
+  cold.addColorStop(0, 'rgba(225,240,255,.3)'); cold.addColorStop(1, 'rgba(225,240,255,0)');
+  g.fillStyle = cold; g.fillRect(BS - BM - BT * 1.6, 0, BM + BT * 1.6, BS);
+  g.lineCap = e.lineCap = 'round';
+  for (let i = 0; i < 26; i++){
+    const y = BM + rnd() * BT * 8, seed = Math.floor(rnd() * 1e6) + 1, len = 50 + rnd() * 90;
+    g.strokeStyle = 'rgba(235,246,255,.7)'; frostBranch(g, seeded(seed), BS - BM + 20, y, Math.PI + (rnd() - 0.5) * 0.8, len, 2.2, 0);
+    e.strokeStyle = 'rgba(110,200,255,.35)'; frostBranch(e, seeded(seed), BS - BM + 20, y, Math.PI + (rnd() - 0.5) * 0.8, len, 1.6, 0);
+  }
+  // moldura: bronze quente à esquerda, aço gelado à direita
+  g.lineWidth = 3;
+  const fr = g.createLinearGradient(BM, 0, BS - BM, 0);
+  fr.addColorStop(0, 'rgba(240,140,60,.75)'); fr.addColorStop(0.5, 'rgba(200,180,150,.5)'); fr.addColorStop(1, 'rgba(200,225,245,.8)');
+  g.strokeStyle = fr; g.strokeRect(BM - 4, BM - 4, BT * 8 + 8, BT * 8 + 8);
+  boardLabels(g, () => 'rgba(237,227,204,.66)', 'rgba(237,227,204,.66)');
+}
+// materiais de uma caixa dividida entre esquerda (fogo, x < 0) e direita (gelo, x > 0)
+// ordem da BoxGeometry: +x, -x, +y, -y, +z, -z (na face -z a imagem corre ao contrário)
+function splitBoxMats(iceHex, fireHex){
+  const tex = (w, h, draw) => { const c = mkCanvas(w, h); draw(c.getContext('2d'), w, h); return canvasTex(c); };
+  const M = o => new THREE.MeshStandardMaterial(Object.assign({ roughness:0.9, flatShading:true, envMapIntensity:0.35 }, o));
+  const ice = hexCss(iceHex), fire = hexCss(fireHex);
+  const lr = fireLeft => M({ map:tex(64, 8, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, w, 0);
+    gr.addColorStop(0, fireLeft ? fire : ice); gr.addColorStop(0.42, fireLeft ? fire : ice); gr.addColorStop(0.58, fireLeft ? ice : fire); gr.addColorStop(1, fireLeft ? ice : fire);
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }) });
+  const top = lr(true);
+  return [M({ color:C(iceHex) }), M({ color:C(fireHex) }), top, top, lr(true), lr(false)];
+}
+function slabMatsSplit(){
+  const rnd = seeded(19);
+  const mk = parts => {
+    const m = mkCanvas(1024, 64), em = mkCanvas(1024, 64);
+    for (const [x0, w, kind] of parts) paintSideKind(m.getContext('2d'), em.getContext('2d'), x0, w, 64, kind, rnd);
+    return new THREE.MeshStandardMaterial({ map:canvasTex(m), emissiveMap:canvasTex(em), emissive:C(0xffffff), emissiveIntensity:0.9, roughness:0.85, envMapIntensity:0.4 });
+  };
+  const cap = splitBoxMats(0x3a4654, 0x2a1e1a)[2];
+  return [mk([[0, 1024, 'ice']]), mk([[0, 1024, 'fire']]), cap, cap, mk([[0, 512, 'fire'], [512, 512, 'ice']]), mk([[0, 512, 'ice'], [512, 512, 'fire']])];
+}
+// pedra com veios de lava (obsidiana) para pilares e torre
+function veinTex(seed){
+  const m = mkCanvas(256, 512), e = mkCanvas(256, 512), g = m.getContext('2d'), x = e.getContext('2d'), rnd = seeded(seed);
+  const lg = g.createLinearGradient(0, 0, 256, 0);
+  lg.addColorStop(0, '#141012'); lg.addColorStop(0.5, '#24201f'); lg.addColorStop(1, '#141012');
+  g.fillStyle = lg; g.fillRect(0, 0, 256, 512);
+  speckle(g, rnd, 0, 0, 256, 512, 1600, r => `rgba(255,230,210,${0.03 + r() * 0.05})`, r => `rgba(0,0,0,${0.15 + r() * 0.15})`, 3);
+  for (let i = 0; i < 30; i++){ g.strokeStyle = `rgba(200,190,200,${0.04 + rnd() * 0.05})`; g.lineWidth = 2; g.beginPath(); const y = rnd() * 512; g.moveTo(0, y); g.lineTo(256, y + (rnd() - 0.5) * 80); g.stroke(); }
+  x.fillStyle = '#000'; x.fillRect(0, 0, 256, 512);
+  const lines = [];
+  for (let i = 0; i < 7; i++){ const x0 = rnd() * 256; lines.push(jagLine(rnd, x0, 512, x0 + (rnd() - 0.5) * 120, 512 * (0.1 + rnd() * 0.6), 9, 26)); }
+  for (let i = 0; i < 6; i++){ const y0 = 512 * (0.5 + rnd() * 0.5); lines.push(jagLine(rnd, rnd() * 256, y0, rnd() * 256, y0 - rnd() * 90, 6, 18)); }
+  lavaLines(g, x, lines, true);
+  const t = canvasTex(m), te = canvasTex(e);
+  return new THREE.MeshStandardMaterial({ map:t, emissiveMap:te, emissive:C(0xffffff), emissiveIntensity:1.1, roughness:0.35, metalness:0.15, envMapIntensity:0.9, flatShading:true });
+}
+function obsidianPillar(x, z, h, mat, rnd){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, new THREE.CylinderGeometry(0.62, 0.78, 0.36, 6), mat, 0, 0.18, 0, 0, rnd(), 0);
+  addMesh(g, new THREE.CylinderGeometry(0.42, 0.52, h, 6), mat, 0, 0.36 + h / 2, 0, (rnd() - 0.5) * 0.05, rnd(), (rnd() - 0.5) * 0.05);
+  addMesh(g, new THREE.CylinderGeometry(0.3, 0.44, 0.4, 6), mat, 0.05, 0.56 + h, 0, 0.25, rnd(), -0.2);
+  for (let i = 0; i < 4; i++) addMesh(g, new THREE.DodecahedronGeometry(0.12 + rnd() * 0.14, 0), mat, (rnd() - 0.5) * 1.6, 0.06, (rnd() - 0.5) * 1.6, rnd(), rnd(), rnd());
+  bakeInto(g, envRoot);
+  glowSprite(envRoot, x, GROUND_Y + 0.25, z, 1.6, 0xff5a18, 0.35);
+}
+// cristal de gelo: degradê azul por vértice, brilho de ambiente forte e arestas acesas (linhas aditivas)
+function crystalCluster(x, z, n, h, rnd, edgeMat){
+  const g = new THREE.Group(), geo = new THREE.OctahedronGeometry(1, 0);
+  for (let i = 0; i < n; i++){
+    const a = i * 2.3 + rnd(), d = i ? 0.2 + rnd() * 0.55 : 0, hh = h * (i ? 0.35 + rnd() * 0.55 : 1), r = 0.14 + rnd() * 0.09 + (i ? 0 : 0.1), t = d > 0 ? 0.38 : 0;
+    const m = new THREE.Mesh(geo, null);
+    m.position.set(Math.cos(a) * d, hh * 0.32, Math.sin(a) * d); m.rotation.set(Math.sin(a) * t, rnd(), -Math.cos(a) * t); m.scale.set(r, hh * 0.5, r * 0.85);
+    g.add(m);
+  }
+  g.updateMatrixWorld(true);
+  const parts = [];
+  g.children.forEach(m => { const q = geo.index ? geo.toNonIndexed() : geo.clone(); q.applyMatrix4(m.matrixWorld); parts.push(q); });
+  let n0 = 0; for (const q of parts) n0 += q.attributes.position.count;
+  const pos = new Float32Array(n0 * 3), col = new Float32Array(n0 * 3);
+  let k = 0;
+  for (const q of parts){ pos.set(q.attributes.position.array, k * 3); k += q.attributes.position.count; q.dispose(); }
+  const lo = C(0x1a4a74), hi = C(0xd8f4ff);
+  for (let i = 0; i < n0; i++){ const f = clamp((pos[i * 3 + 1] + 0.2) / (h * 0.8), 0, 1); col[i * 3] = mix(lo.r, hi.r, f); col[i * 3 + 1] = mix(lo.g, hi.g, f); col[i * 3 + 2] = mix(lo.b, hi.b, f); }
+  const bg = new THREE.BufferGeometry();
+  bg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); bg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  bg.computeVertexNormals();
+  geo.dispose();
+  const solid = new THREE.Mesh(bg, CRYSTAL.mat);
+  solid.position.set(x, GROUND_Y, z); solid.castShadow = true; solid.receiveShadow = true;
+  envRoot.add(solid);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(bg, 20), edgeMat);
+  edges.position.copy(solid.position); edges.renderOrder = 2;
+  envRoot.add(edges);
+  glowSprite(envRoot, x, GROUND_Y + h * 0.4, z, h * 1.4, 0x5fc8ff, 0.22);
+}
+const CRYSTAL = { mat:null };
+function lampPost(x, z, I){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, new THREE.CylinderGeometry(0.16, 0.22, 0.22, 8), ironMat, 0, 0.11, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.04, 0.05, 2.1, 6), ironMat, 0, 1.15, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.15, 0.1, 0.06, 6), ironMat, 0, 2.2, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.02, 0.16, 0.14, 6), ironMat, 0, 2.6, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.11, 0.11, 0.3, 6, 1, true), new THREE.MeshBasicMaterial({ color:C(0xbff0ff), toneMapped:false, transparent:true, opacity:0.85 }), 0, 2.4, 0, 0, 0, 0, false);
+  bakeInto(g, envRoot);
+  glowSprite(envRoot, x, GROUND_Y + 2.4, z, 1.3, 0x7fd8ff, 0.7);
+  lavaLight(x, GROUND_Y + 2.3, z, I, 0x7fc8ff, 9);
+}
+function iceTower(x, z, r, h, mat, roof, win){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, new THREE.CylinderGeometry(r, r * 1.1, h, 10), mat, 0, h / 2, 0);
+  addMesh(g, new THREE.CylinderGeometry(r * 1.2, r * 1.05, 0.3, 10), mat, 0, h + 0.15, 0);
+  addMesh(g, new THREE.ConeGeometry(r * 1.15, h * 0.55, 10), roof, 0, h + 0.3 + h * 0.275, 0);
+  for (let i = 0; i < 3; i++) addMesh(g, new THREE.BoxGeometry(0.14, 0.34, 0.05), win, 0, h * (0.4 + i * 0.17), r * 1.02, 0, 0, 0, false);
+  return g;
+}
+// geiser de fogo: chama alta que irrompe de tempos em tempos
+function geyser(x, z, rnd){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  addMesh(g, new THREE.CylinderGeometry(0.5, 0.75, 0.22, 7), darkStoneMat, 0, 0.11, 0);
+  addMesh(g, new THREE.CircleGeometry(0.36, 10), new THREE.MeshBasicMaterial({ color:C(0xff6a18), toneMapped:false }), 0, 0.23, 0, -Math.PI / 2, 0, 0, false);
+  envRoot.add(g);
+  const f = flameGroup(g, 0, 0.2, 0, 2.6, rnd, 0);
+  ENVX.geysers.push({ f, x, z, ph:rnd() * 9, next:performance.now() + 2000 + rnd() * 6000, t0:-1e9 });
+}
 function buildEnvSplit(){
   const rnd = seeded(71);
-  themeMats({ stone:0x3e3430, dark:0x221c1a, iron:0x34343a, wood:0x1e140e });
-  const iceMat = new THREE.MeshStandardMaterial({ color:C(0x9fd6f0), roughness:0.12, metalness:0.05, transparent:true, opacity:0.86, emissive:C(0x0c3a50), envMapIntensity:1.6, flatShading:true });
-  const snowMat = new THREE.MeshStandardMaterial({ color:C(0xe6eef6), roughness:0.88, flatShading:true, envMapIntensity:0.5 });
-  const frostMat = new THREE.MeshStandardMaterial({ color:C(0x9aaec0), roughness:0.8, flatShading:true, envMapIntensity:0.5 });
-  GY = { ice:iceMat, frost:frostMat };
-  groundMesh(paintGround('#93a8bc', ['rgba(60,90,130,.28)', 'rgba(255,255,255,.3)'], ['rgba(255,255,255,.7)', 'rgba(70,100,140,.35)']), 29, 80, 40, 20, 0.85);
-  groundMesh(paintGround('#1c1412', ['rgba(0,0,0,.42)', 'rgba(120,52,30,.16)'], ['rgba(0,0,0,.5)', 'rgba(160,96,60,.2)']), 31, 80, 40, -20);
-  // faixa de chão molhado onde o gelo derrete contra a brasa
-  const wet = new THREE.Mesh(new THREE.PlaneGeometry(80, 0.9), new THREE.MeshStandardMaterial({ color:C(0x2a3038), roughness:0.25, metalness:0.1, envMapIntensity:0.9 }));
-  wet.rotation.x = -Math.PI / 2; wet.position.set(0, GROUND_Y + 0.006, 0); wet.receiveShadow = true;
-  envRoot.add(wet);
-  scatterRocks(rnd, 170, (col, x, z, r) => { const l = 0.16 + r() * 0.14; return z > 0 ? col.setRGB(l * 1.3, l * 1.5, l * 1.8) : col.setRGB(l * 0.6, l * 0.5, l * 0.45); });
-  // lado do gelo: cristais, montes de neve, luz fria
-  iceCluster(-7.6, 3.8, 7, 2.4, rnd, iceMat); iceCluster(7.6, 3.4, 6, 2.0, rnd, iceMat);
-  iceCluster(-6.0, 6.0, 5, 1.4, rnd, iceMat); iceCluster(5.9, 6.2, 4, 1.2, rnd, iceMat); iceCluster(-9.2, 0.8, 4, 1.6, rnd, iceMat);
-  glowSprite(envRoot, -7.6, GROUND_Y + 1.2, 3.8, 3.2, 0x6fd0ff, 0.28); glowSprite(envRoot, 7.6, GROUND_Y + 1.0, 3.4, 3, 0x6fd0ff, 0.26);
-  lavaLight(-7.2, 1.4, 3.6, 1.5, 0x6fc4ff, 9); lavaLight(7.2, 1.2, 3.4, 1.3, 0x6fc4ff, 9);
-  snowDrifts([[-3.2, 5.7, 1.2, 0.5, 0.1], [0.6, 5.9, 1.5, 0.55, -0.1], [3.8, 5.6, 1.1, 0.45, 0.2], [-6.6, 4.6, 0.9, 0.6, 0.6], [6.7, 4.9, 1.0, 0.7, -0.4], [8.2, 1.6, 0.8, 0.6, 0.3], [-8.2, 2.0, 0.7, 0.9, 0.1], [-1.5, 7.4, 1.6, 0.7, 0]], snowMat);
-  // lado do fogo: braseiros, pilares em chamas, muros chamuscados, veios de lava
-  torch(-5.5, -4.0, rnd); torch(5.5, -4.0, rnd);
-  firePillar(-7.7, -3.4, 1.6, rnd, 1.6); firePillar(7.8, -2.4, 1.2, rnd, 0);
-  wall(-2.6, -6.2, 4.4, 1.5, 0.05, rnd); wall(3.6, -6.0, 2.6, 1.0, -0.12, rnd);
-  basaltCluster(6.4, -5.2, 5, 2.0, rnd);
-  const lm = lavaMat(4, 1, [0.01, 0.003]);
-  for (const [x, z, len, ry] of [[-8.3, -5.6, 3.6, 0.4], [8.6, -6.2, 3.2, -0.3], [2.6, -7.8, 5, 0.05], [-4.0, -8.2, 3.2, -0.12], [-10.5, -1.6, 2.6, 1.2]]) lavaStrip(x, z, len, 0.22, ry, lm);
-  graveyard('w', rnd, 'ice'); graveyard('b', rnd, 'urn');
+  themeMats({ stone:0x3e3634, dark:0x1e1817, iron:0x2e3036, wood:0x1e140e });
+  CRYSTAL.mat = new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.06, metalness:0.15, envMapIntensity:2.2, transparent:true, opacity:0.9, emissive:C(0x0a2a40), flatShading:true });
+  const edgeMat = new THREE.LineBasicMaterial({ color:C(0x9fe6ff), transparent:true, opacity:0.55, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false });
+  const snowMat = new THREE.MeshStandardMaterial({ color:C(0x8296aa), roughness:0.85, flatShading:true, envMapIntensity:0.5 });
+  const frostMat = new THREE.MeshStandardMaterial({ color:C(0x6a7c8e), roughness:0.75, flatShading:true, envMapIntensity:0.6 });
+  const iceStone = blockMat(0xd8ecfa, 0.4);
+  iceStone.emissive = C(0x0c2232);
+  GY = { ice:new THREE.MeshStandardMaterial({ color:C(0x7fb0d0), roughness:0.15, metalness:0.1, transparent:true, opacity:0.88, emissive:C(0x08283a), envMapIntensity:1.6, flatShading:true }), frost:frostMat };
+  // chão: brasa e basalto rachado à esquerda, neve azulada à direita, faixa de lama no meio
+  const fireG = groundMesh(paintGround('#16100e', ['rgba(0,0,0,.45)', 'rgba(120,48,20,.16)'], ['rgba(0,0,0,.5)', 'rgba(160,96,60,.18)']), 31, 40, 80, 0);
+  fireG.position.x = -20;
+  const iceG = groundMesh(paintGround('#5a6a7c', ['rgba(30,50,80,.3)', 'rgba(220,235,255,.18)'], ['rgba(240,248,255,.55)', 'rgba(40,60,90,.3)']), 29, 40, 80, 0, 0.75);
+  iceG.position.x = 20;
+  const sc = mkCanvas(64, 8), sg = sc.getContext('2d'), sgr = sg.createLinearGradient(0, 0, 64, 0);
+  sgr.addColorStop(0, 'rgba(22,16,14,0)'); sgr.addColorStop(0.35, 'rgba(30,26,26,.9)'); sgr.addColorStop(0.65, 'rgba(40,48,58,.9)'); sgr.addColorStop(1, 'rgba(90,106,124,0)');
+  sg.fillStyle = sgr; sg.fillRect(0, 0, 64, 8);
+  const seam = new THREE.Mesh(new THREE.PlaneGeometry(3, 80), new THREE.MeshStandardMaterial({ map:canvasTex(sc), transparent:true, roughness:0.35, envMapIntensity:0.8, depthWrite:false }));
+  seam.rotation.x = -Math.PI / 2; seam.position.set(0, GROUND_Y + 0.006, 0); seam.renderOrder = 1;
+  envRoot.add(seam);
+  // lago congelado ao fundo, à direita
+  const lake = new THREE.Mesh(new THREE.CircleGeometry(1, 28), new THREE.MeshStandardMaterial({ color:C(0x1c3a54), roughness:0.06, metalness:0.3, envMapIntensity:1.8 }));
+  lake.rotation.x = -Math.PI / 2; lake.scale.set(3.4, 2.0, 1); lake.position.set(10.4, GROUND_Y + 0.01, -7.4); lake.receiveShadow = true;
+  envRoot.add(lake);
+  scatterRocks(rnd, 120, (col, x, z, r) => { const l = 0.08 + r() * 0.08; return x > 0 ? col.setRGB(l * 1.6, l * 1.9, l * 2.3) : col.setRGB(l * 0.7, l * 0.55, l * 0.5); }, (x, z) => Math.abs(x) < 1.2 || (x > 5 && z < -3.6));
+  // lado do fogo
+  const vein = veinTex(7);
+  obsidianPillar(-7.2, -5.4, 3.4, vein, rnd); obsidianPillar(-8.6, 2.6, 2.6, vein, rnd); obsidianPillar(-5.6, -8.2, 4.2, vein, rnd);
+  const lm = lavaMat(1.6, 1.6, [0.006, 0.01]);
+  for (const [x, z, r, sx] of [[-9.2, -2.2, 1.1, 1.4], [-6.8, 6.2, 0.8, 1.5]]){
+    const m = new THREE.Mesh(new THREE.CircleGeometry(r, 20), lm);
+    m.rotation.x = -Math.PI / 2; m.scale.set(sx, 1, 1); m.position.set(x, GROUND_Y + 0.014, z); m.renderOrder = 1;
+    envRoot.add(m);
+    glowSprite(envRoot, x, GROUND_Y + 0.4, z, r * 3.4, 0xff6a20, 0.3);
+  }
+  const lr = lavaMat(5, 1, [0.012, 0.004]);
+  lavaStrip(-8.8, -7.6, 6, 0.5, 0.25, lr); lavaStrip(-10.6, 1.2, 4, 0.35, 1.3, lr);
+  lavaLight(-9.0, GROUND_Y + 0.3, -2.4, 1.5);
+  torch(-5.5, -4.0, rnd); torch(-5.6, 4.0, rnd);
+  geyser(-9.6, -4.8, rnd); geyser(-10.2, 4.6, rnd);
+  dragonSkeleton(-8.4, 0.6, Math.PI + 0.3, rnd, new THREE.MeshStandardMaterial({ color:C(0x4a3c34), roughness:0.8, flatShading:true, envMapIntensity:0.4 }));
+  // lado do gelo
+  crystalCluster(7.3, 3.8, 8, 3.2, rnd, edgeMat); crystalCluster(6.4, -7.2, 7, 2.8, rnd, edgeMat); crystalCluster(9.6, 5.2, 5, 2.0, rnd, edgeMat);
+  dragonSkeleton(8.4, -0.4, 0.3, rnd, new THREE.MeshStandardMaterial({ color:C(0xc4d2de), roughness:0.55, emissive:C(0x061420), flatShading:true, envMapIntensity:0.8 }));
+  snowDrifts([[6.0, 5.8, 1.2, 0.6, 0.2], [8.4, 1.8, 0.8, 0.7, 0.3], [5.4, -6.4, 1.0, 0.6, 0], [10.4, -2.6, 1.4, 1.0, 0.4]], snowMat);
+  lampPost(5.5, -4.0, 1.4); lampPost(5.6, 4.0, 1.4);
+  const roof = new THREE.MeshStandardMaterial({ color:C(0x9cc8e6), roughness:0.2, metalness:0.1, envMapIntensity:1.4, flatShading:true });
+  const win = new THREE.MeshBasicMaterial({ color:C(0x8fe0ff), toneMapped:false });
+  const castle = new THREE.Group();
+  castle.add(iceTower(6.4, -10.6, 0.8, 4.4, iceStone, roof, win), iceTower(9.0, -11.6, 1.0, 5.6, iceStone, roof, win), iceTower(11.6, -10.4, 0.7, 3.8, iceStone, roof, win));
+  addMesh(castle, worldBox(6, 2.4, 0.8), iceStone, 9.0, GROUND_Y + 1.2, -10.8);
+  for (let x = 6.3; x < 11.8; x += 0.8) addMesh(castle, worldBox(0.4, 0.4, 0.8), iceStone, x, GROUND_Y + 2.6, -10.8);
+  bakeInto(castle, envRoot);
+  // torre escura em ruínas, iluminada pela lava, ao fundo à esquerda
+  const tw = new THREE.Group();
+  addMesh(tw, new THREE.CylinderGeometry(1.1, 1.3, 4.6, 8), vein, -7.6, GROUND_Y + 2.3, -10.2);
+  for (let i = 0; i < 8; i++){ if (i % 3 === 1) continue; const a = i * TAU / 8; addMesh(tw, new THREE.BoxGeometry(0.4, 0.5 + (i % 2) * 0.4, 0.4), vein, -7.6 + Math.cos(a) * 1.05, GROUND_Y + 4.85, -10.2 + Math.sin(a) * 1.05, 0, -a, 0); }
+  bakeInto(tw, envRoot);
+  // graves: urnas no lado do fogo (Aurora, à esquerda), túmulos gelados no lado do gelo (Legião)
+  graveyard('w', rnd, 'urn'); graveyard('b', rnd, 'ice');
+  // faixa de runas na frente do tabuleiro: laranja à esquerda, ciano à direita
+  const band = new THREE.PlaneGeometry(10.4, 0.5); band.rotateX(-Math.PI / 2);
+  const bm = new THREE.Mesh(band, runeBandMat(10.4, u => u < 0.5 ? 'rgba(255,130,50,1)' : 'rgba(110,210,255,1)', 17));
+  bm.position.set(0, GROUND_Y + 0.008, 5.45); envRoot.add(bm);
   buildBackdrop(paintBackdropSplit);
-  paintAurora(boltCanvas.getContext('2d'), 0, boltCanvas.width * 0.56, boltCanvas.height * 0.8, seeded(5), 1.4);
+  paintAurora(boltCanvas.getContext('2d'), boltCanvas.width * 0.46, boltCanvas.width, boltCanvas.height * 0.8, seeded(5), 1.4);
   boltTex.needsUpdate = true;
   ENVX.aurora = true;
   for (let i = 0; i < 2; i++){
-    const mm = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x6a4a42 : 0x8aa0b8), transparent:true, opacity:i ? 0.26 : 0.36, depthWrite:false }));
+    const mm = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x5a4440 : 0x6a7a90), transparent:true, opacity:i ? 0.2 : 0.26, depthWrite:false }));
     mm.rotation.x = -Math.PI / 2; mm.position.y = GROUND_Y + 0.25 + i * 0.35; mm.renderOrder = 1;
     envRoot.add(mm); mists.push(mm);
   }
+}
+// céu dividido: vulcão e brasa à esquerda, aurora boreal sobre picos gelados à direita, fundidos no centro
+function icePeaks(g, rnd, w, hz, band, x0, x1, tall, light, shade){
+  let x = x0;
+  while (x < x1){
+    const pw = w * (0.04 + rnd() * 0.06), ph = band * tall * (0.5 + rnd() * 0.5), px = x + pw / 2;
+    g.fillStyle = shade; g.beginPath(); g.moveTo(x, hz); g.lineTo(px, hz - ph); g.lineTo(x + pw, hz); g.fill();
+    g.fillStyle = light; g.beginPath(); g.moveTo(px, hz - ph); g.lineTo(px - pw * 0.18, hz - ph * 0.62); g.lineTo(px - pw * 0.05, hz - ph * 0.7); g.lineTo(px + pw * 0.05, hz - ph * 0.55); g.lineTo(px + pw * 0.22, hz - ph * 0.64); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.moveTo(x, hz); g.lineTo(px, hz - ph); g.lineTo(px, hz); g.fill();
+    x += pw * (0.55 + rnd() * 0.3);
+  }
+}
+function paintBackdropSplit(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(97), hz = h * 0.8, band = h * 0.5;
+  // lado do fogo
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#160705'); sky.addColorStop(0.45, '#4a140a'); sky.addColorStop(0.8, '#b8481a'); sky.addColorStop(1, '#ff8a2a');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  smokeClouds(g, rnd, w * 0.6, hz, h, 60, '255,120,40');
+  ridge(g, rnd, w, hz, band, '#3a1610', 0.2, 0.45, 0, w * 0.62);
+  volcano(g, rnd, w, hz, band, w * 0.2, w * 0.15, 1.3);
+  volcano(g, rnd, w, hz, band, w * 0.42, w * 0.08, 0.75);
+  ridge(g, rnd, w, hz, band, '#140807', 0.06, 0.2, 0, w * 0.62);
+  const glow = g.createLinearGradient(0, hz - band * 0.45, 0, hz);
+  glow.addColorStop(0, 'rgba(255,100,30,0)'); glow.addColorStop(1, 'rgba(255,90,20,.45)');
+  g.fillStyle = glow; g.fillRect(0, hz - band * 0.45, w * 0.62, band * 0.45);
+  // lado do gelo, numa tela à parte, fundido por um degradê horizontal largo
+  const c2 = mkCanvas(w, h), f = c2.getContext('2d');
+  const sky2 = f.createLinearGradient(0, 0, 0, hz);
+  sky2.addColorStop(0, '#04070f'); sky2.addColorStop(0.55, '#0c1e2e'); sky2.addColorStop(1, '#3a6478');
+  f.fillStyle = sky2; f.fillRect(0, 0, w, hz);
+  for (let i = 0; i < 260; i++){ f.fillStyle = `rgba(255,255,255,${0.2 + rnd() * 0.6})`; f.fillRect(w * 0.38 + rnd() * w * 0.62, rnd() * hz * 0.7, 1 + (rnd() < 0.1 ? 1 : 0), 1); }
+  paintAurora(f, w * 0.4, w, hz, rnd, 1);
+  icePeaks(f, rnd, w, hz, band, w * 0.36, w, 1.0, '#e6f2fa', '#6a8aa4');
+  icePeaks(f, rnd, w, hz, band, w * 0.4, w, 0.55, '#c8dcea', '#3c5468');
+  f.fillStyle = 'rgba(160,210,240,.12)'; f.fillRect(w * 0.36, hz - band * 0.12, w * 0.64, band * 0.12);
+  f.globalCompositeOperation = 'destination-in';
+  const mk = f.createLinearGradient(w * 0.4, 0, w * 0.6, 0);
+  mk.addColorStop(0, 'rgba(0,0,0,0)'); mk.addColorStop(1, 'rgba(0,0,0,1)');
+  f.fillStyle = mk; f.fillRect(0, 0, w, h);
+  g.drawImage(c2, 0, 0);
+  // vapor na linha de encontro
+  const st = g.createRadialGradient(w * 0.5, hz, 0, w * 0.5, hz, band * 1.1);
+  st.addColorStop(0, 'rgba(210,220,230,.35)'); st.addColorStop(1, 'rgba(210,220,230,0)');
+  g.fillStyle = st; g.fillRect(w * 0.3, hz - band * 1.1, w * 0.4, band * 1.1);
+  const gr = g.createLinearGradient(0, 0, w, 0);
+  gr.addColorStop(0, '#1c0e0a'); gr.addColorStop(0.5, '#1a1a1e'); gr.addColorStop(1, '#202c38');
+  g.fillStyle = gr; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
 }
 
 /* céus temáticos */
@@ -2106,38 +2703,6 @@ function paintAurora(g, x0, x1, hz, rnd, alpha){
   g.globalCompositeOperation = 'source-over';
 }
 // céu dividido: aurora boreal sobre picos gelados à esquerda, brilho vulcânico à direita
-function paintBackdropSplit(c){
-  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(97), hz = h * 0.8, band = h * 0.5;
-  const sky = g.createLinearGradient(0, 0, 0, hz);
-  sky.addColorStop(0, '#050914'); sky.addColorStop(0.55, '#0e2434'); sky.addColorStop(1, '#4c7c92');
-  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
-  for (let i = 0; i < 220; i++){ g.fillStyle = `rgba(255,255,255,${0.2 + rnd() * 0.6})`; g.fillRect(rnd() * w * 0.62, rnd() * hz * 0.7, 1 + (rnd() < 0.1 ? 1 : 0), 1); }
-  paintAurora(g, 0, w * 0.6, hz, rnd, 1);
-  ridge(g, rnd, w, hz, band, '#8aa4ba', 0.35, 0.95, 0, w * 0.66, true);
-  g.fillStyle = 'rgba(255,255,255,.55)';
-  ridge(g, rnd, w, hz, band, 'rgba(240,248,255,.35)', 0.5, 0.9, 0, w * 0.6, true);
-  ridge(g, rnd, w, hz, band, '#3e5468', 0.1, 0.32, 0, w * 0.7);
-  const c2 = mkCanvas(w, h), f = c2.getContext('2d');
-  const sky2 = f.createLinearGradient(0, 0, 0, hz);
-  sky2.addColorStop(0, '#160705'); sky2.addColorStop(0.45, '#4a140a'); sky2.addColorStop(0.8, '#c84c16'); sky2.addColorStop(1, '#ff8a2a');
-  f.fillStyle = sky2; f.fillRect(0, 0, w, hz);
-  smokeClouds(f, rnd, w, hz, h, 60, '255,120,40');
-  ridge(f, rnd, w, hz, band, '#3a1610', 0.2, 0.45, w * 0.35, w);
-  volcano(f, rnd, w, hz, band, w * 0.8, w * 0.16, 1.2);
-  ridge(f, rnd, w, hz, band, '#140807', 0.06, 0.2, w * 0.35, w);
-  const glow = f.createLinearGradient(0, hz - band * 0.45, 0, hz);
-  glow.addColorStop(0, 'rgba(255,100,30,0)'); glow.addColorStop(1, 'rgba(255,90,20,.45)');
-  f.fillStyle = glow; f.fillRect(0, hz - band * 0.45, w, band * 0.45);
-  f.globalCompositeOperation = 'destination-in';
-  const mk = f.createLinearGradient(w * 0.44, 0, w * 0.62, 0);
-  mk.addColorStop(0, 'rgba(0,0,0,0)'); mk.addColorStop(1, 'rgba(0,0,0,1)');
-  f.fillStyle = mk; f.fillRect(0, 0, w, h);
-  g.drawImage(c2, 0, 0);
-  const gr = g.createLinearGradient(0, 0, w, 0);
-  gr.addColorStop(0, '#202c38'); gr.addColorStop(0.5, '#1a1a1e'); gr.addColorStop(1, '#1c0e0a');
-  g.fillStyle = gr; g.fillRect(0, hz, w, h - hz);
-  bdFade(g, w, h);
-}
 // silhueta de dragão que plana pelo céu distante (corpo e asas separados, para bater as asas)
 function makeGlider(){
   const W = 1.5, mkT = draw => { const c = mkCanvas(256, 64), g = c.getContext('2d'); g.fillStyle = '#fff'; draw(g); return canvasTex(c); };
@@ -2625,7 +3190,7 @@ const CLIPS = {
   death:{ dur:440, key:1, ch:'death' },
 };
 const RING_COL = { w:0xf0b450, b:0xe8344a };
-const RING_SET = { std:{ w:0xf0b450, b:0xe8344a }, gelo:{ w:0x7fe0ff, b:0xff6a1a } };
+const RING_SET = { std:{ w:0xf0b450, b:0xe8344a } };
 let ringGeo = null;
 // partes comuns: anel da facção, sombra de contato, giro para o alvo
 function shell(side){
@@ -3002,26 +3567,9 @@ function propFrames(scene, type){
 }
 const PROPM = {};
 function propMats(side){
-  const pk = arena === 'gelo' ? side + 'g' : side;
+  const pk = side;
   if (PROPM[pk]) return PROPM[pk];
   const b = side === 'b';
-  if (arena === 'gelo') return (PROPM[pk] = b ? {
-    steel:new THREE.MeshStandardMaterial({ color:C(0x3c3434), metalness:0.85, roughness:0.32, envMapIntensity:1.3 }),
-    gold:new THREE.MeshStandardMaterial({ color:C(0x8a3a14), metalness:0.8, roughness:0.35, envMapIntensity:1.3, emissive:C(0x3a0c02) }),
-    wood:new THREE.MeshStandardMaterial({ color:C(0x24160f), roughness:0.8 }),
-    face:new THREE.MeshStandardMaterial({ color:C(0x3a1608), roughness:0.7 }),
-    gem:new THREE.MeshBasicMaterial({ color:C(0xff6a1a), toneMapped:false }),
-    flame:new THREE.MeshBasicMaterial({ color:C(0xff6a1a), toneMapped:false }),
-    hex:0xff5a1a,
-  } : {
-    steel:new THREE.MeshStandardMaterial({ color:C(0xdce8f2), metalness:0.85, roughness:0.22, envMapIntensity:1.4 }),
-    gold:new THREE.MeshStandardMaterial({ color:C(0xa8c8e0), metalness:0.85, roughness:0.25, envMapIntensity:1.4, emissive:C(0x06303e) }),
-    wood:new THREE.MeshStandardMaterial({ color:C(0x8a9cae), roughness:0.75 }),
-    face:new THREE.MeshStandardMaterial({ color:C(0xeaf4fa), roughness:0.6 }),
-    gem:new THREE.MeshBasicMaterial({ color:C(0x5fd8ff), toneMapped:false }),
-    flame:new THREE.MeshBasicMaterial({ color:C(0x9fe8ff), toneMapped:false }),
-    hex:0x7fe0ff,
-  });
   return (PROPM[pk] = {
     steel:new THREE.MeshStandardMaterial({ color:C(b ? 0x4a4b52 : 0xc9ced6), metalness:0.85, roughness:0.3, envMapIntensity:1.3 }),
     gold:new THREE.MeshStandardMaterial({ color:C(b ? 0x6a3a22 : 0xd8a540), metalness:0.85, roughness:0.32, envMapIntensity:1.3 }),
@@ -3104,41 +3652,28 @@ async function loadModels(){
 
 /* Tinta do lado: a Legião usa os mesmos modelos, escurecidos para ferro, osso e carmesim.
    Rig procedural: tinge as cores por vértice. GLB: clona cada material uma vez (cache) e tinge cor e emissivo. */
-// tinta por lado e por arena: a Legião escura e vermelha; no Fogo x Gelo, a Aurora vira gelo (prata azulada,
-// brilho ciano) e a Legião vira brasa (vermelho-laranja). A Aurora das outras arenas fica na paleta original.
+// tinta da Legião (escura e vermelha); a Aurora fica na paleta original em todas as arenas
 const TINTS = {
   b:{ mul:0x5a3a3a, k:2.3, glow:0xff2a3c, emis:0x180306, desat:0, gk:[1.05, 1.6, 1.4] },
-  ice:{ mul:0xd8eaf8, k:1.22, glow:0x8fe8ff, emis:0x06303e, desat:0.9, gk:[1.0, 1.0, 1.0] },
-  fire:{ mul:0x704030, k:2.3, glow:0xff6a1a, emis:0x3c0e02, desat:0.1, gk:[1.0, 1.3, 1.6] },
 };
-const tintId = side => arena === 'gelo' ? (side === 'w' ? 'ice' : 'fire') : side === 'b' ? 'b' : null;
+const tintId = side => side === 'b' ? 'b' : null;
 const SIDE_TINT = { prof:{}, cache:new Map() };
 function tintProfile(id){
   if (SIDE_TINT.prof[id]) return SIDE_TINT.prof[id];
   const D = TINTS[id];
   return (SIDE_TINT.prof[id] = { T:C(D.mul).multiplyScalar(D.k), G0:C(D.glow), E:C(D.emis), desat:D.desat, gk:D.gk });
 }
-// texturas dos GLB: dessatura e tinge no shader (a cor do material sozinha não tira o dourado)
-function desatHook(t, id, P){
-  const T = P.T, v = `vec3(${T.r.toFixed(4)}, ${T.g.toFixed(4)}, ${T.b.toFixed(4)})`, d = P.desat.toFixed(3);
-  t.onBeforeCompile = sh => {
-    sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114))), ${d}) * ${v};`);
-  };
-  t.customProgramCacheKey = () => 'tint-' + id;
-  const base = Object.getPrototypeOf(t).clone;
-  t.clone = function(){ const c = base.call(this); c.onBeforeCompile = this.onBeforeCompile; c.customProgramCacheKey = this.customProgramCacheKey; c.clone = this.clone; return c; };
-}
 function applySideTint(obj, side){
   const id = tintId(side);
   if (!id) return obj;
-  const P = tintProfile(id), T = P.T, G0 = P.G0, gk = P.gk, dz = P.desat;
+  const P = tintProfile(id), T = P.T, G0 = P.G0, gk = P.gk;
   let cache = SIDE_TINT.cache.get(id);
   if (!cache) SIDE_TINT.cache.set(id, cache = new Map());
   const tinted = m => {
     let t = cache.get(m);
     if (!t){
       t = m.clone();
-      if (t.color){ if (dz > 0) desatHook(t, id, P); else t.color.multiply(T); }
+      if (t.color) t.color.multiply(T);
       if (t.emissive){ t.emissive.copy(P.E); t.userData.baseEmissive = P.E.getHex(); }
       cache.set(m, t);
     }
@@ -3157,9 +3692,6 @@ function applySideTint(obj, side){
           if (glowy){
             const l = Math.max(a[i], a[i + 1], a[i + 2]);
             a[i] = G0.r * l * gk[0]; a[i + 1] = G0.g * l * gk[1] + 0.02 * l; a[i + 2] = G0.b * l * gk[2];
-          } else if (dz > 0){
-            const l = 0.299 * a[i] + 0.587 * a[i + 1] + 0.114 * a[i + 2];
-            a[i] = mix(a[i], l, dz) * T.r; a[i + 1] = mix(a[i + 1], l, dz) * T.g; a[i + 2] = mix(a[i + 2], l, dz) * T.b;
           } else { a[i] *= T.r; a[i + 1] *= T.g; a[i + 2] *= T.b; }
         }
         g.attributes.color.needsUpdate = true;
@@ -3774,16 +4306,16 @@ function applyArenaColors(){
   const gl = arena === 'gelo';
   for (const s0 of ['w', 'b']){
     FXC[s0] = Object.assign({}, FXC_BASE[s0], gl ? FXC_GELO[s0] : null);
-    RING_COL[s0] = (gl ? RING_SET.gelo : RING_SET.std)[s0];
-    CINE_COL[s0] = (gl ? CINE_SET.gelo : CINE_SET.std)[s0];
+    RING_COL[s0] = RING_SET.std[s0];
+    CINE_COL[s0] = CINE_SET.std[s0];
   }
   for (const k of ['rcw', 'rcb']) if (TEXC[k]){ TEXC[k].dispose(); delete TEXC[k]; }
   tileBlend();
 }
-// destaques das casas: aditivos somem sobre o gelo claro, então no Fogo x Gelo usam mistura normal
+// destaques das casas: aditivos por padrão; uma arena de chão claro pode pedir mistura normal (tileNormal)
 function tileBlend(){
   if (!TILE.move) return;
-  const gl = arena === 'gelo';
+  const gl = !!AR().tileNormal;
   for (const k of ['move', 'atk', 'check', 'sel']){ const m = TILE[k].mat; m.blending = gl ? THREE.NormalBlending : THREE.AdditiveBlending; m.opacity = gl ? 0.9 : 1; m.needsUpdate = true; }
 }
 // estilhaços de gelo nos golpes da Aurora (Fogo x Gelo)
@@ -4296,7 +4828,7 @@ async function play(ev){
 /* ---------- Câmera de combate: close dramático em cada captura ---------- */
 const CINE_CAP = { p:'LANÇA FIEL', n:'CARGA IMPLACÁVEL', b:'ARCANO SUPREMO', r:'FÚRIA DA TERRA', q:'JULGAMENTO DO RAIO', k:'LÂMINA REAL' };
 const CINE_COL = { w:0xffb347, b:0xff3048 };
-const CINE_SET = { std:{ w:0xffb347, b:0xff3048 }, gelo:{ w:0x8fe8ff, b:0xff5a1a } };
+const CINE_SET = { std:{ w:0xffb347, b:0xff3048 } };
 const cine = { mode:'full', active:false, k:0, kT:0, skip:false, slowUntil:0, slowTs:1, pos:null, look:null, occ:new Set(), victim:null, fighters:[], mate:false };
 const cineEl = document.getElementById('cine'), cineCap = document.getElementById('cine-cap'), cineFlash = document.getElementById('cine-flash'), cineLive = document.getElementById('cine-live');
 const realWait = ms => new Promise(r => setTimeout(r, ms));
@@ -4458,7 +4990,7 @@ function extent(){
   return [x, y0, y1];
 }
 function fitFor(yaw, pitch, aerial){
-  const key = `${W}x${H}:${yaw.toFixed(3)}:${pitch}`;
+  const key = `${arena}:${W}x${H}:${yaw.toFixed(3)}:${pitch}`;
   if (fitCache.has(key)) return fitCache.get(key);
   camera.clearViewOffset(); camera.fov = cam.fov; camera.updateProjectionMatrix();
   const top = aerial ? 0.075 : W < 560 ? 0.11 : 0.15, ytop = 1 - 2 * top, ybot = -0.97, xm = 0.97;
@@ -4470,10 +5002,13 @@ function fitFor(yaw, pitch, aerial){
     const [x, y0, y1] = extent();
     if (x <= xm && y1 - y0 <= ytop - ybot) hi = r.D; else lo = r.D;
   }
-  r.D = hi; placeRig(r);
+  // algumas arenas pedem mais cenário em volta (só em telas largas: no celular o tabuleiro continua cheio)
+  const cA = AR().cam, wide = !aerial && cA && W >= 560;
+  r.D = wide ? hi * cA.pad : hi; placeRig(r);
   const [, y0, y1] = extent();
-  // Padrão encosta no topo reservado; Aérea fica centrada
-  const res = { D:hi, offY:aerial ? (ytop - y1 - (ytop - ybot - (y1 - y0)) / 2) * H / 2 : (ytop - y1) * H / 2, ytop };
+  // Padrão encosta no topo reservado; Aérea fica centrada; nas arenas largas, o tabuleiro desce um pouco
+  const free = ytop - ybot - (y1 - y0);
+  const res = { D:r.D, offY:aerial ? (ytop - y1 - free / 2) * H / 2 : wide ? (ytop - y1 - free * cA.drop) * H / 2 : (ytop - y1) * H / 2, ytop:wide ? cA.hz - 0.07 : ytop };
   if (fitCache.size > 200) fitCache.clear();
   fitCache.set(key, res);
   projDirty = true;
@@ -4483,8 +5018,9 @@ function desiredRig(){
   const flipY = VIEW.flip ? Math.PI : 0;
   if (VIEW.mode === 'drone') return { yaw:VIEW.droneYaw, pitch:VIEW.dronePitch, D:VIEW.droneD, tx:VIEW.panX, tz:VIEW.panZ, offY:0, ytop:0.7 };
   if (VIEW.mode === 'aerial'){ const f = fitFor(flipY, PITCH.aerial, true); return { yaw:flipY, pitch:PITCH.aerial, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop }; }
-  const yaw = cam.yawT + flipY, f = fitFor(yaw, PITCH.std, false);
-  return { yaw, pitch:PITCH.std, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop };
+  const P0 = AR().cam && W >= 560 ? AR().cam.pitch : PITCH.std;
+  const yaw = cam.yawT + flipY, f = fitFor(yaw, P0, false);
+  return { yaw, pitch:P0, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop };
 }
 function fitCamera(){
   if (!GLOK || !W) return;
@@ -4650,8 +5186,14 @@ function updateEnv(now, dt){
     tch.halo.material.opacity = 0.45 + (f - 0.86) * 1.2;
     if (!RM && Math.random() < dt * 0.004){
       const wp = tch.f.getWorldPosition(_p);
-      sparks.emit(wp.x + (Math.random() - 0.5) * 0.1, wp.y + 0.35, wp.z + (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.3, 0.6 + Math.random() * 0.6, (Math.random() - 0.5) * 0.3, 1600, 0.04, '#ffb050', 1, 0.05, 0.7, 1);
+      sparks.emit(wp.x + (Math.random() - 0.5) * 0.1, wp.y + 0.35, wp.z + (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.3, 0.6 + Math.random() * 0.6, (Math.random() - 0.5) * 0.3, 1600, 0.04, tch.spark, 1, 0.05, 0.7, 1);
     }
+  }
+  for (const gy of ENVX.geysers){
+    if (!RM && now > gy.next){ gy.t0 = now; gy.next = now + 5000 + Math.random() * 7000; }
+    const k = (now - gy.t0) / 1600, e = k > 0 && k < 1 ? Math.sin(Math.PI * Math.min(1, k * 1.6)) * (1 - k * 0.4) : 0;
+    gy.f.scale.set(2.6 * (0.7 + 0.3 * e), 2.6 * (0.55 + 2.6 * e), 2.6 * (0.7 + 0.3 * e));
+    if (e > 0.3 && Math.random() < dt * 0.05) sparks.emit(gy.x + (Math.random() - 0.5) * 0.4, GROUND_Y + 0.5 + Math.random() * 2.5 * e, gy.z + (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.8, 1.5 + Math.random() * 2, (Math.random() - 0.5) * 0.8, 1400, 0.06, Math.random() < 0.5 ? '#ffd080' : '#ff6a20', 1, -2, 0.7, 1);
   }
   boardMat.emissiveIntensity = RM ? 1 : 0.9 + 0.2 * Math.sin(t * 0.9);
   for (let i = 0; i < mists.length; i++) mists[i].rotation.z = t * (i ? -0.012 : 0.008);
@@ -4662,32 +5204,31 @@ function updateEnv(now, dt){
     emberAcc += dt * (dr ? 0.035 : gl ? 0.014 : 0.012);
     while (emberAcc > 1){
       emberAcc -= 1;
-      const x = (Math.random() - 0.5) * 18, z = gl ? -0.4 - Math.random() * 8 : (Math.random() - 0.5) * 14 - 1;
+      const x = gl ? -0.6 - Math.random() * 11 : (Math.random() - 0.5) * 18, z = (Math.random() - 0.5) * 14 - 1;
       sparks.emit(x, GROUND_Y + 0.1, z, (Math.random() - 0.5) * 0.2, 0.25 + Math.random() * 0.45, (Math.random() - 0.5) * 0.2, 4500 + Math.random() * 2500, 0.035 + Math.random() * 0.035, Math.random() < 0.5 ? (dr ? '#ff8a30' : '#e3963c') : '#ff6a28', 0.9, 0.02, 0.9, 1);
     }
-    ashAcc += dt * (dr ? 0.034 : gl ? 0.012 : 0.03);
+    ashAcc += dt * (A.ash != null ? A.ash : dr ? 0.034 : gl ? 0.012 : 0.03);
     while (ashAcc > 1){
       ashAcc -= 1;
-      const z = gl ? -0.4 - Math.random() * 8 : (Math.random() - 0.5) * 14 - 1;
-      const col = dr ? (Math.random() < 0.5 ? '#6e625a' : '#3e3632') : Math.random() < 0.5 ? '#b9ada0' : '#8d8479';
-      dust.emit((Math.random() - 0.5) * 16, 4 + Math.random() * 2, z, 0.15 + Math.random() * 0.15, -0.35 - Math.random() * 0.25, (Math.random() - 0.5) * 0.15, 9000, 0.03 + Math.random() * 0.03, col, 0.75, 0, 0.95);
+      const z = (Math.random() - 0.5) * 14 - 1, x = gl ? -0.6 - Math.random() * 10 : (Math.random() - 0.5) * 16;
+      const col = dr || gl ? (Math.random() < 0.5 ? '#6e625a' : '#3e3632') : Math.random() < 0.5 ? '#b9ada0' : '#8d8479';
+      dust.emit(x, 4 + Math.random() * 2, z, 0.15 + Math.random() * 0.15, -0.35 - Math.random() * 0.25, (Math.random() - 0.5) * 0.15, 9000, 0.03 + Math.random() * 0.03, col, 0.75, 0, 0.95);
     }
     if (gl){
       snowAcc += dt * 0.03;
       while (snowAcc > 1){
         snowAcc -= 1;
-        dust.emit((Math.random() - 0.5) * 18, 4 + Math.random() * 2, 0.3 + Math.random() * 9, (Math.random() - 0.5) * 0.25, -0.3 - Math.random() * 0.2, (Math.random() - 0.5) * 0.15, 9000, 0.035 + Math.random() * 0.03, Math.random() < 0.7 ? '#f4f9ff' : '#cfe4f4', 0.9, 0, 0.95);
+        dust.emit(0.6 + Math.random() * 11, 4 + Math.random() * 2, (Math.random() - 0.5) * 14 - 1, (Math.random() - 0.5) * 0.25, -0.3 - Math.random() * 0.2, (Math.random() - 0.5) * 0.15, 9000, 0.035 + Math.random() * 0.03, Math.random() < 0.7 ? '#f4f9ff' : '#cfe4f4', 0.9, 0, 0.95);
       }
-      // vapor onde as metades se encontram (quase todo fora do tabuleiro, para não cobrir as peças)
-      steamAcc += dt * 0.012;
+      // vapor onde o fogo encontra o gelo: na linha do meio, atrás do tabuleiro (não cobre as peças)
+      steamAcc += dt * 0.014;
       while (steamAcc > 1){
         steamAcc -= 1;
-        const s = Math.random() < 0.5 ? -1 : 1, on = Math.random() < 0.25, x = s * (on ? 4.35 + Math.random() * 0.5 : 5 + Math.random() * 8);
-        dust.emit(x, on ? 0.02 : GROUND_Y + 0.05, (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.12, 0.25 + Math.random() * 0.2, (Math.random() - 0.5) * 0.08, 2600, 0.28 + Math.random() * 0.22, '#e6eef4', 0.2, 0.12, 0.6);
+        dust.emit((Math.random() - 0.5) * 1.6, GROUND_Y + 0.05, -5 - Math.random() * 7, (Math.random() - 0.5) * 0.12, 0.25 + Math.random() * 0.2, (Math.random() - 0.5) * 0.08, 2600, 0.28 + Math.random() * 0.22, '#e6eef4', 0.2, 0.12, 0.6);
       }
     }
-    if (arena === 'medieval' && !bolt && now > nextBolt){
-      drawBolt();
+    if (A.bolts && !bolt && now > nextBolt){
+      drawBolt(A.bolts[0], A.bolts[1]);
       bolt = { t0:now };
       nextBolt = now + 7000 + Math.random() * 9000;
     }
@@ -5641,6 +6182,7 @@ function applyArena(){
     if (BD.last != null){ backdrop.visible = !(VIEW.mode === 'aerial' && rig.pitch > 1.3); placeBackdrop(BD.last); }
     if (S) buildChars();
     if (PV.ok) PV.key = '';
+    fitCache.clear(); projDirty = true;
   }
   arenaAudio(1.5);
   if (S) renderCard();
