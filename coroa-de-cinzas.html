@@ -205,6 +205,8 @@ canvas{display:block; width:100%}
 body[data-arena="fortaleza"]{--glow-top:#1a1e2a; --glow-low:#24140e}
 body[data-arena="zodiaco"]{--glow-top:#141c44; --glow-low:#1c1040}
 body[data-arena="multiverso"]{--glow-top:#221446; --glow-low:#2a0e3a}
+body[data-arena="infernal"]{--glow-top:#2a0a12; --glow-low:#3a0c06}
+body[data-arena="celestial"]{--glow-top:#18284a; --glow-low:#1a2238}
 body[data-arena="dragoes"]{--glow-top:#331509; --glow-low:#3a0d06}
 body[data-arena="gelo"]{--glow-top:#132230; --glow-low:#3a1208}
 .unit-view canvas{display:block; width:100%; touch-action:pan-y; cursor:grab}
@@ -299,6 +301,10 @@ details.rules[open] summary::before{content:"▾ "}
           <optgroup label="Místicas">
             <option value="zodiaco">Zodíaco</option>
             <option value="multiverso">Multiverso</option>
+            <option value="infernal">Mistério Infernal</option>
+          </optgroup>
+          <optgroup label="Divinas">
+            <option value="celestial">Celestial</option>
           </optgroup>
         </select>
       </div>
@@ -769,7 +775,7 @@ const ARENAS = {
     win:'O Rei da Legião Cinzenta não tem para onde fugir. As estrelas se alinham com a Aurora.',
     lose:'O seu Rei está cercado. Os astros viram as costas para a Aurora.',
     tail:' Sob o disco do zodíaco, as constelações seguem girando.' },
-  multiverso:{ name:'Multiverso', fog:0x0a061c, near:24, far:56, exposure:1.25, bright:true, dais:true, boardGlow:0xb08aff, sideGlow:0x9a6aff,
+  multiverso:{ name:'Multiverso', graveLift:0.35, fog:0x0a061c, near:24, far:56, exposure:1.25, bright:true, dais:true, boardGlow:0xb08aff, sideGlow:0x9a6aff,
     hemi:[0x8a86b8, 0x2a1a4a, 0.7], moon:[0xd4ccf0, 1.3], warm:[0xff5ac8, 0.4],
     env:[['#5a3aa0', 0], ['#1a1040', 0.42], ['#3a1a50', 0.55], ['#06041a', 1]],
     envSpots:[[30, 64, 12, '#ff7ac8'], [100, 62, 10, '#7ae0ff'], [170, 64, 12, '#a07aff'], [230, 62, 10, '#4affb0'], [80, 18, 34, '#c8a0ff']],
@@ -778,13 +784,31 @@ const ARENAS = {
     win:'O Rei da Legião Cinzenta não tem para onde fugir. Em todos os mundos, a Aurora vence.',
     lose:'O seu Rei está cercado. Os portais se fecham sobre a Aurora.',
     tail:' Pelos fragmentos do chão, outros mundos continuam olhando.' },
+  infernal:{ name:'Mistério Infernal', fog:0x120608, near:22, far:52, exposure:1.2, bright:true, dais:true, boardGlow:0xff6a2a,
+    hemi:[0x8a7a8a, 0x3a1a14, 0.62], moon:[0xe8d8d4, 1.3], warm:[0xff4a1a, 0.5], warmPos:[0, 3, -10],
+    env:[['#4a2030', 0], ['#1a0a10', 0.42], ['#6a1a0a', 0.55], ['#0a0404', 1]],
+    envSpots:[[30, 64, 14, '#ff6a20'], [100, 62, 10, '#ff3a10'], [170, 64, 14, '#ff6a20'], [230, 62, 10, '#a04aff'], [80, 18, 30, '#a06a8a']],
+    music:'musica_infernal', amb:'ambiente_infernal', bolts:[0.5, 0.95], boltCol:['rgba(220,170,255,.95)', 'rgba(170,80,255,1)'], ash:0.02,
+    cam:{ pitch:0.64, pad:1.35, drop:0.5, hz:0.86 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. Os selos se apagam diante da Aurora.',
+    lose:'O seu Rei está cercado. O portal negro se abre para a Legião.',
+    tail:' Entre as lajes de obsidiana, a lava continua pulsando.' },
+  celestial:{ name:'Celestial', fog:0x101a30, near:24, far:58, exposure:1.25, bright:true, dais:true, boardGlow:0x8ac8ff, sideGlow:0x6aa8ff,
+    hemi:[0xa8bce8, 0x3a3a50, 0.8], moon:[0xd8e4ff, 1.45], warm:[0xffd27a, 0.35], warmPos:[-6, 6, -6],
+    env:[['#8aa8e0', 0], ['#2a3a60', 0.42], ['#5a5a70', 0.55], ['#101828', 1]],
+    envSpots:[[30, 64, 12, '#7ab8ff'], [100, 62, 10, '#ffd27a'], [170, 64, 12, '#7ab8ff'], [230, 62, 10, '#ffd27a'], [80, 18, 34, '#e0ecff']],
+    music:'musica_celestial', amb:'ambiente_celestial', bolts:[0.55, 0.95], ash:0,
+    cam:{ pitch:0.64, pad:1.35, drop:0.5, hz:0.86 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. Os céus coroam a Aurora.',
+    lose:'O seu Rei está cercado. Até as estrelas se curvam à Legião.',
+    tail:' Sobre o mármore, os selos de ouro seguem brilhando.' },
 };
 let arena = 'fortaleza', arenaPending = null;
 try { const a = localStorage.getItem(ARENA_KEY); if (ARENAS[a]) arena = a; } catch (e){}
 const AR = () => ARENAS[arena];
 let envRoot = null, envRT = null, warmL = null;
 // estado animado da arena: texturas de lava, luzes que pulsam, dragão no céu, rajadas de fogo
-const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
+const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], orbs:[], bob:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
 function mkCanvas(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function canvasTex(c, srgb = true){
   const t = new THREE.CanvasTexture(c);
@@ -1165,7 +1189,7 @@ function buildEnvMedieval(){
 // cemitérios: um canteiro por exército, no flanco do lado de quem perdeu as peças
 // estilo: 'stone' (lápides, Ruínas), 'urn' (urnas de cinzas) ou 'ice' (túmulos congelados)
 const GRAVE = { w:{ x:-5.75, z0:-0.45, dir:1, face:Math.PI / 2 }, b:{ x:5.75, z0:0.45, dir:-1, face:-Math.PI / 2 } };
-function graveyard(side, rnd, style = 'stone'){
+function graveyard(side, rnd, style = 'stone', opt = {}){
   const G0 = GRAVE[side], g = new THREE.Group(), ice = style === 'ice', urn = style === 'urn';
   // cores das chamas: Aurora âmbar e Legião vermelha; no Fogo x Gelo, gelo frio e brasa laranja
   const fireSide = arena === 'gelo' && urn;
@@ -1237,6 +1261,13 @@ function graveyard(side, rnd, style = 'stone'){
   const mist = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 4.2), new THREE.MeshBasicMaterial({ map:glowTex, color:C(ice ? 0xa8bccc : urn ? 0x6a5a52 : 0x8a8a96), transparent:true, opacity:0.16, depthWrite:false }));
   mist.rotation.x = -Math.PI / 2; mist.position.y = 0.2; mist.renderOrder = 1;
   g.add(mist);
+  // no Multiverso o canteiro flutua sobre uma ilha de pedra
+  if (opt.island){
+    g.position.y += opt.island;
+    const rock = floatingRock(1.25, 2.2, 1.6, darkStoneMat, rnd);
+    rock.position.y = 0; g.add(rock);
+    glowSprite(g, 0, -0.9, 0, 3, 0x8a6aff, 0.25);
+  }
   envRoot.add(g);
 }
 function addMesh(parent, geo, mat, x, y, z, rx = 0, ry = 0, rz = 0, shadow = true){
@@ -1439,7 +1470,8 @@ function drawBolt(x0 = 0.1, x1 = 0.9){
     }
     g.lineWidth = wid; g.stroke();
   };
-  g.strokeStyle = 'rgba(220,228,255,.95)'; g.shadowColor = 'rgba(170,185,255,1)'; g.shadowBlur = 14;
+  const bc = AR().boltCol || ['rgba(220,228,255,.95)', 'rgba(170,185,255,1)'];
+  g.strokeStyle = bc[0]; g.shadowColor = bc[1]; g.shadowBlur = 14;
   seg(w * (x0 + Math.random() * (x1 - x0)), 0, 11, (Math.random() - 0.5) * 0.4, 0, 3);
   boltTex.needsUpdate = true;
 }
@@ -1460,7 +1492,7 @@ function buildArena(){
   envRoot.name = 'arena';
   world.add(envRoot);
   torches.length = 0; mists.length = 0;
-  ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0;
+  ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0; ENVX.orbs.length = 0; ENVX.bob.length = 0;
   ENVX.repaint = null; ENVX.onCapture = null;
   ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false;
   const now = performance.now();
@@ -1525,6 +1557,8 @@ function buildEnvironment(){
   else if (arena === 'fortaleza') buildEnvFortress();
   else if (arena === 'zodiaco') buildEnvZodiac();
   else if (arena === 'multiverso') buildEnvMulti();
+  else if (arena === 'infernal') buildEnvInfernal();
+  else if (arena === 'celestial') buildEnvCelestial();
   else buildEnvMedieval();
 }
 
@@ -2799,9 +2833,335 @@ function buildEnvMulti(){
   portalRing(8.6, -5.0, -Math.PI / 2 + 0.25, CY.trim);
   // portal verde e violeta dentro da arcada do fundo
   swirlDisc(envRoot, 3.0, GROUND_Y + 2.2, -9.3, 1.05, '#3aff9a', '#e0c8ff', 77);
-  graveyard('w', rnd); graveyard('b', rnd);
+  graveyard('w', rnd, 'stone', { island:0.35 }); graveyard('b', rnd, 'stone', { island:0.35 });
   buildBackdrop(c => paintBackdropNight(c, { seed:161, sky:[[0, '#07031a'], [0.5, '#24104e'], [0.85, '#4a2478'], [1, '#7a4a9a']], neb:22, nebCols:['rgba(180,80,255,.22)', 'rgba(255,80,200,.16)', 'rgba(80,140,255,.16)'],
     galaxies:[[0.18, 0.28, 60, 0.55, 'rgba(200,160,255,.6)'], [0.74, 0.18, 46, 0.45, 'rgba(160,200,255,.6)']], hill:'#1c1040', silhouette:'#0a0618', ground:'#08061a' }));
+}
+
+/* Santuários (Mistério Infernal e Celestial): o mesmo pátio, com chão de lajes partidas e selos acesos.
+   O Infernal é obsidiana com lava; o Celestial, o espelho claro, é mármore com veios de ouro e juntas azuis. */
+// lajes irregulares: uma grade torta de cantos, cada laje encolhida para abrir as juntas que brilham
+function paintSlabs(map, emis, o){
+  const g = map.getContext('2d'), e = emis.getContext('2d'), N = map.width, rnd = seeded(o.seed);
+  const n = o.cells, step = N / n, P = [];
+  for (let j = 0; j <= n; j++){ P.push([]); for (let i = 0; i <= n; i++){ const edge = i === 0 || j === 0 || i === n || j === n; P[j].push([i * step + (edge ? 0 : (rnd() - 0.5) * step * 0.5), j * step + (edge ? 0 : (rnd() - 0.5) * step * 0.5)]); } }
+  g.fillStyle = o.seam; g.fillRect(0, 0, N, N);
+  const eg = e.createRadialGradient(N / 2, N / 2, 0, N / 2, N / 2, N * 0.7);
+  eg.addColorStop(0, o.glow); eg.addColorStop(1, o.glowFar);
+  e.fillStyle = eg; e.fillRect(0, 0, N, N);
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++){
+    const q = [P[j][i], P[j][i + 1], P[j + 1][i + 1], P[j + 1][i]], cx = q.reduce((a, p) => a + p[0], 0) / 4, cy = q.reduce((a, p) => a + p[1], 0) / 4;
+    const k = 0.95 - rnd() * 0.025, pts = q.map(p => [cx + (p[0] - cx) * k, cy + (p[1] - cy) * k]);
+    const path = ctx => { ctx.beginPath(); pts.forEach((p, m) => m ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); };
+    const l = rnd(), lg = g.createLinearGradient(pts[0][0], pts[0][1], pts[2][0], pts[2][1]);
+    lg.addColorStop(0, o.slab[0]); lg.addColorStop(0.5 + (l - 0.5) * 0.4, o.slab[1]); lg.addColorStop(1, o.slab[2]);
+    path(g); g.fillStyle = lg; g.fill();
+    g.save(); path(g); g.clip();
+    for (let v = 0; v < o.veins; v++){ g.strokeStyle = o.vein[v % o.vein.length]; strokePts(g, jagLine(rnd, cx + (rnd() - 0.5) * step, cy + (rnd() - 0.5) * step, cx + (rnd() - 0.5) * step * 1.4, cy + (rnd() - 0.5) * step * 1.4, 8, step * 0.18), 1 + rnd() * 1.6); }
+    speckle(g, rnd, cx - step, cy - step, step * 2, step * 2, 160, r => `rgba(255,255,255,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.06 + r() * 0.1})`, 2);
+    g.restore();
+    path(e); e.fillStyle = '#000'; e.fill();
+  }
+}
+function slabFloor(o){
+  const N = 2048, map = mkCanvas(N, N), emis = mkCanvas(N, N);
+  paintSlabs(map, emis, o);
+  const tm = canvasTex(map), te = canvasTex(emis);
+  tm.anisotropy = te.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const mat = new THREE.MeshStandardMaterial({ map:tm, emissiveMap:te, emissive:C(0xffffff), emissiveIntensity:o.ei, roughness:o.rough, metalness:o.metal || 0.1, envMapIntensity:o.env || 0.8 });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(o.size, o.size), mat);
+  m.rotation.x = -Math.PI / 2; m.position.y = GROUND_Y + 0.004; m.receiveShadow = true;
+  envRoot.add(m);
+  ENVX.twinkle.push({ m:mat, base:o.ei, ph:0, sp:0.9 });
+  return mat;
+}
+// selos: círculos rúnicos, sigilos, pentagrama com glifos, sol e lua, estrela
+function sealCanvas(kind, col, col2, seed){
+  const S = 512, c = mkCanvas(S, S), g = c.getContext('2d'), rnd = seeded(seed), m = S / 2;
+  g.translate(m, m); g.lineCap = g.lineJoin = 'round';
+  g.shadowColor = col; g.shadowBlur = 14; g.strokeStyle = col; g.fillStyle = col;
+  const ring = (r, w) => { g.lineWidth = w; g.beginPath(); g.arc(0, 0, r, 0, TAU); g.stroke(); };
+  const star = (n, r, skip) => { g.beginPath(); for (let i = 0; i <= n; i++){ const a = (i * skip) * TAU / n - Math.PI / 2; const x = Math.cos(a) * r, y = Math.sin(a) * r; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); };
+  ring(236, 6); ring(214, 3);
+  if (kind === 'pentagrama'){
+    star(5, 200, 2); g.lineWidth = 3; ring(150, 3);
+    g.lineWidth = 5; for (let i = 0; i < 12; i++){ const a = i * TAU / 12; g.save(); g.rotate(a); zodiacGlyph(g, i, 0, -182, 11); g.restore(); }
+  } else if (kind === 'solLua'){
+    g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 70, 0, TAU); g.stroke();
+    for (let i = 0; i < 16; i++){ const a = i * TAU / 16; g.beginPath(); g.moveTo(Math.cos(a) * 86, Math.sin(a) * 86); g.lineTo(Math.cos(a) * (i % 2 ? 130 : 160), Math.sin(a) * (i % 2 ? 130 : 160)); g.stroke(); }
+    g.strokeStyle = col2; g.shadowColor = col2; g.lineWidth = 6;
+    g.beginPath(); g.arc(-10, 0, 44, Math.PI * 0.35, Math.PI * 1.65); g.quadraticCurveTo(-34, 0, 10 + Math.cos(Math.PI * 0.35) * 44 - 20, Math.sin(Math.PI * 0.35) * 44); g.stroke();
+    g.lineWidth = 3; ring(190, 3);
+  } else if (kind === 'estrela'){
+    star(8, 190, 3); g.lineWidth = 3; ring(120, 3); star(4, 110, 1);
+  } else if (kind === 'sigilo'){
+    g.lineWidth = 6;
+    const pts = []; for (let i = 0; i < 6; i++) pts.push([(rnd() - 0.5) * 300, (rnd() - 0.5) * 300]);
+    g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.stroke();
+    for (const p of pts){ g.beginPath(); g.arc(p[0], p[1], 10, 0, TAU); g.stroke(); }
+    g.beginPath(); g.moveTo(-160, 0); g.lineTo(160, 0); g.stroke();
+  } else {
+    g.lineWidth = 4; ring(150, 3);
+    rune(g, 0, 0, 160, seeded(seed + 1));
+  }
+  // anel de runas na borda
+  g.lineWidth = 3;
+  for (let i = 0; i < 20; i++){ const a = i * TAU / 20; g.save(); g.rotate(a); rune(g, 0, -225, 16, seeded(seed * 7 + i)); g.restore(); }
+  return c;
+}
+function seal(x, z, r, kind, o, seed){
+  const t = canvasTex(sealCanvas(kind, o.col, o.col2 || o.col, seed));
+  const mat = new THREE.MeshBasicMaterial({ map:t, transparent:true, opacity:o.op || 0.85, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false, color:C(0xffffff) });
+  const geo = new THREE.PlaneGeometry(r * 2, r * 2); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, GROUND_Y + 0.015, z); m.rotation.y = (seed % 7) * 0.4; m.renderOrder = 2;
+  envRoot.add(m);
+  return { x, z, r, mat };
+}
+function sealFlare(seals, x, z, sound, hex){
+  let best = seals[0], bd = 1e9;
+  for (const s0 of seals){ const d = (s0.x - x) ** 2 + (s0.z - z) ** 2; if (d < bd){ bd = d; best = s0; } }
+  snd(sound, { vol:0.85 });
+  if (GLOK){ sparks.burst(new THREE.Vector3(best.x, GROUND_Y + 0.2, best.z), 26, ['#ffffff', '#' + new THREE.Color(hex).getHexString()], 2.2, { life:700, size:0.07, grav:-1, upward:true }); flashLight(new THREE.Vector3(best.x, 0.4, best.z), hex, 3, 700); }
+  tween(1500, k => { const f = Math.sin(Math.PI * Math.min(1, k * 1.3)); best.mat.opacity = 0.85 + f * 0.15; best.mat.color.setScalar(1 + f * 2.2); }, linE);
+}
+// estátuas: figura encapuzada segurando um orbe aceso
+function hoodedStatue(x, z, ry, mat, orbHex, h = 1){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry; g.scale.setScalar(h);
+  addMesh(g, new THREE.CylinderGeometry(0.42, 0.5, 0.25, 8), mat, 0, 0.12, 0);
+  addMesh(g, new THREE.ConeGeometry(0.42, 1.5, 9), mat, 0, 1.0, 0);
+  addMesh(g, new THREE.SphereGeometry(0.24, 10, 8, 0, TAU, 0, Math.PI * 0.62), mat, 0, 1.7, 0, -0.2, 0, 0).scale.set(1, 1.25, 1.1);
+  addMesh(g, new THREE.SphereGeometry(0.15, 8, 6), new THREE.MeshBasicMaterial({ color:C(0x050407) }), 0, 1.62, 0.09, 0, 0, 0, false).scale.set(1, 1.2, 0.6);
+  for (const s of [-1, 1]) addMesh(g, new THREE.CylinderGeometry(0.07, 0.11, 0.6, 7), mat, s * 0.2, 1.25, 0.2, -1.1, 0, -s * 0.35);
+  bakeInto(g, envRoot);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.13 * h, 14, 10), new THREE.MeshBasicMaterial({ color:C(orbHex), toneMapped:false }));
+  const wp = new THREE.Vector3(0, 1.22 * h, 0.5 * h).applyAxisAngle(UP, ry).add(new THREE.Vector3(x, GROUND_Y, z));
+  orb.position.copy(wp); envRoot.add(orb);
+  const halo = glowSprite(envRoot, wp.x, wp.y, wp.z, 0.9 * h, orbHex, 0.7);
+  ENVX.orbs.push({ halo, base:0.7, ph:Math.random() * 10 });
+}
+// leão de chifres em pedra (reaproveita a anatomia do leão de cristal)
+function hornedLion(x, z, ry, mat, hornMat, top){
+  const g = new THREE.Group();
+  g.position.set(x, top, z); g.rotation.y = ry; g.scale.setScalar(1.05);
+  const P = [[CG.box(), [0, 0.72, 0], [0, 0, 0.05], [1.15, 0.46, 0.46]], [CG.dod(), [0.42, 0.85, 0], null, [0.36, 0.38, 0.34]],
+    [CG.dod(), [0.7, 1.12, 0], [0.3, 0.2, 0], [0.34, 0.34, 0.32]], [CG.ico(), [0.86, 1.1, 0], null, [0.18, 0.17, 0.16]],
+    [CG.box(), [0.42, 0.28, 0.15], [0, 0, 0.1], [0.14, 0.56, 0.14]], [CG.box(), [0.42, 0.28, -0.15], [0, 0, 0.1], [0.14, 0.56, 0.14]],
+    [CG.box(), [-0.42, 0.28, 0.15], [0, 0, -0.15], [0.16, 0.56, 0.16]], [CG.box(), [-0.42, 0.28, -0.15], [0, 0, -0.15], [0.16, 0.56, 0.16]],
+    [CG.cyl(), [-0.78, 0.95, 0], [0, 0, 0.9], [0.04, 0.62, 0.04]]];
+  for (const [geo, p, r, s] of P) addMesh(g, geo, mat, ...p, ...(r || [0, 0, 0])).scale.set(...s);
+  for (const s of [-1, 1]) addMesh(g, new THREE.ConeGeometry(0.06, 0.42, 6), hornMat, 0.72, 1.4, s * 0.12, s * 0.5, 0, -0.5);
+  bakeInto(g, envRoot);
+}
+// globo armilar: esfera com anéis que giram devagar; espinhos no Infernal, constelações de ouro no Celestial
+function armillary(x, z, r, sphereMat, ringMat, spikes){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z);
+  const st = new THREE.Group();
+  addMesh(st, new THREE.CylinderGeometry(0.6, 0.75, 0.3, 10), darkStoneMat, 0, 0.15, 0);
+  addMesh(st, new THREE.CylinderGeometry(0.12, 0.22, 1.0, 8), ringMat, 0, 0.8, 0);
+  bakeInto(st, g);
+  const hub = new THREE.Group(); hub.position.y = 1.3 + r; g.add(hub);
+  const sp = new THREE.Mesh(new THREE.SphereGeometry(r * 0.78, 28, 18), sphereMat); sp.castShadow = true; hub.add(sp);
+  ENVX.spin.push({ o:sp, ax:'y', v:0.00008 });
+  for (const [rr, tilt, ax, v] of [[1.0, 0.4, 'y', 0.00014], [1.08, 1.2, 'x', -0.0001], [0.94, -0.7, 'z', 0.00012]]){
+    const ring = new THREE.Group(), t = new THREE.Mesh(new THREE.TorusGeometry(r * rr, 0.04, 6, 48), ringMat);
+    ring.add(t); t.rotation.set(tilt, 0, tilt * 0.4);
+    if (spikes) for (let i = 0; i < 14; i++){ const a = i * TAU / 14, c = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.22, 5), ringMat); c.position.set(Math.cos(a) * r * rr, Math.sin(a) * r * rr, 0); c.rotation.z = a - Math.PI / 2; t.add(c); }
+    hub.add(ring); ENVX.spin.push({ o:ring, ax, v });
+  }
+  envRoot.add(g);
+}
+function globeTex(sea, line, star, seed){
+  const c = mkCanvas(1024, 512), g = c.getContext('2d'), rnd = seeded(seed);
+  g.fillStyle = sea; g.fillRect(0, 0, 1024, 512);
+  for (let i = 0; i < 9; i++) drawConstellation(g, constellationPts(i), 60 + rnd() * 900, 80 + rnd() * 350, 120, rnd() * TAU, star, line);
+  g.strokeStyle = line; g.lineWidth = 2; for (let y = 64; y < 512; y += 64){ g.beginPath(); g.moveTo(0, y); g.lineTo(1024, y); g.stroke(); }
+  for (let x = 0; x < 1024; x += 85){ g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 512); g.stroke(); }
+  return canvasTex(c);
+}
+function orbPedestal(x, z, mat, orbHex, r = 0.22){
+  const top = pedestal(x, z, 0.3, 0.75, mat);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), new THREE.MeshStandardMaterial({ color:C(orbHex), emissive:C(orbHex), emissiveIntensity:0.9, roughness:0.15, metalness:0.2, envMapIntensity:1.5 }));
+  orb.position.set(x, top + r, z); orb.castShadow = true; envRoot.add(orb);
+  const halo = glowSprite(envRoot, x, top + r, z, 1.0, orbHex, 0.5);
+  ENVX.orbs.push({ halo, base:0.5, ph:Math.random() * 10 });
+}
+function skulls(list, mat){
+  const g = new THREE.Group(), dark = new THREE.MeshBasicMaterial({ color:C(0x060505) });
+  for (const [x, z, ry, s] of list){
+    const k = new THREE.Group(); k.position.set(x, GROUND_Y, z); k.rotation.y = ry; k.scale.setScalar(s); g.add(k);
+    addMesh(k, new THREE.SphereGeometry(0.12, 9, 7), mat, 0, 0.11, 0).scale.set(1, 0.9, 1.15);
+    addMesh(k, new THREE.BoxGeometry(0.13, 0.05, 0.1), mat, 0, 0.03, 0.08);
+    for (const sx of [-1, 1]) addMesh(k, new THREE.SphereGeometry(0.03, 5, 4), dark, sx * 0.045, 0.12, 0.11, 0, 0, 0, false);
+    addMesh(k, new THREE.CylinderGeometry(0.02, 0.02, 0.36, 5), mat, 0.2, 0.02, 0.05, Math.PI / 2, 0.6, 0);
+  }
+  bakeInto(g, envRoot);
+}
+// corrente de elos pesada pendurada entre dois pontos (catenária)
+function chain(a, b, sag, mat){
+  const g = new THREE.Group(), link = new THREE.TorusGeometry(0.07, 0.02, 4, 8), n = Math.round(a.distanceTo(b) / 0.13);
+  for (let i = 0; i < n; i++){
+    const k = i / (n - 1), p = new THREE.Vector3().lerpVectors(a, b, k); p.y -= sag * 4 * k * (1 - k);
+    const q = new THREE.Vector3().lerpVectors(a, b, Math.min(1, k + 0.01)); q.y -= sag * 4 * Math.min(1, k + 0.01) * (1 - Math.min(1, k + 0.01));
+    const m = new THREE.Mesh(link, mat); m.position.copy(p); m.lookAt(q); m.rotateZ(i % 2 ? Math.PI / 2 : 0); g.add(m);
+  }
+  bakeInto(g, envRoot);
+}
+function portalGate(x, z, frameMat, runeHex, c1, c2, seed){
+  const g = new THREE.Group();
+  addMesh(g, worldBox(0.7, 3.4, 0.9), frameMat, x - 1.35, GROUND_Y + 1.7, z);
+  addMesh(g, worldBox(0.7, 3.4, 0.9), frameMat, x + 1.35, GROUND_Y + 1.7, z);
+  addMesh(g, new THREE.TorusGeometry(1.35, 0.32, 6, 18, Math.PI), frameMat, x, GROUND_Y + 3.4, z).scale.z = 1.4;
+  addMesh(g, worldBox(3.6, 0.4, 1.0), frameMat, x, GROUND_Y + 0.2, z);
+  bakeInto(g, envRoot);
+  const rt = mkCanvas(1024, 64), rg = rt.getContext('2d');
+  rg.strokeStyle = '#fff'; rg.lineWidth = 4; rg.lineCap = 'round';
+  for (let i = 0; i < 24; i++) rune(rg, (i + 0.5) * 1024 / 24, 32, 34, seeded(seed * 3 + i));
+  const rm = new THREE.MeshBasicMaterial({ map:canvasTex(rt), color:C(runeHex), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false, side:THREE.DoubleSide });
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.09, 4, 32, Math.PI), rm);
+  arch.position.set(x, GROUND_Y + 2.3, z + 0.46); envRoot.add(arch);
+  const d = swirlDisc(envRoot, x, GROUND_Y + 2.0, z + 0.42, 1.05, c1, c2, seed);
+  d.scale.set(1, 1.35, 1);
+  ENVX.twinkle.push({ m:{ set emissiveIntensity(v){ rm.opacity = clamp(v, 0, 1); } }, base:0.85, ph:1, sp:2.1 });
+}
+// ilha flutuante: rocha invertida com topo plano (para templos e para os cemitérios do Multiverso)
+function floatingRock(w, d, depth, mat, rnd){
+  const geo = new THREE.ConeGeometry(1, 1, 8, 2), p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++){ const y = p.getY(i); if (y < 0.49) { p.setX(i, p.getX(i) * (0.85 + rnd() * 0.3)); p.setZ(i, p.getZ(i) * (0.85 + rnd() * 0.3)); } }
+  geo.rotateX(Math.PI); geo.translate(0, -0.5, 0); geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, mat); m.scale.set(w, depth, d); m.castShadow = true;
+  return m;
+}
+function greekTemple(g, x, y, z, s, marble, gold){
+  const t = new THREE.Group(); t.position.set(x, y, z); t.scale.setScalar(s); g.add(t);
+  addMesh(t, new THREE.BoxGeometry(2.4, 0.2, 1.4), marble, 0, 0.1, 0);
+  for (let i = 0; i < 6; i++) for (const zz of [-0.55, 0.55]) addMesh(t, new THREE.CylinderGeometry(0.08, 0.09, 1.1, 8), marble, -1.0 + i * 0.4, 0.75, zz);
+  addMesh(t, new THREE.BoxGeometry(2.5, 0.16, 1.5), marble, 0, 1.38, 0);
+  const roof = new THREE.CylinderGeometry(0.01, 0.82, 2.5, 3, 1); roof.rotateZ(Math.PI / 2); roof.scale(1, 0.42, 1);
+  addMesh(t, roof, gold, 0, 1.64, 0);
+}
+function buildSanctum(K, rnd){
+  // chão de lajes, selos, pátio, estátuas e portal; K traz paleta, materiais e sons
+  slabFloor(K.slab);
+  const bg = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color:C(K.groundHex), roughness:0.9 }));
+  bg.rotation.x = -Math.PI / 2; bg.position.y = GROUND_Y - 0.005; bg.receiveShadow = true; envRoot.add(bg);
+  const seals = [
+    seal(0, 6.7, 1.45, K.frontSeal, K.sealA, 3), seal(-6.7, 4.4, 0.8, 'runas', K.sealA, 5), seal(-6.8, -3.3, 0.8, 'sigilo', K.sealA, 7),
+    seal(-3.5, 6.5, 0.85, K.sideSeal, K.sealB, 9), seal(3.6, 6.4, 0.8, 'runas', K.sealB, 11), seal(5.9, 3.0, 0.7, 'sigilo', K.sealA, 13),
+    seal(-3.4, -6.7, 0.7, 'estrela', K.sealB, 15), seal(3.4, -6.6, 0.7, 'runas', K.sealA, 17),
+  ];
+  for (let i = 0; i < 6; i++){ const a = rnd() * TAU, r = 6 + rnd() * 2.5; seals.push(seal(Math.cos(a) * r, Math.sin(a) * r * 0.9, 0.35, 'runas', K.sealB, 20 + i)); }
+  ENVX.onCapture = (x, z) => sealFlare(seals, x, z, K.sound, K.flareHex);
+  buildCourtyard(K.CY, rnd);
+  portalGate(3.0, -9.0, K.CY.trim, K.runeHex, K.portal[0], K.portal[1], 61);
+  const top = pedestal(7.5, 1.9, 0.8, 0.3, K.statue);
+  hornedLion(7.5, 1.9, -2.3, K.statue, K.horn, top);
+  hoodedStatue(7.0, -1.4, -1.7, K.statue, K.orbHex, 1.05);
+  hoodedStatue(7.6, 4.6, -1.9, K.statue, K.orbHex, 1.0);
+  hoodedStatue(6.3, 6.4, -2.4, K.statue, K.orbHex, 0.95);
+  armillary(7.7, -4.6, 0.9, K.globe, K.ring, K.spikes);
+  orbPedestal(6.2, -3.9, K.statue, K.orb2Hex); orbPedestal(8.5, 0.4, K.statue, K.orb2Hex);
+  skulls([[5.6, 6.9, 0.4, 1], [6.0, 7.3, -0.8, 0.85], [7.2, 6.9, 1.6, 0.9], [-6.2, 7.0, 0.3, 0.9], [-5.6, 6.5, -1, 0.8]], K.bone);
+  graveyard('w', rnd); graveyard('b', rnd);
+}
+function paintBackdropInfernal(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(171), hz = h * 0.8, band = h * 0.5;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#0e0510'); sky.addColorStop(0.45, '#3a0e2a'); sky.addColorStop(0.8, '#8a2a20'); sky.addColorStop(1, '#ff6a2a');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  smokeClouds(g, rnd, w, hz, h, 80, '255,80,140');
+  nebula(g, rnd, w, hz * 0.6, 8, ['rgba(160,40,200,.16)', 'rgba(255,60,60,.12)']);
+  ridge(g, rnd, w, hz, band, '#2a0e12', 0.2, 0.45);
+  volcano(g, rnd, w, hz, band, w * 0.42, w * 0.12, 1.1); volcano(g, rnd, w, hz, band, w * 0.8, w * 0.14, 1.3);
+  ridge(g, rnd, w, hz, band, '#120608', 0.06, 0.2);
+  skyline(g, rnd, w, hz, band, '#0a0406', { tent:'#3a2a26', fire:'rgba(255,90,40,.9)', flag:'#4a0a10', lit:'rgba(255,120,50,.9)' });
+  const glow = g.createLinearGradient(0, hz - band * 0.4, 0, hz);
+  glow.addColorStop(0, 'rgba(255,80,30,0)'); glow.addColorStop(1, 'rgba(255,70,20,.4)');
+  g.fillStyle = glow; g.fillRect(0, hz - band * 0.4, w, band * 0.4);
+  g.fillStyle = '#120808'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
+}
+function buildEnvInfernal(){
+  const rnd = seeded(181);
+  themeMats({ stone:0x2e2828, dark:0x161212, iron:0x1e1c20, wood:0x241812 });
+  const constO = constellationTex(211, 'rgba(255,150,70,1)', 'rgba(255,90,30,.8)');
+  const wall = blockMat(0x4a3e3c, 0.85), trim = blockMat(0x342a2a, 0.85);
+  for (const m of [wall, trim]){ m.emissiveMap = constO; m.emissive = C(0xff6a2a); m.emissiveIntensity = 0.9; ENVX.twinkle.push({ m, base:0.9, ph:Math.random() * 6, sp:0.8 }); }
+  const darkStone = new THREE.MeshStandardMaterial({ color:C(0x2a2426), roughness:0.6, metalness:0.15, envMapIntensity:0.8, flatShading:true });
+  const K = {
+    slab:{ seed:5, cells:14, size:30, seam:'#2a0c06', glow:'rgba(255,110,30,1)', glowFar:'rgba(200,50,10,1)', slab:['#1a1618', '#0e0c0e', '#221c1e'], vein:['rgba(120,100,110,.12)', 'rgba(255,120,60,.08)'], veins:3, ei:0.85, rough:0.35, metal:0.2 },
+    groundHex:0x0a0808, frontSeal:'pentagrama', sideSeal:'pentagrama', sound:'selo_runico', flareHex:0xff5a1a,
+    sealA:{ col:'rgba(255,140,50,1)' }, sealB:{ col:'rgba(255,100,40,1)', op:0.7 },
+    CY:{ wall, trim, flame:FLAME_STD, bronze:new THREE.MeshStandardMaterial({ color:C(0x7a5a3a), metalness:0.85, roughness:0.4 }), banner:bannerTex({ field:'#2a1414', dark:'#100606', gold:'#c8843a' }), flag:0x3a0a0e, tent:0x4a3a34, window:new THREE.MeshBasicMaterial({ color:C(0xff6a2a), toneMapped:false }), gateDark:0x050203, right:false },
+    runeHex:0xa04aff, portal:['#2a0a4a', '#c07aff'], statue:darkStone, horn:new THREE.MeshStandardMaterial({ color:C(0x4a3a30), roughness:0.5 }),
+    orbHex:0xb05aff, orb2Hex:0xff2a2a, globe:new THREE.MeshStandardMaterial({ color:C(0x2a2224), roughness:0.45, metalness:0.4, envMapIntensity:0.8 }), ring:new THREE.MeshStandardMaterial({ color:C(0x3a3034), metalness:0.8, roughness:0.4 }), spikes:true,
+    bone:new THREE.MeshStandardMaterial({ color:C(0xb8a888), roughness:0.7, flatShading:true }),
+  };
+  buildSanctum(K, rnd);
+  // correntes entre as torres e a muralha
+  const ch = new THREE.MeshStandardMaterial({ color:C(0x2a2a30), metalness:0.85, roughness:0.4 });
+  chain(new THREE.Vector3(-8.2, GROUND_Y + 5.2, -9.0), new THREE.Vector3(-8.2, GROUND_Y + 4.6, -4.4), 0.8, ch);
+  chain(new THREE.Vector3(-8.2, GROUND_Y + 4.6, 0.8), new THREE.Vector3(-8.2, GROUND_Y + 5.0, 5.4), 0.9, ch);
+  chain(new THREE.Vector3(-7.6, GROUND_Y + 6.8, -9.6), new THREE.Vector3(-3.4, GROUND_Y + 5.8, -11.3), 1.0, ch);
+  buildBackdrop(paintBackdropInfernal);
+}
+function paintBackdropCelestial(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(191), hz = h * 0.8, band = h * 0.5;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#050a1e'); sky.addColorStop(0.5, '#142a5a'); sky.addColorStop(0.85, '#3a5a9a'); sky.addColorStop(1, '#8aa8d8');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  nebula(g, rnd, w, hz * 0.7, 12, ['rgba(120,160,255,.16)', 'rgba(200,170,255,.12)']);
+  for (let i = 0; i < 600; i++){ g.fillStyle = `rgba(255,255,255,${0.3 + rnd() * 0.7})`; g.fillRect(rnd() * w, rnd() * hz * 0.85, rnd() < 0.05 ? 2 : 1, 1); }
+  spiralGalaxy(g, w * 0.22, hz * 0.25, 70, 0.5, 'rgba(200,210,255,.7)');
+  icePeaks(g, rnd, w, hz, band, 0, w, 0.9, '#f0f6ff', '#5a7aa8');
+  // ilhas flutuantes com templos e palácios de cúpulas douradas
+  const island = (x, y, r, kind) => {
+    g.fillStyle = '#4a5a7a'; g.beginPath(); g.moveTo(x - r, y); g.lineTo(x + r, y); g.lineTo(x + r * 0.2, y + r * 0.9); g.lineTo(x - r * 0.3, y + r * 0.7); g.closePath(); g.fill();
+    g.fillStyle = '#e8eef8'; g.fillRect(x - r * 0.8, y - 3, r * 1.6, 4);
+    if (kind === 'templo'){ for (let i = 0; i < 6; i++) g.fillRect(x - r * 0.6 + i * r * 0.24, y - r * 0.5, r * 0.06, r * 0.5); g.beginPath(); g.moveTo(x - r * 0.7, y - r * 0.5); g.lineTo(x, y - r * 0.8); g.lineTo(x + r * 0.7, y - r * 0.5); g.fillStyle = '#e8c070'; g.fill(); }
+    else { g.fillRect(x - r * 0.5, y - r * 0.6, r, r * 0.6); g.fillStyle = '#e8c070'; g.beginPath(); g.arc(x, y - r * 0.6, r * 0.32, Math.PI, 0); g.fill(); g.beginPath(); g.arc(x - r * 0.38, y - r * 0.6, r * 0.14, Math.PI, 0); g.fill(); g.beginPath(); g.arc(x + r * 0.38, y - r * 0.6, r * 0.14, Math.PI, 0); g.fill(); }
+  };
+  island(w * 0.12, hz * 0.45, 46, 'templo'); island(w * 0.36, hz * 0.32, 54, 'palacio'); island(w * 0.62, hz * 0.5, 30, 'templo');
+  ridge(g, rnd, w, hz, band, '#2a3a5a', 0.08, 0.25);
+  skyline(g, rnd, w, hz, band, '#1a2440', { domes:true, tent:'#c8d4e8', fire:'rgba(150,200,255,.9)', flag:'#e8c070', lit:'rgba(255,220,150,.9)' });
+  g.fillStyle = '#1a2238'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
+}
+const FLAME_BLUE = { outer:0x4a9aff, inner:0xd8f0ff, halo:0x5aa8ff, light:0x7ab8ff, spark:'#bfe0ff', coal:0x3a7aff };
+function buildEnvCelestial(){
+  const rnd = seeded(197);
+  themeMats({ stone:0xd8dce6, dark:0x9aa2b4, iron:0x8a7040, wood:0x5a4430 });
+  const edgeMat = crystalMats();
+  const marble = new THREE.MeshStandardMaterial({ color:C(0xeef2f8), roughness:0.3, metalness:0.05, envMapIntensity:1.1, flatShading:true });
+  const gold = new THREE.MeshStandardMaterial({ color:C(0xe8c070), metalness:1, roughness:0.25, envMapIntensity:1.5 });
+  const wall = blockMat(0xe4e8f0, 0.5), trim = blockMat(0xc8d0de, 0.5);
+  const K = {
+    slab:{ seed:9, cells:14, size:30, seam:'#0a1a3a', glow:'rgba(110,170,255,1)', glowFar:'rgba(60,110,220,1)', slab:['#141c30', '#0a1020', '#1c2640'], vein:['rgba(240,240,255,.22)', 'rgba(240,200,120,.28)'], veins:4, ei:0.8, rough:0.34, metal:0.1, env:1.0 },
+    groundHex:0x10162a, frontSeal:'solLua', sideSeal:'estrela', sound:'selo_celestial', flareHex:0x8ac8ff,
+    sealA:{ col:'rgba(240,200,110,1)', col2:'rgba(150,200,255,1)' }, sealB:{ col:'rgba(140,200,255,1)', op:0.75 },
+    CY:{ wall, trim, flame:FLAME_BLUE, bronze:new THREE.MeshStandardMaterial({ color:C(0xc89a50), metalness:0.95, roughness:0.25, envMapIntensity:1.5 }),
+      banner:bannerTex({ field:'#1e3a7a', dark:'#0e1a40', gold:'#e8c070' }), flag:0xe8c070, tent:0xe8eef8, dome:gold,
+      window:new THREE.MeshBasicMaterial({ color:C(0xbfe0ff), toneMapped:false }), gateDark:0x0a1020, right:false, brazierStone:marble },
+    runeHex:0x8ac8ff, portal:['#1a4aaa', '#e0f0ff'], statue:marble, horn:gold,
+    orbHex:0xffd27a, orb2Hex:0x3a7aff, globe:new THREE.MeshStandardMaterial({ map:globeTex('#0e2050', 'rgba(232,192,112,.7)', 'rgba(255,230,170,1)', 3), roughness:0.35, metalness:0.3, envMapIntensity:1.2 }), ring:gold, spikes:false,
+    bone:marble,
+  };
+  buildSanctum(K, rnd);
+  // cristais de gelo e pedras-gema à esquerda
+  crystalCluster(-7.2, 2.0, 7, 2.4, rnd, edgeMat); crystalCluster(-6.8, -5.4, 5, 1.8, rnd, edgeMat);
+  const gem = new THREE.MeshStandardMaterial({ color:C(0x1a3a8a), roughness:0.2, metalness:0.3, envMapIntensity:1.6, emissive:C(0x061a40), flatShading:true });
+  const gg = new THREE.Group();
+  for (const [x, z, s] of [[-7.6, 6.0, 0.5], [-6.4, 6.8, 0.35], [-8.0, -1.8, 0.4], [-5.8, -6.8, 0.3]]) addMesh(gg, new THREE.DodecahedronGeometry(s, 0), gem, x, GROUND_Y + s * 0.6, z, rnd(), rnd(), rnd());
+  bakeInto(gg, envRoot);
+  // ilha flutuante com um templo, no alto, além do muro
+  const isl = new THREE.Group(); isl.position.set(-4.6, GROUND_Y + 5.4, -12.5);
+  isl.add(floatingRock(2.2, 1.6, 2.2, new THREE.MeshStandardMaterial({ color:C(0x5a6a8a), roughness:0.9, flatShading:true }), rnd));
+  greekTemple(isl, 0, 0, 0, 0.9, marble, gold);
+  envRoot.add(isl);
+  ENVX.bob.push({ o:isl, y:isl.position.y, ph:0 });
+  buildBackdrop(paintBackdropCelestial);
 }
 
 /* Covil dos Dragões */
@@ -4527,7 +4887,7 @@ function syncChar(p, now, dt){
   if (p.removed) return;
   if (p.grave){
     c.setGhost(true, GRAVE[p.side].face);
-    c.setTransform(p.dx, p.dz, GROUND_Y + 0.05);
+    c.setTransform(p.dx, p.dz, GROUND_Y + 0.05 + (AR().graveLift || 0));
     c.setOpacity(p.alpha * 0.92);
     c.setSink(p.sink || 0);
     c.setFlash(0);
@@ -5720,6 +6080,8 @@ function updateEnv(now, dt){
   // constelações cintilando e anéis girando (parados com movimento reduzido)
   for (const T0 of ENVX.twinkle) T0.m.emissiveIntensity = RM ? T0.base : T0.base * (0.72 + 0.28 * Math.sin(t * T0.sp + T0.ph));
   if (!RM) for (const S1 of ENVX.spin) S1.o.rotation[S1.ax] += S1.v * dt;
+  for (const O of ENVX.orbs) O.halo.material.opacity = RM ? O.base : O.base * (0.75 + 0.25 * Math.sin(t * 3.1 + O.ph) * Math.sin(t * 1.7 + O.ph * 2));
+  if (!RM) for (const B0 of ENVX.bob) B0.o.position.y = B0.y + Math.sin(t * 0.5 + B0.ph) * 0.15;
   boardMat.emissiveIntensity = RM ? 1 : 0.9 + 0.2 * Math.sin(t * 0.9);
   for (let i = 0; i < mists.length; i++) mists[i].rotation.z = t * (i ? -0.012 : 0.008);
   // lava corre devagar (parada com movimento reduzido)
