@@ -22,6 +22,7 @@ Os dois exércitos (Ordem da Aurora e Legião Cinzenta) usam os mesmos modelos, 
 - Regras completas do xadrez: xeque, xeque-mate, roque, en passant, promoção e empates.
 - IA própria (negamax com alfa-beta e quiescência) num Web Worker: Recruta, Veterano e Mestre.
 - Câmera de combate estilo fatality: close, câmera lenta, faixas de cinema e título do golpe.
+- Três arenas, trocadas no meio da partida: Ruínas Medievais, Covil dos Dragões e Fogo x Gelo, cada uma com música e ambiente próprios.
 - Vistas Padrão, Drone (360°) e Aérea, além de inverter o campo.
 - Ficha da peça com o personagem em 3D girando.
 - Áudio: 25 efeitos, ambiente, música tema e narrador em português.
