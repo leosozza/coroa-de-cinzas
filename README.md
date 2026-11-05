@@ -1,6 +1,6 @@
-# Coroa de Cinzas
+# Arcane Chess
 
-Xadrez clássico em 3D com alma de RPG sombrio. Cada peça é um personagem com poderes próprios, as capturas viram cenas de combate em câmera cinematográfica, as peças abatidas vão para um cemitério ao lado da arena, e há narrador, trilha sonora e uma IA em três níveis.
+Xadrez clássico em 3D com alma de RPG sombrio (antes chamado Coroa de Cinzas). Cada peça é um personagem com poderes próprios, as capturas viram cenas de combate em câmera cinematográfica, as peças abatidas vão para um cemitério ao lado da arena, e há narrador, trilha sonora e uma IA em três níveis.
 
 O jogo é um único arquivo HTML ([coroa-de-cinzas.html](coroa-de-cinzas.html)) feito com Three.js r128 e chess.js. Ele foi publicado como Artifact do Claude.
 
@@ -22,7 +22,7 @@ Os dois exércitos (Ordem da Aurora e Legião Cinzenta) usam os mesmos modelos, 
 - Regras completas do xadrez: xeque, xeque-mate, roque, en passant, promoção e empates.
 - IA própria (negamax com alfa-beta e quiescência) num Web Worker: Recruta, Veterano e Mestre.
 - Câmera de combate estilo fatality: close, câmera lenta, faixas de cinema e título do golpe.
-- Arenas trocadas no meio da partida, cada uma com música e ambiente próprios: Fortaleza Medieval, Ruínas Medievais, Covil dos Dragões, Fogo x Gelo, Zodíaco, Multiverso, Mistério Infernal e Celestial. Em produção: Monte Olimpo e Pedra Filosofal.
+- Arenas trocadas no meio da partida, cada uma com música e ambiente próprios: Fortaleza Medieval, Ruínas Medievais, Covil dos Dragões, Fogo x Gelo, Zodíaco, Multiverso, Mistério Infernal, Celestial, Monte Olimpo e Pedra Filosofal.
 - Vistas Padrão, Drone (360°) e Aérea, além de inverter o campo.
 - Ficha da peça com o personagem em 3D girando.
 - Áudio: 25 efeitos, ambiente, música tema e narrador em português.

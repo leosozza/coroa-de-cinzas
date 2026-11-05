@@ -1,4 +1,4 @@
-<title>Coroa de Cinzas</title>
+<title>Arcane Chess</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -207,6 +207,8 @@ body[data-arena="zodiaco"]{--glow-top:#141c44; --glow-low:#1c1040}
 body[data-arena="multiverso"]{--glow-top:#221446; --glow-low:#2a0e3a}
 body[data-arena="infernal"]{--glow-top:#2a0a12; --glow-low:#3a0c06}
 body[data-arena="celestial"]{--glow-top:#18284a; --glow-low:#1a2238}
+body[data-arena="olimpo"]{--glow-top:#3a3424; --glow-low:#202436}
+body[data-arena="alquimia"]{--glow-top:#14182e; --glow-low:#2a0c14}
 body[data-arena="dragoes"]{--glow-top:#331509; --glow-low:#3a0d06}
 body[data-arena="gelo"]{--glow-top:#132230; --glow-low:#3a1208}
 .unit-view canvas{display:block; width:100%; touch-action:pan-y; cursor:grab}
@@ -262,7 +264,7 @@ details.rules[open] summary::before{content:"▾ "}
 <div class="app">
   <header class="top">
     <div class="brand">
-      <h1>Coroa de <span>Cinzas</span></h1>
+      <h1>Arcane <span>Chess</span></h1>
       <p>Xadrez clássico com alma de RPG sombrio</p>
     </div>
     <div class="controls">
@@ -305,6 +307,8 @@ details.rules[open] summary::before{content:"▾ "}
           </optgroup>
           <optgroup label="Divinas">
             <option value="celestial">Celestial</option>
+            <option value="olimpo">Monte Olimpo</option>
+            <option value="alquimia">Pedra Filosofal</option>
           </optgroup>
         </select>
       </div>
@@ -802,13 +806,32 @@ const ARENAS = {
     win:'O Rei da Legião Cinzenta não tem para onde fugir. Os céus coroam a Aurora.',
     lose:'O seu Rei está cercado. Até as estrelas se curvam à Legião.',
     tail:' Sobre o mármore, os selos de ouro seguem brilhando.' },
+  olimpo:{ name:'Monte Olimpo', fog:0x3a3a48, near:26, far:62, exposure:1.2, bright:true, dais:true, boardGlow:0xffd27a, sideGlow:0xffc060,
+    hemi:[0xe8e0d0, 0x5a5040, 0.8], moon:[0xfff0d0, 1.55], warm:[0xffc060, 0.6], warmPos:[6, 8, -8],
+    env:[['#c8d0e8', 0], ['#8a8a9a', 0.42], ['#d8b880', 0.55], ['#4a4a50', 1]],
+    envSpots:[[30, 64, 14, '#ffe0a0'], [100, 62, 12, '#ffd080'], [170, 64, 14, '#ffe0a0'], [230, 62, 12, '#ffd080'], [80, 18, 40, '#fff4e0']],
+    music:'musica_olimpo', amb:'ambiente_olimpo', bolts:[0.5, 0.95], boltCol:['rgba(255,240,190,.95)', 'rgba(255,200,90,1)'], ash:0,
+    cam:{ pitch:0.64, pad:1.35, drop:0.5, hz:0.86 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. O Olimpo saúda a Aurora.',
+    lose:'O seu Rei está cercado. Os deuses dão as costas à Aurora.',
+    tail:' No alto do Olimpo, os raios de Zeus seguem caindo.' },
+  alquimia:{ name:'Pedra Filosofal', fog:0x0a0c16, near:24, far:56, exposure:1.25, bright:true, dais:true, boardGlow:0xffc870, sideGlow:0xffb050,
+    hemi:[0x6a78a8, 0x3a2a20, 0.65], moon:[0xb8c4e8, 1.3], warm:[0xffa850, 0.55], warmPos:[-6, 5, 4],
+    env:[['#3a4a80', 0], ['#181c30', 0.42], ['#4a3020', 0.55], ['#08080e', 1]],
+    envSpots:[[30, 64, 12, '#ffb060'], [100, 62, 10, '#5aff8a'], [170, 64, 12, '#ff2a4a'], [230, 62, 10, '#8a6aff'], [80, 18, 34, '#8a9ac8']],
+    music:'musica_alquimia', amb:'ambiente_alquimia', bolts:[0.5, 0.95], boltCol:['rgba(220,190,255,.95)', 'rgba(150,90,255,1)'], ash:0,
+    fx:{ w:{ death:['#fff0b0', '#ffd050', '#e8a830'] }, b:{ death:['#fff0b0', '#ffd050', '#e8a830'] } },
+    cam:{ pitch:0.64, pad:1.35, drop:0.5, hz:0.86 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. A Pedra Filosofal brilha para a Aurora.',
+    lose:'O seu Rei está cercado. A Legião transmuta a vitória em ouro.',
+    tail:' Diante do portal, a Pedra continua girando.' },
 };
 let arena = 'fortaleza', arenaPending = null;
 try { const a = localStorage.getItem(ARENA_KEY); if (ARENAS[a]) arena = a; } catch (e){}
 const AR = () => ARENAS[arena];
 let envRoot = null, envRT = null, warmL = null;
 // estado animado da arena: texturas de lava, luzes que pulsam, dragão no céu, rajadas de fogo
-const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], orbs:[], bob:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
+const ENVX = { tex:[], lights:[], geysers:[], twinkle:[], spin:[], orbs:[], bob:[], floaters:[], motes:[], bubbles:[], repaint:null, onCapture:null, glider:null, glide:null, nextGlide:0, burst:null, nextBurst:0, aurora:false };
 function mkCanvas(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function canvasTex(c, srgb = true){
   const t = new THREE.CanvasTexture(c);
@@ -1492,7 +1515,7 @@ function buildArena(){
   envRoot.name = 'arena';
   world.add(envRoot);
   torches.length = 0; mists.length = 0;
-  ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0; ENVX.orbs.length = 0; ENVX.bob.length = 0;
+  ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0; ENVX.orbs.length = 0; ENVX.bob.length = 0; ENVX.floaters.length = 0; ENVX.motes.length = 0; ENVX.bubbles.length = 0;
   ENVX.repaint = null; ENVX.onCapture = null;
   ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false;
   const now = performance.now();
@@ -1559,6 +1582,8 @@ function buildEnvironment(){
   else if (arena === 'multiverso') buildEnvMulti();
   else if (arena === 'infernal') buildEnvInfernal();
   else if (arena === 'celestial') buildEnvCelestial();
+  else if (arena === 'olimpo') buildEnvOlympus();
+  else if (arena === 'alquimia') buildEnvAlchemy();
   else buildEnvMedieval();
 }
 
@@ -2844,16 +2869,18 @@ function buildEnvMulti(){
 function paintSlabs(map, emis, o){
   const g = map.getContext('2d'), e = emis.getContext('2d'), N = map.width, rnd = seeded(o.seed);
   const n = o.cells, step = N / n, P = [];
-  for (let j = 0; j <= n; j++){ P.push([]); for (let i = 0; i <= n; i++){ const edge = i === 0 || j === 0 || i === n || j === n; P[j].push([i * step + (edge ? 0 : (rnd() - 0.5) * step * 0.5), j * step + (edge ? 0 : (rnd() - 0.5) * step * 0.5)]); } }
+  for (let j = 0; j <= n; j++){ P.push([]); for (let i = 0; i <= n; i++){ const edge = i === 0 || j === 0 || i === n || j === n; P[j].push([i * step + (edge ? 0 : (rnd() - 0.5) * step * 0.85), j * step + (edge ? 0 : (rnd() - 0.5) * step * 0.85)]); } }
   g.fillStyle = o.seam; g.fillRect(0, 0, N, N);
   const eg = e.createRadialGradient(N / 2, N / 2, 0, N / 2, N / 2, N * 0.7);
   eg.addColorStop(0, o.glow); eg.addColorStop(1, o.glowFar);
   e.fillStyle = eg; e.fillRect(0, 0, N, N);
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++){
-    const q = [P[j][i], P[j][i + 1], P[j + 1][i + 1], P[j + 1][i]], cx = q.reduce((a, p) => a + p[0], 0) / 4, cy = q.reduce((a, p) => a + p[1], 0) / 4;
+    const Q = [P[j][i], P[j][i + 1], P[j + 1][i + 1], P[j + 1][i]], split = rnd() < 0.45, d = rnd() < 0.5;
+    for (const q of split ? (d ? [[Q[0], Q[1], Q[2]], [Q[0], Q[2], Q[3]]] : [[Q[0], Q[1], Q[3]], [Q[1], Q[2], Q[3]]]) : [Q]){
+    const cx = q.reduce((a, p) => a + p[0], 0) / q.length, cy = q.reduce((a, p) => a + p[1], 0) / q.length;
     const k = 0.95 - rnd() * 0.025, pts = q.map(p => [cx + (p[0] - cx) * k, cy + (p[1] - cy) * k]);
     const path = ctx => { ctx.beginPath(); pts.forEach((p, m) => m ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); };
-    const l = rnd(), lg = g.createLinearGradient(pts[0][0], pts[0][1], pts[2][0], pts[2][1]);
+    const l = rnd(), lg = g.createLinearGradient(pts[0][0], pts[0][1], pts[pts.length - 1 > 1 ? 2 : 1][0], pts[pts.length - 1 > 1 ? 2 : 1][1]);
     lg.addColorStop(0, o.slab[0]); lg.addColorStop(0.5 + (l - 0.5) * 0.4, o.slab[1]); lg.addColorStop(1, o.slab[2]);
     path(g); g.fillStyle = lg; g.fill();
     g.save(); path(g); g.clip();
@@ -2861,6 +2888,7 @@ function paintSlabs(map, emis, o){
     speckle(g, rnd, cx - step, cy - step, step * 2, step * 2, 160, r => `rgba(255,255,255,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.06 + r() * 0.1})`, 2);
     g.restore();
     path(e); e.fillStyle = '#000'; e.fill();
+    }
   }
 }
 function slabFloor(o){
@@ -3162,6 +3190,523 @@ function buildEnvCelestial(){
   envRoot.add(isl);
   ENVX.bob.push({ o:isl, y:isl.position.y, ph:0 });
   buildBackdrop(paintBackdropCelestial);
+}
+
+/* Monte Olimpo: terraço de mármore dos deuses gregos, colunas dóricas com faixas de ouro, estátuas dos olímpicos,
+   Pégaso, a águia de Zeus e a montanha de templos acima das nuvens. */
+const FLAME_DIVINE = { outer:0xffc860, inner:0xfff6e0, halo:0xffd890, light:0xffd080, spark:'#fff0c0', coal:0xffb040 };
+function meander(g, r0, r1, n){
+  // faixa de grega (meandro) entre dois raios
+  g.beginPath();
+  for (let i = 0; i < n; i++){
+    const a0 = i * TAU / n, a1 = (i + 1) * TAU / n, am = (a0 + a1) / 2, P = (a, r) => [Math.cos(a) * r, Math.sin(a) * r];
+    const rm = (r0 + r1) / 2;
+    const pts = [P(a0, r0), P(a0, r1), P(am, r1), P(am, rm), P(a0 + (a1 - a0) * 0.25, rm), P(a0 + (a1 - a0) * 0.25, r0 + (r1 - r0) * 0.25), P(a1, r0 + (r1 - r0) * 0.25)];
+    pts.forEach((p, k) => (k || i) ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+  }
+  g.stroke();
+}
+function boltShape(g, x, y, s){
+  g.save(); g.translate(x, y); g.scale(s, s);
+  g.beginPath(); g.moveTo(0.15, -1); g.lineTo(-0.35, 0.05); g.lineTo(0.02, 0.05); g.lineTo(-0.2, 1); g.lineTo(0.38, -0.12); g.lineTo(0.02, -0.12); g.lineTo(0.3, -1); g.closePath(); g.fill();
+  g.restore();
+}
+function greekSealCanvas(kind, col, col2, seed){
+  const S = 512, c = mkCanvas(S, S), g = c.getContext('2d'), m = S / 2;
+  g.translate(m, m); g.lineCap = g.lineJoin = 'round';
+  g.shadowColor = col; g.shadowBlur = 12; g.strokeStyle = col; g.fillStyle = col;
+  const ring = (r, w) => { g.lineWidth = w; g.beginPath(); g.arc(0, 0, r, 0, TAU); g.stroke(); };
+  ring(238, 5); g.lineWidth = 4; meander(g, 196, 226, 28); ring(190, 3);
+  if (kind === 'louro'){
+    for (const s of [-1, 1]) for (let i = 0; i < 11; i++){
+      const a = Math.PI / 2 + s * (0.25 + i * 0.22), x = Math.cos(a) * 130, y = Math.sin(a) * 130;
+      g.save(); g.translate(x, y); g.rotate(a + s * 0.9); g.beginPath(); g.ellipse(0, 0, 26, 9, 0, 0, TAU); g.fill(); g.restore();
+    }
+    g.fillStyle = col2; g.shadowColor = col2; boltShape(g, 0, -10, 70);
+  } else if (kind === 'raio'){
+    boltShape(g, 0, 0, 120); g.strokeStyle = col2; g.shadowColor = col2; ring(150, 3);
+  } else {
+    g.font = '700 64px Alegreya, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const L = ['Α', 'Ω', 'Δ', 'Σ', 'Φ', 'Ψ', 'Λ', 'Θ'];
+    for (let i = 0; i < 8; i++){ const a = i * TAU / 8 - Math.PI / 2; g.fillText(L[(i + seed) % 8], Math.cos(a) * 140, Math.sin(a) * 140); }
+    g.fillStyle = col2; g.shadowColor = col2; g.font = '700 110px Alegreya, Georgia, serif'; g.fillText(L[seed % 8], 0, 6);
+  }
+  return c;
+}
+function greekSeal(x, z, r, kind, col, col2, seed){
+  const t = canvasTex(greekSealCanvas(kind, col, col2, seed));
+  const mat = new THREE.MeshBasicMaterial({ map:t, transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false, color:C(0xffffff) });
+  const geo = new THREE.PlaneGeometry(r * 2, r * 2); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, mat); m.position.set(x, GROUND_Y + 0.015, z); m.renderOrder = 2;
+  envRoot.add(m);
+  return { x, z, r, mat };
+}
+function doricColumn(g, x, z, h, marble, gold){
+  addMesh(g, new THREE.BoxGeometry(0.95, 0.16, 0.95), marble, x, GROUND_Y + 0.08, z);
+  addMesh(g, new THREE.CylinderGeometry(0.4, 0.44, 0.14, 16), marble, x, GROUND_Y + 0.23, z);
+  addMesh(g, new THREE.CylinderGeometry(0.31, 0.36, h, 16), marble, x, GROUND_Y + 0.3 + h / 2, z);
+  addMesh(g, new THREE.CylinderGeometry(0.335, 0.335, 0.08, 16), gold, x, GROUND_Y + 0.3 + h * 0.86, z);
+  addMesh(g, new THREE.CylinderGeometry(0.42, 0.32, 0.16, 16), marble, x, GROUND_Y + 0.38 + h, z);
+  addMesh(g, new THREE.BoxGeometry(0.95, 0.14, 0.95), gold, x, GROUND_Y + 0.53 + h, z);
+}
+// figura de mármore: túnica, tronco, cabeça, braços; os atributos de cada deus em ouro
+function godStatue(x, z, ry, s, marble, gold, kind){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry; g.scale.setScalar(s);
+  addMesh(g, new THREE.CylinderGeometry(0.62, 0.7, 0.45, 12), marble, 0, 0.22, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.66, 0.66, 0.06, 12), gold, 0, 0.47, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.26, 0.4, 1.3, 10), marble, 0, 1.15, 0);
+  addMesh(g, new THREE.BoxGeometry(0.5, 0.62, 0.3), marble, 0, 2.05, 0);
+  addMesh(g, new THREE.SphereGeometry(0.16, 10, 8), marble, 0, 2.55, 0);
+  addMesh(g, new THREE.CylinderGeometry(0.05, 0.05, 0.6, 6), marble, -0.31, 1.95, 0.05, 0.2, 0, 0.25);
+  const up = kind === 'zeus' || kind === 'poseidon' || kind === 'atena';
+  addMesh(g, new THREE.CylinderGeometry(0.05, 0.05, 0.6, 6), marble, 0.33, up ? 2.45 : 1.95, 0.05, 0, 0, up ? -2.8 : -0.3);
+  if (kind === 'zeus' || kind === 'poseidon' || kind === 'mago') addMesh(g, new THREE.ConeGeometry(0.13, kind === 'mago' ? 0.5 : 0.32, 8), marble, 0, kind === 'mago' ? 2.28 : 2.36, 0.08, Math.PI, 0, 0);
+  if (kind === 'zeus'){
+    for (let i = 0; i < 4; i++) addMesh(g, new THREE.BoxGeometry(0.07, 0.28, 0.05), gold, 0.38 + (i % 2) * 0.08, 2.75 + i * 0.22, 0.05, 0, 0, i % 2 ? 0.6 : -0.6);
+    addMesh(g, new THREE.TorusGeometry(0.17, 0.03, 6, 14), gold, 0, 2.62, 0, Math.PI / 2, 0, 0);
+  } else if (kind === 'poseidon'){
+    addMesh(g, new THREE.CylinderGeometry(0.025, 0.025, 2.4, 6), gold, 0.4, 1.9, 0.05);
+    for (const dx of [-0.12, 0, 0.12]) addMesh(g, new THREE.ConeGeometry(0.035, 0.25, 5), gold, 0.4 + dx, 3.2, 0.05);
+    addMesh(g, new THREE.BoxGeometry(0.3, 0.04, 0.04), gold, 0.4, 3.05, 0.05);
+  } else if (kind === 'atena'){
+    addMesh(g, new THREE.CylinderGeometry(0.025, 0.025, 2.4, 6), marble, 0.4, 1.9, 0.05);
+    addMesh(g, new THREE.ConeGeometry(0.05, 0.2, 5), gold, 0.4, 3.15, 0.05);
+    addMesh(g, new THREE.CylinderGeometry(0.36, 0.36, 0.05, 18), gold, -0.42, 1.5, 0.12, Math.PI / 2, 0, 0.2);
+    addMesh(g, new THREE.BoxGeometry(0.05, 0.2, 0.34), gold, 0, 2.72, 0);
+    addMesh(g, new THREE.SphereGeometry(0.09, 8, 6), marble, -0.3, 2.42, 0);
+    for (const s0 of [-1, 1]) addMesh(g, new THREE.ConeGeometry(0.02, 0.06, 4), marble, -0.3 + s0 * 0.04, 2.52, 0);
+  } else if (kind === 'mago'){
+    addMesh(g, new THREE.CylinderGeometry(0.03, 0.035, 2.6, 6), marble, 0.4, 1.8, 0.05);
+    addMesh(g, new THREE.SphereGeometry(0.11, 10, 8), gold, 0.4, 3.15, 0.05);
+    addMesh(g, new THREE.ConeGeometry(0.22, 0.55, 10), marble, 0, 2.85, 0, -0.15, 0, 0);
+  } else {
+    addMesh(g, new THREE.TorusGeometry(0.2, 0.025, 5, 12, Math.PI * 1.3), gold, -0.38, 1.75, 0.18, 0, 0, Math.PI * 0.85);
+    for (let i = 0; i < 4; i++) addMesh(g, new THREE.CylinderGeometry(0.005, 0.005, 0.3, 3), gold, -0.46 + i * 0.05, 1.78, 0.18);
+    addMesh(g, new THREE.TorusGeometry(0.2, 0.03, 6, 14), gold, 0, 2.62, 0, Math.PI / 2, 0, 0);
+  }
+  bakeInto(g, envRoot);
+}
+function pegasus(x, z, ry, marble, gold){
+  const g = new THREE.Group();
+  g.position.set(x, GROUND_Y, z); g.rotation.y = ry;
+  addMesh(g, new THREE.BoxGeometry(1.6, 0.4, 0.9), marble, 0, 0.2, 0);
+  addMesh(g, new THREE.BoxGeometry(1.0, 0.42, 0.36), marble, 0, 1.15, 0);
+  for (const [lx, lz, a] of [[0.35, 0.12, -0.5], [0.35, -0.12, 0.1], [-0.38, 0.12, 0.2], [-0.38, -0.12, -0.15]]) addMesh(g, new THREE.BoxGeometry(0.1, 0.62, 0.1), marble, lx, 0.72, lz, 0, 0, a);
+  addMesh(g, new THREE.BoxGeometry(0.2, 0.6, 0.22), marble, 0.55, 1.5, 0, 0, 0, -0.6);
+  addMesh(g, new THREE.BoxGeometry(0.4, 0.18, 0.18), marble, 0.82, 1.78, 0, 0, 0, -0.3);
+  addMesh(g, new THREE.CylinderGeometry(0.03, 0.06, 0.6, 5), marble, -0.6, 1.0, 0, 0, 0, 0.9);
+  for (const s0 of [-1, 1]){ const w = addMesh(g, new THREE.ConeGeometry(0.42, 1.4, 3), marble, -0.05, 1.85, s0 * 0.3, s0 * 0.6, 0, 0.6); w.scale.set(1, 1, 0.12); }
+  addMesh(g, new THREE.BoxGeometry(1.62, 0.05, 0.92), gold, 0, 0.42, 0);
+  bakeInto(g, envRoot);
+}
+function eagleColumn(x, z, marble, gold){
+  const g = new THREE.Group();
+  doricColumn(g, x, z, 2.2, marble, gold);
+  const y = GROUND_Y + 2.95;
+  addMesh(g, new THREE.SphereGeometry(0.18, 8, 6), gold, x, y + 0.12, z).scale.set(1, 1.3, 0.8);
+  addMesh(g, new THREE.SphereGeometry(0.09, 8, 6), gold, x, y + 0.42, z + 0.05);
+  addMesh(g, new THREE.ConeGeometry(0.03, 0.1, 4), gold, x, y + 0.4, z + 0.15, Math.PI / 2, 0, 0);
+  for (const s0 of [-1, 1]){ const w = addMesh(g, new THREE.ConeGeometry(0.2, 0.8, 3), gold, x + s0 * 0.42, y + 0.32, z, 0, 0, s0 * 1.1); w.scale.set(1, 1, 0.15); }
+  bakeInto(g, envRoot);
+}
+function laurel(x, z, rnd, leaf, gold){
+  const g = new THREE.Group();
+  for (let i = 0; i < 3; i++){
+    const a = rnd() * TAU, len = 0.6 + rnd() * 0.4;
+    addMesh(g, new THREE.CylinderGeometry(0.012, 0.02, len, 4), gold, x + Math.cos(a) * 0.2, GROUND_Y + len / 2, z + Math.sin(a) * 0.2, Math.cos(a) * 0.4, 0, Math.sin(a) * 0.4);
+    for (let k = 0; k < 6; k++) addMesh(g, new THREE.SphereGeometry(0.06, 5, 3), leaf, x + Math.cos(a) * (0.2 + k * 0.05), GROUND_Y + 0.2 + k * 0.08, z + Math.sin(a) * (0.2 + k * 0.05), rnd(), rnd(), rnd()).scale.set(1.8, 0.4, 0.8);
+  }
+  bakeInto(g, envRoot);
+}
+function paintBackdropOlympus(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(211), hz = h * 0.8, band = h * 0.5;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#1a2448'); sky.addColorStop(0.4, '#4a5a8a'); sky.addColorStop(0.75, '#d8b880'); sky.addColorStop(1, '#ffe8b8');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  spiralGalaxy(g, w * 0.16, hz * 0.2, 60, 0.5, 'rgba(220,210,255,.6)');
+  for (let i = 0; i < 260; i++){ g.fillStyle = `rgba(255,255,255,${0.2 + rnd() * 0.5})`; g.fillRect(rnd() * w, rnd() * hz * 0.4, 1, 1); }
+  // o Olimpo: montanha clara com patamares de templos e o grande templo no cume
+  const mx = w * 0.56;
+  g.fillStyle = '#c8ccd8'; g.beginPath(); g.moveTo(w * 0.22, hz); g.quadraticCurveTo(w * 0.4, hz - band * 0.9, mx - w * 0.05, hz - band * 1.45); g.lineTo(mx + w * 0.05, hz - band * 1.45); g.quadraticCurveTo(w * 0.72, hz - band * 0.9, w * 0.9, hz); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.moveTo(mx - w * 0.05, hz - band * 1.45); g.lineTo(mx + w * 0.05, hz - band * 1.45); g.lineTo(mx + w * 0.11, hz - band * 1.0); g.lineTo(mx, hz - band * 1.15); g.lineTo(mx - w * 0.1, hz - band * 1.0); g.fill();
+  const temple = (x, y, tw, col) => {
+    g.fillStyle = '#f4f2ec'; g.fillRect(x - tw / 2, y - 3, tw, 4);
+    for (let i = 0; i < 7; i++) g.fillRect(x - tw / 2 + 2 + i * (tw - 6) / 6, y - tw * 0.3, Math.max(2, tw * 0.05), tw * 0.3);
+    g.fillRect(x - tw / 2 - 2, y - tw * 0.33, tw + 4, 4);
+    g.fillStyle = col; g.beginPath(); g.moveTo(x - tw / 2 - 3, y - tw * 0.33); g.lineTo(x, y - tw * 0.48); g.lineTo(x + tw / 2 + 3, y - tw * 0.33); g.fill();
+  };
+  for (let t = 0; t < 4; t++) for (let i = 0; i < 4 - t; i++) temple(mx - w * (0.1 - t * 0.02) + i * w * (0.065 - t * 0.008), hz - band * (0.25 + t * 0.3), 50 - t * 6, '#e8c070');
+  temple(mx, hz - band * 1.45, 72, '#ffd27a');
+  // nuvens douradas em volta
+  for (let i = 0; i < 70; i++){
+    const x = rnd() * w, y = hz - band * (0.2 + rnd() * 0.9), rx = w * (0.02 + rnd() * 0.05), ry = h * (0.02 + rnd() * 0.03);
+    g.fillStyle = `rgba(255,${230 + Math.floor(rnd() * 25)},${200 + Math.floor(rnd() * 40)},${0.25 + rnd() * 0.3})`;
+    g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, TAU); g.fill();
+  }
+  ridge(g, rnd, w, hz, band, '#8a90a8', 0.08, 0.22);
+  g.fillStyle = '#5a5a70'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
+}
+// Zeus gigante e translúcido nas nuvens, pintado num cartaz preso ao céu
+function zeusSky(){
+  const c = mkCanvas(256, 256), g = c.getContext('2d');
+  g.fillStyle = '#fff';
+  g.beginPath(); g.ellipse(128, 70, 30, 34, 0, 0, TAU); g.fill();
+  g.beginPath(); g.moveTo(98, 85); g.quadraticCurveTo(128, 150, 158, 85); g.fill();
+  g.beginPath(); g.moveTo(80, 110); g.lineTo(176, 110); g.lineTo(200, 256); g.lineTo(56, 256); g.closePath(); g.fill();
+  g.lineCap = 'round'; g.lineWidth = 16; g.strokeStyle = '#fff';
+  g.beginPath(); g.moveTo(170, 118); g.lineTo(220, 60); g.stroke();
+  g.fillStyle = '#ffe08a'; boltShape(g, 226, 34, 26);
+  const t = canvasTex(c);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), new THREE.MeshBasicMaterial({ map:t, color:C(0xffe8c0), transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false }));
+  m.position.set(9.5, 0.2, 0.02); m.renderOrder = -1;
+  backdrop.add(m);
+  ENVX.twinkle.push({ m:{ set emissiveIntensity(v){ m.material.opacity = v; } }, base:0.2, ph:0, sp:0.4 });
+}
+function buildEnvOlympus(){
+  const rnd = seeded(223);
+  themeMats({ stone:0xe6e2d8, dark:0xb8b2a6, iron:0xc8a050, wood:0x6a5034 });
+  const marble = new THREE.MeshStandardMaterial({ color:C(0xf2efe8), roughness:0.32, metalness:0.04, envMapIntensity:1.1, flatShading:true });
+  const gold = new THREE.MeshStandardMaterial({ color:C(0xe8c070), metalness:1, roughness:0.22, envMapIntensity:1.6 });
+  slabFloor({ seed:13, cells:14, size:30, seam:'#1a2240', glow:'rgba(255,210,120,1)', glowFar:'rgba(120,170,255,1)', slab:['#2a2c38', '#1a1c28', '#30323e'], vein:['rgba(250,250,255,.25)', 'rgba(240,200,110,.3)'], veins:4, ei:0.75, rough:0.3, metal:0.1, env:1.0 });
+  const bg = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color:C(0x8a8a96), roughness:0.8 }));
+  bg.rotation.x = -Math.PI / 2; bg.position.y = GROUND_Y - 0.005; bg.receiveShadow = true; envRoot.add(bg);
+  const seals = [
+    greekSeal(0, 6.7, 1.45, 'louro', 'rgba(240,200,110,1)', 'rgba(150,200,255,1)', 1),
+    greekSeal(-6.7, 4.4, 0.8, 'letras', 'rgba(140,200,255,1)', 'rgba(240,200,110,1)', 2), greekSeal(-6.8, -3.3, 0.8, 'raio', 'rgba(240,200,110,1)', 'rgba(140,200,255,1)', 3),
+    greekSeal(-3.5, 6.5, 0.85, 'letras', 'rgba(240,200,110,1)', 'rgba(140,200,255,1)', 4), greekSeal(3.6, 6.4, 0.8, 'raio', 'rgba(140,200,255,1)', 'rgba(240,200,110,1)', 5),
+    greekSeal(-3.4, -6.7, 0.7, 'letras', 'rgba(240,200,110,1)', 'rgba(140,200,255,1)', 6), greekSeal(3.4, -6.6, 0.7, 'louro', 'rgba(140,200,255,1)', 'rgba(240,200,110,1)', 7),
+  ];
+  // na captura, um raio de ouro cai do céu sobre a casa
+  ENVX.onCapture = (x, z) => {
+    snd('raio_zeus', { vol:0.9 });
+    const top = new THREE.Vector3(x + 1.2, 7, z - 1.5), hit = new THREE.Vector3(x, 0.4, z);
+    const sky = lightningFx(top, hit, 0xfff4d0, 0xffc040, ['#fff6d8', '#ffd060']);
+    flashLight(hit, 0xffd070, 5, 600); spawnRing(x, z, 0xffd070, 1.3, 520); shake(0.12);
+    tween(420, k => { sky.k = 1 - k; sky.update(!RM && Math.random() < 0.5); }).then(() => sky.dispose());
+    let best = seals[0], bd = 1e9; for (const s0 of seals){ const d = (s0.x - x) ** 2 + (s0.z - z) ** 2; if (d < bd){ bd = d; best = s0; } }
+    tween(1300, k => { best.mat.color.setScalar(1 + Math.sin(Math.PI * k) * 1.8); }, linE);
+  };
+  // colunata dórica à esquerda, com arquitrave e faixa de ouro
+  const L = new THREE.Group();
+  for (let z = -8.4; z <= 6.4; z += 2.45) doricColumn(L, -8.4, z, 3.6, marble, gold);
+  addMesh(L, new THREE.BoxGeometry(1.1, 0.42, 15.6), marble, -8.4, GROUND_Y + 4.65, -1.0);
+  addMesh(L, new THREE.BoxGeometry(1.14, 0.08, 15.64), gold, -8.4, GROUND_Y + 4.42, -1.0);
+  addMesh(L, new THREE.BoxGeometry(1.2, 0.18, 15.8), marble, -8.4, GROUND_Y + 4.95, -1.0);
+  // fundo: escadaria e templo principal, com mais colunas em ruína
+  addMesh(L, new THREE.BoxGeometry(10, 0.3, 2.4), marble, 2.2, GROUND_Y + 0.15, -10.4);
+  addMesh(L, new THREE.BoxGeometry(9, 0.3, 2.0), marble, 2.2, GROUND_Y + 0.45, -10.6);
+  for (const [x, h] of [[-5.6, 2.6], [-4.0, 1.4], [7.8, 3.0]]) doricColumn(L, x, -9.4, h, marble, gold);
+  bakeInto(L, envRoot);
+  const tg = new THREE.Group(); greekTemple(tg, 2.2, GROUND_Y + 0.6, -11.2, 2.6, marble, gold); bakeInto(tg, envRoot);
+  // braseiros de mármore com chama divina (quatro luzes)
+  for (const [x, z] of [[-5.35, -5.35], [5.35, -5.35], [-6.6, 2.0], [6.6, 6.0]]) brazier(x, z, rnd, 1.5, FLAME_DIVINE, marble);
+  laurel(-6.2, -6.4, rnd, new THREE.MeshStandardMaterial({ color:C(0x6a8a3a), roughness:0.6 }), gold);
+  laurel(-7.4, 6.2, rnd, new THREE.MeshStandardMaterial({ color:C(0x7a9a42), roughness:0.6 }), gold);
+  // os deuses à direita: Zeus maior, Atena, Poseidon e Apolo; Pégaso na frente e a águia numa coluna
+  godStatue(8.2, -5.4, -1.2, 1.35, marble, gold, 'zeus');
+  godStatue(7.6, -1.8, -1.6, 1.05, marble, gold, 'atena');
+  godStatue(7.9, 1.6, -1.7, 1.05, marble, gold, 'poseidon');
+  godStatue(7.4, 4.6, -2.0, 1.0, marble, gold, 'apolo');
+  pegasus(5.6, 7.6, -2.6, marble, gold);
+  eagleColumn(-5.2, 7.2, marble, gold);
+  lavaLight(7.6, 3.2, -4.6, 1.3, 0xffd890, 10);
+  graveyard('w', rnd); graveyard('b', rnd);
+  buildBackdrop(paintBackdropOlympus);
+  zeusSky();
+}
+
+/* Pedra Filosofal: a cidadela de um alquimista. O tabuleiro fica numa plataforma redonda de pedra com arcos góticos;
+   em volta, o chão se abre para os andares de baixo (biblioteca, laboratório de poções e uma rosácea de vitral). */
+const FLAME_ARCANE = { outer:0x4a8aff, inner:0xd8ecff, halo:0x6a9aff, light:0x6a9aff, spark:'#a8d0ff', coal:0x3a6aff };
+function planetSymbol(g, i, x, y, s){
+  g.save(); g.translate(x, y); g.scale(s, s); const lw = g.lineWidth; g.lineWidth = lw / s;
+  const C0 = (cx, cy, r) => { g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke(); };
+  const L = (...p) => { g.beginPath(); g.moveTo(p[0], p[1]); for (let k = 2; k < p.length; k += 2) g.lineTo(p[k], p[k + 1]); g.stroke(); };
+  switch (i % 7){
+    case 0: C0(0, 0, 0.8); g.beginPath(); g.arc(0, 0, 0.12, 0, TAU); g.fill(); break;
+    case 1: g.beginPath(); g.arc(0, 0, 0.8, Math.PI * 0.3, Math.PI * 1.7); g.arc(0.35, 0, 0.6, Math.PI * 1.55, Math.PI * 0.45, true); g.stroke(); break;
+    case 2: C0(0, -0.3, 0.5); L(0, 0.2, 0, 1); L(-0.35, 0.6, 0.35, 0.6); break;
+    case 3: C0(-0.2, 0.2, 0.5); L(0.15, -0.15, 0.8, -0.8); L(0.4, -0.8, 0.8, -0.8, 0.8, -0.4); break;
+    case 4: L(-0.6, -0.6, 0.2, -0.6, -0.6, 0.6, 0.6, 0.6); L(0.2, -0.9, 0.2, 0.9); break;
+    case 5: L(-0.5, -0.8, 0.5, -0.8); L(0, -0.8, 0, 0.8); g.beginPath(); g.arc(0.2, 0.3, 0.3, -Math.PI / 2, Math.PI / 2); g.stroke(); break;
+    case 6: C0(0, 0.2, 0.45); L(0, -0.25, 0, -0.9); L(-0.35, -0.6, 0.35, -0.6); g.beginPath(); g.arc(0, -0.95, 0.35, Math.PI * 0.15, Math.PI * 0.85, true); g.stroke(); break;
+  }
+  g.restore(); g.lineWidth = lw;
+}
+// círculo de transmutação: círculos, triângulos, quadrado, símbolos planetários e dos elementos
+function paintTransmutation(g, c, R, col, rnd){
+  g.save(); g.translate(c, c); g.strokeStyle = col; g.fillStyle = col; g.lineCap = g.lineJoin = 'round';
+  const ring = (r, w) => { g.lineWidth = w; g.beginPath(); g.arc(0, 0, r, 0, TAU); g.stroke(); };
+  const poly = (n, r, a0) => { g.beginPath(); for (let i = 0; i <= n; i++){ const a = a0 + i * TAU / n; i ? g.lineTo(Math.cos(a) * r, Math.sin(a) * r) : g.moveTo(Math.cos(a) * r, Math.sin(a) * r); } g.stroke(); };
+  ring(R, 6); ring(R * 0.93, 3); ring(R * 0.62, 4); ring(R * 0.57, 2);
+  g.lineWidth = 3; poly(3, R * 0.93, -Math.PI / 2); poly(3, R * 0.93, Math.PI / 2); poly(4, R * 0.62, Math.PI / 4);
+  g.lineWidth = 5;
+  for (let i = 0; i < 7; i++){ const a = i * TAU / 7 - Math.PI / 2; planetSymbol(g, i, Math.cos(a) * R * 0.78, Math.sin(a) * R * 0.78, R * 0.05); }
+  for (let i = 0; i < 4; i++){
+    const a = i * TAU / 4, x = Math.cos(a) * R * 1.06, y = Math.sin(a) * R * 1.06, s = R * 0.05;
+    g.beginPath(); g.moveTo(x, y - s); g.lineTo(x + s, y + s * 0.8); g.lineTo(x - s, y + s * 0.8); g.closePath(); g.stroke();
+    if (i % 2) { g.beginPath(); g.moveTo(x - s * 0.6, y + s * 0.1); g.lineTo(x + s * 0.6, y + s * 0.1); g.stroke(); }
+    ring(0, 0);
+  }
+  g.lineWidth = 3;
+  for (let i = 0; i < 36; i++){ const a = i * TAU / 36; g.save(); g.rotate(a); rune(g, 0, -R * 0.965, R * 0.03, seeded(700 + i)); g.restore(); }
+  g.restore();
+}
+function circleTex(col, size = 512){
+  const c = mkCanvas(size, size), g = c.getContext('2d');
+  g.shadowColor = col; g.shadowBlur = 14;
+  paintTransmutation(g, size / 2, size * 0.44, col, seeded(3));
+  return canvasTex(c);
+}
+// paredes dos andares de baixo: estantes de livros (biblioteca) ou prateleiras de frascos e redomas (laboratório)
+function shelfCanvas(kind){
+  const c = mkCanvas(1024, 256), g = c.getContext('2d'), rnd = seeded(kind === 'lab' ? 31 : 37);
+  g.fillStyle = '#1a120c'; g.fillRect(0, 0, 1024, 256);
+  for (let row = 0; row < 4; row++){
+    const y = 14 + row * 60;
+    g.fillStyle = '#3a2416'; g.fillRect(0, y + 50, 1024, 8);
+    if (kind === 'lab'){
+      for (let x = 10; x < 1010; x += 34 + rnd() * 26){
+        const w = 16 + rnd() * 14, h = 22 + rnd() * 24, cols = ['#4aff8a', '#b05aff', '#ffb040', '#4ad8ff'], cl = cols[Math.floor(rnd() * 4)];
+        if (rnd() < 0.2){
+          g.fillStyle = 'rgba(200,230,255,.25)'; g.beginPath(); g.arc(x + 18, y + 26, 20, Math.PI, 0); g.lineTo(x + 38, y + 50); g.lineTo(x - 2, y + 50); g.fill();
+          g.fillStyle = ['#ff5a2a', '#ffb040', '#ff7ac8'][Math.floor(rnd() * 3)]; g.beginPath(); g.ellipse(x + 18, y + 38, 8, 6, 0, 0, TAU); g.fill(); g.beginPath(); g.moveTo(x + 18, y + 38); g.lineTo(x + 30, y + 30); g.lineTo(x + 26, y + 40); g.fill();
+        } else {
+          const lg = g.createLinearGradient(0, y + 50 - h, 0, y + 50); lg.addColorStop(0, 'rgba(255,255,255,.3)'); lg.addColorStop(0.4, cl); lg.addColorStop(1, cl);
+          g.fillStyle = lg; g.fillRect(x, y + 50 - h, w, h); g.fillStyle = '#6a4a30'; g.fillRect(x + w * 0.3, y + 50 - h - 6, w * 0.4, 6);
+        }
+      }
+    } else {
+      for (let x = 4; x < 1020;){
+        const w = 7 + rnd() * 9, h = 34 + rnd() * 14;
+        g.fillStyle = ['#6a1a1a', '#1a3a5a', '#3a5a2a', '#5a3a1a', '#4a2a5a', '#7a5a2a'][Math.floor(rnd() * 6)];
+        g.fillRect(x, y + 50 - h, w, h); g.fillStyle = 'rgba(230,190,110,.6)'; g.fillRect(x, y + 50 - h + 6, w, 2);
+        x += w + 1;
+      }
+    }
+  }
+  const glow = g.createLinearGradient(0, 256, 0, 0);
+  glow.addColorStop(0, kind === 'lab' ? 'rgba(80,255,140,.25)' : 'rgba(255,180,80,.3)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = glow; g.fillRect(0, 0, 1024, 256);
+  return c;
+}
+function archesCanvas(){
+  const c = mkCanvas(1024, 256), g = c.getContext('2d');
+  g.fillStyle = '#4a4e58'; g.fillRect(0, 0, 1024, 256);
+  for (let i = 0; i < 8; i++){
+    const x = i * 128 + 64;
+    g.fillStyle = '#14161c'; g.beginPath(); g.moveTo(x - 40, 240); g.lineTo(x - 40, 110); g.quadraticCurveTo(x - 40, 40, x, 24); g.quadraticCurveTo(x + 40, 40, x + 40, 110); g.lineTo(x + 40, 240); g.fill();
+    g.strokeStyle = '#6a6e7a'; g.lineWidth = 8; g.stroke();
+    g.fillStyle = 'rgba(255,190,100,.35)'; g.fillRect(x - 30, 170, 60, 70);
+  }
+  return c;
+}
+function roseWindow(){
+  const c = mkCanvas(512, 512), g = c.getContext('2d'), m = 256;
+  g.translate(m, m);
+  const cols = ['#6a3aff', '#3a8aff', '#c05aff', '#2a5aff', '#ff5ac8', '#4ac8ff'];
+  for (let ring = 3; ring >= 0; ring--){
+    const r = 60 + ring * 60, n = 8 + ring * 4;
+    for (let i = 0; i < n; i++){
+      g.fillStyle = cols[(i + ring) % cols.length];
+      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, r, i * TAU / n, (i + 1) * TAU / n); g.closePath(); g.fill();
+    }
+  }
+  g.strokeStyle = '#141018'; g.lineWidth = 8;
+  for (let ring = 0; ring < 4; ring++){ g.beginPath(); g.arc(0, 0, 60 + ring * 60, 0, TAU); g.stroke(); }
+  for (let i = 0; i < 16; i++){ const a = i * TAU / 16; g.beginPath(); g.moveTo(Math.cos(a) * 60, Math.sin(a) * 60); g.lineTo(Math.cos(a) * 240, Math.sin(a) * 240); g.stroke(); }
+  for (let i = 0; i < 8; i++){ const a = i * TAU / 8; g.beginPath(); g.arc(Math.cos(a) * 150, Math.sin(a) * 150, 40, 0, TAU); g.stroke(); }
+  return canvasTex(c);
+}
+// um corte no chão (setor de anel) que olha para o andar de baixo
+function floorWell(r0, r1, a0, a1, depth, wallTex, archTex, stone, floorMat){
+  const g = new THREE.Group(), al = a1 - a0;
+  const outer = new THREE.Mesh(new THREE.CylinderGeometry(r1, r1, depth, 32, 1, true, Math.PI / 2 - a1, al), new THREE.MeshStandardMaterial({ map:wallTex, side:THREE.BackSide, roughness:0.8, emissive:C(0xffffff), emissiveMap:wallTex, emissiveIntensity:0.35 }));
+  outer.position.y = GROUND_Y - depth / 2; g.add(outer);
+  const inner = new THREE.Mesh(new THREE.CylinderGeometry(r0, r0, depth, 32, 1, true, Math.PI / 2 - a1, al), new THREE.MeshStandardMaterial({ map:archTex, roughness:0.85 }));
+  inner.position.y = GROUND_Y - depth / 2; g.add(inner);
+  const fl = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 32, 1, a0, al), floorMat);
+  fl.rotation.x = -Math.PI / 2; fl.scale.y = -1; fl.position.y = GROUND_Y - depth; g.add(fl);
+  for (const a of [a0, a1]){
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(r1 - r0, depth), stone);
+    w.position.set(Math.cos(a) * (r0 + r1) / 2, GROUND_Y - depth / 2, Math.sin(a) * (r0 + r1) / 2); w.rotation.y = -a; w.material.side = THREE.DoubleSide; g.add(w);
+  }
+  // borda de pedra em volta do corte
+  const rim = new THREE.Mesh(new THREE.RingGeometry(r1, r1 + 0.18, 32, 1, a0, al), stone);
+  rim.rotation.x = -Math.PI / 2; rim.scale.y = -1; rim.position.y = GROUND_Y + 0.01; g.add(rim);
+  envRoot.add(g);
+  return g;
+}
+function groundWithWells(wells, mat){
+  const shape = new THREE.Shape(); shape.moveTo(-40, -40); shape.lineTo(40, -40); shape.lineTo(40, 40); shape.lineTo(-40, 40); shape.closePath();
+  for (const [r0, r1, a0, a1] of wells){
+    const h = new THREE.Path(), n = 24;
+    for (let i = 0; i <= n; i++){ const a = a0 + (a1 - a0) * i / n; i ? h.lineTo(Math.cos(a) * r1, Math.sin(a) * r1) : h.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); }
+    for (let i = n; i >= 0; i--){ const a = a0 + (a1 - a0) * i / n; h.lineTo(Math.cos(a) * r0, Math.sin(a) * r0); }
+    h.closePath(); shape.holes.push(h);
+  }
+  const geo = new THREE.ShapeGeometry(shape, 8);
+  geo.rotateX(Math.PI / 2);
+  const m = new THREE.Mesh(geo, mat); m.position.y = GROUND_Y; m.receiveShadow = true;
+  mat.side = THREE.DoubleSide;
+  envRoot.add(m);
+}
+function floatingBook(x, y, z, rnd, list, y0, y1){
+  const b = new THREE.Group(), cover = new THREE.MeshStandardMaterial({ color:C(['#6a1a1a', '#1a3a5a', '#3a2a5a'][Math.floor(rnd() * 3)]), roughness:0.7 });
+  addMesh(b, new THREE.BoxGeometry(0.34, 0.05, 0.26), cover, 0, 0, 0, 0, 0, 0, false);
+  addMesh(b, new THREE.PlaneGeometry(0.3, 0.22), new THREE.MeshBasicMaterial({ color:C(0xfff0c8), toneMapped:false, side:THREE.DoubleSide }), 0, 0.03, 0, -Math.PI / 2, 0, 0, false);
+  b.position.set(x, y, z); b.rotation.set((rnd() - 0.5) * 0.6, rnd() * 3, (rnd() - 0.5) * 0.6);
+  envRoot.add(b);
+  list.push({ o:b, y0, y1, v:0.00025 + rnd() * 0.0002, rs:(rnd() - 0.5) * 0.001 });
+}
+// a Pedra Filosofal: cristal rubi girando sobre um pedestal arcano, anéis de ouro em órbita e brilho subindo
+function philosophersStone(x, z, gold, stone, rnd){
+  const ped = new THREE.Group();
+  addMesh(ped, new THREE.CylinderGeometry(0.9, 1.05, 0.3, 8), stone, x, GROUND_Y + 0.15, z);
+  addMesh(ped, new THREE.CylinderGeometry(0.4, 0.6, 0.9, 8), stone, x, GROUND_Y + 0.75, z);
+  addMesh(ped, new THREE.CylinderGeometry(0.75, 0.45, 0.2, 8), gold, x, GROUND_Y + 1.3, z);
+  bakeInto(ped, envRoot);
+  const hub = new THREE.Group(); hub.position.set(x, GROUND_Y + 2.3, z); envRoot.add(hub);
+  const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), new THREE.MeshStandardMaterial({ color:C(0xc8102a), emissive:C(0xff1a3a), emissiveIntensity:1.1, roughness:0.08, metalness:0.2, envMapIntensity:2, flatShading:true }));
+  gem.scale.set(1, 1.45, 1); hub.add(gem);
+  ENVX.spin.push({ o:gem, ax:'y', v:0.0006 });
+  glowSprite(hub, 0, 0, 0, 2.6, 0xff2a4a, 0.55);
+  for (const [r, t, v] of [[0.85, 0.5, 0.0005], [1.0, -0.9, -0.0004], [0.72, 1.4, 0.0007]]){
+    const h = new THREE.Group(), ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.025, 6, 40), gold);
+    ring.rotation.x = t; h.add(ring); hub.add(h); ENVX.spin.push({ o:h, ax:'y', v });
+  }
+  ENVX.bob.push({ o:hub, y:hub.position.y, ph:0 });
+  ENVX.motes.push({ x, z, y0:GROUND_Y + 1.5 });
+  lavaLight(x, GROUND_Y + 2.3, z, 1.6, 0xff2a3a, 8);
+}
+function buildEnvAlchemy(){
+  const rnd = seeded(241);
+  themeMats({ stone:0x5a5e66, dark:0x33363e, iron:0x2a2a30, wood:0x3a2616 });
+  const gold = new THREE.MeshStandardMaterial({ color:C(0xd8a840), metalness:1, roughness:0.25, envMapIntensity:1.5 });
+  const stoneM = new THREE.MeshStandardMaterial({ color:C(0x4a4e58), roughness:0.85, flatShading:true });
+  // chão de lajes musgosas com três cortes (biblioteca à esquerda, laboratório à direita, rosácea na frente)
+  const R0 = 7.7, R1 = 9.9, D0 = 3.2;
+  const wells = [[R0, R1, Math.PI * 0.82, Math.PI * 1.18], [R0, R1, -Math.PI * 0.18, Math.PI * 0.18], [R0, R1, Math.PI * 0.33, Math.PI * 0.67]];
+  const gc = mkCanvas(512, 512);
+  paintGround('#3a3e44', ['rgba(40,70,40,.3)', 'rgba(0,0,0,.35)'], ['rgba(120,150,90,.25)', 'rgba(0,0,0,.4)'])(gc.getContext('2d'), seeded(43));
+  const gt = canvasTex(gc); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.repeat.set(0.25, 0.25);
+  groundWithWells(wells, new THREE.MeshStandardMaterial({ map:gt, bumpMap:gt, bumpScale:0.03, roughness:0.9, envMapIntensity:0.4 }));
+  // plataforma redonda com o círculo de transmutação em ouro
+  const pc = mkCanvas(2048, 2048), pg = pc.getContext('2d');
+  pg.fillStyle = '#26282e'; pg.fillRect(0, 0, 2048, 2048);
+  speckle(pg, rnd, 0, 0, 2048, 2048, 9000, r => `rgba(255,255,255,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.1 + r() * 0.1})`, 3);
+  for (let i = 0; i < 24; i++){ const a = i * TAU / 24; pg.strokeStyle = 'rgba(0,0,0,.5)'; pg.lineWidth = 4; pg.beginPath(); pg.moveTo(1024 + Math.cos(a) * 700, 1024 + Math.sin(a) * 700); pg.lineTo(1024 + Math.cos(a) * 1024, 1024 + Math.sin(a) * 1024); pg.stroke(); }
+  const pe = mkCanvas(2048, 2048), peg = pe.getContext('2d');
+  peg.shadowColor = 'rgba(255,200,90,1)'; peg.shadowBlur = 16;
+  paintTransmutation(peg, 1024, 960, 'rgba(255,205,110,.95)', rnd);
+  const pm = new THREE.MeshStandardMaterial({ map:canvasTex(pc), emissiveMap:canvasTex(pe), emissive:C(0xffffff), emissiveIntensity:0.6, roughness:0.75, envMapIntensity:0.5 });
+  const plat = new THREE.Mesh(new THREE.CircleGeometry(R0 - 0.1, 64), pm);
+  plat.rotation.x = -Math.PI / 2; plat.position.y = GROUND_Y + 0.006; plat.receiveShadow = true; envRoot.add(plat);
+  ENVX.twinkle.push({ m:pm, base:0.6, ph:0, sp:0.6 });
+  // os andares de baixo
+  const shelfL = canvasTex(shelfCanvas('lib')), shelfR = canvasTex(shelfCanvas('lab')), arch = canvasTex(archesCanvas());
+  for (const t of [shelfL, shelfR, arch]){ t.wrapS = THREE.RepeatWrapping; t.repeat.x = 2; }
+  const warmFloor = new THREE.MeshStandardMaterial({ color:C(0x3a2a1a), emissive:C(0x5a3010), roughness:0.8 });
+  floorWell(R0, R1, wells[0][2], wells[0][3], D0, shelfL, arch, stoneM, warmFloor);
+  floorWell(R0, R1, wells[1][2], wells[1][3], D0, shelfR, arch, stoneM, new THREE.MeshStandardMaterial({ color:C(0x1a2a1a), emissive:C(0x0a3018), roughness:0.8 }));
+  floorWell(R0, R1, wells[2][2], wells[2][3], D0, arch, arch, stoneM, new THREE.MeshStandardMaterial({ color:C(0x141018), roughness:0.8 }));
+  lavaLight(-8.8, GROUND_Y - 1.6, 0, 1.6, 0xffb060, 7);
+  lavaLight(8.8, GROUND_Y - 1.6, 0, 1.5, 0x5aff8a, 7);
+  // rosácea acesa por baixo
+  const rose = new THREE.Mesh(new THREE.CircleGeometry(1.0, 32), new THREE.MeshBasicMaterial({ map:roseWindow(), toneMapped:false }));
+  rose.rotation.x = -Math.PI / 2; rose.position.set(0, GROUND_Y - D0 + 0.02, (R0 + R1) / 2); envRoot.add(rose);
+  glowSprite(envRoot, 0, GROUND_Y - D0 + 0.6, (R0 + R1) / 2, 3.2, 0x8a5aff, 0.5);
+  // caldeirões verdes borbulhando no laboratório
+  for (const [a, rr] of [[-0.08, 8.4], [0.1, 9.2]]){
+    const x = Math.cos(a) * rr, z = Math.sin(a) * rr, cg = new THREE.Group();
+    addMesh(cg, new THREE.SphereGeometry(0.42, 12, 8, 0, TAU, Math.PI * 0.35, Math.PI * 0.65), ironMat, x, GROUND_Y - D0 + 0.42, z);
+    addMesh(cg, new THREE.CircleGeometry(0.33, 16), new THREE.MeshBasicMaterial({ color:C(0x5aff7a), toneMapped:false }), x, GROUND_Y - D0 + 0.6, z, -Math.PI / 2, 0, 0, false);
+    bakeInto(cg, envRoot);
+    glowSprite(envRoot, x, GROUND_Y - D0 + 0.9, z, 1.6, 0x5aff7a, 0.45);
+    ENVX.bubbles.push({ x, z, y:GROUND_Y - D0 + 0.62 });
+  }
+  // livros flutuando para cima na biblioteca
+  for (let i = 0; i < 7; i++){ const a = Math.PI * (0.85 + rnd() * 0.3), rr = R0 + 0.4 + rnd() * 1.6; floatingBook(Math.cos(a) * rr, GROUND_Y - 2 + rnd() * 3, Math.sin(a) * rr, rnd, ENVX.floaters, GROUND_Y - 2.6, GROUND_Y + 1.6); }
+  // muralha gótica musgosa à esquerda, com nichos de estantes; velas flutuando
+  const wall = blockMat(0x6a7468, 0.9), trim = blockMat(0x4e564c, 0.9);
+  const Lw = new THREE.Group(), dark = new THREE.MeshBasicMaterial({ color:C(0x0c0a08) });
+  addMesh(Lw, worldBox(1.2, 6.2, 18), wall, -11.0, GROUND_Y + 3.1, -1.5);
+  for (const z of [-7.5, -4.2, 3.4, 6.4]){
+    const sh = new THREE.Shape(); sh.moveTo(-0.7, 0); sh.lineTo(-0.7, 2.2); sh.quadraticCurveTo(-0.7, 3.2, 0, 3.5); sh.quadraticCurveTo(0.7, 3.2, 0.7, 2.2); sh.lineTo(0.7, 0); sh.closePath();
+    const nm = new THREE.Mesh(new THREE.ShapeGeometry(sh, 8), dark); nm.position.set(-10.39, GROUND_Y + 0.4, z); nm.rotation.y = Math.PI / 2; Lw.add(nm);
+    for (let k = 0; k < 3; k++){
+      addMesh(Lw, new THREE.BoxGeometry(0.3, 0.05, 1.3), woodMat, -10.25, GROUND_Y + 0.9 + k * 0.75, z);
+      for (let b = 0; b < 6; b++) addMesh(Lw, new THREE.BoxGeometry(0.22, 0.3 + rnd() * 0.15, 0.08), b % 2 ? trim : woodMat, -10.25, GROUND_Y + 1.1 + k * 0.75, z - 0.5 + b * 0.2);
+    }
+    addMesh(Lw, worldBox(0.4, 6.4, 0.5), trim, -10.2, GROUND_Y + 3.2, z + 1.6);
+  }
+  bakeInto(Lw, envRoot);
+  for (let i = 0; i < 9; i++){
+    const x = -9.4 + rnd() * 2, y = GROUND_Y + 2.4 + rnd() * 2.4, z = -8 + rnd() * 14, cd = new THREE.Group();
+    addMesh(cd, new THREE.CylinderGeometry(0.035, 0.035, 0.22, 6), new THREE.MeshStandardMaterial({ color:C(0xeee0c0), roughness:0.6 }), 0, 0, 0, 0, 0, 0, false);
+    glowSprite(cd, 0, 0.16, 0, 0.35, 0xffc060, 0.8);
+    cd.position.set(x, y, z); envRoot.add(cd);
+    ENVX.bob.push({ o:cd, y, ph:rnd() * 6 });
+  }
+  cannon(-6.7, 6.7, -0.7, gold);
+  // fundo: arcada escura com portal violeta, estátuas de magos encapuzados, braseiros azuis e a Pedra
+  portalGate(0, -9.6, trim, 0xa06aff, '#2a0a5a', '#d0a0ff', 71);
+  hoodedStatue(-2.6, -8.9, 0.1, stoneM, 0x9a6aff, 1.25);
+  hoodedStatue(2.6, -8.9, -0.1, stoneM, 0x9a6aff, 1.25);
+  brazier(-5.35, -5.35, rnd, 1.5, FLAME_ARCANE, stoneM);
+  brazier(5.35, -5.35, rnd, 1.5, FLAME_ARCANE, stoneM);
+  philosophersStone(0, -7.0, gold, stoneM, rnd);
+  const back = new THREE.Group();
+  for (const [a, b] of [[-10.4, -1.8], [1.8, 10.6]]){ addMesh(back, worldBox(b - a, 3.6, 1.0), wall, (a + b) / 2, GROUND_Y + 1.8, -10.4); for (let x = a + 0.4; x < b - 0.3; x += 1.4) addMesh(back, new THREE.ConeGeometry(0.28, 1.2, 4), trim, x, GROUND_Y + 4.2, -10.4); }
+  bakeInto(back, envRoot);
+  // direita: mago de pedra com cajado, esfinge, globo celeste, orbes e um anel-portal azul flutuando
+  godStatue(6.6, 6.2, -2.3, 1.05, stoneM, gold, 'mago');
+  hoodedStatue(6.0, -7.2, -1.2, stoneM, 0x6aa0ff, 1.0);
+  const sx = new THREE.Group();
+  addMesh(sx, new THREE.BoxGeometry(1.8, 0.4, 0.9), stoneM, 8.2, GROUND_Y + 0.2, -6.6);
+  addMesh(sx, new THREE.BoxGeometry(1.2, 0.5, 0.6), stoneM, 8.1, GROUND_Y + 0.65, -6.6);
+  addMesh(sx, new THREE.BoxGeometry(0.4, 0.8, 0.5), stoneM, 7.55, GROUND_Y + 1.05, -6.6);
+  addMesh(sx, new THREE.BoxGeometry(0.34, 0.36, 0.34), stoneM, 7.45, GROUND_Y + 1.55, -6.6);
+  addMesh(sx, new THREE.ConeGeometry(0.32, 0.6, 4), stoneM, 7.5, GROUND_Y + 1.5, -6.6, 0, Math.PI / 4, 0).scale.set(1, 1, 0.6);
+  bakeInto(sx, envRoot);
+  armillary(9.4, -8.0, 0.8, new THREE.MeshStandardMaterial({ map:globeTex('#0e2050', 'rgba(232,192,112,.7)', 'rgba(255,230,170,1)', 9), roughness:0.35, metalness:0.3 }), gold, false);
+  const ring = new THREE.Group(); ring.position.set(8.6, GROUND_Y + 2.8, -2.6); envRoot.add(ring);
+  const rr = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.06, 6, 28), gold); ring.add(rr);
+  swirlDisc(ring, 0, 0, 0, 0.55, '#2a6aff', '#d8ecff', 83);
+  ring.rotation.y = -Math.PI / 2; ENVX.bob.push({ o:ring, y:ring.position.y, ph:2 });
+  graveyard('w', rnd); graveyard('b', rnd);
+  // na captura: um círculo de transmutação dourado acende sob a casa
+  const circTex = circleTex('rgba(255,210,110,1)');
+  ENVX.onCapture = (x, z) => {
+    snd('transmutacao', { vol:0.85 });
+    const m = groundDecal(circTex, x, z, 1.6, 0xffffff, true, 0.03);
+    tween(1500, k => { m.material.opacity = Math.sin(Math.PI * Math.min(1, k * 1.2)); m.rotation.y = k * 1.2; }, linE).then(() => dropDecal(m));
+    flashLight(new THREE.Vector3(x, 0.4, z), 0xffd070, 3, 800);
+  };
+  buildBackdrop(paintBackdropCitadel);
+}
+// cidadela gótica genérica de torres escuras num penhasco, sob tempestade com raios violeta
+function paintBackdropCitadel(c){
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(251), hz = h * 0.8, band = h * 0.5;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#05060e'); sky.addColorStop(0.5, '#141a34'); sky.addColorStop(0.85, '#2a2a50'); sky.addColorStop(1, '#4a3a6a');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  smokeClouds(g, rnd, w, hz, h, 70, '160,120,255');
+  for (let i = 0; i < 200; i++){ g.fillStyle = `rgba(255,255,255,${0.2 + rnd() * 0.5})`; g.fillRect(rnd() * w, rnd() * hz * 0.5, 1, 1); }
+  ridge(g, rnd, w, hz, band, '#1a1c2a', 0.15, 0.4);
+  // penhasco e cidadela
+  const cx = w * 0.62;
+  g.fillStyle = '#0c0d16'; g.beginPath(); g.moveTo(cx - w * 0.16, hz); g.lineTo(cx - w * 0.12, hz - band * 0.5); g.lineTo(cx + w * 0.1, hz - band * 0.55); g.lineTo(cx + w * 0.15, hz); g.fill();
+  for (let i = 0; i < 9; i++){
+    const x = cx - w * 0.11 + i * w * 0.025, tw = 8 + rnd() * 10, th = band * (0.4 + rnd() * 0.75);
+    g.fillRect(x, hz - band * 0.55 - th, tw, th);
+    g.beginPath(); g.moveTo(x - 3, hz - band * 0.55 - th); g.lineTo(x + tw / 2, hz - band * 0.55 - th - 24 - rnd() * 18); g.lineTo(x + tw + 3, hz - band * 0.55 - th); g.fill();
+    if (rnd() < 0.7){ g.fillStyle = 'rgba(255,190,110,.85)'; g.fillRect(x + tw * 0.35, hz - band * 0.55 - th * (0.3 + rnd() * 0.4), 2, 4); g.fillStyle = '#0c0d16'; }
+  }
+  g.fillStyle = '#10121c'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
 }
 
 /* Covil dos Dragões */
@@ -5185,7 +5730,7 @@ const FXC_GELO = {
 function applyArenaColors(){
   const gl = arena === 'gelo';
   for (const s0 of ['w', 'b']){
-    FXC[s0] = Object.assign({}, FXC_BASE[s0], gl ? FXC_GELO[s0] : null);
+    FXC[s0] = Object.assign({}, FXC_BASE[s0], gl ? FXC_GELO[s0] : null, AR().fx ? AR().fx[s0] : null);
     RING_COL[s0] = RING_SET.std[s0];
     CINE_COL[s0] = CINE_SET.std[s0];
   }
@@ -6082,6 +6627,12 @@ function updateEnv(now, dt){
   if (!RM) for (const S1 of ENVX.spin) S1.o.rotation[S1.ax] += S1.v * dt;
   for (const O of ENVX.orbs) O.halo.material.opacity = RM ? O.base : O.base * (0.75 + 0.25 * Math.sin(t * 3.1 + O.ph) * Math.sin(t * 1.7 + O.ph * 2));
   if (!RM) for (const B0 of ENVX.bob) B0.o.position.y = B0.y + Math.sin(t * 0.5 + B0.ph) * 0.15;
+  // livros subindo devagar, brilho saindo da Pedra e bolhas nos caldeirões
+  if (!RM){
+    for (const F of ENVX.floaters){ F.o.position.y += F.v * dt; F.o.rotation.y += F.rs * dt; if (F.o.position.y > F.y1) F.o.position.y = F.y0; }
+    for (const M of ENVX.motes) if (Math.random() < dt * 0.02) sparks.emit(M.x + (Math.random() - 0.5) * 0.8, M.y0 + Math.random() * 0.4, M.z + (Math.random() - 0.5) * 0.8, (Math.random() - 0.5) * 0.1, 0.35 + Math.random() * 0.3, (Math.random() - 0.5) * 0.1, 2600, 0.05, Math.random() < 0.5 ? '#ff5a6a' : '#ffd070', 0.9, 0.05, 0.9, 1);
+    for (const B1 of ENVX.bubbles) if (Math.random() < dt * 0.012) sparks.emit(B1.x + (Math.random() - 0.5) * 0.4, B1.y, B1.z + (Math.random() - 0.5) * 0.4, 0, 0.5 + Math.random() * 0.4, 0, 900, 0.07, '#7aff9a', 0.9, 0, 0.9);
+  }
   boardMat.emissiveIntensity = RM ? 1 : 0.9 + 0.2 * Math.sin(t * 0.9);
   for (let i = 0; i < mists.length; i++) mists[i].rotation.z = t * (i ? -0.012 : 0.008);
   // lava corre devagar (parada com movimento reduzido)
