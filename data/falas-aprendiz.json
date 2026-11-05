@@ -1,0 +1,49 @@
+{
+  "v_apr_boas_vindas": "Bem-vindo ao Modo Aprendiz. Vamos aprender xadrez passo a passo, do primeiro lance ao xeque-mate.",
+  "v_apr_muito_bem": "Muito bem!",
+  "v_apr_tente_de_novo": "Quase. Tente de novo.",
+  "v_apr_licao_concluida": "Lição concluída. Você ganhou uma insígnia!",
+  "v_apr_todas": "Você concluiu todas as lições. Agora o campo de batalha é seu.",
+
+  "v_apr_l1_intro": "Cada exército tem dezesseis peças: oito peões, duas torres, dois cavalos, dois bispos, uma dama e um rei.",
+  "v_apr_l1_rei": "Este é o Rei, a peça mais importante. Se ele levar xeque-mate, a partida acaba.",
+  "v_apr_l1_dama": "Esta é a Dama, a peça mais forte do tabuleiro. Ela vale nove peões.",
+  "v_apr_l1_torre": "Esta é a Torre. Ela vale cinco peões e domina linhas e colunas.",
+  "v_apr_l1_bispo": "Este é o Bispo. Ele vale três peões e corre pelas diagonais.",
+  "v_apr_l1_cavalo": "Este é o Cavalo. Ele vale três peões e é a única peça que salta.",
+  "v_apr_l1_peao": "Este é o Peão. Vale um só, mas pode chegar ao fim do tabuleiro e virar Dama.",
+
+  "v_apr_l2_intro": "Agora vamos ver como cada peça se move. Leve a peça até a casa dourada.",
+  "v_apr_l2_torre": "A Torre anda em linha reta, quantas casas quiser, na horizontal ou na vertical.",
+  "v_apr_l2_bispo": "O Bispo anda na diagonal, quantas casas quiser, sempre na mesma cor de casa.",
+  "v_apr_l2_dama": "A Dama junta os dois jeitos: linha reta e diagonal, quantas casas quiser.",
+  "v_apr_l2_rei": "O Rei anda só uma casa, em qualquer direção.",
+  "v_apr_l2_cavalo": "O Cavalo anda em L: duas casas para um lado e uma para o outro, saltando por cima das peças.",
+  "v_apr_l2_peao": "O Peão anda para frente, uma casa de cada vez. No primeiro lance, pode andar duas.",
+
+  "v_apr_l3_intro": "Capturar é ocupar a casa de uma peça inimiga. A peça capturada sai do tabuleiro.",
+  "v_apr_l3_cavalo": "Capture o Bispo da Legião com o seu Cavalo.",
+  "v_apr_l3_peao": "O Peão captura de um jeito diferente: uma casa na diagonal, para frente. Capture a Torre.",
+  "v_apr_l3_livre": "Uma peça inimiga está sem proteção. Encontre-a e capture-a de graça.",
+
+  "v_apr_l4_intro": "Xeque é quando o Rei está sendo atacado. Existem três jeitos de sair do xeque.",
+  "v_apr_l4_fugir": "Primeiro jeito: fugir. Mova o Rei para uma casa segura.",
+  "v_apr_l4_capturar": "Segundo jeito: capturar a peça que está dando xeque.",
+  "v_apr_l4_bloquear": "Terceiro jeito: bloquear. Coloque uma peça entre o atacante e o seu Rei.",
+
+  "v_apr_l5_roque": "O roque protege o Rei e ativa a Torre. Mova o Rei duas casas na direção da Torre.",
+  "v_apr_l5_passant": "En passant: o peão inimigo acabou de andar duas casas e parou ao lado do seu. Capture-o como se ele tivesse andado só uma.",
+  "v_apr_l5_promocao": "Promoção: leve o peão até a última fileira e escolha em que peça ele vai se transformar.",
+
+  "v_apr_l6_intro": "Xeque-mate é o xeque do qual não há saída. É assim que se vence uma partida.",
+  "v_apr_l6_mate1": "Encontre o xeque-mate em um lance.",
+  "v_apr_l6_mate2": "Agora um mate em dois: prepare o golpe, espere a resposta da Legião e dê o mate.",
+
+  "v_apr_l7_intro": "Hora da partida guiada contra o nível Easy. Peça uma dica quando quiser e veja a nota de cada lance.",
+  "v_apr_perigo": "Cuidado: há uma peça sua atacada e sem proteção.",
+  "v_apr_dica": "Veja a seta: este é o lance que o motor recomenda.",
+  "v_apr_otimo": "Ótimo lance!",
+  "v_apr_bom": "Bom lance.",
+  "v_apr_impreciso": "Lance impreciso. Havia algo melhor.",
+  "v_apr_erro": "Esse lance foi um erro. Veja qual seria o melhor."
+}

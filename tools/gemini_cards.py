@@ -45,8 +45,10 @@ if __name__ == "__main__":
             continue
         if want and c["id"] not in want:
             continue
-        try:
-            d = make(k, c, ref)
-            ref = ref or d
-        except SystemExit as e:
-            print(f"  falhou {c['id']}: {e}", flush=True)
+        for tentativa in range(3):  # conexões longas às vezes caem ("Broken pipe")
+            try:
+                d = make(k, c, ref)
+                ref = ref or d
+                break
+            except (SystemExit, OSError) as e:
+                print(f"  falhou {c['id']} (tentativa {tentativa + 1}): {e}", flush=True)

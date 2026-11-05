@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
 <style>
 /* Layout: campo de batalha 3D (tabuleiro de pedra entre ruínas) à esquerda; ficha da peça, lances e crônica à direita; empilha no celular */
 :root{
@@ -27,6 +27,8 @@
   --f-display:"Grenze Gotisch", "UnifrakturMaguntia", Georgia, serif;
   --f-body:"Alegreya", Georgia, "Times New Roman", serif;
   --f-ui:"Alegreya Sans SC", "Alegreya Sans", system-ui, sans-serif;
+  --f-logo:"Cinzel Decorative", "Cinzel", "Trajan Pro", "Times New Roman", Georgia, serif;
+  --f-engrave:"Cinzel", "Trajan Pro", Georgia, serif;
   --f-glyph:"Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", serif;
 }
 body{
@@ -258,31 +260,74 @@ details.rules[open] summary::before{content:"▾ "}
 .end-stats{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-family:var(--f-ui); font-size:.85rem; color:var(--ash); margin-bottom:20px}
 .end-stats b{display:block; font-size:1.4rem; color:var(--bone); font-variant-numeric:tabular-nums}
 .end-actions{display:flex; justify-content:center; flex-wrap:wrap; gap:10px}
+
+/* Logo: letras de metal dourado com contorno escuro e brilhos de runa ciano */
+.logo{margin:0; display:inline-flex; flex-direction:column; align-items:flex-start; gap:4px; line-height:1}
+.logo-word{position:relative; font-family:var(--f-logo); font-weight:900; font-size:clamp(1.7rem, 4.6vw, 2.7rem); letter-spacing:.03em; white-space:nowrap;
+  background:linear-gradient(180deg, #fff3c8 0%, #f0cf7a 24%, #b27a2c 50%, #f4d47e 66%, #8a5420 84%, #5a3412 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-stroke:1px rgba(36,20,6,.9);
+  filter:drop-shadow(0 2px 0 #120a04) drop-shadow(0 0 10px rgba(80,200,255,.16))}
+.logo-word::after{content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 14% 46%, rgba(120,230,255,.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 41% 38%, rgba(120,230,255,.9) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 63% 58%, rgba(120,230,255,.95) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 88% 42%, rgba(120,230,255,.9) 0 1.5px, transparent 3px);
+  animation:runeglint 3.2s ease-in-out infinite}
+@keyframes runeglint{0%, 100%{opacity:.35} 50%{opacity:1}}
+.logo-sub{font-family:var(--f-engrave); font-weight:700; font-size:clamp(.56rem, 1.4vw, .74rem); letter-spacing:.3em; text-transform:uppercase; color:#d8b26a;
+  text-shadow:0 1px 0 #000, 0 -1px 0 rgba(255,240,200,.18)}
+.logo.big{align-items:center}
+.logo.big .logo-word{font-size:clamp(2.6rem, 11vw, 5.6rem)}
+.logo.big .logo-sub{font-size:clamp(.72rem, 2.4vw, 1.05rem)}
+.top .controls .menu-btn{border-color:rgba(232,192,112,.45)}
+/* Tela inicial: logo, modos com moldura rúnica, arenas com miniaturas; a arena gira atrás, escurecida */
+.title{position:fixed; inset:0; z-index:60; overflow-y:auto; padding:24px 16px 32px;
+  background:radial-gradient(ellipse at 50% 30%, rgba(8,8,20,.5) 0%, rgba(4,4,10,.86) 70%); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px)}
+.title-inner{max-width:980px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center}
+.title-tag{margin:0; font-family:var(--f-engrave); font-weight:600; letter-spacing:.22em; text-transform:uppercase; font-size:.78rem; color:#bfa8ff}
+.title-pt{margin:-6px 0 6px; font-size:.9rem; color:var(--ash)}
+.modes{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; width:100%}
+.mode-card{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; text-align:left; padding:16px 16px 14px; min-height:104px;
+  background:linear-gradient(180deg, rgba(34,30,40,.92), rgba(18,16,22,.95)); border:1px solid rgba(232,192,112,.42); border-radius:4px;
+  box-shadow:inset 0 0 0 3px rgba(8,6,10,.85), inset 0 0 0 4px rgba(160,110,255,.22), 0 8px 24px rgba(0,0,0,.4); color:var(--bone); font-family:var(--f-body); cursor:pointer}
+.mode-card::before, .mode-card::after{content:""; position:absolute; width:22px; height:22px; border:2px solid rgba(170,120,255,.8); pointer-events:none}
+.mode-card::before{left:5px; top:5px; border-right:0; border-bottom:0}
+.mode-card::after{right:5px; bottom:5px; border-left:0; border-top:0}
+.mode-card b{font-family:var(--f-engrave); font-size:1.05rem; letter-spacing:.06em; color:#f0d48a}
+.mode-card span{font-size:.92rem; color:#cfc6b4}
+.mode-card:hover:not(.soon){border-color:#f0cf7a; box-shadow:inset 0 0 0 3px rgba(8,6,10,.85), inset 0 0 0 4px rgba(170,120,255,.5), 0 0 22px rgba(170,120,255,.25)}
+.mode-card.soon{opacity:.62; cursor:default; padding-bottom:32px}
+.mode-card em{position:absolute; right:12px; bottom:10px; font-style:normal; font-family:var(--f-ui); font-size:.7rem; letter-spacing:.1em; color:#bfa8ff; border:1px solid rgba(170,120,255,.5); padding:1px 7px; border-radius:10px}
+.setup{width:100%; max-width:640px; padding:16px; border:1px solid rgba(232,192,112,.35); border-radius:4px; background:rgba(16,14,20,.94); text-align:left}
+.setup h3{margin:0 0 10px; font-family:var(--f-engrave); letter-spacing:.08em; color:#f0d48a; font-size:1rem}
+.setup .row{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px}
+.setup .acts{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+.title-continue{font-family:var(--f-engrave); letter-spacing:.08em}
+.arena-pick{width:100%}
+.arena-pick h3{margin:6px 0 8px; font-family:var(--f-engrave); letter-spacing:.12em; font-size:.85rem; color:var(--ash); text-transform:uppercase}
+.thumbs{display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:8px}
+.thumb{display:flex; flex-direction:column; gap:4px; padding:4px; min-height:0; background:rgba(16,14,20,.9); border:1px solid var(--seam); border-radius:4px; text-align:left}
+.thumb canvas{display:block; width:100%; aspect-ratio:16 / 9; border-radius:2px; background:#0c0c12}
+.thumb span{font-size:.74rem; letter-spacing:.04em; padding:0 2px 2px; color:var(--bone)}
+.thumb[aria-pressed="true"]{border-color:#f0cf7a; box-shadow:0 0 0 1px #f0cf7a}
+/* barra do Espectador e relógios */
+.specbar{display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin:0 0 10px}
+.specbar .score{font-family:var(--f-ui); letter-spacing:.06em; color:var(--bone); margin-right:auto}
+.clock{font-family:var(--f-ui); font-variant-numeric:tabular-nums; padding:1px 8px; border:1px solid var(--seam); border-radius:3px; color:var(--ash)}
+.clock.run{color:var(--bone); border-color:var(--ember-deep)}
+.clock.low{color:var(--blood)}
+@media (max-width:560px){ .logo-sub{letter-spacing:.2em} .modes{grid-template-columns:1fr 1fr} .mode-card{min-height:96px; padding:14px 12px 12px} .mode-card span{font-size:.82rem} }
+@media (prefers-reduced-motion: reduce){ .logo-word::after{animation:none; opacity:.7} }
 @media (prefers-reduced-motion: reduce){ .thinking .sigil, .hud-phase.check b, .hud-phase.think b::after, .cine .flash.go{animation:none} .meter > i, .cine .bar, .cine .vig, .cine .cap{transition:none} }
 </style>
 
 <div class="app">
   <header class="top">
     <div class="brand">
-      <h1>Arcane <span>Chess</span></h1>
-      <p>Xadrez clássico com alma de RPG sombrio</p>
+      <h1 class="logo" aria-label="Arcane Chess"><span class="logo-word">Arcane Chess</span><span class="logo-sub">The Battle for the Grimoire</span></h1>
     </div>
     <div class="controls">
-      <div class="field">
-        <label for="mode">Modo</label>
-        <select id="mode">
-          <option value="ai">Contra a Legião (IA)</option>
-          <option value="pvp">Dois jogadores</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="diff">Dificuldade</label>
-        <select id="diff">
-          <option value="1">Recruta</option>
-          <option value="2" selected>Veterano</option>
-          <option value="3">Mestre</option>
-        </select>
-      </div>
+      <button id="menu-btn" class="menu-btn" type="button">Menu</button>
       <div class="field">
         <label for="cine-mode">Câmera de combate</label>
         <select id="cine-mode">
@@ -326,9 +371,54 @@ details.rules[open] summary::before{content:"▾ "}
     </div>
   </header>
 
+<div class="title" id="title" role="dialog" aria-modal="true" aria-labelledby="title-logo">
+  <div class="title-inner">
+    <div class="logo big" id="title-logo" role="heading" aria-level="2" aria-label="Arcane Chess"><span class="logo-word">Arcane Chess</span><span class="logo-sub">The Battle for the Grimoire</span></div>
+    <p class="title-tag">TCG &amp; Chess · Magic &amp; Strategy</p>
+    <p class="title-pt">Xadrez clássico com alma de RPG sombrio</p>
+    <div class="acts-top"><button class="btn-main title-continue" id="t-continue" type="button" hidden>Continuar partida</button></div>
+    <div class="modes" id="t-modes">
+      <button class="mode-card" type="button" data-mode="padrao"><b>Modo Padrão</b><span>Xadrez clássico contra a IA ou a dois no mesmo aparelho.</span></button>
+      <button class="mode-card" type="button" data-mode="spec"><b>Modo Espectador</b><span>IA contra IA: assista, pause, volte um lance ou assuma um lado.</span></button>
+      <div class="mode-card soon"><b>Modo Aprendiz</b><span>Sete lições guiadas, dicas do motor e insígnias.</span><em>Em breve</em></div>
+      <div class="mode-card soon"><b>Modo Arcano</b><span>Xadrez com cartas, essência e o Grimório.</span><em>Em breve</em></div>
+    </div>
+    <div class="setup" id="setup-padrao" hidden>
+      <h3>Modo Padrão</h3>
+      <div class="row">
+        <div class="field"><label for="mode">Adversário</label><select id="mode"><option value="ai">Contra a IA</option><option value="pvp">Dois jogadores</option></select></div>
+        <div class="field"><label for="diff">Nível</label><select id="diff"><option value="1">Easy · Recruta</option><option value="2" selected>Medium · Veterano</option><option value="3">Expert · Mestre</option></select></div>
+        <div class="field"><label for="t-color">Sua cor</label><select id="t-color"><option value="w">Ordem da Aurora</option><option value="b">Legião Cinzenta</option><option value="r">Sortear</option></select></div>
+        <div class="field"><label for="t-clock">Relógio</label><select id="t-clock"><option value="none">Sem relógio</option><option value="10">10 minutos</option><option value="3+2">3 min + 2 s</option></select></div>
+      </div>
+      <p class="hint" id="t-undo-note"></p>
+      <div class="acts"><button class="btn-main" id="t-start" type="button">Começar</button><button id="t-back1" type="button">Voltar</button></div>
+    </div>
+    <div class="setup" id="setup-spec" hidden>
+      <h3>Modo Espectador</h3>
+      <div class="row">
+        <div class="field"><label for="s-w">Ordem da Aurora</label><select id="s-w"><option value="1">Easy · Recruta</option><option value="2" selected>Medium · Veterano</option><option value="3">Expert · Mestre</option></select></div>
+        <div class="field"><label for="s-b">Legião Cinzenta</label><select id="s-b"><option value="1">Easy · Recruta</option><option value="2" selected>Medium · Veterano</option><option value="3">Expert · Mestre</option></select></div>
+        <div class="field"><label for="s-speed">Velocidade</label><select id="s-speed"><option value="slow">Lenta</option><option value="normal" selected>Normal</option><option value="fast">Rápida (pula as cenas)</option></select></div>
+        <div class="field"><label for="s-series">Série</label><select id="s-series"><option value="1">Partida única</option><option value="3">Melhor de 3</option><option value="5">Melhor de 5</option></select></div>
+        <div class="field"><label for="s-rules">Regras</label><select id="s-rules"><option value="padrao">Padrão</option><option value="arcano" disabled>Arcano (em breve)</option></select></div>
+      </div>
+      <div class="acts"><button class="btn-main" id="s-start" type="button">Assistir</button><button id="t-back2" type="button">Voltar</button></div>
+    </div>
+    <div class="arena-pick"><h3>Arena</h3><div class="thumbs" id="t-arenas"></div></div>
+  </div>
+</div>
+
   <main class="stage">
     <section class="board-col">
       <div class="turn" id="turn" aria-live="polite"></div>
+      <div class="specbar" id="specbar" hidden>
+        <span class="score" id="spec-score"></span>
+        <button id="spec-pause" type="button">Pausar</button>
+        <button id="spec-back" type="button" disabled>Voltar um lance</button>
+        <button id="spec-take-w" type="button">Assumir a Aurora</button>
+        <button id="spec-take-b" type="button">Assumir a Legião</button>
+      </div>
       <div class="scene" id="scene">
         <canvas id="cv" tabindex="0" aria-label="Campo de batalha em 3D, visto do lado da Aurora. Use as setas para mover o cursor, Enter para escolher e Esc para cancelar. Arraste para os lados para girar a câmera."></canvas>
         <canvas id="ov" aria-hidden="true"></canvas>
@@ -2821,6 +2911,8 @@ function multiBanner(seed){
     heraldBeast(g, 62, 112, 1.2, '#fff6e0', seed % 2 === 1);
   } });
 }
+const MULTI_SKY = { seed:161, sky:[[0, '#07031a'], [0.5, '#24104e'], [0.85, '#4a2478'], [1, '#7a4a9a']], neb:22, nebCols:['rgba(180,80,255,.22)', 'rgba(255,80,200,.16)', 'rgba(80,140,255,.16)'],
+  galaxies:[[0.18, 0.28, 60, 0.55, 'rgba(200,160,255,.6)'], [0.74, 0.18, 46, 0.45, 'rgba(160,200,255,.6)']], hill:'#1c1040', silhouette:'#0a0618', ground:'#08061a' };
 function buildEnvMulti(){
   const rnd = seeded(151);
   themeMats({ stone:0x2a3460, dark:0x161c38, iron:0x2a2c3a, wood:0x2a1e18 });
@@ -2859,8 +2951,7 @@ function buildEnvMulti(){
   // portal verde e violeta dentro da arcada do fundo
   swirlDisc(envRoot, 3.0, GROUND_Y + 2.2, -9.3, 1.05, '#3aff9a', '#e0c8ff', 77);
   graveyard('w', rnd, 'stone', { island:0.35 }); graveyard('b', rnd, 'stone', { island:0.35 });
-  buildBackdrop(c => paintBackdropNight(c, { seed:161, sky:[[0, '#07031a'], [0.5, '#24104e'], [0.85, '#4a2478'], [1, '#7a4a9a']], neb:22, nebCols:['rgba(180,80,255,.22)', 'rgba(255,80,200,.16)', 'rgba(80,140,255,.16)'],
-    galaxies:[[0.18, 0.28, 60, 0.55, 'rgba(200,160,255,.6)'], [0.74, 0.18, 46, 0.45, 'rgba(160,200,255,.6)']], hill:'#1c1040', silhouette:'#0a0618', ground:'#08061a' }));
+  buildBackdrop(c => paintBackdropNight(c, MULTI_SKY));
 }
 
 /* Santuários (Mistério Infernal e Celestial): o mesmo pátio, com chão de lajes partidas e selos acesos.
@@ -6442,6 +6533,8 @@ function fitFor(yaw, pitch, aerial){
   return res;
 }
 function desiredRig(){
+  // na tela inicial a câmera dá voltas lentas em torno da arena
+  if (TITLE.open) return { yaw:performance.now() * 0.00005, pitch:0.78, D:18, tx:0, tz:0, offY:0, ytop:0.7 };
   const flipY = VIEW.flip ? Math.PI : 0;
   if (VIEW.mode === 'drone') return { yaw:VIEW.droneYaw, pitch:VIEW.dronePitch, D:VIEW.droneD, tx:VIEW.panX, tz:VIEW.panZ, offY:0, ytop:0.7 };
   if (VIEW.mode === 'aerial'){ const f = fitFor(flipY, PITCH.aerial, true); return { yaw:flipY, pitch:PITCH.aerial, D:f.D, tx:0, tz:0, offY:f.offY, ytop:f.ytop }; }
@@ -6560,7 +6653,7 @@ function hudPhaseText(){
   if (!S || S.over) return null;
   const mine = human(S.turn), chk = checkSide === S.turn && !busy;
   let t, s, cls = S.turn;
-  if (cfg.mode === 'ai') { t = mine ? 'SUA VEZ' : 'TURNO DA LEGIÃO'; s = mine ? FACTION.w : 'A Legião trama seu golpe…'; }
+  if (cfg.mode === 'ai') { t = mine ? 'SUA VEZ' : S.turn === 'w' ? 'TURNO DA AURORA' : 'TURNO DA LEGIÃO'; s = mine ? FACTION[S.turn] : `A ${S.turn === 'w' ? 'Aurora' : 'Legião'} trama seu golpe…`; }
   else { t = S.turn === 'w' ? 'TURNO DA AURORA' : 'TURNO DA LEGIÃO'; s = FACTION[S.turn]; }
   if (chk){ s = t === 'SUA VEZ' ? 'Sua vez · proteja o rei' : t.charAt(0) + t.slice(1).toLowerCase(); t = 'XEQUE!'; cls = 'check'; }
   return { t, s, cls, think:!mine && !S.over };
@@ -6948,10 +7041,15 @@ function sfx(k){
 
 /* ---------- Interface ---------- */
 let G = null, S = null, LOG = [], busy = false, aiToken = 0;
-const cfg = { mode:'ai', diff:2 };
+const cfg = { mode:'ai', diff:2, human:'w', clock:'none', undoLeft:Infinity, diffW:2, diffB:2, speed:'normal', series:1, paused:false };
+const LEVEL = { 1:'Easy · Recruta', 2:'Medium · Veterano', 3:'Expert · Mestre' };
+const TITLE = { open:false };
+const CLK = { on:false, ms:{ w:0, b:0 }, inc:0, last:0, thinking:false };
+const SERIES = { n:1, w:0, b:0, d:0, t:0, cine:null, view:null };
 const ui = { sel:null, acts:[], hover:null, inspect:null, hoverId:null, cursor:{ r:6, c:4 }, kb:false };
 const $ = id => document.getElementById(id);
-const human = side => cfg.mode === 'pvp' || side === 'w';
+const human = side => cfg.mode === 'pvp' || (cfg.mode === 'ai' && side === cfg.human);
+const aiLevel = side => cfg.mode === 'spec' ? (side === 'w' ? cfg.diffW : cfg.diffB) : cfg.diff;
 const pieceAt = (r, c) => S.board[r * 8 + c];
 const moveNo = () => Number(G.fen().split(' ')[5]) || 1;
 
@@ -6993,6 +7091,7 @@ function newGame(){
   syncState();
   closePromo(null);
   $('end').hidden = true;
+  clockStart();
   pushLog(`As hostes se encaram entre as ruínas. A <b class="w">Ordem da Aurora</b> move primeiro.`);
   snd('v_inicio', { delay:0.3 });
   if (typeof turnFlipCheck === 'function') turnFlipCheck();
@@ -7012,15 +7111,17 @@ function renderTurn(){
   const side = S.turn, thinking = !S.over && !human(side);
   let txt;
   if (S.over) txt = S.over.kind === 'mate' ? `${FACTION[S.over.winner]} vence por xeque-mate` : 'Empate';
-  else if (cfg.mode === 'ai') txt = side === 'w' ? 'Sua vez · Ordem da Aurora' : 'A Legião Cinzenta trama seu golpe…';
+  else if (cfg.mode === 'ai') txt = side === cfg.human ? `Sua vez · ${FACTION[side]}` : `A ${FACTION[side]} trama seu golpe…`;
+  else if (cfg.mode === 'spec') txt = cfg.paused ? 'Partida pausada' : `A ${FACTION[side]} pensa · ${LEVEL[aiLevel(side)]}`;
   else txt = `Vez da ${FACTION[side]}`;
   const sideCls = S.over ? (S.over.winner || 'w') : side;
   const chk = !S.over && S.inCheck && !busy ? '<span class="tag check">Xeque</span>' : '';
   el.className = 'turn' + (thinking ? ' thinking' : '');
   el.innerHTML = `<span class="turn-who side-${sideCls}"><span class="sigil"></span><span>${txt}</span></span>
-    <span class="turn-right">${chk}<span class="turn-no">Lance ${moveNo()}</span></span>`;
+    <span class="turn-right">${chk}${clockHtml()}<span class="turn-no">Lance ${moveNo()}</span></span>`;
   $('hint').textContent = S.over ? 'A partida terminou. Comece outra ou desfaça a última jogada.'
-    : !human(side) ? 'A Legião está pensando. Enquanto isso, passe o mouse ou toque nas peças para conhecê-las.'
+    : cfg.mode === 'spec' ? 'Modo Espectador: as duas IAs jogam. Pause para voltar um lance ou assuma um dos lados.'
+    : !human(side) ? `A ${FACTION[side]} está pensando. Enquanto isso, passe o mouse ou toque nas peças para conhecê-las.`
     : 'Escolha uma peça sua. Casas âmbar mostram para onde ela pode ir; casas vermelhas são capturas. Arraste para os lados para girar a câmera.';
 }
 function renderForces(){
@@ -7170,9 +7271,18 @@ function renderRoster(){
   $('roster').innerHTML = ['k', 'q', 'r', 'b', 'n', 'p'].map(t => `<tr><td>${GL[t]}${VS}</td><td>${TYPES[t].name}</td><td>${MOVE_DESC[t]}</td></tr>`).join('');
 }
 function updateUndo(){
-  const off = busy || !G || !G.history().length || !$('promo').hidden;
+  const spec = cfg.mode === 'spec', lim = cfg.mode === 'ai' && isFinite(cfg.undoLeft);
+  const off = busy || !G || !G.history().length || !$('promo').hidden || cfg.undoLeft <= 0 || spec;
   $('undo').disabled = off;
   $('end-undo').disabled = off;
+  $('undo').textContent = cfg.undoLeft <= 0 && cfg.mode === 'ai' ? 'Desfazer (desligado)' : lim ? `Desfazer jogada (${cfg.undoLeft})` : 'Desfazer jogada';
+  const sb = $('specbar');
+  sb.hidden = !spec;
+  if (spec){
+    $('spec-pause').textContent = cfg.paused ? 'Continuar' : 'Pausar';
+    $('spec-back').disabled = !cfg.paused || busy || !G.history().length;
+    $('spec-score').textContent = SERIES.n > 1 ? `Aurora ${SERIES.w} × ${SERIES.b} Legião · melhor de ${SERIES.n}` : `Aurora (${LEVEL[cfg.diffW]}) × Legião (${LEVEL[cfg.diffB]})`;
+  }
 }
 function renderAll(){ renderTurn(); renderForces(); renderCard(); renderMoves(); updateUndo(); }
 
@@ -7285,6 +7395,8 @@ async function doMove(m){
 }
 function afterTurn(){
   S.over = outcome();
+  clockMoved();
+  saveGame();
   turnFlipCheck();
   renderAll();
   if (S.over) return showEnd();
@@ -7321,25 +7433,27 @@ function aiThink(fen, diff){
   }).then(r => r === undefined ? local() : r);
 }
 function maybeAI(){
-  if (S.over || human(S.turn)) return;
-  busy = true;
+  if (S.over || human(S.turn) || cfg.paused || TITLE.open) return;
+  busy = true; CLK.thinking = true;
   renderAll();
-  const tok = ++aiToken;
+  const tok = ++aiToken, gap = cfg.mode === 'spec' ? { slow:1100, normal:600, fast:160 }[cfg.speed] : 420;
   setTimeout(async () => {
     if (tok !== aiToken) return;
     let res = null;
-    try { res = await aiThink(G.fen(), cfg.diff); } catch (e){ res = null; }
+    try { res = await aiThink(G.fen(), aiLevel(S.turn)); } catch (e){ res = null; }
     if (tok !== aiToken) return;
+    CLK.thinking = false;
     const legal = G.moves({ verbose:true });
     let m = res && legal.find(x => x.from === res.from && x.to === res.to && (x.promotion || '') === (res.promotion || ''));
     if (!m) m = legal[Math.floor(Math.random() * legal.length)];
     busy = false;
     doMove(m);
-  }, 420 * SPD);
+  }, gap * SPD);
 }
 function doUndo(){
-  if (busy || !G.history().length || promoResolve) return;
-  aiToken++;
+  if (busy || !G.history().length || promoResolve || cfg.undoLeft <= 0) return;
+  if (cfg.mode === 'ai' && isFinite(cfg.undoLeft)) cfg.undoLeft--;
+  aiToken++; CLK.thinking = false;
   G.undo();
   while (cfg.mode === 'ai' && G.history().length && !human(G.turn())) G.undo();
   resetUI();
@@ -7357,8 +7471,9 @@ function showEnd(){
     title = 'Xeque-mate';
     color = o.winner === 'w' ? 'var(--ember)' : 'var(--blood)';
     if (cfg.mode === 'ai'){
-      good = o.winner === 'w';
-      text = good ? AR().win : AR().lose;
+      good = o.winner === cfg.human;
+      text = cfg.human === 'w' ? (good ? AR().win : AR().lose)
+        : good ? `O Rei da Ordem da Aurora não tem para onde fugir. A Legião Cinzenta reclama a coroa.${AR().tail}` : `O seu Rei está cercado. A Ordem da Aurora vence.${AR().tail}`;
     } else { good = true; text = `A ${FACTION[o.winner]} vence: o rei inimigo não tem saída.${AR().tail}`; }
     pushLog(`<b>Xeque-mate.</b> A ${FACTION[o.winner]} vence a batalha.`);
   } else {
@@ -7367,8 +7482,10 @@ function showEnd(){
       rep:['Empate por repetição', 'A mesma posição surgiu três vezes. As cinzas assentam sem coroa.'],
       material:['Empate por material insuficiente', 'Não restam peças capazes de dar xeque-mate.'],
       fifty:['Empate pelos 50 lances', 'Cinquenta lances de cada lado sem captura nem movimento de peão.'],
+      tempo:['Tempo esgotado', o.winner ? `O relógio da ${FACTION[other(o.winner)]} zerou. A ${FACTION[o.winner]} vence.` : ''],
     }[o.kind];
     title = T[0]; text = T[1] + AR().tail;
+    if (o.kind === 'tempo'){ good = cfg.mode !== 'ai' || o.winner === cfg.human; color = o.winner === 'w' ? 'var(--ember)' : 'var(--blood)'; }
     pushLog(`<b>${title}.</b>`);
   }
   $('end-title').textContent = title;
@@ -7380,6 +7497,7 @@ function showEnd(){
   if (o.kind === 'mate'){ snd(good ? 'vitoria' : 'derrota', { delay:0.5 }); snd(good ? 'v_vitoria' : 'v_derrota', { delay:1.1 }); }
   else snd('v_empate', { delay:0.8 });
   updateUndo();
+  if (cfg.mode === 'spec') seriesEnd();
   setTimeout(() => { if (S.over){ $('end').hidden = false; $('again').focus(); } }, 650 * SPD);
 }
 
@@ -7635,8 +7753,8 @@ $('newgame').addEventListener('click', () => { audio(); newGame(); });
 $('again').addEventListener('click', () => { audio(); newGame(); cv.focus(); });
 $('undo').addEventListener('click', () => { audio(); doUndo(); });
 $('end-undo').addEventListener('click', () => { audio(); doUndo(); cv.focus(); });
-$('mode').addEventListener('change', e => { cfg.mode = e.target.value; $('diff').disabled = cfg.mode === 'pvp'; newGame(); syncViewUI(); turnFlipCheck(); });
-$('diff').addEventListener('change', e => { cfg.diff = +e.target.value; });
+$('mode').addEventListener('change', e => { $('diff').disabled = $('t-color').disabled = e.target.value === 'pvp'; undoNote(); });
+$('diff').addEventListener('change', undoNote);
 // controle de áudio: som, música, narrador e volume (lembrados neste navegador)
 (() => {
   const box = $('audio'), panel = $('audio-panel'), btn = $('audio-btn');
@@ -7668,6 +7786,230 @@ $('diff').addEventListener('change', e => { cfg.diff = +e.target.value; });
   sync();
 })();
 
+/* ---------- Tela inicial, Modo Padrão (cor, relógio, limite de desfazer) e Modo Espectador ---------- */
+const SAVE_KEY = 'coroa-de-cinzas:partida';
+const UNDO_LIMIT = { 1:Infinity, 2:3, 3:0 };
+function undoNote(){
+  const pvp = $('mode').value === 'pvp', d = +$('diff').value;
+  $('t-undo-note').textContent = pvp ? 'Dois jogadores no mesmo aparelho: desfazer livre.' : d === 1 ? 'Easy: desfazer livre.' : d === 2 ? 'Medium: até 3 desfazer por partida.' : 'Expert: sem desfazer.';
+}
+// relógio: conta o tempo de quem tem a vez (inclusive a IA pensando); para durante as animações e no menu
+function clockStart(minMs){
+  const c = cfg.clock;
+  CLK.on = c !== 'none' && cfg.mode !== 'spec';
+  CLK.ms.w = CLK.ms.b = minMs || (c === '10' ? 600000 : 180000);
+  CLK.inc = c === '3+2' ? 2000 : 0;
+  CLK.last = performance.now(); CLK.thinking = false;
+}
+const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+function clockHtml(){
+  if (!CLK.on) return '';
+  return ['w', 'b'].map(s0 => `<span class="clock ${S && S.turn === s0 && !S.over ? 'run' : ''} ${CLK.ms[s0] < 20000 ? 'low' : ''}" id="clk-${s0}" aria-label="Relógio da ${FACTION[s0]}">${s0 === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[s0])}</span>`).join('');
+}
+function clockMoved(){ if (CLK.on && S && G.history().length) CLK.ms[other(G.turn())] += CLK.inc; }
+setInterval(() => {
+  const now = performance.now(), dt = now - CLK.last;
+  CLK.last = now;
+  if (!CLK.on || !S || S.over || TITLE.open || (busy && !CLK.thinking) || !$('promo').hidden && !promoResolve) return;
+  const side = S.turn;
+  CLK.ms[side] -= dt;
+  const el = $('clk-' + side);
+  if (el){ el.textContent = `${side === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[side])}`; el.classList.toggle('low', CLK.ms[side] < 20000); }
+  if (CLK.ms[side] <= 0){
+    aiToken++; busy = false; CLK.thinking = false;
+    S.over = { kind:'tempo', winner:other(side) };
+    renderAll(); showEnd();
+  }
+}, 250);
+// partida salva para "Continuar partida" (só Padrão e dois jogadores)
+function saveGame(){
+  try {
+    if (cfg.mode === 'spec') return;
+    if (!G || S.over || !G.history().length){ localStorage.removeItem(SAVE_KEY); return; }
+    localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign(serialize(), { clock:CLK.on ? { ...CLK.ms } : null, arena })));
+  } catch (e){}
+}
+function loadSaved(){ try { const v = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return v && Array.isArray(v.hist) && v.hist.length ? v : null; } catch (e){ return null; } }
+// série do Espectador
+function seriesEnd(){
+  const o = S.over, need = Math.ceil(SERIES.n / 2);
+  if (o.winner) SERIES[o.winner]++; else SERIES.d++;
+  renderAll();
+  const done = SERIES.w >= need || SERIES.b >= need || SERIES.w + SERIES.b + SERIES.d >= SERIES.n + 4;
+  if (!done && SERIES.n > 1){
+    $('end-text').textContent += ` Placar: Aurora ${SERIES.w} × ${SERIES.b} Legião. A próxima partida começa em instantes.`;
+    clearTimeout(SERIES.t); SERIES.t = setTimeout(() => { if (cfg.mode === 'spec' && S.over && !TITLE.open) newGame(); }, 4200);
+  } else if (SERIES.n > 1){
+    const w = SERIES.w > SERIES.b ? 'w' : SERIES.b > SERIES.w ? 'b' : null;
+    $('end-title').textContent = w ? `Série: ${FACTION[w]}` : 'Série empatada';
+    $('end-text').textContent = `Placar final: Aurora ${SERIES.w} × ${SERIES.b} Legião.`;
+  }
+}
+// tela inicial
+function openTitle(){
+  TITLE.open = true;
+  aiToken++; CLK.thinking = false; if (cfg.mode !== 'spec') busy = false;
+  const t = $('title'), sv = loadSaved(), mid = G && G.history().length && !S.over;
+  $('t-continue').hidden = !(mid || sv);
+  $('t-continue').textContent = mid ? 'Voltar à partida' : 'Continuar partida';
+  showSetup(null);
+  t.hidden = false;
+  renderThumbs();
+  fitCache.clear(); projDirty = true;
+  setTimeout(() => { const b = t.querySelector('.mode-card'); if (b) b.focus(); }, 30);
+}
+function closeTitle(){
+  TITLE.open = false;
+  $('title').hidden = true;
+  fitCache.clear(); projDirty = true;
+  if (S && !S.over) maybeAI();
+  renderAll();
+}
+function showSetup(id){
+  $('setup-padrao').hidden = id !== 'padrao';
+  $('setup-spec').hidden = id !== 'spec';
+  $('t-modes').hidden = !!id;
+  if (id === 'padrao') undoNote();
+  const f = id && $(id === 'padrao' ? 't-start' : 's-start'); if (f) f.focus();
+}
+function leaveSpec(){
+  if (cfg.mode !== 'spec') return;
+  cfg.paused = false;
+  if (SERIES.cine) { cine.mode = SERIES.cine; $('cine-mode').value = SERIES.cine; }
+  if (SERIES.view && SERIES.view !== VIEW.mode) setView(SERIES.view);
+  clearTimeout(SERIES.t);
+}
+function startPadrao(){
+  leaveSpec();
+  cfg.mode = $('mode').value; cfg.diff = +$('diff').value;
+  const col = $('t-color').value;
+  cfg.human = cfg.mode === 'pvp' ? 'w' : col === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : col;
+  cfg.undoLeft = cfg.mode === 'pvp' ? Infinity : UNDO_LIMIT[cfg.diff];
+  cfg.clock = $('t-clock').value;
+  clockStart();
+  closeTitle();
+  setFlip(cfg.mode === 'ai' && cfg.human === 'b');
+  newGame();
+  syncViewUI();
+}
+function startSpec(){
+  if (cfg.mode !== 'spec'){ SERIES.cine = cine.mode; SERIES.view = VIEW.mode; }
+  cfg.mode = 'spec'; cfg.diffW = +$('s-w').value; cfg.diffB = +$('s-b').value; cfg.speed = $('s-speed').value; cfg.paused = false; cfg.clock = 'none'; cfg.undoLeft = Infinity;
+  Object.assign(SERIES, { n:+$('s-series').value, w:0, b:0, d:0 });
+  cine.mode = { slow:'full', normal:'fast', fast:'off' }[cfg.speed];
+  $('cine-mode').value = cine.mode;
+  clockStart();
+  closeTitle();
+  setFlip(false);
+  setView('drone');
+  newGame();
+}
+function specPause(){
+  if (cfg.mode !== 'spec') return;
+  cfg.paused = !cfg.paused;
+  if (cfg.paused){ aiToken++; if (CLK.thinking){ busy = false; CLK.thinking = false; } }
+  renderAll();
+  if (!cfg.paused) maybeAI();
+}
+function specBack(){
+  if (cfg.mode !== 'spec' || !cfg.paused || busy || !G.history().length) return;
+  aiToken++;
+  G.undo();
+  resetUI(); resetFx(); syncState();
+  $('end').hidden = true;
+  pushLog('<i>O tempo recua:</i> o último lance foi desfeito.');
+  renderAll();
+}
+// assumir um dos lados: vira uma partida Padrão contra a IA no nível do outro lado
+function specTake(side){
+  if (cfg.mode !== 'spec') return;
+  const lvl = side === 'w' ? cfg.diffB : cfg.diffW;
+  leaveSpec();
+  Object.assign(cfg, { mode:'ai', human:side, diff:lvl, undoLeft:UNDO_LIMIT[lvl], paused:false, clock:'none' });
+  $('mode').value = 'ai'; $('diff').value = String(lvl);
+  clockStart();
+  aiToken++; if (CLK.thinking){ busy = false; CLK.thinking = false; }
+  setFlip(side === 'b');
+  pushLog(`<i>Você assume a</i> <b class="${side}">${FACTION[side]}</b>.`);
+  renderAll(); syncViewUI();
+  if (!busy) maybeAI();
+}
+// miniaturas das arenas: o céu de cada uma pintado numa tela pequena (feito uma vez, sob demanda)
+const THUMB_PAINT = {
+  fortaleza:c => paintBackdropFortress(c), medieval:c => paintBackdrop(c), dragoes:c => paintBackdropDragon(c), gelo:c => paintBackdropSplit(c),
+  zodiaco:c => paintBackdropNight(c), multiverso:c => paintBackdropNight(c, MULTI_SKY), infernal:c => paintBackdropInfernal(c),
+  celestial:c => paintBackdropCelestial(c), olimpo:c => paintBackdropOlympus(c), alquimia:c => paintBackdropCitadel(c),
+};
+const THUMB_CACHE = {};
+function renderThumbs(){
+  const box = $('t-arenas');
+  if (!box.childElementCount){
+    for (const id of Object.keys(ARENAS)){
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'thumb'; b.dataset.arena = id;
+      const cv0 = mkCanvas(160, 90); cv0.setAttribute('aria-hidden', 'true');
+      const sp = document.createElement('span'); sp.textContent = ARENAS[id].name;
+      b.append(cv0, sp);
+      b.addEventListener('click', () => { audio(); setArena(id); syncThumbs(); });
+      box.appendChild(b);
+    }
+  }
+  syncThumbs();
+  const ids = Object.keys(ARENAS).filter(id => !THUMB_CACHE[id]);
+  const step = () => {
+    const id = ids.shift();
+    if (!id || !TITLE.open) return;
+    try {
+      const big = mkCanvas(1024, 150);
+      if (GLOK && THUMB_PAINT[id]) THUMB_PAINT[id](big);
+      THUMB_CACHE[id] = big;
+      const cv0 = box.querySelector(`[data-arena="${id}"] canvas`), g = cv0.getContext('2d');
+      g.fillStyle = '#0c0c12'; g.fillRect(0, 0, 160, 90);
+      g.drawImage(big, 290, 0, 444, 150, 0, 0, 160, 54);
+      const lg = g.createLinearGradient(0, 54, 0, 90); lg.addColorStop(0, hexCss(ARENAS[id].fog)); lg.addColorStop(1, '#050507');
+      g.fillStyle = lg; g.fillRect(0, 54, 160, 36);
+      g.fillStyle = 'rgba(230,220,200,.8)';
+      for (let r = 0; r < 4; r++) for (let c0 = 0; c0 < 8; c0++) if ((r + c0) % 2 === 0) g.fillRect(48 + c0 * 8 - r * 2, 60 + r * 6, 8 + r * 0.5, 6);
+    } catch (e){}
+    setTimeout(step, 40);
+  };
+  setTimeout(step, 60);
+}
+function syncThumbs(){ for (const b of $('t-arenas').children) b.setAttribute('aria-pressed', String(b.dataset.arena === (arenaPending || arena))); }
+document.querySelectorAll('#t-modes [data-mode]').forEach(b => b.addEventListener('click', () => { audio(); showSetup(b.dataset.mode); }));
+$('t-back1').addEventListener('click', () => showSetup(null));
+$('t-back2').addEventListener('click', () => showSetup(null));
+$('t-start').addEventListener('click', () => { audio(); startPadrao(); });
+$('s-start').addEventListener('click', () => { audio(); startSpec(); });
+$('t-continue').addEventListener('click', () => {
+  audio();
+  if (G && G.history().length && !S.over){ closeTitle(); return; }
+  const sv = loadSaved();
+  if (!sv) return;
+  leaveSpec();
+  closeTitle();
+  if (sv.arena && ARENAS[sv.arena] && sv.arena !== arena) setArena(sv.arena);
+  start(sv);
+  if (sv.clock && CLK.on){ CLK.ms.w = sv.clock.w; CLK.ms.b = sv.clock.b; }
+  setFlip(cfg.mode === 'ai' && cfg.human === 'b');
+});
+$('menu-btn').addEventListener('click', () => { audio(); openTitle(); });
+$('spec-pause').addEventListener('click', specPause);
+$('spec-back').addEventListener('click', specBack);
+$('spec-take-w').addEventListener('click', () => specTake('w'));
+$('spec-take-b').addEventListener('click', () => specTake('b'));
+// Esc: fecha um painel do menu, volta à partida ou abre o menu (sem roubar o Esc da seleção e da câmera de combate)
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (TITLE.open){
+    if (!$('setup-padrao').hidden || !$('setup-spec').hidden){ showSetup(null); e.preventDefault(); return; }
+    if (G && G.history().length && !S.over){ closeTitle(); e.preventDefault(); }
+    return;
+  }
+  if (ui.sel != null || cine.active || promoResolve || !$('end').hidden || !$('audio-panel').hidden) return;
+  e.preventDefault(); openTitle();
+}, true);
+
 /* ---------- Inicialização ---------- */
 function serialize(){
   return { fen:G.fen(), hist:G.history(), cfg:{ ...cfg }, log:LOG.slice(0, 40) };
@@ -7684,6 +8026,9 @@ function start(data){
     for (const san of data.hist) if (!G.move(san)){ ok = false; break; }
     if (!ok){ G = new Chess(); if (data.fen) G.load(data.fen); }
     Object.assign(cfg, data.cfg || {});
+    if (cfg.undoLeft == null) cfg.undoLeft = Infinity;
+    if (cfg.mode === 'spec') cfg.mode = 'ai';
+    clockStart();
     $('mode').value = cfg.mode; $('diff').value = String(cfg.diff); $('diff').disabled = cfg.mode === 'pvp';
     LOG = data.log || [];
     resetUI();
@@ -7702,7 +8047,7 @@ pvInit();
 initWorker();
 const hot = window.claude && window.claude.hot;
 if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => serialize());
-if (hot && typeof hot.ready === 'function') hot.ready(start); else start((hot && hot.data) || {});
+if (hot && typeof hot.ready === 'function') hot.ready(d => { start(d); openTitle(); }); else { start((hot && hot.data) || {}); openTitle(); }
 
 new ResizeObserver(() => layout()).observe(scene);
 layout();
