@@ -117,6 +117,38 @@ canvas{display:block; width:100%}
 #cv:focus-visible{outline:2px solid var(--ember); outline-offset:-2px}
 #ov{position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none}
 .hint{font-size:.88rem; color:var(--ash); font-style:italic; margin:0}
+/* Modo Aprendiz */
+.lesson{display:grid; gap:6px; padding:10px 12px; border:1px solid var(--seam); border-left:3px solid var(--ember); border-radius:4px; background:linear-gradient(180deg, rgba(43,33,24,.88), rgba(23,21,16,.92))}
+.lesson-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.lesson-n{font-family:var(--f-ui); font-size:.75rem; letter-spacing:.16em; color:var(--ember)}
+.lesson-top b{font-family:var(--f-engrave); font-size:1rem; letter-spacing:.05em; color:var(--bone)}
+.lesson-prog{margin-left:auto; display:flex; gap:6px; padding-right:2px}
+.lesson-prog i{width:9px; height:9px; transform:rotate(45deg); border:1px solid var(--ember-deep)}
+.lesson-prog i.on{background:var(--ember); border-color:var(--ember)}
+.lesson-prog i.cur{border-color:var(--ember); box-shadow:0 0 6px var(--ember)}
+.lesson-sub{margin:0; font-size:.86rem; color:var(--ash); font-style:italic}
+.lesson-sub:empty{display:none}
+.lesson-text{margin:0; font-size:1.02rem; line-height:1.4; color:var(--bone); min-height:1.4em}
+.lesson-acts{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.lesson-acts button{min-height:36px}
+.apr-grade{font-family:var(--f-ui); font-size:.86rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; border:1px solid currentColor; background:rgba(0,0,0,.35)}
+.apr-grade.otimo{color:var(--life)} .apr-grade.bom{color:#b8dc9a} .apr-grade.impreciso{color:var(--warn)} .apr-grade.erro{color:#ff8a7a}
+.seal{display:inline-grid; place-items:center; width:56px; height:56px; border-radius:50%; font-family:var(--f-engrave); font-weight:700; font-size:1.05rem; color:#2a1a08;
+  background:radial-gradient(circle at 35% 30%, #ffe7a8, #e3a548 55%, #8f5c1d); box-shadow:0 0 0 3px rgba(0,0,0,.5), 0 0 0 4px rgba(227,165,72,.6), 0 0 22px rgba(227,165,72,.4)}
+.seal.off{background:rgba(0,0,0,.3); color:var(--ash); box-shadow:inset 0 0 0 2px var(--seam)}
+.apr-done{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); z-index:4; width:min(340px, calc(100% - 24px)); padding:20px 18px 16px; text-align:center;
+  border:1px solid rgba(227,165,72,.6); border-radius:6px; background:rgba(12,10,8,.93); box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.apr-done h2{margin:12px 0 4px; font-family:var(--f-engrave); font-size:1.1rem; letter-spacing:.08em; color:var(--ember)}
+.apr-done p{margin:0 0 14px; color:var(--bone)}
+.apr-done .acts{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+.lessons{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:10px; margin:10px 0 12px}
+.lesson-card{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; align-items:center; text-align:left; padding:12px; min-height:84px; border:1px solid var(--seam); border-radius:4px; background:rgba(0,0,0,.35); color:var(--bone); cursor:pointer; font:inherit}
+.lesson-card .seal{grid-row:1 / span 3; width:44px; height:44px; font-size:.9rem}
+.lesson-card b{font-family:var(--f-engrave); letter-spacing:.04em; color:#f0d48a; font-size:.95rem}
+.lesson-card span:not(.seal){font-size:.85rem; color:#cfc6b4}
+.lesson-card em{font-style:normal; font-family:var(--f-ui); font-size:.72rem; letter-spacing:.08em; color:var(--ember)}
+.lesson-card:hover, .lesson-card:focus-visible{border-color:var(--ember)}
+.lesson-card:focus-visible{outline:2px solid var(--ember); outline-offset:1px}
 /* minimapa 2D no canto da cena */
 .mm{--mm:176px; position:absolute; top:10px; right:10px; z-index:3; width:var(--mm); padding:5px 6px 6px; border:1px solid rgba(227,165,72,.55); border-radius:4px;
   background:rgba(10,8,6,.66); box-shadow:0 0 0 1px rgba(0,0,0,.65), 0 10px 26px rgba(0,0,0,.55), inset 0 0 14px rgba(227,165,72,.07)}
@@ -401,7 +433,7 @@ details.rules[open] summary::before{content:"▾ "}
     <div class="modes" id="t-modes">
       <button class="mode-card" type="button" data-mode="padrao"><b>Modo Padrão</b><span>Xadrez clássico contra a IA ou a dois no mesmo aparelho.</span></button>
       <button class="mode-card" type="button" data-mode="spec"><b>Modo Espectador</b><span>IA contra IA: assista, pause, volte um lance ou assuma um lado.</span></button>
-      <div class="mode-card soon"><b>Modo Aprendiz</b><span>Sete lições guiadas, dicas do motor e insígnias.</span><em>Em breve</em></div>
+      <button class="mode-card" type="button" data-mode="aprendiz"><b>Modo Aprendiz</b><span>Sete lições guiadas, dicas do motor e insígnias.</span><em id="apr-count">0/7 insígnias</em></button>
       <div class="mode-card soon"><b>Modo Arcano</b><span>Xadrez com cartas, essência e o Grimório.</span><em>Em breve</em></div>
     </div>
     <div class="setup" id="setup-padrao" hidden>
@@ -426,6 +458,12 @@ details.rules[open] summary::before{content:"▾ "}
       </div>
       <div class="acts"><button class="btn-main" id="s-start" type="button">Assistir</button><button id="t-back2" type="button">Voltar</button></div>
     </div>
+    <div class="setup" id="setup-aprendiz" hidden>
+      <h3>Modo Aprendiz</h3>
+      <p class="hint">Sete lições curtas, do primeiro lance ao xeque-mate, e uma partida guiada no fim. Cada lição concluída vale uma insígnia.</p>
+      <div class="lessons" id="apr-lessons"></div>
+      <div class="acts"><button id="t-back3" type="button">Voltar</button></div>
+    </div>
     <div class="arena-pick"><h3>Arena</h3><div class="thumbs" id="t-arenas"></div></div>
   </div>
 </div>
@@ -439,6 +477,18 @@ details.rules[open] summary::before{content:"▾ "}
         <button id="spec-back" type="button" disabled>Voltar um lance</button>
         <button id="spec-take-w" type="button">Assumir a Aurora</button>
         <button id="spec-take-b" type="button">Assumir a Legião</button>
+      </div>
+      <div class="lesson" id="lesson" role="region" aria-label="Lição do Modo Aprendiz" hidden>
+        <div class="lesson-top"><span class="lesson-n" id="lesson-n"></span><b id="lesson-title"></b><span class="lesson-prog" id="lesson-prog"></span></div>
+        <p class="lesson-sub" id="lesson-sub"></p>
+        <p class="lesson-text" id="lesson-text" aria-live="polite"></p>
+        <div class="lesson-acts">
+          <button type="button" id="apr-hint" title="Atalho: H">Dica</button>
+          <button type="button" id="apr-retry">Repetir</button>
+          <button type="button" id="apr-skip">Pular</button>
+          <button type="button" id="apr-list">Lições</button>
+          <span class="apr-grade" id="apr-grade" hidden></span>
+        </div>
       </div>
       <div class="scene" id="scene">
         <canvas id="cv" tabindex="0" aria-label="Campo de batalha em 3D, visto do lado da Aurora. Use as setas para mover o cursor, Enter para escolher e Esc para cancelar. Arraste para os lados para girar a câmera."></canvas>
@@ -456,6 +506,12 @@ details.rules[open] summary::before{content:"▾ "}
           <canvas id="mm-cv" role="img" aria-label="Tabuleiro 2D com a posição atual. Clique numa casa para escolher ou mover uma peça."></canvas>
         </div>
         <button type="button" class="mm-fab" id="mm-fab" aria-controls="mm" aria-expanded="false" title="Mostrar o mapa (atalho: M)" aria-label="Mostrar o mapa" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
+        <div class="apr-done" id="apr-done" role="dialog" aria-labelledby="apr-done-t" hidden>
+          <span class="seal" id="apr-seal">I</span>
+          <h2 id="apr-done-t">Insígnia conquistada</h2>
+          <p id="apr-done-p"></p>
+          <div class="acts"><button type="button" class="btn-main" id="apr-next">Próxima lição</button><button type="button" id="apr-menu">Lições</button></div>
+        </div>
         <div class="promo" id="promo" role="dialog" aria-modal="true" aria-labelledby="promo-title" hidden>
           <div class="promo-box">
             <h2 id="promo-title">Promoção</h2>
@@ -791,7 +847,7 @@ const aiEngine = () => {
     return best;
   }
   const alg = s => 'abcdefgh'[s & 7] + (8 - (s >> 4));
-  const LEVELS = { 1:{ maxD:1, budget:250, noise:90 }, 2:{ maxD:3, budget:650, noise:10 }, 3:{ maxD:9, budget:1200, noise:0 } };
+  const LEVELS = { 1:{ maxD:1, budget:250, noise:90 }, 2:{ maxD:3, budget:650, noise:10 }, 3:{ maxD:9, budget:1200, noise:0 }, 4:{ maxD:4, budget:500, noise:0 } };
   async function choose(fen, diff, opts = {}){
     const L = LEVELS[diff] || LEVELS[2];
     const budget = opts.budget || L.budget;
@@ -5280,7 +5336,8 @@ function prepAsset(type, gltf, walkGltf){
   glbLog.push(`${GLB_SLUG[type]}: altura ${A.height.toFixed(2)}, escala ${s.toFixed(3)}, giro ${(yawFix * 180 / Math.PI).toFixed(0)}°, clipes ${Object.entries(clips).map(([k, c]) => k + '=' + (c ? c.name + ' ' + c.duration.toFixed(2) + 's' : '-')).join(', ')}, impacto ${A.impact.toFixed(2)}s`);
   return A;
 }
-// torre composta: a base estática na altura da Torre e o arqueiro (com rig) de pé no alto, na escala do Peão
+// torre composta: a base estática (TOWER_BASE_H) e o arqueiro (com rig) de pé no parapeito, na escala do Peão: ≈ 2,2 no total
+const TOWER_BASE_H = 1.25;
 function composeTower(baseG, riderG, walkG){
   const fit = (scene, h, w, stretch = 1) => {
     scene.updateMatrixWorld(true);
@@ -5298,7 +5355,7 @@ function composeTower(baseG, riderG, walkG){
   const head = findBone(rs, /^head$/i) || findBone(rs, /head/i), front = findBone(rs, /headfront|head_front|nose/i);
   rs.updateMatrixWorld(true);
   if (head && front){ const a = head.getWorldPosition(new THREE.Vector3()), b = front.getWorldPosition(new THREE.Vector3()); if (Math.hypot(b.x - a.x, b.z - a.z) > 1e-4) rs.rotation.y = -Math.atan2(b.x - a.x, b.z - a.z); }
-  const B = fit(baseG.scene, GLB_SPEC.r.h, GLB_SPEC.r.w, GLB_SPEC.r.stretch), R = fit(rs, GLB_SPEC.p.h, GLB_SPEC.p.w);
+  const B = fit(baseG.scene, TOWER_BASE_H, GLB_SPEC.r.w, GLB_SPEC.r.stretch), R = fit(rs, GLB_SPEC.p.h, GLB_SPEC.p.w);
   R.holder.position.y = B.h * 0.97;
   const scene = new THREE.Group(); scene.add(B.holder, R.holder);
   const mats = new Set();
@@ -5543,13 +5600,15 @@ function makeGlbCharacter(type, side, A){
   const zapFx = zap ? (() => {
     const X = FXC[side], mats = [new THREE.MeshBasicMaterial({ color:C(X.bolt[0]), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }), new THREE.MeshBasicMaterial({ color:C(X.bolt[1]), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false })];
     const segs = [];
-    for (let i = 0; i < 18; i++){ const m = new THREE.Mesh(segGeo(), mats[i % 2]); m.renderOrder = 7; m.frustumCulled = false; root.add(m); segs.push(m); }
+    for (let i = 0; i < 18; i++){ const m = new THREE.Mesh(segGeo(), mats[i % 2]); m.renderOrder = 7; m.frustumCulled = false; m.visible = false; root.add(m); segs.push(m); }
     const feet = [];
     for (let i = 0; i < 3; i++){ const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(X.bolt[1]), transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false })); s.scale.setScalar(0.22); holder.add(s); feet.push(s); }
     const hp = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3(), lr = new THREE.Vector3();
     let next = 0;
     return {
       mats, segs, feet,
+      // peça no cemitério: sem raios (os segmentos nascem com raio 1 e virariam um bloco branco)
+      hide(){ for (const m of segs) m.visible = false; for (const s of feet) s.visible = false; zap.g.visible = false; },
       update(now, charge){
         const t = now / 1000, k = 0.25 + 0.75 * charge;
         for (let i = 0; i < 3; i++){ const an = t * 2.4 + i * TAU / 3; feet[i].position.set(Math.cos(an) * 0.3, 0.06 + 0.04 * Math.sin(t * 5 + i), Math.sin(an) * 0.3); feet[i].material.opacity = 0.25 + 0.55 * charge; }
@@ -5763,7 +5822,7 @@ function makeGlbCharacter(type, side, A){
       holder.position.set(sx, y - st.sink * (A.height + 0.12), z + sz);
       holder.rotation.set(rx, 0, rz);
       fitProps();
-      if (zapFx && !st.ghost) zapFx.update(now, st.charge || 0);
+      if (zapFx){ if (st.ghost) zapFx.hide(); else zapFx.update(now, st.charge || 0); }
     },
     dispose(){
       resolve(st.shot); resolve(st.pshot); resolve(st.hit); resolve(st.death);
@@ -5825,6 +5884,31 @@ function applyLoadedModels(){
   glbPending.clear();
 }
 function chOf(p){ const e = p ? CH[p.id] : null; return e && e.p === p ? e.c : null; }
+// Torres altas na frente (do ponto de vista da câmera) da peça escolhida, da peça sob o cursor ou da casa apontada
+function updateFocusOcc(dt){
+  const tg = [];
+  const sp = ui.sel != null ? S.pieces[ui.sel] : null;
+  if (sp && !sp.dead) tg.push([sp.dx, sp.dz]);
+  const hp = ui.hoverId != null ? S.pieces[ui.hoverId] : null;
+  if (hp && !hp.dead) tg.push([hp.dx, hp.dz]);
+  const h = ui.kb ? ui.cursor : ui.hover;
+  if (h){ const [x, z] = tc(h.r, h.c); tg.push([x, z]); }
+  const cp = camera.position, H = (GLB.r && GLB.r.height) || 1.2, k = 1 - Math.exp(-dt / 110);
+  for (const p of S.pieces){
+    let occ = false;
+    if (p.t === 'r' && !p.dead && !p.removed && !busy) for (const [x, z] of tg){
+      if (Math.abs(x - p.dx) < 0.2 && Math.abs(z - p.dz) < 0.2) continue;
+      const vx = x - cp.x, vz = z - cp.z, L2 = vx * vx + vz * vz || 1;
+      const t = ((p.dx - cp.x) * vx + (p.dz - cp.z) * vz) / L2;
+      if (t <= 0 || t >= 0.995) continue;
+      const qx = cp.x + vx * t, qz = cp.z + vz * t, y = cp.y + (0.55 - cp.y) * t;
+      if (Math.hypot(qx - p.dx, qz - p.dz) < 0.42 && y < H + 0.05){ occ = true; break; }
+    }
+    const v = p.occK || 0;
+    p.occK = v + ((occ ? 1 : 0) - v) * k;
+    if (p.occK < 0.002) p.occK = 0;
+  }
+}
 function syncChar(p, now, dt){
   const c = chOf(p);
   if (!c) return;
@@ -5841,7 +5925,7 @@ function syncChar(p, now, dt){
     return;
   }
   c.setTransform(p.dx, p.dz, p.lift);
-  c.setOpacity(p.alpha * (cine.occ.has(p) ? 1 - 0.8 * easeIO(cine.k) : 1));
+  c.setOpacity(p.alpha * (cine.occ.has(p) ? 1 - 0.8 * easeIO(cine.k) : 1) * (1 - 0.62 * (p.occK || 0)));
   c.setFlash(p.flash);
   c.setSink(p.sink || 0);
   c.setSelected(p.id === ui.sel && !busy);
@@ -5942,6 +6026,8 @@ function buildFx(){
   TILE.sel = decalPool(tileTex(0.2, 1, 1), 0xffc45a, 0.99, 0.01, true);
   TILE.hover = decalPool(tileTex(0, 0.6, 0), 0xede3cc, 0.98, 0.011, false);
   TILE.hoverKb = decalPool(tileTex(0, 0.75, 0, true), 0xede3cc, 0.98, 0.011, false);
+  TILE.goal = decalPool(tileTex(0.5, 1, 1), 0xffd040, 0.98, 0.0095, true);
+  TILE.danger = decalPool(tileTex(0, 1, 1, true), 0xff3424, 1.0, 0.0105, true);
   tileBlend();
   fireball = new THREE.Group();
   const core = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 7), new THREE.MeshBasicMaterial({ color:C(0xfff0c0), toneMapped:false }));
@@ -6959,6 +7045,12 @@ function syncHighlights(now){
   TILE.atk.mat.opacity = 0.6 + 0.4 * pulse;
   TILE.check.mat.opacity = 0.55 + 0.45 * pulse;
   TILE.sel.mat.opacity = 0.85 + 0.15 * pulse;
+  if (APR.on && !busy){
+    for (const q of APR.goals){ const [x, z] = tc(...rcOf(q)); TILE.goal.put(x, z); }
+    for (const q of APR.danger){ const [x, z] = tc(...rcOf(q)); TILE.danger.put(x, z); }
+    TILE.goal.mat.opacity = 0.55 + 0.45 * pulse;
+    TILE.danger.mat.opacity = 0.5 + 0.5 * pulse;
+  }
   const h = ui.kb ? ui.cursor : ui.hover;
   if (h){ const [x, z] = tc(h.r, h.c); (ui.kb ? TILE.hoverKb : TILE.hover).put(x, z); }
   for (const k in TILE) TILE[k].end();
@@ -6996,6 +7088,19 @@ function toScreen(x, y, z){
 function drawOverlay(){
   og.setTransform(DPR, 0, 0, DPR, 0, 0);
   og.clearRect(0, 0, W, H);
+  const ar = APR.arrow;
+  if (ar && !busy && !cine.active){
+    const [r0, c0] = rcOf(ar.from), [r1, c1] = rcOf(ar.to), [x0, z0] = tc(r0, c0), [x1, z1] = tc(r1, c1);
+    const a = toScreen(x0, 0.1, z0), b = toScreen(x1, 0.1, z1), an = Math.atan2(b.y - a.y, b.x - a.x), w = Math.max(6, Math.min(16, (a.s + b.s) * 0.07)), hl = w * 2.6;
+    const pul = RM ? 0.85 : 0.7 + 0.3 * Math.sin(performance.now() / 220);
+    og.globalAlpha = pul; og.lineCap = 'round';
+    og.strokeStyle = 'rgba(10,6,4,.55)'; og.lineWidth = w + 4;
+    og.beginPath(); og.moveTo(a.x, a.y); og.lineTo(b.x - Math.cos(an) * hl * 0.7, b.y - Math.sin(an) * hl * 0.7); og.stroke();
+    og.strokeStyle = og.fillStyle = ar.color || '#ffd36a'; og.lineWidth = w;
+    og.beginPath(); og.moveTo(a.x, a.y); og.lineTo(b.x - Math.cos(an) * hl * 0.7, b.y - Math.sin(an) * hl * 0.7); og.stroke();
+    og.beginPath(); og.moveTo(b.x, b.y); og.lineTo(b.x - Math.cos(an - 0.45) * hl, b.y - Math.sin(an - 0.45) * hl); og.lineTo(b.x - Math.cos(an + 0.45) * hl, b.y - Math.sin(an + 0.45) * hl); og.closePath(); og.fill();
+    og.globalAlpha = 1; og.lineCap = 'butt';
+  }
   for (const t of texts){
     const sp = toScreen(t.x, t.y, t.z), k = t.life / t.max;
     const size = Math.max(t.minPx, Math.min(46, sp.s * t.scale));
@@ -7156,6 +7261,7 @@ function frame(now){
     applyLoadedModels();
     checkSide = S.inCheck && !S.over ? S.turn : null;
     updateGraves(dt);
+    updateFocusOcc(rdt);
     for (const p of S.pieces) syncChar(p, GT.now, dt);
     updateEnv(now, dt);
     for (const ps of PSYS) ps.update(dt);
@@ -7165,6 +7271,7 @@ function frame(now){
     updateHud();
     pvTick(now);
     mmTick();
+    aprTick();
   } catch (err){
     // um erro de desenho não pode travar o jogo: registra uma vez e segue
     if (!frame.warned){ frame.warned = true; console.error(err); }
@@ -7182,6 +7289,7 @@ const AUD_FILES = ['passo', 'galope', 'cavalo_pouso', 'terra_afunda', 'terra_bro
   'v_inicio', 'v_xeque', 'v_xeque_mate', 'v_golpe_fatal', 'v_lanca_fiel', 'v_carga', 'v_arcano', 'v_furia_terra', 'v_raio', 'v_lamina', 'v_vitoria', 'v_derrota', 'v_empate',
   'rugido_dragao', 'sopro_fogo', 'gelo_estalo', 'gelo_golpe', 'estrelas', 'portal', 'selo_runico', 'selo_celestial', 'raio_zeus', 'transmutacao',
   ...['tema', 'dragoes', 'fogo_gelo', 'zodiaco', 'multiverso', 'infernal', 'celestial', 'olimpo', 'alquimia'].flatMap(k => [k === 'tema' ? 'ambiente' : 'ambiente_' + k, 'musica_' + k])];
+const APR_LINES = { "v_apr_boas_vindas": "Bem-vindo ao Modo Aprendiz. Vamos aprender xadrez passo a passo, do primeiro lance ao xeque-mate.", "v_apr_muito_bem": "Muito bem!", "v_apr_tente_de_novo": "Quase. Tente de novo.", "v_apr_licao_concluida": "Lição concluída. Você ganhou uma insígnia!", "v_apr_todas": "Você concluiu todas as lições. Agora o campo de batalha é seu.", "v_apr_l1_intro": "Cada exército tem dezesseis peças: oito peões, duas torres, dois cavalos, dois bispos, uma dama e um rei.", "v_apr_l1_rei": "Este é o Rei, a peça mais importante. Se ele levar xeque-mate, a partida acaba.", "v_apr_l1_dama": "Esta é a Dama, a peça mais forte do tabuleiro. Ela vale nove peões.", "v_apr_l1_torre": "Esta é a Torre. Ela vale cinco peões e domina linhas e colunas.", "v_apr_l1_bispo": "Este é o Bispo. Ele vale três peões e corre pelas diagonais.", "v_apr_l1_cavalo": "Este é o Cavalo. Ele vale três peões e é a única peça que salta.", "v_apr_l1_peao": "Este é o Peão. Vale um só, mas pode chegar ao fim do tabuleiro e virar Dama.", "v_apr_l2_intro": "Agora vamos ver como cada peça se move. Leve a peça até a casa dourada.", "v_apr_l2_torre": "A Torre anda em linha reta, quantas casas quiser, na horizontal ou na vertical.", "v_apr_l2_bispo": "O Bispo anda na diagonal, quantas casas quiser, sempre na mesma cor de casa.", "v_apr_l2_dama": "A Dama junta os dois jeitos: linha reta e diagonal, quantas casas quiser.", "v_apr_l2_rei": "O Rei anda só uma casa, em qualquer direção.", "v_apr_l2_cavalo": "O Cavalo anda em L: duas casas para um lado e uma para o outro, saltando por cima das peças.", "v_apr_l2_peao": "O Peão anda para frente, uma casa de cada vez. No primeiro lance, pode andar duas.", "v_apr_l3_intro": "Capturar é ocupar a casa de uma peça inimiga. A peça capturada sai do tabuleiro.", "v_apr_l3_cavalo": "Capture o Bispo da Legião com o seu Cavalo.", "v_apr_l3_peao": "O Peão captura de um jeito diferente: uma casa na diagonal, para frente. Capture a Torre.", "v_apr_l3_livre": "Uma peça inimiga está sem proteção. Encontre-a e capture-a de graça.", "v_apr_l4_intro": "Xeque é quando o Rei está sendo atacado. Existem três jeitos de sair do xeque.", "v_apr_l4_fugir": "Primeiro jeito: fugir. Mova o Rei para uma casa segura.", "v_apr_l4_capturar": "Segundo jeito: capturar a peça que está dando xeque.", "v_apr_l4_bloquear": "Terceiro jeito: bloquear. Coloque uma peça entre o atacante e o seu Rei.", "v_apr_l5_roque": "O roque protege o Rei e ativa a Torre. Mova o Rei duas casas na direção da Torre.", "v_apr_l5_passant": "En passant: o peão inimigo acabou de andar duas casas e parou ao lado do seu. Capture-o como se ele tivesse andado só uma.", "v_apr_l5_promocao": "Promoção: leve o peão até a última fileira e escolha em que peça ele vai se transformar.", "v_apr_l6_intro": "Xeque-mate é o xeque do qual não há saída. É assim que se vence uma partida.", "v_apr_l6_mate1": "Encontre o xeque-mate em um lance.", "v_apr_l6_mate2": "Agora um mate em dois: prepare o golpe, espere a resposta da Legião e dê o mate.", "v_apr_l7_intro": "Hora da partida guiada contra o nível Easy. Peça uma dica quando quiser e veja a nota de cada lance.", "v_apr_perigo": "Cuidado: há uma peça sua atacada e sem proteção.", "v_apr_dica": "Veja a seta: este é o lance que o motor recomenda.", "v_apr_otimo": "Ótimo lance!", "v_apr_bom": "Bom lance.", "v_apr_impreciso": "Lance impreciso. Havia algo melhor.", "v_apr_erro": "Esse lance foi um erro. Veja qual seria o melhor." };
 const AUD_LOOPS = new Set(AUD_FILES.filter(n => n.startsWith('musica_') || n.startsWith('ambiente')));
 const AUD_SYNTH = { passo:'step', galope:'gallop', cavalo_pouso:'step', terra_afunda:'rumble', terra_brota:'rumble', flechas:'arrow', flecha_impacto:'hit', espinhos:'tremor',
   raio_dash:'thunder', raio_golpe:'thunder', arcano_carga:'arcane', misseis:'arcane', teleporte:'arcane', espada:'whoosh', lanca:'whoosh', carga_lanca:'hit', queda:'die',
@@ -7289,10 +7397,12 @@ function snd(name, o = {}){
   if (voice && !AUD.set.voice){ rec.via = 'narrador-desligado'; return; }
   const b = AUD.buf[name];
   if (!b){
-    if (!AUD.failed.has(name) && AUD_FILES.includes(name)){
-      // ainda decodificando: toca quando chegar, se ainda fizer sentido (até 1,5 s)
+    const lazy = APR_LINES[name] != null;
+    if (!AUD.failed.has(name) && (AUD_FILES.includes(name) || lazy)){
+      // ainda decodificando: toca quando chegar, se ainda fizer sentido (até 1,5 s; falas do Aprendiz, até 4 s)
+      if (lazy && !AUD.loading[name]) loadOne(name);
       const asked = performance.now();
-      (AUD.waiting[name] = AUD.waiting[name] || []).push(() => { if (AUD.buf[name] && performance.now() - asked < 1500) snd(name, o); });
+      (AUD.waiting[name] = AUD.waiting[name] || []).push(() => { if (AUD.buf[name] && performance.now() - asked < (lazy ? 4000 : 1500)) snd(name, o); });
       rec.via = 'aguardando';
       return;
     }
@@ -7308,6 +7418,11 @@ function snd(name, o = {}){
     s.playbackRate.value = rate;
     g.gain.value = o.vol != null ? o.vol : 1;
     s.connect(g).connect(voice ? AUD.bus.voice : AUD.bus.sfx);
+    if (voice){
+      // cut: a fala nova interrompe a anterior (o Aprendiz avança rápido)
+      if (o.cut && AUD.vsrc){ try { AUD.vsrc.stop(); } catch (e){} AUD.voiceEnd = 0; }
+      AUD.vsrc = s;
+    }
     const at = AC.currentTime + (o.delay || 0);
     s.start(at);
     if (voice) AUD.voiceEnd = Math.max(AUD.voiceEnd, at + b.duration / rate + 0.2);
@@ -7400,6 +7515,7 @@ function resetUI(){
   Object.assign(ui, { sel:null, acts:[], inspect:null, hoverId:null });
 }
 function newGame(){
+  if (APR.on && APR.scripted){ aprStartLesson(APR.L); return; }
   aiToken++;
   G = new Chess();
   LOG = [];
@@ -7441,6 +7557,8 @@ function renderTurn(){
     : cfg.mode === 'spec' ? 'Modo Espectador: as duas IAs jogam. Pause para voltar um lance ou assuma um dos lados.'
     : !human(side) ? `A ${FACTION[side]} está pensando. Enquanto isso, passe o mouse ou toque nas peças para conhecê-las.`
     : 'Escolha uma peça sua. Casas âmbar mostram para onde ela pode ir; casas vermelhas são capturas. Arraste para os lados para girar a câmera.';
+  if (APR.on && !S.over) $('hint').textContent = APR.guided ? 'Partida guiada: anéis vermelhos marcam peças suas atacadas e sem proteção. Peça uma Dica (atalho H) quando quiser.'
+    : 'Modo Aprendiz: siga a instrução acima do tabuleiro. Casas douradas são o alvo; use Dica (atalho H) se travar.';
 }
 function renderForces(){
   const hist = G.history({ verbose:true });
@@ -7591,8 +7709,9 @@ function renderRoster(){
 function updateUndo(){
   const spec = cfg.mode === 'spec', lim = cfg.mode === 'ai' && isFinite(cfg.undoLeft);
   const off = busy || !G || !G.history().length || !$('promo').hidden || cfg.undoLeft <= 0 || spec;
-  $('undo').disabled = off;
-  $('end-undo').disabled = off;
+  const offA = off || (APR.on && APR.scripted);
+  $('undo').disabled = offA;
+  $('end-undo').disabled = offA;
   $('undo').textContent = cfg.undoLeft <= 0 && cfg.mode === 'ai' ? 'Desfazer (desligado)' : lim ? `Desfazer jogada (${cfg.undoLeft})` : 'Desfazer jogada';
   const sb = $('specbar');
   sb.hidden = !spec;
@@ -7712,13 +7831,17 @@ async function doMove(m){
   afterTurn();
 }
 function afterTurn(){
+  // lições roteirizadas: a Legião não joga sozinha e o mate não abre o fim de partida
+  if (APR.on && APR.scripted){ S.over = null; renderAll(); aprAfterMove(); return; }
   S.over = outcome();
   clockMoved();
   saveGame();
   turnFlipCheck();
   renderAll();
+  if (APR.on && APR.guided) aprGuidedAfter();
   if (S.over) return showEnd();
   maybeAI();
+  if (APR.on && APR.guided) aprTurnStart();
 }
 // a IA pensa num Web Worker criado de um Blob; se o navegador recusar, pensa na thread principal
 let aiWorker = null, aiSeq = 0;
@@ -7751,7 +7874,7 @@ function aiThink(fen, diff){
   }).then(r => r === undefined ? local() : r);
 }
 function maybeAI(){
-  if (S.over || human(S.turn) || cfg.paused || TITLE.open) return;
+  if (S.over || human(S.turn) || cfg.paused || TITLE.open || (APR.on && APR.scripted)) return;
   busy = true; CLK.thinking = true;
   renderAll();
   const tok = ++aiToken, gap = cfg.mode === 'spec' ? { slow:1100, normal:600, fast:160 }[cfg.speed] : 420;
@@ -7781,8 +7904,10 @@ function doUndo(){
   pushLog('<i>As cinzas recuam no tempo:</i> a última jogada foi desfeita.');
   renderAll();
   maybeAI();
+  if (APR.on && APR.guided) aprTurnStart();
 }
 function showEnd(){
+  if (APR.on && APR.guided) setTimeout(() => aprGameEnd(S.over), 0);
   const o = S.over, hist = G.history({ verbose:true });
   let title, text, color = 'var(--bone)', good = false;
   if (o.kind === 'mate'){
@@ -7821,6 +7946,7 @@ function showEnd(){
 
 function handleTile(r, c){
   if (promoResolve) return;
+  if (aprTap(r, c)) return;
   const q = pieceAt(r, c);
   if (busy || S.over || !human(S.turn)){
     ui.inspect = q ? q.id : null; renderCard(); return;
@@ -8390,7 +8516,7 @@ setInterval(() => {
 // partida salva para "Continuar partida" (só Padrão e dois jogadores)
 function saveGame(){
   try {
-    if (cfg.mode === 'spec') return;
+    if (cfg.mode === 'spec' || APR.on) return;
     if (!G || S.over || !G.history().length){ localStorage.removeItem(SAVE_KEY); return; }
     localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign(serialize(), { clock:CLK.on ? { ...CLK.ms } : null, arena })));
   } catch (e){}
@@ -8421,6 +8547,7 @@ function openTitle(){
   showSetup(null);
   t.hidden = false;
   renderThumbs();
+  $('apr-count').textContent = `${aprCount()}/7 insígnias`;
   fitCache.clear(); projDirty = true;
   setTimeout(() => { const b = t.querySelector('.mode-card'); if (b) b.focus(); }, 30);
 }
@@ -8434,7 +8561,9 @@ function closeTitle(){
 function showSetup(id){
   $('setup-padrao').hidden = id !== 'padrao';
   $('setup-spec').hidden = id !== 'spec';
+  $('setup-aprendiz').hidden = id !== 'aprendiz';
   $('t-modes').hidden = !!id;
+  if (id === 'aprendiz'){ aprRenderList(); const b = $('apr-lessons').querySelector(`[data-l="${APR.on ? APR.L : aprNext()}"]`); if (b) b.focus(); return; }
   if (id === 'padrao') undoNote();
   const f = id && $(id === 'padrao' ? 't-start' : 's-start'); if (f) f.focus();
 }
@@ -8446,6 +8575,7 @@ function leaveSpec(){
   clearTimeout(SERIES.t);
 }
 function startPadrao(){
+  aprExit();
   leaveSpec();
   cfg.mode = $('mode').value; cfg.diff = +$('diff').value;
   const col = $('t-color').value;
@@ -8459,6 +8589,7 @@ function startPadrao(){
   syncViewUI();
 }
 function startSpec(){
+  aprExit();
   if (cfg.mode !== 'spec'){ SERIES.cine = cine.mode; SERIES.view = VIEW.mode; }
   cfg.mode = 'spec'; cfg.diffW = +$('s-w').value; cfg.diffB = +$('s-b').value; cfg.speed = $('s-speed').value; cfg.paused = false; cfg.clock = 'none'; cfg.undoLeft = Infinity;
   Object.assign(SERIES, { n:+$('s-series').value, w:0, b:0, d:0 });
@@ -8552,6 +8683,7 @@ $('t-continue').addEventListener('click', () => {
   if (G && G.history().length && !S.over){ closeTitle(); return; }
   const sv = loadSaved();
   if (!sv) return;
+  aprExit();
   leaveSpec();
   closeTitle();
   if (sv.arena && ARENAS[sv.arena] && sv.arena !== arena) setArena(sv.arena);
@@ -8568,13 +8700,377 @@ $('spec-take-b').addEventListener('click', () => specTake('b'));
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (TITLE.open){
-    if (!$('setup-padrao').hidden || !$('setup-spec').hidden){ showSetup(null); e.preventDefault(); return; }
+    if (!$('setup-padrao').hidden || !$('setup-spec').hidden || !$('setup-aprendiz').hidden){ showSetup(null); e.preventDefault(); return; }
     if (G && G.history().length && !S.over){ closeTitle(); e.preventDefault(); }
     return;
   }
   if (ui.sel != null || cine.active || promoResolve || !$('end').hidden || !$('audio-panel').hidden) return;
   e.preventDefault(); openTitle();
 }, true);
+
+/* ---------- Modo Aprendiz ----------
+   Lições roteirizadas sobre posições prontas (a Legião não joga sozinha, a não ser no mate em dois) e uma partida
+   guiada contra o nível Easy, com Dica, nota de cada lance e anel de perigo nas peças atacadas e sem proteção.
+   As falas vêm de data/falas-aprendiz.json (assets/audio/<id>.mp3); sem o arquivo, fica só o texto. */
+const APR_KEY = 'coroa-de-cinzas:aprendiz';
+const APR_START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+const APR_ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const APR_LESSONS = [
+  { t:'As peças', d:'Conheça o exército e o valor de cada peça.', badge:'Conhecedor das Hostes', intro:'v_apr_l1_intro', steps:[
+    { kind:'tap', fen:APR_START, say:'v_apr_l1_rei', type:'k' }, { kind:'tap', fen:APR_START, say:'v_apr_l1_dama', type:'q' },
+    { kind:'tap', fen:APR_START, say:'v_apr_l1_torre', type:'r' }, { kind:'tap', fen:APR_START, say:'v_apr_l1_bispo', type:'b' },
+    { kind:'tap', fen:APR_START, say:'v_apr_l1_cavalo', type:'n' }, { kind:'tap', fen:APR_START, say:'v_apr_l1_peao', type:'p' } ] },
+  { t:'Movimentos', d:'Como cada peça anda pelo tabuleiro.', badge:'Mestre dos Passos', intro:'v_apr_l2_intro', steps:[
+    { fen:'7k/8/8/8/8/8/8/R5K1 w - - 0 1', say:'v_apr_l2_torre', goal:'reach', from:'a1', to:'a6' },
+    { fen:'7k/8/8/8/8/8/8/2B3K1 w - - 0 1', say:'v_apr_l2_bispo', goal:'reach', from:'c1', to:'g5' },
+    { fen:'7k/8/8/8/8/8/8/3Q2K1 w - - 0 1', say:'v_apr_l2_dama', goal:'reach', from:'d1', to:'h5' },
+    { fen:'7k/8/8/8/8/8/8/4K3 w - - 0 1', say:'v_apr_l2_rei', goal:'reach', from:'e1', to:'e2' },
+    { fen:'7k/8/8/8/8/8/8/1N4K1 w - - 0 1', say:'v_apr_l2_cavalo', goal:'reach', from:'b1', to:'c3' },
+    { fen:'7k/8/8/8/8/8/4P3/6K1 w - - 0 1', say:'v_apr_l2_peao', goal:'reach', from:'e2', to:'e4' } ] },
+  { t:'Capturas', d:'Tomar peças inimigas e achar a que está sem defesa.', badge:'Caçador de Cinzas', intro:'v_apr_l3_intro', steps:[
+    { fen:'k7/8/8/3b4/8/4N3/8/6K1 w - - 0 1', say:'v_apr_l3_cavalo', goal:'capture', from:'e3', to:'d5' },
+    { fen:'k7/8/8/8/3r4/4P3/8/6K1 w - - 0 1', say:'v_apr_l3_peao', goal:'capture', from:'e3', to:'d4' },
+    { fen:'k7/8/2p5/3r4/4n3/2N5/8/3R2K1 w - - 0 1', say:'v_apr_l3_livre', goal:'capture', from:'c3', to:'e4', hideGoal:true } ] },
+  { t:'Xeque', d:'Os três jeitos de salvar o Rei.', badge:'Guardião do Rei', intro:'v_apr_l4_intro', steps:[
+    { fen:'k7/8/8/8/8/8/8/r3K3 w - - 0 1', say:'v_apr_l4_fugir', goal:'flee', from:'e1', to:'e2', goals:[] },
+    { fen:'k7/8/8/4r3/8/8/1B6/4K3 w - - 0 1', say:'v_apr_l4_capturar', goal:'capture', from:'b2', to:'e5' },
+    { fen:'k3r3/8/8/8/8/R7/8/4K3 w - - 0 1', say:'v_apr_l4_bloquear', goal:'block', from:'a3', to:'e3' } ] },
+  { t:'Lances especiais', d:'Roque, en passant e promoção.', badge:'Arcanista das Regras', sub:'Três regras especiais que todo jogador precisa conhecer.', steps:[
+    { fen:'4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1', say:'v_apr_l5_roque', goal:'castle', from:'e1', to:'g1', goals:['g1', 'c1'] },
+    { fen:'k7/8/8/3pP3/8/8/8/4K3 w - d6 0 1', say:'v_apr_l5_passant', goal:'ep', from:'e5', to:'d6' },
+    { fen:'k7/4P3/8/8/8/8/8/4K3 w - - 0 1', say:'v_apr_l5_promocao', goal:'promo', from:'e7', to:'e8' } ] },
+  { t:'Xeque-mate', d:'Encerrar a partida: mate em um e em dois.', badge:'Selo do Xeque-mate', intro:'v_apr_l6_intro', steps:[
+    { fen:'6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1', say:'v_apr_l6_mate1', goal:'mate1', from:'a1', to:'a8', goals:[] },
+    { fen:'4k3/8/8/8/8/8/1R6/R5K1 w - - 0 1', say:'v_apr_l6_mate2', goal:'mate2', from:'a1', to:'a7', goals:[] } ] },
+  { t:'Partida guiada', d:'Uma partida inteira contra o Easy, com dicas e nota de cada lance.', badge:'Aprendiz Consagrado', intro:'v_apr_l7_intro', guided:true },
+];
+const APR_GOAL = {
+  reach:(m, st) => m.from === st.from && m.to === st.to,
+  capture:(m, st) => m.to === st.to && !!m.captured,
+  flee:m => m.piece === 'k',
+  block:m => m.piece !== 'k' && !m.captured,
+  castle:m => /[kq]/.test(m.flags),
+  ep:m => m.flags.includes('e'),
+  promo:m => !!m.promotion,
+  mate1:() => G.in_checkmate(),
+};
+const APR = { on:false, L:0, step:0, scripted:false, guided:false, phase:0, goals:[], danger:[], arrow:null, queue:[], tm:0, tok:0, gtok:0, pre:null, skipped:false, dangerSig:'', dangerAt:0, done:[] };
+try { const v = JSON.parse(localStorage.getItem(APR_KEY) || 'null'); if (v && Array.isArray(v.done)) APR.done = v.done.map(Boolean).slice(0, 7); } catch (e){}
+function aprSave(){ try { localStorage.setItem(APR_KEY, JSON.stringify({ done:APR.done })); } catch (e){} }
+const aprCount = () => APR.done.filter(Boolean).length;
+const aprNext = () => { for (let i = 0; i < 7; i++) if (!APR.done[i]) return i; return 0; };
+// falas em fila: uma termina, a próxima começa; cut esvazia a fila e corta a que está tocando
+function aprSay(id, cut){
+  if (!id) return;
+  if (cut){ APR.queue.length = 0; snd(id, { cut:true }); return; }
+  APR.queue.push(id);
+}
+function aprVoiceTick(){
+  if (!APR.queue.length) return;
+  if (AC && AUD.started && AC.currentTime < AUD.voiceEnd - 0.1) return;
+  snd(APR.queue.shift(), {});
+}
+function aprPreload(){ if (AC) for (const id in APR_LINES) loadOne(id); }
+function aprText(t){ $('lesson-text').textContent = t; }
+function aprMarks(){
+  MM.setMarks([...APR.goals.map(sq => ({ sq, kind:'aura', color:'#ffd040' })), ...APR.danger.map(sq => ({ sq, kind:'aura', color:'#ff3a30' }))]);
+}
+function aprArrow(from, to, color, ms){
+  APR.arrow = from ? { from, to, color, until:ms ? performance.now() + ms : Infinity } : null;
+  MM.setArrows(from ? [{ from, to, color:color === '#ff8a5a' ? 'rgba(255,138,90,.85)' : 'rgba(255,211,106,.88)' }] : []);
+}
+function aprPanel(){
+  const L = APR_LESSONS[APR.L];
+  $('lesson').hidden = !APR.on;
+  if (!APR.on) return;
+  $('lesson-n').textContent = `LIÇÃO ${APR.L + 1} DE 7`;
+  $('lesson-title').textContent = L.t;
+  $('lesson-sub').textContent = L.intro ? APR_LINES[L.intro] : (L.sub || '');
+  const n = L.steps ? L.steps.length : 0;
+  $('lesson-prog').innerHTML = Array.from({ length:n }, (_, i) => `<i class="${i < APR.step ? 'on' : i === APR.step ? 'cur' : ''}"></i>`).join('');
+  $('lesson-prog').setAttribute('aria-label', n ? `Passo ${Math.min(APR.step + 1, n)} de ${n}` : '');
+  const st = L.steps && L.steps[APR.step];
+  $('apr-hint').disabled = !(APR.guided || (st && st.kind !== 'tap'));
+  $('apr-retry').textContent = APR.guided ? 'Recomeçar' : 'Repetir';
+  $('apr-skip').hidden = APR.guided;
+  if (!APR.guided) $('apr-grade').hidden = true;
+}
+function aprLoad(fen){
+  aiToken++; APR.tok++; CLK.thinking = false; busy = false;
+  G = new Chess(fen);
+  LOG = [];
+  resetUI(); resetFx(); closePromo(null);
+  syncState();
+  $('end').hidden = true;
+  renderAll();
+}
+function aprStartLesson(i){
+  const L = APR_LESSONS[i];
+  if (!L) return;
+  clearTimeout(APR.tm);
+  aprPreload();
+  leaveSpec();
+  Object.assign(APR, { on:true, L:i, step:0, phase:0, scripted:!L.guided, guided:!!L.guided, goals:[], danger:[], skipped:false, pre:null, dangerSig:'', dangerAt:0 });
+  APR.queue.length = 0;
+  aprArrow(null);
+  Object.assign(cfg, { mode:'ai', human:'w', diff:1, undoLeft:L.guided ? Infinity : 0, clock:'none', paused:false });
+  $('mode').value = 'ai'; $('diff').value = '1';
+  clockStart();
+  if (TITLE.open) closeTitle();
+  setFlip(false);
+  $('apr-done').hidden = true; $('apr-grade').hidden = true;
+  aprPanel();
+  if (L.guided){
+    newGame();
+    aprSay(L.intro, true);
+    aprText('Você joga com a Ordem da Aurora. Faça o primeiro lance; a nota aparece logo depois.');
+    aprTurnStart();
+    syncViewUI();
+    return;
+  }
+  if (i === 0 && !aprCount()) aprSay('v_apr_boas_vindas', true);
+  if (L.intro) aprSay(L.intro, i !== 0 || !!aprCount());
+  aprStep(0);
+  syncViewUI();
+}
+function aprStep(i, quiet){
+  const L = APR_LESSONS[APR.L];
+  clearTimeout(APR.tm);
+  if (i >= L.steps.length) return aprComplete();
+  APR.step = i; APR.phase = 0;
+  aprArrow(null);
+  const st = L.steps[i];
+  if (!(st.kind === 'tap' && G && G.fen() === st.fen && !G.history().length)) aprLoad(st.fen);
+  else { resetUI(); renderAll(); }
+  if (st.kind === 'tap'){
+    APR.goals = [];
+    G.board().forEach((row, r) => row.forEach((q, c) => { if (q && q.type === st.type && q.color === 'w') APR.goals.push(sq(r, c)); }));
+  } else APR.goals = st.hideGoal ? [] : st.goals || [st.to];
+  aprMarks();
+  if (!quiet) aprSay(st.say, false);
+  aprText(APR_LINES[st.say] + (st.kind === 'tap' ? ' Toque numa peça destacada para seguir.' : ''));
+  aprPanel();
+}
+// L1: o toque na peça pedida avança (e abre a ficha da peça); nenhum lance é feito
+function aprTap(r, c){
+  if (!APR.on || !APR.scripted) return false;
+  const st = APR_LESSONS[APR.L].steps[APR.step];
+  if (!st || st.kind !== 'tap') return false;
+  const q = pieceAt(r, c);
+  if (q){ ui.inspect = q.id; renderCard(); }
+  if (q && q.t === st.type && APR.goals.length){ snd('selecao', { vol:0.6 }); aprSuccess(); }
+  return true;
+}
+function aprSuccess(){
+  APR.goals = []; aprMarks(); aprArrow(null);
+  aprSay('v_apr_muito_bem', true);
+  aprText(APR_LINES.v_apr_muito_bem);
+  APR.step++; aprPanel(); APR.step--;
+  const next = APR.step + 1;
+  APR.tm = setTimeout(() => { if (APR.on && APR.scripted) aprStep(next); }, 1500);
+}
+function aprFail(){
+  aprArrow(null);
+  aprSay('v_apr_tente_de_novo', true);
+  aprText(APR_LINES.v_apr_tente_de_novo);
+  const cur = APR.step;
+  APR.tm = setTimeout(() => { if (APR.on && APR.scripted && APR.step === cur) aprStep(cur, true); }, 1600);
+}
+// há mate em um para as Brancas contra qualquer resposta?
+function aprForced(fen){
+  const g = new Chess(fen), replies = g.moves({ verbose:true });
+  if (!replies.length) return g.in_checkmate();
+  for (const r of replies){
+    g.move(r);
+    const ok = g.moves({ verbose:true }).some(m => { g.move(m); const mt = g.in_checkmate(); g.undo(); return mt; });
+    g.undo();
+    if (!ok) return false;
+  }
+  return true;
+}
+function aprMateMove(){ for (const m of G.moves({ verbose:true })){ G.move(m); const mt = G.in_checkmate(); G.undo(); if (mt) return m; } return null; }
+function aprAfterMove(){
+  const st = APR_LESSONS[APR.L].steps[APR.step];
+  if (!st || st.kind === 'tap') return;
+  const h = G.history({ verbose:true }), m = h[h.length - 1];
+  if (!m) return;
+  if (st.goal === 'mate2'){
+    if (APR.phase === 0){
+      if (m.color !== 'w') return;
+      if (G.in_checkmate()) return aprSuccess();
+      if (aprForced(G.fen())){ APR.phase = 1; aprText('Boa preparação. Agora a Legião responde…'); return aprReply(); }
+      return aprFail();
+    }
+    if (APR.phase === 1){ APR.phase = 2; aprText('Agora dê o xeque-mate.'); return; }
+    return G.in_checkmate() ? aprSuccess() : aprFail();
+  }
+  if (m.color !== 'w') return;
+  (APR_GOAL[st.goal](m, st) ? aprSuccess : aprFail)();
+}
+async function aprReply(){
+  const tok = ++APR.tok;
+  busy = true; renderAll();
+  let r = null;
+  try { r = await aiThink(G.fen(), 4); } catch (e){ r = null; }
+  if (tok !== APR.tok || !APR.on) return;
+  const legal = G.moves({ verbose:true });
+  const m = (r && legal.find(x => x.from === r.from && x.to === r.to)) || legal[0];
+  setTimeout(() => { if (tok !== APR.tok || !APR.on) return; busy = false; doMove(m); }, 380 * SPD);
+}
+function aprComplete(){
+  const i = APR.L, L = APR_LESSONS[i], first = !APR.done[i], allBefore = aprCount() === 7;
+  APR.goals = []; APR.danger = []; aprMarks(); aprArrow(null);
+  const won = !APR.skipped;
+  if (won){ APR.done[i] = true; aprSave(); }
+  $('apr-seal').textContent = APR_ROMAN[i];
+  $('apr-seal').classList.toggle('off', !won);
+  $('apr-done-t').textContent = won ? `Insígnia: ${L.badge}` : 'Lição concluída';
+  $('apr-done-p').textContent = won ? (first ? APR_LINES.v_apr_licao_concluida : 'Lição concluída de novo. A insígnia já é sua.')
+    : 'Você pulou algum passo. Refaça a lição sem pular para ganhar a insígnia.';
+  $('apr-next').hidden = i >= 6;
+  $('apr-done').hidden = false;
+  aprText(won ? `Lição concluída. Insígnia: ${L.badge}.` : 'Lição concluída, mas sem a insígnia: você pulou um passo.');
+  aprSay(won ? 'v_apr_licao_concluida' : null, true);
+  if (won && aprCount() === 7 && !allBefore) aprSay('v_apr_todas', false);
+  snd('vitoria', { vol:0.5, delay:0.2 });
+  APR.step = L.steps ? L.steps.length : 0; aprPanel();
+  setTimeout(() => $('apr-next').hidden ? $('apr-menu').focus() : $('apr-next').focus(), 40);
+}
+/* partida guiada */
+function aprDanger(side){
+  const f = G.fen().split(' ');
+  f[1] = side === 'w' ? 'b' : 'w'; f[3] = '-';
+  const g = new Chess();
+  if (!g.load(f.join(' '))) return [];
+  const VAL = { p:1, n:3, b:3, r:5, q:9, k:0 }, out = new Set();
+  for (const m of g.moves({ verbose:true })){
+    if (!m.captured || m.captured === 'k' || out.has(m.to)) continue;
+    if (VAL[m.piece] < VAL[m.captured]){ out.add(m.to); continue; }
+    g.move(m);
+    const def = g.moves({ verbose:true }).some(x => x.to === m.to);
+    g.undo();
+    if (!def) out.add(m.to);
+  }
+  return [...out];
+}
+function aprTurnStart(){
+  if (!(APR.on && APR.guided)) return;
+  if (S.over || !human(S.turn) || busy && !S){ APR.danger = []; aprMarks(); return; }
+  if (!human(G.turn())){ APR.danger = []; aprMarks(); return; }
+  const fen = G.fen(), ply = G.history().length;
+  if (!APR.pre || APR.pre.ply !== ply || APR.pre.fen !== fen) APR.pre = { fen, ply, p:aiThink(fen, 4).catch(() => null) };
+  APR.danger = aprDanger(cfg.human);
+  aprMarks();
+  const sig = APR.danger.slice().sort().join();
+  if (APR.danger.length && sig !== APR.dangerSig && performance.now() > APR.dangerAt){
+    APR.dangerAt = performance.now() + 15000;
+    aprSay('v_apr_perigo', false);
+    aprText(APR_LINES.v_apr_perigo);
+  }
+  APR.dangerSig = sig;
+}
+const aprClampS = v => clamp(v || 0, -1500, 1500);
+const APR_GRADE = { otimo:['Ótimo lance!', 'v_apr_otimo'], bom:['Bom lance.', 'v_apr_bom'], impreciso:['Lance impreciso.', 'v_apr_impreciso'], erro:['Erro.', 'v_apr_erro'] };
+function aprGuidedAfter(){
+  const h = G.history({ verbose:true }), m = h[h.length - 1];
+  APR.danger = []; aprMarks(); aprArrow(null);
+  if (!m || m.color !== cfg.human) return;
+  aprGrade(m, h.length);
+}
+async function aprGrade(m, ply){
+  const pre = APR.pre;
+  if (!pre || pre.ply !== ply - 1) return;
+  const tok = ++APR.gtok;
+  const best = await pre.p;
+  if (!best) return;
+  let loss = 0;
+  if (!(best.from === m.from && best.to === m.to && (best.promotion || '') === (m.promotion || ''))){
+    const g2 = new Chess(pre.fen);
+    g2.move({ from:m.from, to:m.to, promotion:m.promotion });
+    let played;
+    if (g2.in_checkmate()) played = 1500;
+    else if (g2.game_over()) played = 0;
+    else { const aft = await aiThink(g2.fen(), 4).catch(() => null); played = aft ? -aft.score : best.score; }
+    loss = aprClampS(best.score) - aprClampS(played);
+  }
+  if (tok !== APR.gtok || !APR.on || !APR.guided) return;
+  const k = loss <= 25 ? 'otimo' : loss <= 80 ? 'bom' : loss <= 220 ? 'impreciso' : 'erro';
+  const el = $('apr-grade');
+  el.hidden = false; el.className = 'apr-grade ' + k; el.textContent = APR_GRADE[k][0];
+  aprSay(APR_GRADE[k][1], true);
+  if ((k === 'impreciso' || k === 'erro') && G.history().length === ply){
+    let san = '';
+    try { san = new Chess(pre.fen).move({ from:best.from, to:best.to, promotion:best.promotion }).san; } catch (e){}
+    aprText(`${APR_LINES[APR_GRADE[k][1]]}${san ? ` O melhor era ${san}.` : ''}`);
+    aprArrow(best.from, best.to, '#ff8a5a', 5000);
+  } else if (k === 'impreciso' || k === 'erro') aprText(APR_LINES[APR_GRADE[k][1]]);
+  else aprText(APR_GRADE[k][0]);
+}
+async function aprHint(){
+  if (!APR.on || busy) return;
+  if (APR.guided){
+    if (S.over || !human(S.turn)) return;
+    aprTurnStart();
+    const pre = APR.pre, best = pre && await pre.p;
+    if (!best || !APR.on || G.fen() !== pre.fen) return;
+    let san = '';
+    try { san = new Chess(pre.fen).move({ from:best.from, to:best.to, promotion:best.promotion }).san; } catch (e){}
+    aprArrow(best.from, best.to, '#ffd36a', 9000);
+    aprSay('v_apr_dica', true);
+    aprText(`${APR_LINES.v_apr_dica}${san ? ` (${san})` : ''}`);
+    return;
+  }
+  const st = APR_LESSONS[APR.L].steps[APR.step];
+  if (!st || st.kind === 'tap') return;
+  let from = st.from, to = st.to;
+  if (st.goal === 'mate2' && APR.phase === 2){ const mm = aprMateMove(); if (mm){ from = mm.from; to = mm.to; } }
+  aprArrow(from, to, '#ffd36a');
+  aprSay('v_apr_dica', true);
+  aprText(APR_LINES[st.say]);
+}
+function aprGameEnd(o){
+  if (!APR.on || !APR.guided || !o) return;
+  const good = o.kind !== 'mate' || o.winner === cfg.human;
+  if (!good){ aprText('A Legião venceu desta vez. Clique em Recomeçar e tente de novo: a insígnia vem com uma vitória ou um empate.'); return; }
+  setTimeout(() => { if (!APR.on || !APR.guided) return; $('end').hidden = true; aprComplete(); }, 2600);
+}
+function aprExit(){
+  if (!APR.on) return;
+  clearTimeout(APR.tm);
+  APR.on = false; APR.scripted = APR.guided = false; APR.tok++; APR.gtok++;
+  APR.goals = []; APR.danger = []; APR.queue.length = 0; APR.pre = null;
+  aprArrow(null); MM.setMarks([]);
+  $('lesson').hidden = true; $('apr-done').hidden = true;
+  if (cfg.undoLeft === 0) cfg.undoLeft = UNDO_LIMIT[cfg.diff] != null ? UNDO_LIMIT[cfg.diff] : Infinity;
+}
+function aprRenderList(){
+  const box = $('apr-lessons');
+  box.innerHTML = APR_LESSONS.map((L, i) => `<button type="button" class="lesson-card" data-l="${i}"><span class="seal${APR.done[i] ? '' : ' off'}" aria-hidden="true">${APR_ROMAN[i]}</span>`
+    + `<b>${i + 1}. ${L.t}</b><span>${L.d}</span><em>${APR.done[i] ? 'Insígnia: ' + L.badge : 'Insígnia a conquistar'}</em></button>`).join('');
+  for (const b of box.querySelectorAll('[data-l]')) b.addEventListener('click', () => { audio(); aprStartLesson(+b.dataset.l); });
+  $('apr-count').textContent = `${aprCount()}/7 insígnias`;
+}
+function aprTick(){
+  aprVoiceTick();
+  if (APR.arrow && performance.now() > APR.arrow.until) aprArrow(null);
+}
+$('apr-hint').addEventListener('click', () => { audio(); aprHint(); });
+$('apr-retry').addEventListener('click', () => {
+  audio();
+  if (APR.guided){ APR.pre = null; $('apr-grade').hidden = true; aprStartLesson(APR.L); return; }
+  aprStep(APR.step);
+});
+$('apr-skip').addEventListener('click', () => { audio(); if (!APR.on || APR.guided) return; APR.skipped = true; APR.queue.length = 0; aprStep(APR.step + 1); });
+$('apr-list').addEventListener('click', () => { audio(); openTitle(); showSetup('aprendiz'); });
+$('apr-next').addEventListener('click', () => { audio(); $('apr-done').hidden = true; aprStartLesson(Math.min(6, APR.L + 1)); });
+$('apr-menu').addEventListener('click', () => { audio(); $('apr-done').hidden = true; openTitle(); showSetup('aprendiz'); });
+$('t-back3').addEventListener('click', () => showSetup(null));
+document.addEventListener('keydown', e => {
+  if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || TITLE.open) return;
+  if ((e.key === 'h' || e.key === 'H') && APR.on) aprHint();
+});
+aprRenderList();
 
 /* ---------- Inicialização ---------- */
 function serialize(){
