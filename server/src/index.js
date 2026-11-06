@@ -6,7 +6,9 @@
 //   POST /api/rooms            (Bearer) { mode, tc, color, deck } -> { id, link, room }
 //   GET  /api/rooms/:id                                  -> room
 //   GET  /api/rooms/:id/ws     WebSocket; 1ª mensagem { t:'hello', token }
-//   GET  /api/queue/:fila/:ritmo/ws   fila casual ou ranqueada de Xadrez Puro (WebSocket; avisa o par ou oferece a IA)
+//   GET  /api/queue/:fila/:ritmo/ws   filas: ranked, casual (Xadrez Puro), arcano-ranked, arcano-casual (12+5; o hello leva o grimório)
+//   GET  /api/profile/:uid            perfil público: notas e ligas, vitórias/derrotas/empates por modo, grimório mais usado, últimas 20
+//   GET  /api/replay/:id              replay de partida terminada: semente, grimórios e ações (o motor refaz tudo, mãos inclusive)
 //   GET  /api/leaderboard?pool=xadrez  ranking (notas firmes de contas)
 //   GET  /api/auth/providers                      provedores de login configurados
 //   POST /api/auth/start   (Bearer do convidado) { provider, return } -> { url } (state + PKCE)
@@ -14,14 +16,15 @@
 //   POST /api/auth/exchange { code }              -> { token, user }
 //   POST /api/me/birth     (Bearer) { birth:'AAAA-MM-DD' }
 import { GameRoom, TC } from './room.js';
-import { Matchmaker, QUEUES } from './queue.js';
+import { Matchmaker, QUEUES, QUEUE_RE } from './queue.js';
+import { DECK_IDS, RULES } from './engine.js';
 import { signToken, verifyToken, bearer, randomId } from './auth.js';
 import { publicRating } from './ratings.js';
 import { enabled as authProviders, startLogin, callback as authCallback, fakeAuthorize, exchangeLogin } from './oauth.js';
 import { LEAGUES, GRANDMASTER, PROVISIONAL_RD } from './glicko2.js';
 export { GameRoom, Matchmaker };
 
-const VERSION = 'fase1-c';
+const VERSION = 'fase2-a';
 function cors(req, env){
   const origin = req.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -128,7 +131,7 @@ export default {
         return json(req, env, await r.json(), r.status);
       }
 
-      const q = p.match(/^\/api\/queue\/(ranked|casual)\/([0-9+]+)\/ws$/);
+      const q = p.match(new RegExp('^' + QUEUE_RE.source));
       if (q){
         if (!(QUEUES[q[1]] || []).includes(q[2])) return json(req, env, { err:'Fila desconhecida.' }, 404);
         if (req.headers.get('Upgrade') !== 'websocket') return json(req, env, { err:'Use WebSocket.' }, 426);
@@ -141,7 +144,49 @@ export default {
         return json(req, env, { pool, top:rows.map((x, i) => ({ rank:i + 1, name:x.name, r:Math.round(x.r), games:x.games })) });
       }
 
-      if (p === '/api/config') return json(req, env, { tc:Object.keys(TC), queues:QUEUES, leagues:LEAGUES, grandmaster:GRANDMASTER, provisionalRd:PROVISIONAL_RD });
+      if (p === '/api/config') return json(req, env, { tc:Object.keys(TC), queues:QUEUES, decks:DECK_IDS, rules:RULES, leagues:LEAGUES, grandmaster:GRANDMASTER, provisionalRd:PROVISIONAL_RD });
+
+      const pf = p.match(/^\/api\/profile\/([A-Za-z0-9_]{3,40})$/);
+      if (pf){
+        if (!env.DB) return json(req, env, { err:'Servidor sem banco.' }, 500);
+        let u = await env.DB.prepare('SELECT id, kind, name, created, deleted, merged_into FROM users WHERE id = ?').bind(pf[1]).first();
+        // convidado fundido numa conta: o perfil é o da conta
+        if (u && u.deleted && u.merged_into) u = await env.DB.prepare('SELECT id, kind, name, created, deleted, merged_into FROM users WHERE id = ?').bind(u.merged_into).first();
+        if (!u || u.deleted) return json(req, env, { err:'Jogador não encontrado.' }, 404);
+        const id = u.id, done = "result IN ('1-0', '0-1', '1/2-1/2')";
+        const [stats, deck, recent] = await Promise.all([
+          env.DB.prepare(`SELECT mode, SUM(CASE WHEN (white = ?1 AND result = '1-0') OR (black = ?1 AND result = '0-1') THEN 1 ELSE 0 END) AS w,
+            SUM(CASE WHEN (white = ?1 AND result = '0-1') OR (black = ?1 AND result = '1-0') THEN 1 ELSE 0 END) AS l,
+            SUM(CASE WHEN result = '1/2-1/2' THEN 1 ELSE 0 END) AS d FROM games WHERE (white = ?1 OR black = ?1) AND ${done} GROUP BY mode`).bind(id).all(),
+          env.DB.prepare(`SELECT deck, COUNT(*) AS n FROM (SELECT deck_w AS deck FROM games WHERE white = ?1 AND mode = 'arcano' AND ${done}
+            UNION ALL SELECT deck_b AS deck FROM games WHERE black = ?1 AND mode = 'arcano' AND ${done}) WHERE deck IS NOT NULL GROUP BY deck ORDER BY n DESC, deck LIMIT 1`).bind(id).first(),
+          env.DB.prepare(`SELECT g.id, g.mode, g.tc, g.ranked, g.white, g.black, COALESCE(g.w_name, uw.name) AS w_name, COALESCE(g.b_name, ub.name) AS b_name, g.result, g.reason, g.plies, g.ended,
+            g.w_delta, g.b_delta, g.deck_w, g.deck_b, g.actions IS NOT NULL AS replay FROM games g LEFT JOIN users uw ON uw.id = g.white LEFT JOIN users ub ON ub.id = g.black
+            WHERE g.white = ?1 OR g.black = ?1 ORDER BY g.ended DESC LIMIT 20`).bind(id).all(),
+        ]);
+        const by = {}; for (const m of ['xadrez', 'arcano']) by[m] = { w:0, l:0, d:0 };
+        for (const r of stats.results) by[r.mode] = { w:r.w || 0, l:r.l || 0, d:r.d || 0 };
+        const games = recent.results.map(g => {
+          const color = g.white === id ? 'w' : 'b', score = g.result;
+          const outcome = score === 'abortada' ? 'cancelada' : score === '1/2-1/2' ? 'empate' : (score === '1-0') === (color === 'w') ? 'vitoria' : 'derrota';
+          return { id:g.id, mode:g.mode, tc:g.tc, ranked:!!g.ranked, color, outcome, score, reason:g.reason, plies:g.plies, ended:g.ended,
+            opponent:{ id:color === 'w' ? g.black : g.white, name:color === 'w' ? g.b_name : g.w_name }, deck:color === 'w' ? g.deck_w : g.deck_b,
+            delta:color === 'w' ? g.w_delta : g.b_delta, replay:!!g.replay && score !== 'abortada' };
+        });
+        return json(req, env, { user:{ id, name:u.name, kind:u.kind, since:u.created },
+          ratings:{ xadrez:await publicRating(env.DB, id, u.kind, 'xadrez'), arcano:await publicRating(env.DB, id, u.kind, 'arcano') },
+          stats:by, deck:deck ? { id:deck.deck, games:deck.n } : null, recent:games });
+      }
+
+      const rp = p.match(/^\/api\/replay\/([a-z0-9]{8})$/);
+      if (rp){
+        const g = env.DB ? await env.DB.prepare(`SELECT g.*, COALESCE(g.w_name, uw.name) AS wn, COALESCE(g.b_name, ub.name) AS bn FROM games g LEFT JOIN users uw ON uw.id = g.white LEFT JOIN users ub ON ub.id = g.black WHERE g.id = ?`).bind(rp[1]).first() : null;
+        // só partidas terminadas estão no histórico; sem as ações (partidas antigas ou canceladas) não há replay
+        if (!g || g.actions == null || g.result === 'abortada') return json(req, env, { err:'Replay indisponível.' }, 404);
+        return json(req, env, { id:g.id, mode:g.mode, tc:g.tc, ranked:!!g.ranked, seed:g.seed, decks:g.mode === 'arcano' ? { w:g.deck_w, b:g.deck_b } : null,
+          players:{ w:{ id:g.white, name:g.wn }, b:{ id:g.black, name:g.bn } }, result:g.result, reason:g.reason, plies:g.plies, ended:g.ended,
+          moves:g.moves ? g.moves.split(' ') : [], actions:JSON.parse(g.actions), rules:g.rules, rulesNow:RULES, delta:{ w:g.w_delta, b:g.b_delta } });
+      }
       if (p === '/api/tc') return json(req, env, { tc:Object.keys(TC) });
       return json(req, env, { err:'Rota desconhecida.' }, 404);
     } catch (e){

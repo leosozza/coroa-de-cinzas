@@ -51,3 +51,10 @@ Durable Objects com SQLite e D1 cabem no plano gratuito. `DEV_TC`, `RECONNECT_MS
   (10 verificações: health, CORS, sala por link com mate, mão escondida no Arcano, pareamento na fila casual).
 - Em produção nunca criar `DEV_AUTH`, `DEV_TC`, `RECONNECT_MS`, `FIRST_MOVE_MS`, `QUEUE_AI_MS` ou `SHOW_MS`.
 - Login Google/Discord continua escondido até os apps serem registrados (ids em `wrangler.toml`, segredos por `wrangler secret put`).
+
+## Fase 2 (a): Arcano ranqueado, perfil e replays
+- Filas novas: `GET /api/queue/arcano-ranked/12+5/ws` e `/api/queue/arcano-casual/12+5/ws`; o hello leva o grimório: `{t:'hello', token, deck:'tempestade'|'cinzas'|'arcano'}`. `GET /api/config` lista `decks` e o carimbo `rules`.
+- `GET /api/profile/:uid` → `{ user, ratings:{xadrez, arcano}, stats:{xadrez:{w,l,d}, arcano:{w,l,d}}, deck:{id, games}, recent:[até 20] }`.
+- `GET /api/replay/:id` → `{ mode, seed, decks, actions, moves, players, result, reason, rules, rulesNow, delta }` (só partidas terminadas). Para reproduzir: `ARC.create({seed, decks, oracle:'previsto'})` (ou `{seed, pure:true}`) e `ARC.apply` em cada ação.
+- Migração nova: `migrations/0003_replays.sql` (colunas em `games`: seed, deck_w, deck_b, actions, rules, w_name, b_name, w_delta, b_delta; índice por data). Aplicar antes do deploy: `npx wrangler@4 d1 migrations apply arcane-chess --remote` (sem ela, o código novo não consegue gravar as partidas).
+- Testes: `node test/fase2.mjs` (local). O `test/smoke.mjs` agora confere o replay e o perfil da partida por link e pareia dois na fila casual do Arcano; rode depois da migração 0003 e do deploy.

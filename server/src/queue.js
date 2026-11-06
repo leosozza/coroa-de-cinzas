@@ -3,13 +3,18 @@
 // (no aparelho do jogador, sem nota) e continua procurando enquanto ele quiser.
 import { verifySession, randomId } from './auth.js';
 import { getRating } from './ratings.js';
+import { DECK_IDS } from './engine.js';
 
-export const QUEUES = { ranked:['10+0', '3+2'], casual:['10+0', '3+2', '5+3'] };
+// Xadrez Puro: ranked e casual. Arcano (Fase 2): arcano-ranked e arcano-casual, 12+5, com o grimório escolhido na entrada
+export const QUEUES = { ranked:['10+0', '3+2'], casual:['10+0', '3+2', '5+3'], 'arcano-ranked':['12+5'], 'arcano-casual':['12+5'] };
+export const QUEUE_RE = /\/api\/queue\/(ranked|casual|arcano-ranked|arcano-casual)\/([0-9+]+)\/ws$/;
+export const modeOf = q => (q.startsWith('arcano') ? 'arcano' : 'xadrez');
+export const isRanked = q => q.endsWith('ranked');
 const TICK = 2000;
 // janela de nota: 150 pontos, +25 a cada segundo de espera; na ranqueada até 500, na casual sem limite depois de 20 s
 export function windowFor(queue, waitedMs){
   const w = 150 + 25 * waitedMs / 1000;
-  return queue === 'ranked' ? Math.min(500, w) : waitedMs >= 20000 ? Infinity : w;
+  return isRanked(queue) ? Math.min(500, w) : waitedMs >= 20000 ? Infinity : w;
 }
 // nível da IA de reserva pela nota (1 Recruta, 2 Veterano, 3 Mestre)
 export const aiLevel = r => (r < 1300 ? 1 : r < 1700 ? 2 : 3);
@@ -22,7 +27,7 @@ export class Matchmaker {
 
   async fetch(req){
     if (req.headers.get('Upgrade') !== 'websocket') return new Response('use WebSocket', { status:426 });
-    const url = new URL(req.url), m = url.pathname.match(/\/api\/queue\/(ranked|casual)\/([0-9+]+)\/ws$/);
+    const url = new URL(req.url), m = url.pathname.match(QUEUE_RE);
     if (!m || !(QUEUES[m[1]] || []).includes(m[2])) return new Response('fila desconhecida', { status:404 });
     const pair = new WebSocketPair();
     this.ctx.acceptWebSocket(pair[1]);
@@ -38,10 +43,13 @@ export class Matchmaker {
     if (!p){ this.send(ws, { t:'error', err:'Sessão inválida.', code:'auth' }); ws.close(4001, 'auth'); return; }
     // a mesma pessoa em duas abas: fica só a mais nova
     for (const x of this.tickets()) if (x.t.uid === p.uid && x.ws !== ws){ x.t.done = true; x.ws.serializeAttachment(x.t); this.send(x.ws, { t:'replaced' }); try { x.ws.close(4002, 'outra aba'); } catch (e){} }
-    const rt = await getRating(this.env.DB, p.uid, 'xadrez');
-    Object.assign(t, { uid:p.uid, name:p.name, r:rt.r, rd:rt.rd, since:Date.now(), offered:false });
+    const mode = modeOf(t.queue);
+    // Arcano: o grimório vem no hello e é conferido contra os do motor
+    if (mode === 'arcano' && !DECK_IDS.includes(m.deck)){ this.send(ws, { t:'error', err:'Escolha um grimório válido.', code:'deck' }); ws.close(4003, 'deck'); return; }
+    const rt = await getRating(this.env.DB, p.uid, mode);
+    Object.assign(t, { uid:p.uid, name:p.name, r:rt.r, rd:rt.rd, since:Date.now(), offered:false, deck:mode === 'arcano' ? m.deck : null });
     ws.serializeAttachment(t);
-    this.send(ws, { t:'queued', queue:t.queue, tc:t.tc, r:Math.round(t.r) });
+    this.send(ws, { t:'queued', queue:t.queue, tc:t.tc, mode, deck:t.deck, r:Math.round(t.r) });
     await this.match();
   }
   async webSocketClose(ws, code){ try { ws.close(code === 1005 ? 1000 : code, 'tchau'); } catch (e){} }
@@ -77,11 +85,12 @@ export class Matchmaker {
     const [W, Bk] = flip ? [A, B] : [B, A];
     const seats = { w:{ uid:W.t.uid, name:W.t.name }, b:{ uid:Bk.t.uid, name:Bk.t.name } };
     const stub = this.env.GAME.get(this.env.GAME.idFromName(id));
-    const r = await stub.fetch('https://sala/init', { method:'POST', body:JSON.stringify({ id, uid:W.t.uid, name:W.t.name, mode:'xadrez', tc:A.t.tc, color:'w', ranked:A.t.queue === 'ranked', queue:A.t.queue, seats }) });
+    const mode = modeOf(A.t.queue), ranked = isRanked(A.t.queue), decks = mode === 'arcano' ? { w:W.t.deck, b:Bk.t.deck } : null;
+    const r = await stub.fetch('https://sala/init', { method:'POST', body:JSON.stringify({ id, uid:W.t.uid, name:W.t.name, mode, tc:A.t.tc, color:'w', ranked, queue:A.t.queue, seats, decks }) });
     if (!r.ok) return;
     for (const [x, color, opp] of [[W, 'w', Bk], [Bk, 'b', W]]){
       x.t.done = true; x.ws.serializeAttachment(x.t);
-      this.send(x.ws, { t:'match', room:id, color, ranked:A.t.queue === 'ranked', tc:A.t.tc, opponent:{ name:opp.t.name, r:Math.round(opp.t.r) } });
+      this.send(x.ws, { t:'match', room:id, color, mode, ranked, tc:A.t.tc, deck:x.t.deck, opponent:{ name:opp.t.name, r:Math.round(opp.t.r) } });
       try { x.ws.close(1000, 'pareado'); } catch (e){}
     }
   }

@@ -1,6 +1,7 @@
 // Teste rápido contra o servidor publicado (sem os relógios acelerados do .dev.vars).
 // Uso: node test/smoke.mjs https://arcane-chess-api.leonardo-zogbi.workers.dev
-// Cria três convidados, joga um mate por link, abre uma sala do Arcano e pareia dois na fila casual.
+// Cria convidados, joga um mate por link (e confere o replay e o perfil), abre uma sala do Arcano, pareia dois na fila casual
+// de Xadrez Puro e dois na fila casual do Arcano (12+5, grimório na entrada). Exige a migração 0003 aplicada.
 const BASE = process.argv[2] || 'http://127.0.0.1:8787', WSB = BASE.replace(/^http/, 'ws');
 const ORIGIN = 'https://arcanechess.pages.dev';
 let fails = 0, passes = 0, STEP = 0, LAST = [];
@@ -10,7 +11,7 @@ async function api(path, o = {}){
   return { status:r.status, headers:r.headers, j:await r.json().catch(() => null) };
 }
 const guest = async name => (await api('/api/guest', { body:{ name } })).j;
-function sock(path, token){
+function sock(path, token, extra){
   const ws = new WebSocket(WSB + path), msgs = [], waiters = [];
   const c = { msgs, last:null, seat:null, send:o => ws.send(JSON.stringify(o)), close:() => ws.close(),
     move:(from, to) => c.send({ t:'act', a:{ type:'move', from, to } }),
@@ -22,7 +23,7 @@ function sock(path, token){
     }) };
   ws.addEventListener('message', ev => { const m = JSON.parse(ev.data); msgs.push(m); if (m.t === 'state') c.last = m; if (m.t === 'welcome') c.seat = m.you.seat; LAST.push({t:m.t,status:m.status,err:m.err,n:m.state&&m.state.hist&&m.state.hist.length}); if (LAST.length>6) LAST.shift();
     for (const w of waiters.slice()) if (w.f(m)){ waiters.splice(waiters.indexOf(w), 1); w.res(m); } });
-  ws.addEventListener('open', () => c.send({ t:'hello', token }));
+  ws.addEventListener('open', () => c.send({ t:'hello', token, ...(extra || (/\/queue\/arcano-/.test(path) ? { deck:'cinzas' } : {})) }));
   return c;
 }
 const st = p => m => m.t === 'state' && m.state && p(m);
@@ -47,6 +48,11 @@ async function main(){
   const over = await b.wait(st(m => m.status === 'over'));
   ok(over.result && over.result.score === '1-0' && over.result.reason === 'mate', 'mate: ' + JSON.stringify(over.result));
   a.close(); b.close();
+  // replay e perfil da partida que acabou (Fase 2)
+  const rp = await api('/api/replay/' + r.id);
+  ok(rp.status === 200 && typeof rp.j.seed === 'number' && rp.j.actions.length === 7 && rp.j.moves.join(' ') === 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7#', 'replay gravado');
+  const pf = await api('/api/profile/' + A.user.id);
+  ok(pf.status === 200 && pf.j.stats.xadrez.w >= 1 && pf.j.recent[0].id === r.id && pf.j.recent[0].outcome === 'vitoria' && pf.j.recent[0].replay, 'perfil com a partida');
 
   STEP = 2;
   // 2) Arcano: a mão do rival chega escondida
@@ -72,6 +78,16 @@ async function main(){
   rk.send({ t:'resign' }); const o = await rw.wait(st(m => m.status === 'over'));
   ok(o.result.score === '1-0', 'partida da fila terminou');
   qa.close(); qb.close(); rw.close(); rk.close();
+
+  STEP = 4;
+  // 4) fila casual do Arcano 12+5: grimório na entrada, sala com os dois grimórios (sem nota)
+  const xa = sock('/api/queue/arcano-casual/12+5/ws', A.token); const qx = await xa.wait(m => m.t === 'queued' || m.t === 'error');
+  ok(qx.t === 'queued' && qx.mode === 'arcano', 'fila do Arcano aceita (sem grimório seria recusada)');
+  xa.close(); await new Promise(r => setTimeout(r, 300));
+  const ya = sock('/api/queue/arcano-casual/12+5/ws', A.token), yb = sock('/api/queue/arcano-casual/12+5/ws', B.token);
+  const xm = await ya.wait(m => m.t === 'match' || m.t === 'error', 20000), ym = await yb.wait(m => m.t === 'match' || m.t === 'error', 20000);
+  ok(xm.t === 'match' && ym.t === 'match' && xm.room === ym.room && xm.mode === 'arcano' && !xm.ranked, 'pareados no Arcano casual');
+  ya.close(); yb.close();
 
   console.log(`smoke ${BASE}: ${passes} ok, ${fails} falhas, ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   process.exit(fails ? 1 : 0);

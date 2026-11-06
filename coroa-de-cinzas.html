@@ -496,6 +496,23 @@ details.rules[open] summary::before{content:"▾ "}
 .on-acct-btns{display:flex; flex-wrap:wrap; gap:8px}
 .on-acct #on-logout{justify-self:start}
 .on-birth{display:grid; gap:4px; margin-top:10px}
+/* perfil e histórico */
+.on-prof{display:grid; gap:12px}
+.pf-head{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px}
+.pf-head h4{margin:0; font-family:var(--f-engrave); letter-spacing:.06em; color:#f0d48a; font-size:1rem; overflow-wrap:anywhere}
+.pf-rs{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px}
+.pf-r{display:grid; gap:2px; padding:8px 10px; border:1px solid var(--seam); border-radius:4px; background:rgba(30,24,44,.35); font-family:var(--f-ui)}
+.pf-r b{font-size:.72rem; letter-spacing:.1em; color:var(--ash); font-weight:500}
+.pf-r em{font-style:normal; font-size:1.25rem; color:var(--bone)}
+.pf-r span{font-size:.85rem; color:#f0d48a}
+.pf-r small{font-size:.8rem; color:var(--ash)}
+.pf-list{display:grid; gap:6px; margin:0; padding:0; list-style:none}
+.pf-list li{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; padding:6px 8px; border:1px solid var(--seam); border-radius:4px; font-family:var(--f-ui); font-size:.85rem}
+.pf-list .pf-o{min-width:72px; font-weight:600}
+.pf-list .pf-o.vitoria{color:#9fe3a8} .pf-list .pf-o.derrota{color:#ff9a8a} .pf-list .pf-o.empate{color:#e6dbff} .pf-list .pf-o.cancelada{color:var(--ash)}
+.pf-list .pf-m{color:var(--ash); flex:1 1 160px; min-width:0}
+.pf-list button{min-height:36px; padding:4px 10px; font-size:.85rem}
+.pf-link{background:none; border:0; padding:0; min-height:0; color:#f0d48a; text-decoration:underline; cursor:pointer; font:inherit}
 .on-birth label{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.1em; color:var(--ash)}
 .on-birth label span{letter-spacing:0; text-transform:none}
 .setup input[type=text]{font-family:var(--f-body); font-size:.95rem; color:var(--bone); background:var(--stone); border:1px solid var(--seam); border-radius:3px; padding:8px 12px; min-height:40px; width:100%; min-width:0}
@@ -540,7 +557,7 @@ details.rules[open] summary::before{content:"▾ "}
 @media (prefers-reduced-motion: reduce){ .logo-word::after{animation:none; opacity:.7} }
 @media (prefers-reduced-motion: reduce){ .thinking .sigil, .hud-phase.check b, .hud-phase.think b::after, .cine .flash.go{animation:none} .meter > i, .cine .bar, .cine .vig, .cine .cap{transition:none} }
 body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-top, 0px)); left:50%; transform:translateX(-50%); width:min(620px, calc(100vw - 24px)); margin:0}
-@media (max-width:900px), (pointer:coarse){ .onbar button{min-height:44px} .setup input[type=text], .setup input[type=date]{min-height:44px} }
+@media (max-width:900px), (pointer:coarse){ .onbar button{min-height:44px} .pf-list button{min-height:44px} .pf-link{min-height:44px} .setup input[type=text], .setup input[type=date]{min-height:44px} }
 /* alvos de toque: no celular e no tablet, nada abaixo de 44 px (no fim, para vencer as regras base) */
 @media (max-width:900px), (pointer:coarse){
   button, select{min-height:44px}
@@ -696,11 +713,14 @@ body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-t
         <div class="on-tabs" role="tablist" aria-label="Como jogar">
           <button type="button" role="tab" id="on-tab-q" aria-selected="true" aria-controls="on-q-p">Fila</button>
           <button type="button" role="tab" id="on-tab-l" aria-selected="false" aria-controls="on-l-p">Partida por link</button>
+          <button type="button" role="tab" id="on-tab-p" aria-selected="false" aria-controls="on-p-p">Perfil</button>
         </div>
+        <div id="on-p-p" role="tabpanel" aria-labelledby="on-tab-p" hidden><div class="on-prof" id="on-prof" aria-live="polite"></div></div>
         <div id="on-q-p" role="tabpanel" aria-labelledby="on-tab-q">
           <div class="row">
-            <div class="field"><label for="on-q">Fila de Xadrez Puro</label><select id="on-q"><option value="casual">Casual (sem nota)</option><option value="ranked">Ranqueada</option></select></div>
+            <div class="field"><label for="on-q">Fila</label><select id="on-q"><option value="casual">Xadrez Puro · casual (sem nota)</option><option value="ranked">Xadrez Puro · ranqueada</option><option value="arcano-casual">Arcano · casual (sem nota)</option><option value="arcano-ranked">Arcano · ranqueada</option></select></div>
             <div class="field"><label for="on-qtc">Ritmo</label><select id="on-qtc"></select></div>
+            <div class="field" id="on-qdeck-f" hidden><label for="on-qdeck">Seu grimório</label><select id="on-qdeck"><option value="tempestade">Tempestade</option><option value="cinzas">Cinzas</option><option value="arcano">Arcano</option></select></div>
           </div>
           <p class="hint" id="on-qmsg" aria-live="polite"></p>
           <div class="acts"><button class="btn-main" id="on-qgo" type="button">Procurar rival</button><button id="on-qcancel" type="button" hidden>Sair da fila</button><button id="on-ai" type="button" hidden></button></div>
@@ -9427,7 +9447,7 @@ function resetUI(){
   Object.assign(ui, { sel:null, acts:[], inspect:null, hoverId:null });
 }
 function newGame(){
-  onlineLeave();
+  onlineLeave(); replayExit();
   if (APR.on && APR.scripted){ aprStartLesson(APR.L); return; }
   if (cfg.arc){ arcNewGame(); return; }
   aiToken++;
@@ -9459,6 +9479,7 @@ function renderTurn(){
   const side = S.turn, thinking = !S.over && !human(side);
   let txt;
   if (S.over) txt = S.over.kind === 'mate' ? `${FACTION[S.over.winner]} vence por xeque-mate` : S.over.kind === 'abortada' ? 'Partida cancelada' : S.over.winner ? `${FACTION[S.over.winner]} vence` : 'Empate';
+  else if (cfg.mode === 'replay') txt = `Replay · vez da ${FACTION[side]}`;
   else if (cfg.mode === 'online') txt = !cfg.human ? `Assistindo · vez da ${FACTION[side]}` : side === cfg.human ? `Sua vez · ${FACTION[side]}` : `Vez de ${onlineOppName()}`;
   else if (cfg.mode === 'ai') txt = side === cfg.human ? `Sua vez · ${FACTION[side]}` : `A ${FACTION[side]} trama seu golpe…`;
   else if (cfg.mode === 'spec') txt = cfg.paused ? 'Partida pausada' : `A ${FACTION[side]} pensa · ${LEVEL[aiLevel(side)]}`;
@@ -9470,6 +9491,7 @@ function renderTurn(){
   el.innerHTML = `<span class="turn-who side-${sideCls}"><span class="sigil"></span><span>${txt}</span></span>
     <span class="turn-right">${chk}${clockHtml()}<span class="turn-no">Lance ${moveNo()}</span></span>`;
   $('hint').textContent = S.over ? 'A partida terminou. Comece outra ou desfaça a última jogada.'
+    : cfg.mode === 'replay' ? 'Replay: use Avançar, Voltar, Início e Fim na barra acima do tabuleiro. Toque nas peças para ver a ficha.'
     : cfg.mode === 'spec' ? 'Modo Espectador: as duas IAs jogam. Pause para voltar um lance ou assuma um dos lados.'
     : !human(side) ? `A ${FACTION[side]} está pensando. Enquanto isso, passe o mouse ou toque nas peças para conhecê-las.`
     : 'Escolha uma peça sua. Casas âmbar mostram para onde ela pode ir; casas vermelhas são capturas. Arraste para os lados para girar a câmera.';
@@ -9761,6 +9783,8 @@ async function doMove(m){
   afterTurn();
 }
 function afterTurn(){
+  // replay: o lance já veio da gravação; nada de IA, relógio, salvar ou fim de partida (a barra do replay mostra o resultado)
+  if (cfg.mode === 'replay'){ renderAll(); if (cfg.arc) arcEnterCards(); return; }
   // lições roteirizadas: a Legião não joga sozinha e o mate não abre o fim de partida
   if (APR.on && APR.scripted){ S.over = null; renderAll(); aprAfterMove(); return; }
   S.over = outcome();
@@ -9805,7 +9829,7 @@ function aiThink(fen, diff){
   }).then(r => r === undefined ? local() : r);
 }
 function maybeAI(){
-  if (cfg.mode === 'online') return;
+  if (cfg.mode === 'online' || cfg.mode === 'replay') return;
   if (cfg.arc){ arcAIContinue(); return; }
   if (S.over || human(S.turn) || cfg.paused || TITLE.open || (APR.on && APR.scripted)) return;
   busy = true; CLK.thinking = true;
@@ -10555,7 +10579,7 @@ setInterval(() => {
 // partida salva para "Continuar partida" (só Padrão e dois jogadores)
 function saveGame(){
   try {
-    if (cfg.mode === 'spec' || cfg.mode === 'online' || APR.on || cfg.arc) return;
+    if (cfg.mode === 'spec' || cfg.mode === 'online' || cfg.mode === 'replay' || APR.on || cfg.arc) return;
     if (!G || S.over || !G.history().length){ localStorage.removeItem(SAVE_KEY); return; }
     localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign(serialize(), { clock:CLK.on ? { ...CLK.ms } : null, arena })));
   } catch (e){}
@@ -10820,7 +10844,8 @@ function arcRender(){
   $('arc-ess').innerHTML = Array.from({ length:ARC.ESS_MAX }, (_, i) => `<i class="${i < e ? 'on' : ''}"></i>`).join('') + `<b>${e}</b>`;
   $('arc-ess').setAttribute('aria-label', `Essência: ${e} de ${ARC.ESS_MAX}`);
   $('arc-info').textContent = `Grimório ${typeof s.arc.deck[act] === 'number' ? s.arc.deck[act] : s.arc.deck[act].length} · ${op === 'w' ? 'Aurora' : 'Legião'}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
-  const cardsPhase = s.arc.phase === 'cards' && !busy && !s.over && !arcIsAI(actor) && actor === act;
+  // no replay as cartas só se mostram (jogar ou encerrar o turno mudaria a gravação)
+  const cardsPhase = s.arc.phase === 'cards' && !busy && !s.over && !arcIsAI(actor) && actor === act && cfg.mode !== 'replay';
   $('arc-end').hidden = !cardsPhase;
   $('arc-end').disabled = !!ARCUI.sel && ARCUI.picks.length > 0;
   const box = $('arc-hand');
@@ -11029,6 +11054,7 @@ function arcMarks(){
   MM.setMarks([...own, ...glow, ...terr, ...ARC.RUNES.filter(q => !G.s.arc.runes[q]).map(sq => ({ sq, kind:'rune', color:'#b48cff' })), ...ARCUI.opts.map(sq => ({ sq, kind:'aura', color:'#b48cff' }))]);
 }
 function arcSelect(uid){
+  if (cfg.mode === 'replay') return;
   if (!G || !G.s) return;
   if (arcIsAI(ARC.actor(G.s)) && !ARCAI.running && !(ARCUI.sel === uid)) { /* a vez é da IA: só mostra a carta */ }
   if (ARCUI.sel === uid){ arcCancel(); return; }
@@ -11057,7 +11083,7 @@ function arcTile(r, c){
   return true;
 }
 async function arcPlay(){
-  if (!ARCUI.sel || busy) return;
+  if (!ARCUI.sel || busy || cfg.mode === 'replay') return;
   if (cfg.mode === 'online' && !NET.applying){ onlineCard(); return; }
   const r = ARC.playCard(G.s, ARCUI.sel, ARCUI.picks);
   if (!r.ok){ arcMsg(r.err); return; }
@@ -11408,11 +11434,12 @@ function arcEnterCards(){
     arcRender(); arcMarks();
     if (arcIsAI(G.s.arc.cardSide)) { arcMsg(`A ${FACTION[G.s.arc.cardSide]} escolhe as cartas…`); arcAIContinue(); }
     else if (cfg.mode === 'online' && G.s.arc.cardSide !== cfg.human) arcMsg(`A ${FACTION[G.s.arc.cardSide]} está na fase de cartas…`);
+    else if (cfg.mode === 'replay') arcMsg(`Replay: fase de cartas da ${FACTION[G.s.arc.cardSide]}.`);
     else arcMsg('Fase de cartas: jogue até uma carta ou encerre o turno.');
   });
 }
 async function arcEndTurn(){
-  if (!G || !G.s || G.s.arc.phase !== 'cards' || busy) return;
+  if (!G || !G.s || G.s.arc.phase !== 'cards' || busy || cfg.mode === 'replay') return;
   if (cfg.mode === 'online'){ if (G.s.arc.cardSide === cfg.human && onlineSend({ type:'end' })){ busy = true; arcRender(); } return; }
   const r = ARC.endTurn(G.s);
   if (!r.ok){ arcMsg(r.err); return; }
@@ -11514,7 +11541,7 @@ function arcReady(){
   if (S.inCheck) snd('xeque', { vol:0.6 });
 }
 function arcNewGame(){
-  onlineLeave();
+  onlineLeave(); replayExit();
   aiToken++;
   const seed = (Math.random() * 4294967296) >>> 0;
   ARCAI.tok++; ARCAI.running = false;
@@ -12014,7 +12041,7 @@ function onlineFillTc(sel, list, keep){
   if (list.some(x => x[0] === v)) sel.value = v;
 }
 function onlineOpen(){
-  onlineFillTc($('on-qtc'), ONLINE_TC.queue);
+  onlineQForm();
   onlineFillTc($('on-ltc'), ONLINE_TC[$('on-lmode').value]);
   $('on-ldeck-f').hidden = $('on-lmode').value !== 'arcano';
   $('on-status').textContent = 'Conectando ao servidor…'; $('on-status').hidden = false;
@@ -12082,13 +12109,21 @@ async function onlineBirth(){
 function onlineRenderMe(){
   if (NET.user) $('on-name').value = NET.user.name;
   onlineRenderAcct();
-  const r = NET.ratings && NET.ratings.xadrez;
-  $('on-rating').innerHTML = r ? `Xadrez Puro <em>${r.r}${r.provisional ? '?' : ''}</em> · ${netEsc(r.leagueName)}${r.games ? ` · ${r.games} ranqueada${r.games === 1 ? '' : 's'}` : ''}` : '—';
+  const R = NET.ratings, one = (r, n) => r ? `<span>${n} <em>${r.r}${r.provisional ? '?' : ''}</em> · ${netEsc(r.leagueName)}</span>` : '';
+  $('on-rating').innerHTML = R ? one(R.xadrez, 'Xadrez Puro') + one(R.arcano, 'Arcano') : '—';
 }
 function onlineTab(k){
-  $('on-tab-q').setAttribute('aria-selected', String(k === 'q')); $('on-tab-l').setAttribute('aria-selected', String(k === 'l'));
-  $('on-q-p').hidden = k !== 'q'; $('on-l-p').hidden = k !== 'l';
+  for (const [t, id] of [['q', 'on-tab-q'], ['l', 'on-tab-l'], ['p', 'on-tab-p']]) $(id).setAttribute('aria-selected', String(k === t));
+  $('on-q-p').hidden = k !== 'q'; $('on-l-p').hidden = k !== 'l'; $('on-p-p').hidden = k !== 'p';
+  if (k === 'p' && NET.user) onlineProfile(NET.user.id);
 }
+// filas: Xadrez Puro (10+0, 3+2, 5+3) e Arcano (12+5, com o grimório escolhido na entrada)
+const onlineQArc = () => $('on-q').value.startsWith('arcano');
+function onlineQForm(){
+  onlineFillTc($('on-qtc'), onlineQArc() ? [['12+5', '12 min + 5 s']] : ONLINE_TC.queue);
+  $('on-qdeck-f').hidden = !onlineQArc();
+}
+const ONLINE_QNAME = { casual:'casual de Xadrez Puro', ranked:'ranqueada de Xadrez Puro', 'arcano-casual':'casual do Arcano', 'arcano-ranked':'ranqueada do Arcano' };
 async function onlineRename(){
   const name = $('on-name').value.trim();
   if (!NET.ok || !NET.user || name === NET.user.name) return;
@@ -12110,11 +12145,12 @@ function onlineQueue(){
   NET.qws = ws;
   onlineQMsg('Entrando na fila…');
   $('on-qgo').hidden = true; $('on-qcancel').hidden = false; $('on-ai').hidden = true;
-  ws.onopen = () => ws.send(JSON.stringify({ t:'hello', token:NET.token }));
+  const deck = q.startsWith('arcano') ? $('on-qdeck').value : undefined;
+  ws.onopen = () => ws.send(JSON.stringify({ t:'hello', token:NET.token, deck }));
   ws.onmessage = ev => {
     if (NET.qws !== ws) return;
     let m; try { m = JSON.parse(ev.data); } catch (e){ return; }
-    if (m.t === 'queued') onlineQMsg(`Na fila ${q === 'ranked' ? 'ranqueada' : 'casual'} (${tc}) com nota ${m.r}. Procurando rival…`);
+    if (m.t === 'queued') onlineQMsg(`Na fila ${ONLINE_QNAME[q] || q} (${tc})${m.deck && ARC.DECKS[m.deck] ? ` com o grimório ${ARC.DECKS[m.deck].nome}` : ''}, nota ${m.r}. Procurando rival…`);
     else if (m.t === 'waiting') onlineQMsg(`Procurando rival… ${fmtClock(m.waited)} · ${m.size} na fila${m.window < 9999 ? ` · janela de ±${m.window}` : ''}`);
     else if (m.t === 'offer-ai'){ NET.aiLevel = m.level; $('on-ai').hidden = false; $('on-ai').textContent = `Jogar contra a IA (${LEVEL[m.level]}), sem nota`; }
     else if (m.t === 'match'){ NET.qws = null; onlineQReset(); onlineQMsg(`Rival encontrado: ${m.opponent.name} (${m.opponent.r}). Entrando na partida…`); onlineJoin(m.room); }
@@ -12128,6 +12164,12 @@ function onlineQueue(){
 function onlineAi(){
   const tc = $('on-qtc').value;
   onlineCloseQueue();
+  // fila do Arcano: o Arcano contra a IA, com o grimório escolhido
+  if (onlineQArc()){
+    const d = $('on-qdeck').value, o = ['tempestade', 'cinzas', 'arcano'].find(x => x !== d);
+    $('a-opp').value = 'ai'; $('a-diff').value = String(NET.aiLevel || 2); $('a-color').value = 'w'; $('a-deck-w').value = d; $('a-deck-b').value = o;
+    startArcano(); return;
+  }
   $('mode').value = 'ai'; $('diff').value = String(NET.aiLevel || 2); $('t-color').value = 'r'; $('t-clock').value = tc === '3+2' ? '3+2' : '10';
   startPadrao();
 }
@@ -12165,6 +12207,153 @@ function onlineHash(){
   NET.pendingRoom = m[1];
   if (!TITLE.open) openTitle();
   showSetup('online');
+}
+
+
+/* ---- perfil ---- */
+const PF_REASON = { mate:'xeque-mate', tempo:'tempo', 'tempo sem material':'tempo, sem material', abandono:'abandono', desistencia:'desistência', acordo:'acordo', afogamento:'afogamento', repeticao:'repetição', material:'material insuficiente', '50 lances':'50 lances', 'rival não apareceu':'rival não apareceu', 'sem primeiro lance':'sem 1º lance', cancelada:'cancelada' };
+const PF_OUT = { vitoria:'Vitória', derrota:'Derrota', empate:'Empate', cancelada:'Cancelada' };
+async function onlineProfile(uid){
+  const box = $('on-prof');
+  box.innerHTML = '<p class="hint">Carregando o perfil…</p>';
+  let r = null;
+  try { r = await netFetch('/api/profile/' + encodeURIComponent(uid)); } catch (e){}
+  if (!r || !r.ok){ box.innerHTML = `<p class="hint">${r && r.status === 404 ? 'Jogador não encontrado.' : 'Perfil indisponível agora.'}</p>`; return; }
+  const P = r.j, mine = NET.user && P.user.id === NET.user.id;
+  const deckName = id => (ARC.DECKS[id] && ARC.DECKS[id].nome) || id;
+  const card = (k, n) => { const x = P.ratings[k], t = P.stats[k]; return `<div class="pf-r"><b>${n}</b><em>${x.r}${x.provisional ? '?' : ''}</em><span>${netEsc(x.leagueName)}${x.rank ? ` · ${x.rank}º` : ''}</span><small>${t.w} vitória${t.w === 1 ? '' : 's'} · ${t.l} derrota${t.l === 1 ? '' : 's'} · ${t.d} empate${t.d === 1 ? '' : 's'}${x.games ? ` · ${x.games} ranqueada${x.games === 1 ? '' : 's'}` : ''}</small></div>`; };
+  const when = t => { try { return new Date(t).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }); } catch (e){ return ''; } };
+  const rows = P.recent.map(g => `<li><span class="pf-o ${g.outcome}">${PF_OUT[g.outcome] || g.outcome}</span>
+    <span class="pf-m">${g.mode === 'arcano' ? 'Arcano' : 'Xadrez Puro'} · ${g.tc === 'livre' ? 'sem relógio' : g.tc}${g.ranked ? ' · ranqueada' : ''} · contra ${g.opponent.id ? `<button type="button" class="pf-link" data-pf="${netEsc(g.opponent.id)}">${netEsc(g.opponent.name || 'rival')}</button>` : netEsc(g.opponent.name || 'rival')}
+    · ${PF_REASON[g.reason] || netEsc(g.reason || '')}${g.delta != null ? ` · ${g.delta >= 0 ? '+' : ''}${g.delta}` : ''}${g.deck ? ` · ${netEsc(deckName(g.deck))}` : ''} · ${when(g.ended)}</span>
+    ${g.replay ? `<button type="button" data-rpid="${netEsc(g.id)}">Replay</button>` : ''}</li>`).join('');
+  box.innerHTML = `<div class="pf-head"><h4>${netEsc(P.user.name)}${P.user.kind === 'account' ? '' : ' <small>(convidado)</small>'}</h4>${mine ? '' : '<button type="button" data-pf="me">Meu perfil</button>'}</div>
+    <div class="pf-rs">${card('xadrez', 'Xadrez Puro')}${card('arcano', 'Arcano')}</div>
+    <p class="hint">${P.deck ? `Grimório mais usado: <b>${netEsc(deckName(P.deck.id))}</b> (${P.deck.games} partida${P.deck.games === 1 ? '' : 's'}).` : 'Ainda sem partidas do Arcano.'}</p>
+    ${P.recent.length ? `<ol class="pf-list" aria-label="Últimas partidas">${rows}</ol>` : '<p class="hint">Nenhuma partida online ainda.</p>'}`;
+}
+
+/* ---- replay ----
+   O servidor guarda a semente, os grimórios e as ações; o motor do jogo refaz a partida inteira aqui, com as mãos e as
+   armadilhas (só depois do fim). Avançar anima pelo mesmo caminho das partidas; Voltar, Início e Fim reconstroem a cena. */
+const RP = { on:false, d:null, steps:[], i:0, busy:false, auto:false, warn:'' };
+function replayBuild(d){
+  let s = d.mode === 'arcano' ? ARC.create({ seed:d.seed, decks:d.decks, oracle:'previsto' }) : ARC.create({ seed:d.seed, pure:true });
+  const steps = [{ state:s }];
+  for (const a of d.actions){
+    const r = ARC.apply(s, a);
+    if (!r.ok) return { steps, broken:true };
+    s = r.state;
+    steps.push({ state:s, act:a, events:r.events || [], move:r.move || null });
+  }
+  return { steps, broken:false };
+}
+async function onlineReplay(id){
+  let r = null;
+  try { r = await netFetch('/api/replay/' + encodeURIComponent(id)); } catch (e){}
+  if (!r || !r.ok){ onlineToast((r && r.j.err) || 'Replay indisponível.'); return; }
+  replayEnter(r.j);
+}
+function replayEnter(d){
+  const b = replayBuild(d);
+  onlineLeave(); aprExit(); leaveSpec();
+  const arc = d.mode === 'arcano';
+  if (!arc) arcExit();
+  Object.assign(cfg, { mode:'replay', arc, human:null, undoLeft:0, clock:'none', paused:false });
+  CLK.on = false;
+  if (arc && AC) for (const id of ARC_SFX) loadOne(id);
+  const moved = b.steps.slice(1).map(x => x.move && x.move.san).filter(Boolean).join(' ');
+  Object.assign(RP, { on:true, d, steps:b.steps, i:0, busy:false, auto:false,
+    warn:b.broken || (d.moves && d.moves.length && moved !== d.moves.join(' ')) ? 'Este replay foi gravado com regras diferentes e para no ponto em que diverge.' : d.rules && d.rulesNow && d.rules !== d.rulesNow ? 'Gravado com outra versão das cartas: pode divergir.' : '' });
+  LOG = [];
+  closePromo(null);
+  $('end').hidden = true; $('arc-pass').hidden = true;
+  Object.assign(ARCUI, { sel:null, picks:[], opts:[], hidden:false, arrows:[], reply:null, reveal:false });
+  replaySet(0);
+  pushLog(`Replay: <b>${netEsc(d.players.w.name || 'Aurora')}</b> (Aurora) contra <b>${netEsc(d.players.b.name || 'Legião')}</b> (Legião)${d.ranked ? ', ranqueada' : ''}.`);
+  if (RP.warn) pushLog(`<i>${RP.warn}</i>`);
+  closeTitle();
+  setFlip(false); syncViewUI(); layout();
+  renderAll(); if (arc){ arcRender(); arcMarks(); }
+  replayBar();
+}
+function replayExit(){ RP.on = false; RP.auto = false; }
+const ONLINE_KIND_R = { mate:'mate', afogamento:'stalemate', repeticao:'rep', material:'material', '50 lances':'fifty', tempo:'tempo', 'tempo sem material':'tempo', abandono:'abandono', desistencia:'desistencia', acordo:'acordo' };
+function replayOver(){
+  if (RP.i < RP.steps.length - 1) return null;
+  const d = RP.d, winner = d.result === '1-0' ? 'w' : d.result === '0-1' ? 'b' : null;
+  return { kind:ONLINE_KIND_R[d.reason] || 'acordo', winner };
+}
+// pula para o passo i reconstruindo a cena (sem animação)
+function replaySet(i){
+  RP.i = Math.max(0, Math.min(RP.steps.length - 1, i));
+  aiToken++; busy = false;
+  const st = RP.steps[RP.i].state;
+  if (cfg.arc) G = new ArcanoG(st);
+  else { G = new Chess(); for (let k = 1; k <= RP.i; k++){ const a = RP.steps[k].act; if (a.type === 'move') G.move({ from:a.from, to:a.to, promotion:a.promotion }); } }
+  resetUI(); resetFx(); syncState();
+  S.over = replayOver();
+  renderAll();
+  if (cfg.arc){ ARCUI.sel = null; ARCUI.picks = []; ARCUI.opts = []; arcRender(); arcMarks(); arcMsg(''); }
+  replayBar();
+}
+// avança um passo com animação (lance pelo doMove; carta e fim de turno pelos eventos do motor)
+async function replayStep(){
+  if (!RP.on || RP.busy || RP.i >= RP.steps.length - 1) return false;
+  RP.busy = true; replayBar();
+  try {
+    await netIdle();
+    const nx = RP.steps[RP.i + 1], a = nx.act;
+    if (a.type === 'move'){
+      if (cfg.arc) G.pending = { state:nx.state, move:nx.move, events:nx.events };
+      await doMove({ from:a.from, to:a.to, promotion:a.promotion });
+      if (cfg.arc) G.pending = null;
+      await netIdle();
+    } else {
+      G.s = nx.state;
+      busy = true; arcRender(); renderAll();
+      try { await arcEvents(nx.events); } finally { busy = false; }
+      S.turn = G.turn(); S.inCheck = G.in_check();
+    }
+    RP.i++;
+    if (cfg.arc) G.s = nx.state;
+    if (!onlineScene()) replaySet(RP.i);
+    else { S.over = replayOver(); renderAll(); if (cfg.arc){ arcRender(); arcMarks(); } }
+  } finally { RP.busy = false; replayBar(); }
+  return true;
+}
+async function replayPlay(){
+  RP.auto = !RP.auto; replayBar();
+  while (RP.auto && RP.on && RP.i < RP.steps.length - 1){
+    if (!(await replayStep())) break;
+    await netSleep(650);
+  }
+  RP.auto = false; replayBar();
+}
+function replayCmd(k){
+  if (!RP.on) return;
+  if (k === 'exit'){ RP.auto = false; replayExit(); $('onbar').hidden = true; openTitle(); showSetup('online'); onlineTab('p'); return; }
+  if (k === 'play'){ replayPlay(); return; }
+  if (RP.busy) return;
+  RP.auto = false;
+  if (k === 'next') replayStep();
+  else if (k === 'prev') replaySet(RP.i - 1);
+  else if (k === 'start') replaySet(0);
+  else if (k === 'end') replaySet(RP.steps.length - 1);
+}
+function replayBar(){
+  const bar = $('onbar');
+  if (!RP.on || cfg.mode !== 'replay'){ return; }
+  bar.hidden = false;
+  const d = RP.d, N = RP.steps.length - 1, last = RP.i >= N, plies = RP.steps[RP.i].state.hist.length;
+  const res = last ? ` · ${d.result === '1/2-1/2' ? 'empate' : d.result === '1-0' ? 'vitória da Aurora' : 'vitória da Legião'} (${PF_REASON[d.reason] || netEsc(d.reason)})` : '';
+  const dis = c => c ? ' disabled' : '';
+  bar.innerHTML = `<span class="on-tag">Replay${d.ranked ? ' · ranqueada' : ''} · ${d.mode === 'arcano' ? 'Arcano' : 'Xadrez Puro'}</span>
+    <span class="on-vs"><span class="on-p side-w">${netEsc(d.players.w.name || 'Aurora')} (Aurora)</span><span aria-hidden="true">×</span><span class="on-p side-b">${netEsc(d.players.b.name || 'Legião')} (Legião)</span></span>
+    <span class="on-st" aria-live="polite">Passo ${RP.i} de ${N} · lance ${plies}${res}</span>
+    <span class="on-acts"><button type="button" data-rp="start"${dis(RP.i === 0 || RP.busy)}>Início</button><button type="button" data-rp="prev"${dis(RP.i === 0 || RP.busy)}>Voltar</button>
+    <button type="button" data-rp="next"${dis(last || RP.busy)}>Avançar</button><button type="button" data-rp="end"${dis(last || RP.busy)}>Fim</button>
+    <button type="button" data-rp="play"${dis(last && !RP.auto)}${RP.auto ? ' aria-pressed="true"' : ''}>${RP.auto ? 'Pausar' : 'Reproduzir'}</button><button type="button" data-rp="exit">Sair</button></span>`;
 }
 
 /* ---- sala ---- */
@@ -12359,6 +12548,7 @@ function onlineEndExtra(){
   el.dataset.online = NET.info ? NET.info.id : '';
 }
 function onlineBar(){
+  if (cfg.mode === 'replay' && RP.on){ replayBar(); return; }
   const bar = $('onbar');
   const on = cfg.mode === 'online' && NET.began;
   bar.hidden = !on;
@@ -12392,6 +12582,14 @@ function onlineBar(){
   $('on-retry').addEventListener('click', () => { audio(); onlineOpen(); });
   $('on-tab-q').addEventListener('click', () => onlineTab('q'));
   $('on-tab-l').addEventListener('click', () => onlineTab('l'));
+  $('on-tab-p').addEventListener('click', () => onlineTab('p'));
+  $('on-q').addEventListener('change', onlineQForm);
+  $('on-prof').addEventListener('click', e => {
+    const a = e.target.closest('[data-pf]'), r = e.target.closest('[data-rpid]');
+    if (a){ audio(); onlineProfile(a.dataset.pf === 'me' ? NET.user.id : a.dataset.pf); }
+    else if (r){ audio(); onlineReplay(r.dataset.rpid); }
+  });
+  $('onbar').addEventListener('click', e => { const b = e.target.closest('button[data-rp]'); if (b){ audio(); replayCmd(b.dataset.rp); } });
   $('on-lmode').addEventListener('change', () => { onlineFillTc($('on-ltc'), ONLINE_TC[$('on-lmode').value]); $('on-ldeck-f').hidden = $('on-lmode').value !== 'arcano'; });
   $('on-name').addEventListener('change', onlineRename);
   $('on-qgo').addEventListener('click', () => { audio(); onlineQueue(); });
@@ -12421,7 +12619,7 @@ function onlineBar(){
 
 function serialize(){
   // a partida online não vira partida local ao recarregar: o servidor devolve o estado ao reconectar
-  if (cfg.mode === 'online') return {};
+  if (cfg.mode === 'online' || cfg.mode === 'replay') return {};
   return { fen:G.fen(), hist:G.history(), cfg:{ ...cfg }, log:LOG.slice(0, 40) };
 }
 function start(data){

@@ -57,7 +57,7 @@ Ordem de entrega: (a) convidado + partida por link + relógio + reconexão; (b) 
 | F15 | Filas | Ranqueada de Xadrez Puro 10+0 e 3+2; casual 10+0, 3+2 e 5+3 (a casual também pareia pela nota, mas não mexe nela). Janela de nota: 150 pontos, +25 por segundo de espera; na ranqueada até 500, na casual sem limite depois de 20 s. Cores sorteadas. A mesma pessoa em duas abas: fica a mais nova |
 | F16 | IA de reserva | Aos 30 s sem rival a fila oferece a IA pelo nível da nota (Recruta < 1300, Veterano < 1700, Mestre acima) e continua procurando; aceitar sai da fila e joga no aparelho, sem nota |
 | F17 | Sala da fila | Os dois têm 30 s para entrar; se um não aparece, a sala é cancelada sem nota. Na ranqueada contam mate, tempo, abandono, desistência e empates; partida cancelada não conta |
-| F18 | Arcano ranqueado | Fica para a fase 2 (plano). A nota do Arcano já existe separada, começando em 1500 |
+| F18 | Arcano ranqueado | Ativo desde a Fase 2 (a), depois do balanceamento da Fase E: filas `arcano-ranked` e `arcano-casual`, 12+5, com a nota do Arcano separada (Glicko-2, começa em 1500) |
 | F19 | Endereço do servidor | Uma constante no jogo: `ONLINE_API` (hoje `https://arcane-chess-api.leonardo-zogbi.workers.dev`). Para teste local vale `?api=http://127.0.0.1:8787`, aceito só para localhost/127.0.0.1 |
 | F20 | Sem servidor | O menu "Jogar online" mostra "Servidor indisponível" com "Tentar de novo"; nada mais muda. No Artifact a CSP bloqueia a conexão e cai no mesmo aviso. Os outros modos não tocam na rede |
 | F21 | Autoridade no cliente | O lance (e a carta, e o fim do turno) só anda na tela quando o servidor confirma; a vez do rival entra pelo mesmo caminho da IA, com as mesmas animações. Qualquer diferença (reconexão, mensagem perdida) reconstrói a cena a partir do estado do servidor |
@@ -69,3 +69,14 @@ Ordem de entrega: (a) convidado + partida por link + relógio + reconexão; (b) 
 | F27 | Convidado vira conta | Primeiro login: o próprio convidado vira conta (mesmo id, mesma nota e histórico); o nome padrão "Convidado 1234" dá lugar ao nome do provedor, e um nome escolhido é mantido. Login de um convidado numa conta que já existe: ele é fundido nela — em cada modo fica a nota com mais partidas (empate: a de menor desvio), as partidas somam, o histórico passa para a conta e a ficha antiga deixa de valer |
 | F28 | Data de nascimento | Pedida no menu depois do primeiro login (campo de data; não aparece para ninguém); aceita idades de 3 a 120 anos. Necessária para as regras de compra de menores da fase 3 |
 | F29 | Sair | "Sair da conta" esquece a ficha neste aparelho e volta a convidado novo; a conta e a nota ficam no servidor |
+
+## Fase 2 (a) — decisões de implementação (06/11/2026)
+
+| # | Tema | Decisão |
+|---|---|---|
+| F30 | Filas do Arcano | `arcano-ranked` e `arcano-casual`, só 12+5. O grimório vai no `hello` da fila e é conferido contra os grimórios do motor (sem ele, ou inválido, a fila recusa). O espelho é permitido (os dois podem escolher o mesmo). A nota e a janela de pareamento usam a nota do Arcano; a IA de reserva joga o Arcano no aparelho com o grimório escolhido |
+| F31 | Replay | Cada sala guarda a lista das ações aceitas (lance, carta, fim de turno). No fim, o D1 recebe semente, grimórios, ações, nomes da época e a variação de nota (migração 0003). O motor refaz a partida inteira a partir disso, com as mãos e as armadilhas; por isso o replay só existe para partidas terminadas e não para canceladas. Cabe no D1 (uma partida longa do Arcano dá poucos KB); R2 fica para depois |
+| F32 | Regras do replay | Cada partida grava um carimbo das regras (versão do estado do motor + id, custo e tipo das cartas). Se o carimbo mudou desde a gravação, ou se alguma ação não vale mais no motor atual, o replay avisa e para no ponto em que diverge |
+| F33 | Perfil | Público por id (`GET /api/profile/:uid`): nome, notas e ligas dos dois modos, vitórias/derrotas/empates por modo (casual e ranqueada contam; canceladas não), grimório mais usado no Arcano e as últimas 20 partidas com rival, motivo, variação de nota e replay. Nada de data de nascimento nem de provedor de login. Convidado fundido mostra o perfil da conta |
+| F34 | Tela de replay | No menu online, aba Perfil: cada partida tem "Replay". A barra mostra os jogadores, o passo e o lance, e os botões Início, Voltar, Avançar, Fim, Reproduzir/Pausar e Sair. Avançar anima pelo mesmo caminho das partidas; Voltar, Início e Fim reconstroem a cena. No replay as cartas só se mostram (não dá para jogar nem encerrar o turno) |
+| F35 | Histórico antigo | Partidas gravadas antes da migração 0003 aparecem no perfil, mas sem replay (não têm as ações) |

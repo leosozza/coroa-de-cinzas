@@ -1,14 +1,11 @@
 // Sala de partida (Durable Object): uma por partida. O servidor é a autoridade — valida cada ação com o motor
 // (engine/arcano-rules.js, o mesmo do jogo), guarda as mãos e grimórios escondidos, sorteia e controla o relógio.
 // WebSocket com hibernação: a sala dorme entre lances e acorda com o estado salvo.
-import arcanoRules from '../../engine/arcano-rules.js';
-import catalog from '../../data/cartas.json';
+import { ARC, CATALOG, DECK_IDS as DECKS, RULES } from './engine.js';
 import { verifySession } from './auth.js';
 import { rateGame } from './ratings.js';
 
-const ARC = arcanoRules(catalog.cartas);
-const TRAP = new Set(catalog.cartas.filter(c => c.tipo === 'armadilha').map(c => c.id));
-const DECKS = Object.keys(ARC.DECKS);
+const TRAP = new Set(CATALOG.filter(c => c.tipo === 'armadilha').map(c => c.id));
 // ritmos: [minutos, incremento em segundos]; 'livre' = sem relógio (amistosa)
 export const TC = { '10+0':[10, 0], '3+2':[3, 2], '5+3':[5, 3], '12+5':[12, 5], livre:[0, 0] };
 const other = c => (c === 'w' ? 'b' : 'w');
@@ -58,12 +55,15 @@ export class GameRoom {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
       const pick = d => (DECKS.includes(d) ? d : DECKS[crypto.getRandomValues(new Uint8Array(1))[0] % DECKS.length]);
       const creatorSeat = b.color === 'w' || b.color === 'b' ? b.color : (seed & 1 ? 'w' : 'b');
-      const decks = mode === 'arcano' ? { [creatorSeat]:pick(b.deck), [other(creatorSeat)]:null } : null;
+      // na fila do Arcano cada um escolheu o grimório ao entrar (já validado); por link, só o criador escolhe
+      const decks = mode !== 'arcano' ? null : b.decks && DECKS.includes(b.decks.w) && DECKS.includes(b.decks.b) ? { w:b.decks.w, b:b.decks.b }
+        : { [creatorSeat]:pick(b.deck), [other(creatorSeat)]:null };
       this.g = {
         id:b.id, mode, tc:tcs, base:min * 60000, inc:inc * 1000, ranked:!!b.ranked, created:Date.now(),
         creator:{ uid:b.uid, name:b.name }, creatorSeat, decks, seed,
         seats:{ w:null, b:null }, status:'waiting', s:null, clocks:{ w:min * 60000, b:min * 60000 }, turnStart:0, started:false,
         firstMoveBy:0, away:{ w:0, b:0 }, drawOffer:null, result:null, n:0,
+        log:[],   // ações aceitas, na ordem: com a semente e os grimórios, o motor refaz a partida inteira (replay)
       };
       // na fila os dois lugares já vêm marcados
       if (b.seats){ for (const c of ['w', 'b']) if (b.seats[c]) this.g.seats[c] = b.seats[c]; this.g.queue = b.queue || null; this.g.showBy = Date.now() + (+this.env.SHOW_MS || 30000); }
@@ -174,6 +174,7 @@ export class GameRoom {
     g.clocks[side] -= spent;
     const turnBefore = g.s.turn;
     g.s = r.state; g.n++;
+    (g.log = g.log || []).push(act.type === 'move' ? (act.promotion ? { type:'move', from:act.from, to:act.to, promotion:act.promotion } : { type:'move', from:act.from, to:act.to }) : act);
     if (act.type === 'move') g.started = true;
     if (g.s.turn !== turnBefore && g.base && g.started) g.clocks[side] += g.inc;
     g.turnStart = now;
@@ -227,11 +228,13 @@ export class GameRoom {
     if (reason === 'tempo' && winner && g.mode === 'xadrez' && !this.canMate(winner)){ winner = null; reason = 'tempo sem material'; }
     g.status = 'over'; g.result = { winner, reason, score:RESULT(winner) };
     if (g.s && !g.s.over) g.s.over = { kind:'servidor', winner, reason };
-    await this.ctx.storage.deleteAlarm(); await this.save(); await this.record();
+    await this.ctx.storage.deleteAlarm();
+    // a nota vem antes do registro, para o histórico guardar a variação de cada lado
     if (g.ranked && this.env.DB && g.seats.w && g.seats.b){
-      try { g.result.rating = await rateGame(this.env.DB, g.mode, g.seats.w.uid, g.seats.b.uid, winner === 'w' ? 1 : winner === 'b' ? 0 : 0.5); await this.save(); }
+      try { g.result.rating = await rateGame(this.env.DB, g.mode, g.seats.w.uid, g.seats.b.uid, winner === 'w' ? 1 : winner === 'b' ? 0 : 0.5); }
       catch (e){ console.log('nota', e.message); }
     }
+    await this.save(); await this.record();
     this.broadcast(events, last);
   }
   canMate(side){
@@ -271,9 +274,12 @@ export class GameRoom {
     const g = this.g, db = this.env.DB;
     if (!db) return;
     try {
-      await db.prepare('INSERT OR REPLACE INTO games (id, mode, tc, ranked, white, black, result, reason, plies, started, ended, moves) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        .bind(g.id, g.mode, g.tc, g.ranked ? 1 : 0, g.seats.w && g.seats.w.uid, g.seats.b && g.seats.b.uid, g.result.score, g.result.reason,
-          g.s ? g.s.hist.length : 0, g.created, Date.now(), g.s ? g.s.hist.map(h => h.san).join(' ') : '').run();
+      const rt = g.result.rating, W = g.seats.w, B = g.seats.b;
+      await db.prepare('INSERT OR REPLACE INTO games (id, mode, tc, ranked, white, black, result, reason, plies, started, ended, moves, seed, deck_w, deck_b, actions, rules, w_name, b_name, w_delta, b_delta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(g.id, g.mode, g.tc, g.ranked ? 1 : 0, W && W.uid, B && B.uid, g.result.score, g.result.reason,
+          g.s ? g.s.hist.length : 0, g.created, Date.now(), g.s ? g.s.hist.map(h => h.san).join(' ') : '',
+          g.s ? g.seed : null, g.decks ? g.decks.w : null, g.decks ? g.decks.b : null, g.s ? JSON.stringify(g.log || []) : null, RULES,
+          W ? W.name : null, B ? B.name : null, rt ? rt.w.delta : null, rt ? rt.b.delta : null).run();
     } catch (e){ console.log('record', e.message); }
   }
 }
