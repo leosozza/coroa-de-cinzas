@@ -6,10 +6,10 @@
      ARC.legalActions(s, side) · ARC.apply(s, { type:'move'|'card'|'end', ... }) · ARC.viewFor(s, side)
      (e também legalMoves, applyMove, cardOptions, playCard, endTurn, status, fen, predict)
    Cada ação devolve { ok, state, events, err } e nunca altera o estado recebido.
-   Turno: início (+1 essência) → lance → espólio se capturou (+2 essência e o artefato da peça) → fase de cartas
-   (até 1 carta) → fim (compra 1 carta a cada 2 turnos; casas de runa dão 1 carta) → vez do rival.
-   Efeitos nas peças ficam em piece.fx ([{ id, kind:'relic'|'aura'|'mark', turns }]); "turns" conta os fins de turno do
-   dono da peça. Efeitos do tabuleiro (muralhas, lava, portais, rastros, âncoras) contam todos os fins de turno (ttl). */
+   Turno: início (+1 essência) → cartas, quantas a essência pagar → o lance encerra o turno (espólio se capturou: +2
+   essência e o artefato da peça; compra 1 carta a cada 2 turnos; casas de runa dão 1 carta) → vez do rival. "end" é recusado.
+   Efeitos nas peças ficam em piece.fx ([{ id, kind:'relic'|'aura'|'mark'|'rank', turns }]); "turns" conta os fins de turno do
+   dono da peça. 'rank' é uma patente permanente (Lanceiro) que nenhuma relíquia substitui; sai na promoção. Efeitos do tabuleiro (muralhas, lava, portais, rastros, âncoras) contam todos os fins de turno (ttl). */
 const arcanoRules = (catalog = []) => {
   const FILES = 'abcdefgh';
   const toS = i => FILES[i & 7] + (8 - (i >> 4));
@@ -29,7 +29,7 @@ const arcanoRules = (catalog = []) => {
       'armadilha-espinhos', 'armadilha-espinhos', 'visao-oraculo', 'olho-bispo', 'nevoa-fria', 'portal-runa', 'heranca-cavaleiro', 'centuriao', 'dominio-diagonal', 'canhao-cerco'] },
     cinzas:{ nome:'Cinzas', cartas:['rito-sacrificio', 'rito-sacrificio', 'necromante-cinzas', 'ressurreicao-cinzas', 'recruta-cemiterio', 'recruta-cemiterio', 'dragao-cinzas', 'fenix', 'berserker', 'berserker',
       'vinganca-isca', 'vinganca-isca', 'fosso-lava', 'fosso-lava', 'duplo-corpo', 'troca-sombra', 'contrafeitico', 'veu-sombras', 'golem-pedra', 'repercussao-impacto'] },
-    arcano:{ nome:'Arcano', cartas:['visao-oraculo', 'visao-oraculo', 'profecia-selada', 'contrafeitico', 'contrafeitico', 'olho-bispo', 'olho-bispo', 'bispo-oraculo', 'espelho-posicao', 'espelho-posicao',
+    arcano:{ nome:'Arcano', cartas:['visao-oraculo', 'visao-oraculo', 'profecia-selada', 'contrafeitico', 'contrafeitico', 'olho-bispo', 'escudo-arcano', 'bispo-oraculo', 'espelho-posicao', 'espelho-posicao',
       'alcance-torre', 'escudo-arcano', 'troca-sombra', 'portal-runa', 'nevoa-fria', 'passo-relampago', 'veu-sombras', 'empuxo-gravitacional', 'coroa-emprestada', 'andarilho-arcano'] },
   };
   const RARE = catalog.filter(c => c.tipo !== 'artefato' && c.custo >= 5).map(c => c.id);
@@ -121,8 +121,9 @@ const arcanoRules = (catalog = []) => {
     andarilho:(s, i, p, add) => { for (const d of DR){ let t = i; for (let k = 0; k < 2; k++){ t += d; if (!onB(t) || blocked(s, t) || s.board[t]) break; add(i, t, 'n', null, 'andarilho'); } } },
     // Alcance da Torre: captura nas 4 casas em cruz
     alcance:(s, i, p, add) => { for (const d of DR){ const t = i + d; if (onB(t) && !blocked(s, t) && s.board[t] && s.board[t].c !== p.c) add(i, t, 'c', null, 'alcance'); } },
-    // Lança Fiel: o Peão captura uma vez em linha reta à frente
-    lanca:(s, i, p, add) => { const t = i + (p.c === 'w' ? -16 : 16); if (onB(t) && !blocked(s, t) && s.board[t] && s.board[t].c !== p.c) add(i, t, 'c', null, 'lanca'); },
+    // Lanceiro (Lança Fiel): o Peão alcança 1 ou 2 casas em linha reta à frente para capturar, com a casa do meio vazia,
+    // e avança até a casa da vítima (a estocada de lança); continua andando e capturando como Peão
+    lanceiro:(s, i, p, add) => { if (p.t !== 'p') return; const fw = p.c === 'w' ? -16 : 16; for (let k = 1, t = i + fw; k <= 2 && onB(t) && !blocked(s, t); k++, t += fw){ const q = s.board[t]; if (q){ if (q.c !== p.c) add(i, t, 'c', null, 'lanceiro'); break; } } },
     // Domínio Diagonal: captura a 2 casas na diagonal, pulando uma casa vazia
     dominio:(s, i, p, add) => { const fw = p.c === 'w' ? -16 : 16; for (const dc of [-1, 1]){ const m = i + fw + dc, t = i + 2 * (fw + dc); if (onB(t) && !s.board[m] && !blocked(s, t) && s.board[t] && s.board[t].c !== p.c) add(i, t, 'c', null, 'dominio'); } },
     // Centurião: anda 1 casa para os lados e captura também de frente
@@ -131,7 +132,7 @@ const arcanoRules = (catalog = []) => {
       const t = i + (p.c === 'w' ? -16 : 16); if (onB(t) && !blocked(s, t) && s.board[t] && s.board[t].c !== p.c) add(i, t, 'c', null, 'centuriao');
     },
   };
-  const CAP_MODS = ['heranca', 'salto_herdado', 'ferradura', 'coroa', 'coroa_raio', 'coroa_herdada', 'visao_arcana', 'muralha_viva', 'dragao', 'salto', 'pegaso', 'canhao', 'alcance', 'lanca', 'dominio', 'centuriao'];
+  const CAP_MODS = ['heranca', 'salto_herdado', 'ferradura', 'coroa', 'coroa_raio', 'coroa_herdada', 'visao_arcana', 'muralha_viva', 'dragao', 'salto', 'pegaso', 'canhao', 'alcance', 'lanceiro', 'dominio', 'centuriao'];
   function attacked(s, i, by){
     const B = s.board, pd = by === 'w' ? 16 : -16;
     for (const dc of [-1, 1]){ const a = i + pd + dc; if (onB(a) && B[a] && B[a].c === by && B[a].t === 'p') return true; }
@@ -223,7 +224,8 @@ const arcanoRules = (catalog = []) => {
   function makeBoard(s, m){
     const B = s.board, p = B[m.f], u = { m, p, cap:B[m.t], capSq:m.t, castle:s.castle, ep:s.ep, half:s.half, rook:null };
     if (m.fl === 'e'){ u.capSq = m.t + (p.c === 'w' ? 16 : -16); u.cap = B[u.capSq]; B[u.capSq] = null; }
-    B[m.t] = m.pr ? Object.assign({}, p, { t:m.pr, promo:true }) : p;
+    // na promoção a patente de Lanceiro fica para trás (é do Peão)
+    B[m.t] = m.pr ? Object.assign({}, p, { t:m.pr, promo:true, fx:(p.fx || []).filter(x => x.kind !== 'rank') }) : p;
     B[m.f] = null;
     if (m.fl === 'k' || m.fl === 'q'){
       const rf = m.fl === 'k' ? m.f + 3 : m.f - 4, rt = m.fl === 'k' ? m.f + 1 : m.f - 1;
@@ -254,6 +256,7 @@ const arcanoRules = (catalog = []) => {
     const out = [];
     const safeNow = !inCheck(s, c);
     for (const m of pseudo(s, c)){
+      if (s.board[m.f] && s.board[m.f].summoned && (m.fl.includes('c') || m.fl === 'e')) continue;
       if ((m.fl === 'c' || m.fl === 'cp') && guarded(s, m.t)){ if (safeNow) out.push(m); continue; }
       const u = makeBoard(s, m);
       if (!inCheck(s, c)) out.push(m);
@@ -332,11 +335,11 @@ const arcanoRules = (catalog = []) => {
     ev.push({ k:'draw', side:c, card, why });
   }
   const gainEss = (s, c, n, why, ev) => { const a = s.arc.ess[c], b = Math.min(ESS_MAX, a + n); s.arc.ess[c] = b; if (b !== a) ev.push({ k:'essence', side:c, delta:b - a, total:b, why }); };
-  // efeito numa peça: N turnos do dono; se o efeito nasce na vez do dono, o fim desta vez não conta
+  // efeito numa peça: N turnos do dono. Carta (jogada antes do lance) conta o turno atual: "por 1 turno" vale para o lance
+  // deste turno. Efeito que nasce durante o lance numa peça do próprio dono (preso por Vingança, rastro) não conta o fim deste turno.
   function addFx(s, p, fx, n){
-    const actorNow = s.arc.phase === 'cards' ? s.arc.cardSide : s.turn;
     const f = Object.assign({}, fx);
-    if (n != null) f.turns = n + (p.c === actorNow ? 1 : 0);
+    if (n != null) f.turns = n + (p.c === s.turn && !s._byCard ? 1 : 0);
     // 1 relíquia (ou transmutação) por peça: a nova substitui; 1 aura de sacrifício por peça
     if (f.kind === 'relic' || f.kind === 'aura') p.fx = p.fx.filter(x => x.kind !== f.kind);
     else p.fx = p.fx.filter(x => x.id !== f.id);
@@ -435,12 +438,12 @@ const arcanoRules = (catalog = []) => {
       apply(s, c, picks, ev){ addFx(s, s.board[fromS(picks[0])], { id:'dominio', kind:'mark' }, 2); ev.push({ k:'fx', sq:picks[0], id:'dominio' }); },
     },
     'aura-cavaleiro':{
-      targets:(s, c, picks) => picks.length ? { ready:true } : step('Escolha uma Torre, Bispo ou Dama sua: por 1 turno ela salta sobre uma peça no caminho.', ownPieces(s, c, p => 'brq'.includes(p.t))),
+      targets:(s, c, picks) => picks.length ? { ready:true } : step('Escolha uma Torre, Bispo ou Dama sua: neste lance ela salta sobre uma peça no caminho.', ownPieces(s, c, p => 'brq'.includes(p.t))),
       apply(s, c, picks, ev){ addFx(s, s.board[fromS(picks[0])], { id:'salto', kind:'mark' }, 1); ev.push({ k:'fx', sq:picks[0], id:'salto' }); },
     },
     'ponto-ancoragem':{
       targets:(s, c, picks) => picks.length ? { ready:true } : step('Escolha a peça que fica ancorada nesta casa.', ownPieces(s, c)),
-      apply(s, c, picks, ev){ const p = s.board[fromS(picks[0])]; s.arc.anchors.push({ pid:p.id, side:c, sq:picks[0], ttl:4 }); ev.push({ k:'anchor', sq:picks[0] }); },
+      apply(s, c, picks, ev){ const p = s.board[fromS(picks[0])]; s.arc.anchors.push({ pid:p.id, side:c, sq:picks[0], ttl:2 }); ev.push({ k:'anchor', sq:picks[0] }); },
     },
     'empuxo-gravitacional':{
       targets(s, c, picks){
@@ -453,13 +456,8 @@ const arcanoRules = (catalog = []) => {
     },
     'visao-oraculo':{
       targets:() => ({ ready:true }),
-      apply(s, c, picks, ev){
-        const o = other(c), veiled = s.arc.sideFx.some(f => f.id === 'veu' && f.side === o);
-        let moves = predict(s, o, 3);
-        if (veiled){ const all = legalRaw(Object.assign(clone(s), { turn:o }), o); moves = shuffle(s, all.slice()).slice(0, 3).map(m => ({ from:toS(m.f), to:toS(m.t) })); }
-        s.arc.oracle = { by:c, side:o, moves, guaranteed:s.arc.opts.oracle === 'garantido' && !veiled, veiled };
-        ev.push({ k:'oracle', side:c, moves });
-      },
+      // a previsão é feita no fim do seu turno, já com o seu lance no tabuleiro (closeTurn)
+      apply(s, c, picks, ev){ s.arc.oracleReq = { by:c }; ev.push({ k:'oracleReq', side:c }); },
     },
     'veu-sombras':{ targets:() => ({ ready:true }), apply(s, c, picks, ev){ s.arc.sideFx.push({ id:'veu', side:c, ttl:4 }); ev.push({ k:'veil', side:c }); } },
     'rito-sacrificio':{
@@ -575,7 +573,7 @@ const arcanoRules = (catalog = []) => {
         ev.push({ k:'terrain', kind:'nevoa', center:p[0], sqs:hit });
       },
     },
-    'repercussao-impacto':{ targets:() => ({ ready:true }), apply(s, c, p, ev){ s.arc.sideFx.push({ id:'impacto', side:c, ttl:2 }); ev.push({ k:'impactReady', side:c }); } },
+    'repercussao-impacto':{ targets:() => ({ ready:true }), apply(s, c, p, ev){ s.arc.sideFx.push({ id:'impacto', side:c, ttl:1 }); ev.push({ k:'impactReady', side:c }); } },
     'portal-runa':{
       targets(s, c, p){
         if (p.length >= 2) return { ready:true };
@@ -584,13 +582,14 @@ const arcanoRules = (catalog = []) => {
       apply(s, c, p, ev){ s.arc.portals = s.arc.portals.filter(q => q.side !== c); s.arc.portals.push({ side:c, sqs:p.slice(), ttl:6 }); ev.push({ k:'terrain', kind:'portal', sqs:p.slice() }); },
     },
     // artefatos (espólio)
-    'lanca-fiel':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Peão seu.', ownPieces(s, c, q => q.t === 'p')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'lanca', kind:'mark', uses:1 }); ev.push({ k:'fx', sq:p[0], id:'lanca' }); } },
-    'ferradura-salto':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma peça sua (não o Rei): no próximo lance ela pode saltar em L.', ownPieces(s, c, q => q.t !== 'n')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'ferradura', kind:'mark', uses:1 }, 1); ev.push({ k:'fx', sq:p[0], id:'ferradura' }); } },
+    // Lança Fiel: o Peão sobe de patente e vira Lanceiro para sempre (troca a espada pela lança)
+    'lanca-fiel':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Peão seu (que ainda não seja Lanceiro).', ownPieces(s, c, q => q.t === 'p' && !has(q, 'lanceiro'))), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'lanceiro', kind:'rank' }); ev.push({ k:'fx', sq:p[0], id:'lanceiro', rank:true }); } },
+    'ferradura-salto':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma peça sua (não o Rei): neste lance ela pode saltar em L.', ownPieces(s, c, q => q.t !== 'n')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'ferradura', kind:'mark', uses:1 }, 1); ev.push({ k:'fx', sq:p[0], id:'ferradura' }); } },
     'pedra-terra':{
       targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma casa vazia para a muralha.', emptySqs(s, i => withBlocked(s, [toS(i)], c))),
       apply(s, c, p, ev){ s.arc.blocked[p[0]] = { kind:'muralha', ttl:4, side:c }; ev.push({ k:'terrain', kind:'muralha', sqs:[p[0]] }); },
     },
-    'coroa-raio':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma peça sua (não o Rei): por 1 turno ela move como Dama.', ownPieces(s, c, q => q.t !== 'q')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'coroa_raio', kind:'mark' }, 1); ev.push({ k:'fx', sq:p[0], id:'coroa_raio' }); } },
+    'coroa-raio':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma peça sua (não o Rei): neste lance ela move como Dama.', ownPieces(s, c, q => q.t !== 'q')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'coroa_raio', kind:'mark' }, 1); ev.push({ k:'fx', sq:p[0], id:'coroa_raio' }); } },
   };
   const trapsFull = (s, c) => s.arc.traps.filter(t => t.side === c).length >= MAX_TRAPS ? { err:'No máximo 2 armadilhas armadas.' } : null;
   function summon(s, c, t, i, ev){
@@ -620,7 +619,7 @@ const arcanoRules = (catalog = []) => {
   /* ---- ações ---- */
   function create(o = {}, decks){
     if (typeof o === 'number') o = { seed:o, decks };
-    const s = { v:2, rng:(o.seed >>> 0) || 1, nextId:0, board:null, turn:'w', castle:'KQkq', ep:-1, half:0, full:1, hist:[], keys:{}, over:null,
+    const s = { v:4, rng:(o.seed >>> 0) || 1, nextId:0, board:null, turn:'w', castle:'KQkq', ep:-1, half:0, full:1, hist:[], keys:{}, over:null,
       arc:{ ess:{ w:0, b:0 }, hand:{ w:[], b:[] }, deck:{ w:[], b:[] }, discard:{ w:[], b:[] }, grave:{ w:[], b:[] }, turns:{ w:0, b:0 }, runes:{}, phase:'move', cardSide:null, played:false,
         traps:[], blocked:{}, portals:[], anchors:[], trails:[], sideFx:[], oracle:null,
         lim:{ summon:{ w:0, b:0 }, sacr:{ w:0, b:0 }, legend:{ w:0, b:0 }, phoenix:{ w:0, b:0 } }, uid:0, decks:{ w:'tempestade', b:'cinzas' },
@@ -638,6 +637,8 @@ const arcanoRules = (catalog = []) => {
     for (const q of RUNES) s.arc.runes[q] = null;
     s.keys[posKey(s)] = 1;
     if (!o.pure) gainEss(s, s.turn, 1, 'inicio', []);
+    // compensação de quem joga depois (as cartas vêm antes do lance, e isso favorece quem começa): a Legião começa com 1 de essência guardada
+    if (!o.pure) s.arc.ess.b = 1;
     return s;
   }
   function legalMoves(s, from){
@@ -760,18 +761,18 @@ const arcanoRules = (catalog = []) => {
     s.hist.push(v);
     if (m.pr && result === 'normal' && RARE.length && !s.arc.opts.pure) giveCard(s, c, newCard(s, RARE[Math.floor(rnd(s) * RARE.length)]), 'promocao', ev);
     if (s.arc.oracle && s.arc.oracle.side === c){ ev.push({ k:'oracleEnd', hit:s.arc.oracle.moves.some(x => x.from === v.from && x.to === v.to) }); s.arc.oracle = null; }
-    s.arc.phase = 'cards'; s.arc.cardSide = c; s.arc.played = false;
+    // o lance encerra o turno: não há fase de cartas depois dele
     const st = status(s);
     if (st.mate){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); }
-    if (s.arc.opts.pure && !s.over){ const e = endTurn(s); return { ok:true, state:e.state, move:v, events:ev.concat(e.events) }; }
+    else closeTurn(s, c, ev);
     return { ok:true, state:s, move:v, events:ev };
   }
+  // cartas: na sua vez, antes do lance, quantas a essência permitir
   function cardOptions(s, uid, picks = []){
     if (s.over) return { err:'A partida terminou.' };
-    if (s.arc.phase !== 'cards') return { err:'Cartas só na fase de cartas, depois do lance.' };
-    const c = s.arc.cardSide, card = s.arc.hand[c].find(x => x.uid === uid);
+    if (s.arc.phase !== 'move') return { err:'Agora não dá para jogar cartas.' };
+    const c = s.turn, card = s.arc.hand[c].find(x => x.uid === uid);
     if (!card) return { err:'Essa carta não está na sua mão.' };
-    if (s.arc.played) return { err:'Só uma carta por turno.' };
     const def = CARD[card.id];
     if (!def) return { err:'Carta desconhecida.' };
     if (s.arc.ess[c] < def.custo) return { err:`Essência insuficiente (custa ${def.custo}).` };
@@ -782,8 +783,12 @@ const arcanoRules = (catalog = []) => {
     if (r.ready){
       const t = clone(s), ev = [];
       t.arc.ess[c] -= def.custo;
+      t._byCard = true;
       try { FX[card.id].apply(t, c, picks, ev); } catch (e){ return { err:'Alvo inválido.' }; }
       if (inCheck(t, c)) return { err:inCheck(s, c) ? 'Com o Rei em xeque, só vale carta que tira o xeque.' : 'A carta deixaria o seu Rei em xeque.' };
+      // depois das cartas ainda vem o lance: nenhuma carta pode deixar o jogador sem lance (não existe passar a vez)
+      delete t._byCard;
+      if (!legalRaw(t, c).length) return { err:'A carta deixaria você sem nenhum lance.' };
     }
     return r;
   }
@@ -797,11 +802,11 @@ const arcanoRules = (catalog = []) => {
     }
     const fin = cardOptions(s0, uid, picks);
     if (!fin.ready) return { ok:false, err:fin.err || 'Faltam alvos.' };
-    const s = clone(s0), ev = [], c = s.arc.cardSide, o = other(c);
+    const s = clone(s0), ev = [], c = s.turn, o = other(c);
     const idx = s.arc.hand[c].findIndex(x => x.uid === uid), card = s.arc.hand[c][idx], def = CARD[card.id];
     s.arc.hand[c].splice(idx, 1);
     s.arc.ess[c] -= def.custo;
-    s.arc.played = true;
+    s.arc.played = true;   // (informativo: o limite de 1 carta por turno acabou)
     ev.push({ k:'card', side:c, card, picks:picks.slice(), cost:def.custo });
     // Contrafeitico do rival anula esta carta (a essência é gasta)
     const counter = s.arc.traps.find(x => x.id === 'contrafeitico' && x.side === o);
@@ -811,17 +816,20 @@ const arcanoRules = (catalog = []) => {
       ev.push({ k:'trapFire', id:'contrafeitico', side:o, card:card.id });
       return { ok:true, state:s, events:ev };
     }
+    s._byCard = true;
     FX[card.id].apply(s, c, picks, ev);
+    delete s._byCard;
     s.arc.discard[c].push(card);
     if (inCheck(s, c)) return { ok:false, err:'A carta deixaria o seu Rei em xeque.' };
-    const st = status(s);
-    if (st.mate){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); }
     return { ok:true, state:s, events:ev };
   }
+  // não existe mais encerrar o turno à parte: o lance encerra (a função fica para quem ainda chamá-la)
   function endTurn(s0){
     if (s0.over) return { ok:false, err:'A partida terminou.' };
-    if (s0.arc.phase !== 'cards') return { ok:false, err:'Faça o seu lance primeiro.' };
-    const s = clone(s0), ev = [], c = s.arc.cardSide;
+    return { ok:false, err:'O lance encerra o turno: jogue as cartas antes de mover.' };
+  }
+  // fim do turno de c, logo depois do lance (s já é a cópia do lance; s.turn já é o rival)
+  function closeTurn(s, c, ev){
     s.arc.turns[c]++;
     const pure = s.arc.opts.pure;
     if (!pure) for (const q of RUNES){
@@ -829,9 +837,10 @@ const arcanoRules = (catalog = []) => {
       if (p && p.c === c && !s.arc.runes[q]){ s.arc.runes[q] = c; ev.push({ k:'rune', side:c, sq:q }); draw(s, c, 1, 'runa', ev); }
     }
     if (!pure && s.arc.turns[c] % 2 === 0) draw(s, c, 1, 'turno', ev);
-    // contadores das peças do lado que terminou
+    // contadores das peças do lado que terminou (e a peça invocada já pode capturar no próximo turno)
     for (const i of ALL){
       const p = s.board[i];
+      if (p && p.c === c && p.summoned) delete p.summoned;
       if (!p || p.c !== c || !p.fx.length) continue;
       for (const fx of p.fx) if (fx.turns != null) fx.turns--;
       const gone = p.fx.filter(fx => fx.turns != null && fx.turns <= 0);
@@ -856,16 +865,24 @@ const arcanoRules = (catalog = []) => {
       } else ev.push({ k:'anchorFail', sq:an.sq });
     }
     s.arc.anchors = s.arc.anchors.filter(x => x.ttl > 0);
+    // Visão do Oráculo jogada neste turno: prevê os lances do rival na posição depois do seu lance
+    if (s.arc.oracleReq && s.arc.oracleReq.by === c){
+      const o = other(c), veiled = s.arc.sideFx.some(f => f.id === 'veu' && f.side === o);
+      let moves = predict(s, o, 3);
+      if (veiled){ const all = legalRaw(s, o); moves = shuffle(s, all.slice()).slice(0, 3).map(m => ({ from:toS(m.f), to:toS(m.t) })); }
+      s.arc.oracle = { by:c, side:o, moves, guaranteed:s.arc.opts.oracle === 'garantido' && !veiled, veiled };
+      ev.push({ k:'oracle', side:c, moves });
+    }
+    s.arc.oracleReq = null;
     s.arc.phase = 'move'; s.arc.cardSide = null; s.arc.played = false;
     const key = posKey(s);
     s.keys[key] = (s.keys[key] || 0) + 1;
     const st = status(s);
-    if (st.over){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); return { ok:true, state:s, events:ev }; }
+    if (st.over){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); return; }
     if (!pure) gainEss(s, s.turn, 1, 'inicio', ev);
     ev.push({ k:'turn', side:s.turn });
-    return { ok:true, state:s, events:ev };
   }
-  const actor = s => s.over ? null : s.arc.phase === 'cards' ? s.arc.cardSide : s.turn;
+  const actor = s => s.over ? null : s.turn;
   function cardPicks(s, uid, picks, out, cap){
     if (out.length >= cap) return;
     const o = cardOptions(s, uid, picks);
@@ -873,12 +890,12 @@ const arcanoRules = (catalog = []) => {
     if (o.ready){ out.push(picks.slice()); return; }
     for (const q of o.options){ picks.push(q); cardPicks(s, uid, picks, out, cap); picks.pop(); if (out.length >= cap) return; }
   }
+  // na sua vez: as cartas que a essência permite (antes do lance) e os lances (o lance encerra o turno)
   function legalActions(s, side, o = {}){
     if (side && side !== actor(s)) return [];
-    if (s.over) return [];
-    if (s.arc.phase === 'move') return legalMoves(s).map(m => ({ type:'move', from:m.from, to:m.to, promotion:m.promotion, san:m.san }));
-    const out = [{ type:'end' }], c = s.arc.cardSide;
-    if (!s.arc.played) for (const card of s.arc.hand[c]){
+    if (s.over || s.arc.phase !== 'move') return [];
+    const out = legalMoves(s).map(m => ({ type:'move', from:m.from, to:m.to, promotion:m.promotion, san:m.san })), c = s.turn;
+    if (!s.arc.opts.pure && o.cards !== false) for (const card of s.arc.hand[c]){
       const combos = [];
       cardPicks(s, card.uid, [], combos, o.cap || 24);
       for (const picks of combos) out.push({ type:'card', uid:card.uid, id:card.id, picks });
@@ -920,7 +937,7 @@ const arcanoRules = (catalog = []) => {
      carta jogável (com alvos) com não jogar nada. Com o Oráculo garantido, a IA joga o lance revelado. */
   const AI_LV = { 1:{ ms:250, noise:70, cardP:0.45 }, 2:{ ms:700, noise:12, cardP:1 }, 3:{ ms:1400, noise:0, cardP:1 } };
   const FX_VAL = { escudo:90, martir:80, golem:120, heranca:90, coroa:140, coroa_raio:70, coroa_herdada:160, alcance:60, vinganca:40, salto_herdado:60, visao_arcana:50, muralha_viva:120,
-    oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanca:30, ferradura:25, paralisado:-1, nevoa:-30 };
+    oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanceiro:70, ferradura:25, paralisado:-1, nevoa:-30 };
   // valor de carta que a avaliação do tabuleiro não enxerga (armadilhas, informação, portais): sem isso a IA sem ruído nunca as joga
   const CARD_AI = { 'armadilha-espinhos':40, 'troca-sombra':45, 'duplo-corpo':45, 'profecia-selada':40, 'visao-oraculo':30, 'veu-sombras':15, 'bispo-oraculo':55,
     'portal-runa':25, 'ponto-ancoragem':20, 'necromante-cinzas':15, 'grimorio-arcano':10 };
@@ -980,6 +997,42 @@ const arcanoRules = (catalog = []) => {
       // Oráculo garantido contra a IA: ela cumpre o lance revelado
       const orc = s0.arc.oracle;
       if (orc && orc.side === me && orc.guaranteed && orc.moves[0]){ const m = ms.find(x => x.from === orc.moves[0].from && x.to === orc.moves[0].to); if (m) return { action:{ type:'move', from:m.from, to:m.to, promotion:m.promotion }, oracle:true }; }
+      // 1) cartas antes do lance: cada carta é comparada pelo melhor lance que ela deixa (1 lance à frente) contra não jogar nada
+      if (!s.arc.opts.pure && s.arc.hand[me].length && rnd01() <= L.cardP){
+        const cards = legalActions(s, me, { cap:o.cap || (level >= 3 ? 14 : 8) }).filter(a => a.type === 'card');
+        const okReal = a => playCard(s0, a.uid, a.picks).ok;
+        if (cards.length && level === 1){
+          const a = cards[Math.floor(rnd01() * cards.length)], x = { type:'card', uid:a.uid, picks:a.picks };
+          if (okReal(x)) return { action:x, ms:Date.now() - t0 };
+        } else if (cards.length){
+          const cardEnd = t0 + (o.ms || L.ms) * 0.45;
+          const quick = st => {
+            let best = -Infinity;
+            for (const m of legalMoves(st)){
+              const r = applyMove(st, m);
+              if (!r.ok) continue;
+              if (r.state.over && r.state.over.kind === 'mate' && r.state.over.winner === me) return 1e6;
+              const v = evalFor(r.state, me) - hanging(r.state, me) * 0.5;
+              if (v > best) best = v;
+              if (Date.now() > cardEnd + 400) break;
+            }
+            return best;
+          };
+          const base = quick(s);
+          let best = null;
+          for (const a of cards){
+            if (Date.now() > cardEnd) break;
+            const r = playCard(s, a.uid, a.picks);
+            if (!r.ok) continue;
+            const cost = (CARD[a.id] || {}).custo || 0;
+            // a carta sai da mão mas vira efeito (+18 devolve o valor de mão); a essência gasta já sai da avaliação
+            const v = quick(r.state) + cost * 4 + 18 + cardAI(s, s0, me, a.id) + (rnd01() - 0.5) * 2 * L.noise;
+            if (v > base + 8 && (!best || v > best.v)){ const x = { type:'card', uid:a.uid, picks:a.picks }; if (okReal(x)) best = { a:x, v }; }
+          }
+          if (best) return { action:best.a, score:best.v, ms:Date.now() - t0 };
+        }
+      }
+      // 2) o lance
       const scored = [];
       const order = ms.slice().sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0));
       for (const m of order){
@@ -988,21 +1041,18 @@ const arcanoRules = (catalog = []) => {
         let v = evalFor(r.state, me);
         if (r.state.over && r.state.over.kind === 'mate'){ scored.push({ m, v:1e6 }); break; }
         if (level >= 2) v -= hanging(r.state, me) * (level >= 3 ? 0.5 : 0.9);
-        if (level >= 3 && Date.now() < deadline){
-          // melhor resposta do rival (depois da fase de cartas vazia)
-          const e = endTurn(r.state);
-          if (e.ok && !e.state.over){
-            const op = legalMoves(e.state).sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0)).slice(0, 14);
-            let worst = Infinity;
-            for (const om of op){
-              if (Date.now() > deadline) break;
-              const r2 = applyMove(e.state, om);
-              if (!r2.ok) continue;
-              const v2 = evalFor(r2.state, me);
-              if (v2 < worst) worst = v2;
-            }
-            if (worst !== Infinity) v = Math.min(v, worst + 15);
-          } else if (e.ok && e.state.over) v = evalFor(e.state, me);
+        if (level >= 3 && Date.now() < deadline && !r.state.over){
+          // melhor resposta do rival (o lance já encerrou o turno: r.state é a vez dele)
+          const op = legalMoves(r.state).sort((a, b) => (b.captured ? VAL[b.captured] : 0) - (a.captured ? VAL[a.captured] : 0)).slice(0, 14);
+          let worst = Infinity;
+          for (const om of op){
+            if (Date.now() > deadline) break;
+            const r2 = applyMove(r.state, om);
+            if (!r2.ok) continue;
+            const v2 = evalFor(r2.state, me);
+            if (v2 < worst) worst = v2;
+          }
+          if (worst !== Infinity) v = Math.min(v, worst + 15);
         }
         v += (rnd01() - 0.5) * 2 * L.noise;
         scored.push({ m, v });
@@ -1013,28 +1063,6 @@ const arcanoRules = (catalog = []) => {
       for (const x of scored){ const a = { type:'move', from:x.m.from, to:x.m.to, promotion:x.m.promotion }; if (applyMove(s0, a).ok) return { action:a, score:x.v, ms:Date.now() - t0 }; }
       const real = legalMoves(s0)[0];
       return { action:real ? { type:'move', from:real.from, to:real.to, promotion:real.promotion } : null, ms:Date.now() - t0 };
-    }
-    if (s.arc.phase === 'cards'){
-      const acts = legalActions(s, me, { cap:o.cap || (level >= 3 ? 14 : 8) });
-      const base = evalFor(s, me) - (level >= 2 ? hanging(s, me) * 0.8 : 0);
-      const okReal = a => a.type === 'end' || playCard(s0, a.uid, a.picks).ok;
-      let best = { a:{ type:'end' }, v:base };
-      if (rnd01() > L.cardP) return { action:best.a };
-      const cardsOnly = acts.filter(a => a.type === 'card');
-      if (level === 1 && cardsOnly.length){ const a = cardsOnly[Math.floor(rnd01() * cardsOnly.length)], x = { type:'card', uid:a.uid, picks:a.picks }; return { action:okReal(x) ? x : { type:'end' } }; }
-      for (const a of cardsOnly){
-        if (Date.now() > deadline) break;
-        const r = playCard(s, a.uid, a.picks);
-        if (!r.ok) continue;
-        const cost = (CARD[a.id] || {}).custo || 0;
-        // a essência gasta já sai da avaliação; um pequeno bônus para cartas que viram valor no tabuleiro
-        // a carta jogada sai da mão mas vira efeito (+18 devolve o valor de mão); a essência gasta já sai da avaliação
-        let v = evalFor(r.state, me) - (level >= 2 ? hanging(r.state, me) * 0.8 : 0) + cost * 4 + 18 + cardAI(s, s0, me, a.id);
-        if (r.state.over && r.state.over.kind === 'mate' && r.state.over.winner === me) v = 1e6;
-        v += (rnd01() - 0.5) * 2 * L.noise;
-        if (v > best.v + 8){ const x = { type:'card', uid:a.uid, picks:a.picks }; if (okReal(x)) best = { a:x, v }; }
-      }
-      return { action:best.a, score:best.v, ms:Date.now() - t0 };
     }
     return { action:null };
   }

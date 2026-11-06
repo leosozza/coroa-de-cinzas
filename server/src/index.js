@@ -9,7 +9,7 @@
 //   GET  /api/queue/:fila/:ritmo/ws   filas: ranked, casual (Xadrez Puro), arcano-ranked, arcano-casual (12+5; o hello leva o grimório)
 //   GET  /api/profile/:uid            perfil público: notas e ligas, vitórias/derrotas/empates por modo, grimório mais usado, últimas 20
 //   GET  /api/replay/:id              replay de partida terminada: semente, grimórios e ações (o motor refaz tudo, mãos inclusive)
-//   GET  /api/leaderboard?pool=xadrez  ranking (notas firmes de contas)
+//   GET  /api/leaderboard?mode=xadrez|arcano&limit=50  ranking: id, nome, nota, rd e partidas (só contas com partida ranqueada)
 //   GET  /api/auth/providers                      provedores de login configurados
 //   POST /api/auth/start   (Bearer do convidado) { provider, return } -> { url } (state + PKCE)
 //   GET  /api/auth/:provedor/callback             volta do provedor -> página do jogo #login=<código>
@@ -139,9 +139,13 @@ export default {
       }
 
       if (p === '/api/leaderboard'){
-        const pool = url.searchParams.get('pool') === 'arcano' ? 'arcano' : 'xadrez';
-        const rows = env.DB ? (await env.DB.prepare("SELECT users.name AS name, ratings.r AS r, ratings.games AS games FROM ratings JOIN users ON users.id = ratings.user_id WHERE pool = ? AND rd <= ? AND users.kind = 'account' AND users.deleted = 0 ORDER BY r DESC LIMIT 50").bind(pool, PROVISIONAL_RD).all()).results : [];
-        return json(req, env, { pool, top:rows.map((x, i) => ({ rank:i + 1, name:x.name, r:Math.round(x.r), games:x.games })) });
+        // ranking por modo (?mode= ou ?pool=, xadrez|arcano; ?limit= 1–100, padrão 50): só contas com partida ranqueada (convidados fora);
+        // a nota provisória entra marcada. O id leva ao perfil (/api/profile/:uid).
+        const want = url.searchParams.get('mode') || url.searchParams.get('pool');
+        const pool = want === 'arcano' ? 'arcano' : 'xadrez';
+        const limit = Math.max(1, Math.min(100, parseInt(url.searchParams.get('limit'), 10) || 50));
+        const rows = env.DB ? (await env.DB.prepare("SELECT users.id AS id, users.name AS name, ratings.r AS r, ratings.rd AS rd, ratings.games AS games FROM ratings JOIN users ON users.id = ratings.user_id WHERE pool = ? AND ratings.games > 0 AND users.kind = 'account' AND users.deleted = 0 ORDER BY r DESC LIMIT ?").bind(pool, limit).all()).results : [];
+        return json(req, env, { mode:pool, pool, limit, top:rows.map((x, i) => ({ rank:i + 1, id:x.id, name:x.name, rating:Math.round(x.r), r:Math.round(x.r), rd:Math.round(x.rd), games:x.games, provisional:x.rd > PROVISIONAL_RD })) });
       }
 
       if (p === '/api/config') return json(req, env, { tc:Object.keys(TC), queues:QUEUES, decks:DECK_IDS, rules:RULES, leagues:LEAGUES, grandmaster:GRANDMASTER, provisionalRd:PROVISIONAL_RD });

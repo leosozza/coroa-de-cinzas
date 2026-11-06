@@ -1,0 +1,925 @@
+{
+  "regras": {
+    "lance": [
+      "s_<peça>_avanca",
+      "casa_<sq>"
+    ],
+    "captura": [
+      "s_<peça>_captura",
+      "o_<alvo>",
+      "em_<sq>"
+    ],
+    "carta_alvo": [
+      "s_<peça>_usa",
+      "k_<carta>",
+      "e_elimina",
+      "o_<alvo>",
+      "em_<sq>"
+    ],
+    "carta": [
+      "s_<peça>_usa",
+      "k_<carta>"
+    ],
+    "carta_lado": [
+      "lado_<w|b>",
+      "jogam_carta",
+      "k_<carta>"
+    ],
+    "pecas": {
+      "p": "o peão",
+      "n": "o cavaleiro",
+      "b": "o bispo",
+      "r": "a torre",
+      "q": "a dama",
+      "k": "o rei",
+      "L": "o lanceiro"
+    },
+    "pasta": "assets/audio/narr/"
+  },
+  "falas": {
+    "s_p_avanca": {
+      "texto": "O peão avança para",
+      "grupo": "sujeito"
+    },
+    "s_p_captura": {
+      "texto": "O peão captura",
+      "grupo": "sujeito"
+    },
+    "s_p_usa": {
+      "texto": "O peão usa",
+      "grupo": "sujeito"
+    },
+    "o_p": {
+      "texto": "o peão",
+      "grupo": "alvo"
+    },
+    "s_n_avanca": {
+      "texto": "O cavaleiro avança para",
+      "grupo": "sujeito"
+    },
+    "s_n_captura": {
+      "texto": "O cavaleiro captura",
+      "grupo": "sujeito"
+    },
+    "s_n_usa": {
+      "texto": "O cavaleiro usa",
+      "grupo": "sujeito"
+    },
+    "o_n": {
+      "texto": "o cavaleiro",
+      "grupo": "alvo"
+    },
+    "s_b_avanca": {
+      "texto": "O bispo avança para",
+      "grupo": "sujeito"
+    },
+    "s_b_captura": {
+      "texto": "O bispo captura",
+      "grupo": "sujeito"
+    },
+    "s_b_usa": {
+      "texto": "O bispo usa",
+      "grupo": "sujeito"
+    },
+    "o_b": {
+      "texto": "o bispo",
+      "grupo": "alvo"
+    },
+    "s_r_avanca": {
+      "texto": "A torre avança para",
+      "grupo": "sujeito"
+    },
+    "s_r_captura": {
+      "texto": "A torre captura",
+      "grupo": "sujeito"
+    },
+    "s_r_usa": {
+      "texto": "A torre usa",
+      "grupo": "sujeito"
+    },
+    "o_r": {
+      "texto": "a torre",
+      "grupo": "alvo"
+    },
+    "s_q_avanca": {
+      "texto": "A dama avança para",
+      "grupo": "sujeito"
+    },
+    "s_q_captura": {
+      "texto": "A dama captura",
+      "grupo": "sujeito"
+    },
+    "s_q_usa": {
+      "texto": "A dama usa",
+      "grupo": "sujeito"
+    },
+    "o_q": {
+      "texto": "a dama",
+      "grupo": "alvo"
+    },
+    "s_k_avanca": {
+      "texto": "O rei avança para",
+      "grupo": "sujeito"
+    },
+    "s_k_captura": {
+      "texto": "O rei captura",
+      "grupo": "sujeito"
+    },
+    "s_k_usa": {
+      "texto": "O rei usa",
+      "grupo": "sujeito"
+    },
+    "s_L_avanca": {
+      "texto": "O Lanceiro avança para",
+      "grupo": "sujeito"
+    },
+    "s_L_captura": {
+      "texto": "O Lanceiro captura",
+      "grupo": "sujeito"
+    },
+    "s_L_usa": {
+      "texto": "O Lanceiro usa",
+      "grupo": "sujeito"
+    },
+    "o_L": {
+      "texto": "o lanceiro",
+      "grupo": "alvo"
+    },
+    "casa_a1": {
+      "texto": "á um.",
+      "grupo": "casa"
+    },
+    "em_a1": {
+      "texto": "em á um!",
+      "grupo": "casa"
+    },
+    "casa_a2": {
+      "texto": "á dois.",
+      "grupo": "casa"
+    },
+    "em_a2": {
+      "texto": "em á dois!",
+      "grupo": "casa"
+    },
+    "casa_a3": {
+      "texto": "á três.",
+      "grupo": "casa"
+    },
+    "em_a3": {
+      "texto": "em á três!",
+      "grupo": "casa"
+    },
+    "casa_a4": {
+      "texto": "á quatro.",
+      "grupo": "casa"
+    },
+    "em_a4": {
+      "texto": "em á quatro!",
+      "grupo": "casa"
+    },
+    "casa_a5": {
+      "texto": "á cinco.",
+      "grupo": "casa"
+    },
+    "em_a5": {
+      "texto": "em á cinco!",
+      "grupo": "casa"
+    },
+    "casa_a6": {
+      "texto": "á seis.",
+      "grupo": "casa"
+    },
+    "em_a6": {
+      "texto": "em á seis!",
+      "grupo": "casa"
+    },
+    "casa_a7": {
+      "texto": "á sete.",
+      "grupo": "casa"
+    },
+    "em_a7": {
+      "texto": "em á sete!",
+      "grupo": "casa"
+    },
+    "casa_a8": {
+      "texto": "á oito.",
+      "grupo": "casa"
+    },
+    "em_a8": {
+      "texto": "em á oito!",
+      "grupo": "casa"
+    },
+    "casa_b1": {
+      "texto": "bê um.",
+      "grupo": "casa"
+    },
+    "em_b1": {
+      "texto": "em bê um!",
+      "grupo": "casa"
+    },
+    "casa_b2": {
+      "texto": "bê dois.",
+      "grupo": "casa"
+    },
+    "em_b2": {
+      "texto": "em bê dois!",
+      "grupo": "casa"
+    },
+    "casa_b3": {
+      "texto": "bê três.",
+      "grupo": "casa"
+    },
+    "em_b3": {
+      "texto": "em bê três!",
+      "grupo": "casa"
+    },
+    "casa_b4": {
+      "texto": "bê quatro.",
+      "grupo": "casa"
+    },
+    "em_b4": {
+      "texto": "em bê quatro!",
+      "grupo": "casa"
+    },
+    "casa_b5": {
+      "texto": "bê cinco.",
+      "grupo": "casa"
+    },
+    "em_b5": {
+      "texto": "em bê cinco!",
+      "grupo": "casa"
+    },
+    "casa_b6": {
+      "texto": "bê seis.",
+      "grupo": "casa"
+    },
+    "em_b6": {
+      "texto": "em bê seis!",
+      "grupo": "casa"
+    },
+    "casa_b7": {
+      "texto": "bê sete.",
+      "grupo": "casa"
+    },
+    "em_b7": {
+      "texto": "em bê sete!",
+      "grupo": "casa"
+    },
+    "casa_b8": {
+      "texto": "bê oito.",
+      "grupo": "casa"
+    },
+    "em_b8": {
+      "texto": "em bê oito!",
+      "grupo": "casa"
+    },
+    "casa_c1": {
+      "texto": "cê um.",
+      "grupo": "casa"
+    },
+    "em_c1": {
+      "texto": "em cê um!",
+      "grupo": "casa"
+    },
+    "casa_c2": {
+      "texto": "cê dois.",
+      "grupo": "casa"
+    },
+    "em_c2": {
+      "texto": "em cê dois!",
+      "grupo": "casa"
+    },
+    "casa_c3": {
+      "texto": "cê três.",
+      "grupo": "casa"
+    },
+    "em_c3": {
+      "texto": "em cê três!",
+      "grupo": "casa"
+    },
+    "casa_c4": {
+      "texto": "cê quatro.",
+      "grupo": "casa"
+    },
+    "em_c4": {
+      "texto": "em cê quatro!",
+      "grupo": "casa"
+    },
+    "casa_c5": {
+      "texto": "cê cinco.",
+      "grupo": "casa"
+    },
+    "em_c5": {
+      "texto": "em cê cinco!",
+      "grupo": "casa"
+    },
+    "casa_c6": {
+      "texto": "cê seis.",
+      "grupo": "casa"
+    },
+    "em_c6": {
+      "texto": "em cê seis!",
+      "grupo": "casa"
+    },
+    "casa_c7": {
+      "texto": "cê sete.",
+      "grupo": "casa"
+    },
+    "em_c7": {
+      "texto": "em cê sete!",
+      "grupo": "casa"
+    },
+    "casa_c8": {
+      "texto": "cê oito.",
+      "grupo": "casa"
+    },
+    "em_c8": {
+      "texto": "em cê oito!",
+      "grupo": "casa"
+    },
+    "casa_d1": {
+      "texto": "dê um.",
+      "grupo": "casa"
+    },
+    "em_d1": {
+      "texto": "em dê um!",
+      "grupo": "casa"
+    },
+    "casa_d2": {
+      "texto": "dê dois.",
+      "grupo": "casa"
+    },
+    "em_d2": {
+      "texto": "em dê dois!",
+      "grupo": "casa"
+    },
+    "casa_d3": {
+      "texto": "dê três.",
+      "grupo": "casa"
+    },
+    "em_d3": {
+      "texto": "em dê três!",
+      "grupo": "casa"
+    },
+    "casa_d4": {
+      "texto": "dê quatro.",
+      "grupo": "casa"
+    },
+    "em_d4": {
+      "texto": "em dê quatro!",
+      "grupo": "casa"
+    },
+    "casa_d5": {
+      "texto": "dê cinco.",
+      "grupo": "casa"
+    },
+    "em_d5": {
+      "texto": "em dê cinco!",
+      "grupo": "casa"
+    },
+    "casa_d6": {
+      "texto": "dê seis.",
+      "grupo": "casa"
+    },
+    "em_d6": {
+      "texto": "em dê seis!",
+      "grupo": "casa"
+    },
+    "casa_d7": {
+      "texto": "dê sete.",
+      "grupo": "casa"
+    },
+    "em_d7": {
+      "texto": "em dê sete!",
+      "grupo": "casa"
+    },
+    "casa_d8": {
+      "texto": "dê oito.",
+      "grupo": "casa"
+    },
+    "em_d8": {
+      "texto": "em dê oito!",
+      "grupo": "casa"
+    },
+    "casa_e1": {
+      "texto": "é um.",
+      "grupo": "casa"
+    },
+    "em_e1": {
+      "texto": "em é um!",
+      "grupo": "casa"
+    },
+    "casa_e2": {
+      "texto": "é dois.",
+      "grupo": "casa"
+    },
+    "em_e2": {
+      "texto": "em é dois!",
+      "grupo": "casa"
+    },
+    "casa_e3": {
+      "texto": "é três.",
+      "grupo": "casa"
+    },
+    "em_e3": {
+      "texto": "em é três!",
+      "grupo": "casa"
+    },
+    "casa_e4": {
+      "texto": "é quatro.",
+      "grupo": "casa"
+    },
+    "em_e4": {
+      "texto": "em é quatro!",
+      "grupo": "casa"
+    },
+    "casa_e5": {
+      "texto": "é cinco.",
+      "grupo": "casa"
+    },
+    "em_e5": {
+      "texto": "em é cinco!",
+      "grupo": "casa"
+    },
+    "casa_e6": {
+      "texto": "é seis.",
+      "grupo": "casa"
+    },
+    "em_e6": {
+      "texto": "em é seis!",
+      "grupo": "casa"
+    },
+    "casa_e7": {
+      "texto": "é sete.",
+      "grupo": "casa"
+    },
+    "em_e7": {
+      "texto": "em é sete!",
+      "grupo": "casa"
+    },
+    "casa_e8": {
+      "texto": "é oito.",
+      "grupo": "casa"
+    },
+    "em_e8": {
+      "texto": "em é oito!",
+      "grupo": "casa"
+    },
+    "casa_f1": {
+      "texto": "éfe um.",
+      "grupo": "casa"
+    },
+    "em_f1": {
+      "texto": "em éfe um!",
+      "grupo": "casa"
+    },
+    "casa_f2": {
+      "texto": "éfe dois.",
+      "grupo": "casa"
+    },
+    "em_f2": {
+      "texto": "em éfe dois!",
+      "grupo": "casa"
+    },
+    "casa_f3": {
+      "texto": "éfe três.",
+      "grupo": "casa"
+    },
+    "em_f3": {
+      "texto": "em éfe três!",
+      "grupo": "casa"
+    },
+    "casa_f4": {
+      "texto": "éfe quatro.",
+      "grupo": "casa"
+    },
+    "em_f4": {
+      "texto": "em éfe quatro!",
+      "grupo": "casa"
+    },
+    "casa_f5": {
+      "texto": "éfe cinco.",
+      "grupo": "casa"
+    },
+    "em_f5": {
+      "texto": "em éfe cinco!",
+      "grupo": "casa"
+    },
+    "casa_f6": {
+      "texto": "éfe seis.",
+      "grupo": "casa"
+    },
+    "em_f6": {
+      "texto": "em éfe seis!",
+      "grupo": "casa"
+    },
+    "casa_f7": {
+      "texto": "éfe sete.",
+      "grupo": "casa"
+    },
+    "em_f7": {
+      "texto": "em éfe sete!",
+      "grupo": "casa"
+    },
+    "casa_f8": {
+      "texto": "éfe oito.",
+      "grupo": "casa"
+    },
+    "em_f8": {
+      "texto": "em éfe oito!",
+      "grupo": "casa"
+    },
+    "casa_g1": {
+      "texto": "gê um.",
+      "grupo": "casa"
+    },
+    "em_g1": {
+      "texto": "em gê um!",
+      "grupo": "casa"
+    },
+    "casa_g2": {
+      "texto": "gê dois.",
+      "grupo": "casa"
+    },
+    "em_g2": {
+      "texto": "em gê dois!",
+      "grupo": "casa"
+    },
+    "casa_g3": {
+      "texto": "gê três.",
+      "grupo": "casa"
+    },
+    "em_g3": {
+      "texto": "em gê três!",
+      "grupo": "casa"
+    },
+    "casa_g4": {
+      "texto": "gê quatro.",
+      "grupo": "casa"
+    },
+    "em_g4": {
+      "texto": "em gê quatro!",
+      "grupo": "casa"
+    },
+    "casa_g5": {
+      "texto": "gê cinco.",
+      "grupo": "casa"
+    },
+    "em_g5": {
+      "texto": "em gê cinco!",
+      "grupo": "casa"
+    },
+    "casa_g6": {
+      "texto": "gê seis.",
+      "grupo": "casa"
+    },
+    "em_g6": {
+      "texto": "em gê seis!",
+      "grupo": "casa"
+    },
+    "casa_g7": {
+      "texto": "gê sete.",
+      "grupo": "casa"
+    },
+    "em_g7": {
+      "texto": "em gê sete!",
+      "grupo": "casa"
+    },
+    "casa_g8": {
+      "texto": "gê oito.",
+      "grupo": "casa"
+    },
+    "em_g8": {
+      "texto": "em gê oito!",
+      "grupo": "casa"
+    },
+    "casa_h1": {
+      "texto": "agá um.",
+      "grupo": "casa"
+    },
+    "em_h1": {
+      "texto": "em agá um!",
+      "grupo": "casa"
+    },
+    "casa_h2": {
+      "texto": "agá dois.",
+      "grupo": "casa"
+    },
+    "em_h2": {
+      "texto": "em agá dois!",
+      "grupo": "casa"
+    },
+    "casa_h3": {
+      "texto": "agá três.",
+      "grupo": "casa"
+    },
+    "em_h3": {
+      "texto": "em agá três!",
+      "grupo": "casa"
+    },
+    "casa_h4": {
+      "texto": "agá quatro.",
+      "grupo": "casa"
+    },
+    "em_h4": {
+      "texto": "em agá quatro!",
+      "grupo": "casa"
+    },
+    "casa_h5": {
+      "texto": "agá cinco.",
+      "grupo": "casa"
+    },
+    "em_h5": {
+      "texto": "em agá cinco!",
+      "grupo": "casa"
+    },
+    "casa_h6": {
+      "texto": "agá seis.",
+      "grupo": "casa"
+    },
+    "em_h6": {
+      "texto": "em agá seis!",
+      "grupo": "casa"
+    },
+    "casa_h7": {
+      "texto": "agá sete.",
+      "grupo": "casa"
+    },
+    "em_h7": {
+      "texto": "em agá sete!",
+      "grupo": "casa"
+    },
+    "casa_h8": {
+      "texto": "agá oito.",
+      "grupo": "casa"
+    },
+    "em_h8": {
+      "texto": "em agá oito!",
+      "grupo": "casa"
+    },
+    "e_elimina": {
+      "texto": "e elimina",
+      "grupo": "ligacao"
+    },
+    "lado_w": {
+      "texto": "As brancas",
+      "grupo": "lado"
+    },
+    "lado_b": {
+      "texto": "As negras",
+      "grupo": "lado"
+    },
+    "jogam_carta": {
+      "texto": "jogam a carta",
+      "grupo": "ligacao"
+    },
+    "k_passo-relampago": {
+      "texto": "Passo do Relâmpago",
+      "grupo": "carta"
+    },
+    "k_espelho-posicao": {
+      "texto": "Espelho de Posição",
+      "grupo": "carta"
+    },
+    "k_olho-bispo": {
+      "texto": "Olho do Bispo",
+      "grupo": "carta"
+    },
+    "k_dominio-diagonal": {
+      "texto": "Domínio Diagonal",
+      "grupo": "carta"
+    },
+    "k_aura-cavaleiro": {
+      "texto": "Aura do Cavaleiro",
+      "grupo": "carta"
+    },
+    "k_ponto-ancoragem": {
+      "texto": "Ponto de Ancoragem",
+      "grupo": "carta"
+    },
+    "k_empuxo-gravitacional": {
+      "texto": "Empuxo Gravitacional",
+      "grupo": "carta"
+    },
+    "k_visao-oraculo": {
+      "texto": "Visão do Oráculo",
+      "grupo": "carta"
+    },
+    "k_veu-sombras": {
+      "texto": "Véu de Sombras",
+      "grupo": "carta"
+    },
+    "k_rito-sacrificio": {
+      "texto": "Rito do Sacrifício",
+      "grupo": "carta"
+    },
+    "k_heranca-cavaleiro": {
+      "texto": "Herança do Cavaleiro",
+      "grupo": "carta"
+    },
+    "k_coroa-emprestada": {
+      "texto": "Coroa Emprestada",
+      "grupo": "carta"
+    },
+    "k_escudo-arcano": {
+      "texto": "Escudo Arcano",
+      "grupo": "carta"
+    },
+    "k_alcance-torre": {
+      "texto": "Alcance da Torre",
+      "grupo": "carta"
+    },
+    "k_vinganca-isca": {
+      "texto": "Vingança da Isca",
+      "grupo": "carta"
+    },
+    "k_bispo-oraculo": {
+      "texto": "Bispo Oráculo",
+      "grupo": "carta"
+    },
+    "k_pegaso": {
+      "texto": "Ascensão do Pegaso",
+      "grupo": "carta"
+    },
+    "k_dragao-cinzas": {
+      "texto": "Dragão das Cinzas",
+      "grupo": "carta"
+    },
+    "k_canhao-cerco": {
+      "texto": "Canhão de Cerco",
+      "grupo": "carta"
+    },
+    "k_golem-pedra": {
+      "texto": "Golem de Pedra",
+      "grupo": "carta"
+    },
+    "k_andarilho-arcano": {
+      "texto": "Andarilho Arcano",
+      "grupo": "carta"
+    },
+    "k_necromante-cinzas": {
+      "texto": "Necromante das Cinzas",
+      "grupo": "carta"
+    },
+    "k_centuriao": {
+      "texto": "Centurião",
+      "grupo": "carta"
+    },
+    "k_berserker": {
+      "texto": "Berserker",
+      "grupo": "carta"
+    },
+    "k_fenix": {
+      "texto": "Fênix",
+      "grupo": "carta"
+    },
+    "k_ressurreicao-cinzas": {
+      "texto": "Ressurreição das Cinzas",
+      "grupo": "carta"
+    },
+    "k_recruta-cemiterio": {
+      "texto": "Recruta do Cemitério",
+      "grupo": "carta"
+    },
+    "k_armadilha-espinhos": {
+      "texto": "Armadilha de Espinhos",
+      "grupo": "carta"
+    },
+    "k_contrafeitico": {
+      "texto": "Contrafeitiço",
+      "grupo": "carta"
+    },
+    "k_troca-sombra": {
+      "texto": "Troca de Sombra",
+      "grupo": "carta"
+    },
+    "k_duplo-corpo": {
+      "texto": "Duplo de Corpo",
+      "grupo": "carta"
+    },
+    "k_profecia-selada": {
+      "texto": "Profecia Selada",
+      "grupo": "carta"
+    },
+    "k_fosso-lava": {
+      "texto": "Fosso de Lava",
+      "grupo": "carta"
+    },
+    "k_nevoa-fria": {
+      "texto": "Névoa Fria",
+      "grupo": "carta"
+    },
+    "k_repercussao-impacto": {
+      "texto": "Repercussão de Impacto",
+      "grupo": "carta"
+    },
+    "k_portal-runa": {
+      "texto": "Portal de Runa",
+      "grupo": "carta"
+    },
+    "k_lanca-fiel": {
+      "texto": "Lança Fiel",
+      "grupo": "carta"
+    },
+    "k_ferradura-salto": {
+      "texto": "Ferradura do Salto",
+      "grupo": "carta"
+    },
+    "k_grimorio-arcano": {
+      "texto": "Grimório Arcano",
+      "grupo": "carta"
+    },
+    "k_pedra-terra": {
+      "texto": "Pedra da Terra",
+      "grupo": "carta"
+    },
+    "k_coroa-raio": {
+      "texto": "Coroa do Raio",
+      "grupo": "carta"
+    },
+    "e_roque_pequeno": {
+      "texto": "Roque pequeno! O rei se protege.",
+      "grupo": "especial"
+    },
+    "e_roque_grande": {
+      "texto": "Roque grande! O rei se protege.",
+      "grupo": "especial"
+    },
+    "e_promo_q": {
+      "texto": "Promoção! O peão se torna dama!",
+      "grupo": "especial"
+    },
+    "e_promo_r": {
+      "texto": "Promoção! O peão se torna torre!",
+      "grupo": "especial"
+    },
+    "e_promo_b": {
+      "texto": "Promoção! O peão se torna bispo!",
+      "grupo": "especial"
+    },
+    "e_promo_n": {
+      "texto": "Promoção! O peão se torna cavaleiro!",
+      "grupo": "especial"
+    },
+    "e_lanceiro": {
+      "texto": "O peão evolui para Lanceiro! Agora alcança duas casas!",
+      "grupo": "especial"
+    },
+    "e_en_passant": {
+      "texto": "Captura en passant!",
+      "grupo": "especial"
+    },
+    "e_xeque": {
+      "texto": "Xeque no rei!",
+      "grupo": "especial"
+    },
+    "e_rei_perigo": {
+      "texto": "O rei está em perigo!",
+      "grupo": "especial"
+    },
+    "e_armadilha": {
+      "texto": "Uma armadilha é revelada!",
+      "grupo": "especial"
+    },
+    "e_bloqueado": {
+      "texto": "O golpe é bloqueado!",
+      "grupo": "especial"
+    },
+    "e_contrafeitico": {
+      "texto": "Contrafeitiço! A magia é anulada!",
+      "grupo": "especial"
+    },
+    "e_ressurge": {
+      "texto": "Uma peça retorna do cemitério!",
+      "grupo": "especial"
+    },
+    "e_sacrificio": {
+      "texto": "Um sacrifício ousado!",
+      "grupo": "especial"
+    },
+    "e_que_lance": {
+      "texto": "Que lance!",
+      "grupo": "especial"
+    },
+    "e_vez_brancas": {
+      "texto": "Vez das brancas.",
+      "grupo": "especial"
+    },
+    "e_vez_negras": {
+      "texto": "Vez das negras.",
+      "grupo": "especial"
+    },
+    "e_tempo": {
+      "texto": "O tempo está acabando!",
+      "grupo": "especial"
+    },
+    "e_mate_brancas": {
+      "texto": "Xeque-mate! O rei negro é capturado e levado para o campo das brancas!",
+      "grupo": "especial"
+    },
+    "e_mate_negras": {
+      "texto": "Xeque-mate! O rei branco é capturado e levado para o campo das negras!",
+      "grupo": "especial"
+    }
+  }
+}

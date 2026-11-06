@@ -88,7 +88,9 @@ async function main(){
   ok((await api('/api/me', { token:D.token })).j.ratings.xadrez.games === 0, 'sem nota na cancelada');
   rd.close();
 
-  const lb = (await api('/api/leaderboard?pool=xadrez')).j; ok(Array.isArray(lb.top) && lb.top.length === 0, 'ranking só com contas (convidados fora)');
+  // ranking: só contas com partida ranqueada; os convidados desta rodada (que jogaram a ranqueada) ficam de fora
+  const lb = (await api('/api/leaderboard?mode=xadrez&limit=100')).j, mine = [A, B, C, D, E].map(x => x.id || (x.user && x.user.id)).filter(Boolean);
+  ok(Array.isArray(lb.top) && lb.top.every(x => x.id && typeof x.rating === 'number' && x.games > 0) && !lb.top.some(x => mine.includes(x.id)), 'ranking só com contas (convidados fora)');
   console.log(JSON.stringify({ passes, fails, exemplo:rt }));
   process.exit(fails ? 1 : 0);
 }

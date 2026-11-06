@@ -2,3 +2,18 @@
 __pycache__/
 tools/*.log
 assets/meshy/state/
+assets/tripo/
+# brutos e intermediários dos modelos (ficam só no Mac; o jogo usa .opt / .c / .gltf.json)
+assets/meshy/**/meshy_original/
+assets/meshy/**/v1_sem_arma/
+assets/meshy/peao_meshy/
+assets/meshy/peao_v1/
+assets/meshy/**/*.full.glb
+assets/meshy/reinos/**/rigged.glb
+assets/meshy/reinos/**/animated.glb
+assets/meshy/reinos/**/model.glb
+assets/meshy/dragao/model*.glb
+assets/meshy/dragao/rigged.glb
+assets/meshy/dragao/animated.glb
+assets/meshy/dragao/animated.brilho.glb
+data/audio-exemplos/

@@ -1,0 +1,85 @@
+{
+  "reinos": [
+    {
+      "id": "aurora",
+      "nome": "Reino da Aurora",
+      "descricao": "o visual atual: marfim, ouro e vermelho",
+      "pecas": "assets/meshy/<peça>/ (atual)"
+    },
+    {
+      "id": "ferro_negro",
+      "nome": "Legião do Ferro Negro",
+      "descricao": "aço escurecido, espinhos, capas rasgadas, névoa e detalhes carmesim",
+      "paleta": {
+        "principal": "#1a1714",
+        "metal": "#3b3835",
+        "acento": "#7a1c1c",
+        "brilho": "#d6a842"
+      },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/ferro_negro/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/peao.png",
+          "rig": true
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/ferro_negro/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/bispo.png",
+          "rig": true
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/ferro_negro/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/dama.png",
+          "rig": true
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/ferro_negro/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/rei.png",
+          "rig": true
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/ferro_negro/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/ferro_negro/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/ferro_negro/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/ferro_negro/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/ferro_negro/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/ferro_negro/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/ferro_negro/torre.png",
+          "rig": false
+        }
+      },
+      "clipes_extras": "golpes.glb de assets/meshy/<peça>/ (mesmo esqueleto do Meshy)",
+      "golpe_por_peca": {
+        "p": "Thrust_Slash",
+        "b": "Charged_Spell_Cast",
+        "q": "Charged_Slash",
+        "k": "Heavy_Hammer_Swing"
+      },
+      "referencia": "assets/concepts/reinos/ferro_negro/referencia.png"
+    }
+  ]
+}

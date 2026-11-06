@@ -17,6 +17,7 @@
       "tipo": "feitico",
       "custo": 2,
       "efeito": "Uma peça sua anda até 2 casas em qualquer direção, sem capturar.",
+      "golpe": "magia:raio",
       "arte": "a knight dissolving into a crackling blue lightning bolt as it dashes across a stone chessboard"
     },
     {
@@ -25,6 +26,7 @@
       "tipo": "feitico",
       "custo": 3,
       "efeito": "Duas peças suas (não o Rei) trocam de lugar.",
+      "golpe": "magia:arcano",
       "arte": "two armored warriors swapping places through a pair of shimmering silver mirror portals"
     },
     {
@@ -33,6 +35,7 @@
       "tipo": "feitico",
       "custo": 1,
       "efeito": "Revela as armadilhas do rival.",
+      "golpe": "magia:arcano",
       "arte": "a giant glowing arcane eye opening above a chessboard, revealing hidden glowing trap runes"
     },
     {
@@ -41,14 +44,16 @@
       "tipo": "feitico",
       "custo": 2,
       "efeito": "Por 2 turnos, um Peão captura até 2 casas na diagonal, pulando uma casa vazia.",
-      "arte": "a young spear soldier with glowing diagonal rune lines extending from his spear across the board"
+      "golpe": "magia:arcano",
+      "arte": "a young sword soldier with glowing diagonal rune lines extending from his short sword across the board"
     },
     {
       "id": "aura-cavaleiro",
       "nome": "Aura do Cavaleiro",
       "tipo": "feitico",
       "custo": 4,
-      "efeito": "Por 1 turno, uma peça pode saltar sobre outra durante o movimento normal.",
+      "efeito": "Neste turno, uma Torre, Bispo ou Dama sua salta sobre uma peça no caminho.",
+      "golpe": "lamina",
       "arte": "a stone tower warrior leaping over another piece wrapped in a ghostly horse-shaped aura"
     },
     {
@@ -57,6 +62,7 @@
       "tipo": "feitico",
       "custo": 3,
       "efeito": "Marque uma casa antes de capturar; a peça volta para ela no fim do turno do rival.",
+      "golpe": "magia:arcano",
       "arte": "a sorceress striking an enemy while a glowing golden anchor rune tethers her back to a distant square"
     },
     {
@@ -65,14 +71,16 @@
       "tipo": "feitico",
       "custo": 3,
       "efeito": "Empurra uma peça inimiga 1 ou 2 casas em linha reta, com o caminho livre.",
+      "golpe": "magia:arcano",
       "arte": "a violet gravity shockwave blasting an enemy warrior backwards across a chessboard"
     },
     {
       "id": "visao-oraculo",
       "nome": "Visão do Oráculo",
       "tipo": "feitico",
-      "custo": 3,
-      "efeito": "Mostra as 3 jogadas mais prováveis do rival no próximo turno. Contra a IA, a primeira é garantida.",
+      "custo": 2,
+      "efeito": "Depois do seu lance, mostra as 3 jogadas mais prováveis do rival. Contra a IA, a primeira é garantida.",
+      "golpe": "magia:arcano",
       "arte": "a hooded oracle with glowing white eyes seeing three ghostly translucent arrows of future moves over a chessboard"
     },
     {
@@ -81,14 +89,16 @@
       "tipo": "feitico",
       "custo": 2,
       "efeito": "Por 2 turnos, as previsões do rival sobre você mostram setas falsas.",
+      "golpe": "magia:sombra",
       "arte": "a dark veil of swirling purple smoke and shadow covering an army, false glowing arrows twisting in the mist"
     },
     {
       "id": "rito-sacrificio",
       "nome": "Rito do Sacrifício",
       "tipo": "feitico",
-      "custo": 3,
+      "custo": 4,
       "efeito": "Sacrifique uma peça sua (não o Rei). A aura dela vai para outra peça sua, que ganha um poder conforme a sacrificada.",
+      "golpe": "magia:sombra",
       "arte": "a kneeling warrior dissolving into a pillar of golden light, a river of glowing aura flowing into another hero"
     },
     {
@@ -97,6 +107,7 @@
       "tipo": "reliquia",
       "custo": 3,
       "efeito": "Um Peão também move como Cavalo enquanto viver.",
+      "golpe": "investida",
       "arte": "a humble foot soldier receiving a glowing horse-head crest relic onto his helmet"
     },
     {
@@ -105,6 +116,7 @@
       "tipo": "reliquia",
       "custo": 5,
       "efeito": "Uma peça ganha o movimento da Dama por 2 turnos.",
+      "golpe": "magia:arcano",
       "arte": "a floating golden queen's crown descending onto a common soldier, radiant light"
     },
     {
@@ -113,6 +125,7 @@
       "tipo": "reliquia",
       "custo": 4,
       "efeito": "A peça sobrevive à primeira captura; o atacante volta à casa de origem.",
+      "golpe": "magia:arcano",
       "arte": "a glowing hexagonal arcane shield bubble deflecting a sword strike"
     },
     {
@@ -121,6 +134,7 @@
       "tipo": "reliquia",
       "custo": 3,
       "efeito": "Uma Torre ou Peão também captura nas 4 casas em cruz ao redor.",
+      "golpe": "lamina",
       "arte": "a stone watchtower radiating a cross-shaped wave of earth energy onto four surrounding squares"
     },
     {
@@ -129,6 +143,7 @@
       "tipo": "reliquia",
       "custo": 2,
       "efeito": "Se a peça (Peão ou Cavalo) for capturada, o atacante fica paralisado 2 turnos ou recua 2 casas.",
+      "golpe": "veneno",
       "arte": "a fallen soldier releasing a binding explosion of red runes that chains his attacker"
     },
     {
@@ -137,22 +152,25 @@
       "tipo": "transmutacao",
       "custo": 5,
       "efeito": "Por 3 turnos, ao planejar um lance, você vê a melhor resposta do rival.",
+      "golpe": "magia:arcano",
       "arte": "a warrior bishop with a glowing third eye rune on his mitre, eyes shining white, visions swirling around him"
     },
     {
       "id": "pegaso",
       "nome": "Ascensão do Pegaso",
       "tipo": "transmutacao",
-      "custo": 5,
+      "custo": 7,
       "efeito": "Por 2 turnos, um Cavalo vira Pegaso: o L se estende até 6 casas.",
+      "golpe": "investida",
       "arte": "a white warhorse with a knight rider sprouting luminous wings and taking flight in a trail of light"
     },
     {
       "id": "dragao-cinzas",
       "nome": "Dragão das Cinzas",
       "tipo": "transmutacao",
-      "custo": 8,
-      "efeito": "Lendária, 1 por partida. Por 1 turno o Cavalo move como Dama e salta 1 peça no caminho.",
+      "custo": 9,
+      "efeito": "Lendária, 1 por partida. Neste turno o Cavalo move como Dama e salta 1 peça no caminho.",
+      "golpe": "magia:fogo",
       "arte": "a knight and horse bursting into flames and transforming into a roaring winged ash dragon"
     },
     {
@@ -161,6 +179,7 @@
       "tipo": "transmutacao",
       "custo": 4,
       "efeito": "Por 3 turnos, a Torre captura por cima de 1 peça na mesma linha ou coluna.",
+      "golpe": "explosao",
       "arte": "a stone tower transforming into siege artillery, firing a blazing cannonball over a wall"
     },
     {
@@ -169,6 +188,7 @@
       "tipo": "transmutacao",
       "custo": 3,
       "efeito": "Por 3 turnos, ao mover a Torre golpeia as casas vizinhas; se atacada, empurra o atacante.",
+      "golpe": "explosao:terra",
       "arte": "a tower sprouting massive stone arms and becoming a golem, smashing the ground into craters"
     },
     {
@@ -177,6 +197,7 @@
       "tipo": "transmutacao",
       "custo": 3,
       "efeito": "Por 2 turnos, o Bispo também anda até 2 casas em linha reta, podendo trocar de cor de casa.",
+      "golpe": "magia:arcano",
       "arte": "a floating bishop wrapped in arcane runes stepping across both dark and light squares"
     },
     {
@@ -185,6 +206,7 @@
       "tipo": "transmutacao",
       "custo": 3,
       "efeito": "Por 3 turnos, o Bispo deixa um rastro; inimigo que cruzar perde 1 turno.",
+      "golpe": "veneno:sombra",
       "arte": "a dark necromancer bishop leaving a trail of spectral green ghostly footprints on the board"
     },
     {
@@ -193,6 +215,7 @@
       "tipo": "transmutacao",
       "custo": 3,
       "efeito": "Por 3 turnos, o Peão anda 1 casa para os lados e captura também de frente.",
+      "golpe": "lamina",
       "arte": "a foot soldier transformed into a centurion in full armor with a giant glowing rune tower shield"
     },
     {
@@ -201,14 +224,16 @@
       "tipo": "transmutacao",
       "custo": 3,
       "efeito": "O Peão avança até 3 casas capturando tudo no caminho (menos o Rei) e é sacrificado no fim.",
+      "golpe": "lamina",
       "arte": "a demonic shadowy berserker soldier charging forward, smashing through enemies in a dark rage"
     },
     {
       "id": "fenix",
       "nome": "Fênix",
       "tipo": "transmutacao",
-      "custo": 7,
+      "custo": 8,
       "efeito": "Se a Dama for capturada com a aura ativa, renasce na casa inicial. Uma vez por partida.",
+      "golpe": "magia:fogo",
       "arte": "a warrior queen exploding into phoenix fire and rising reborn from the flames with fiery wings"
     },
     {
@@ -216,16 +241,18 @@
       "nome": "Ressurreição das Cinzas",
       "tipo": "invocacao",
       "custo": 6,
-      "efeito": "Traz do seu cemitério uma peça (menos a Dama) para uma casa vazia da sua primeira fileira.",
+      "efeito": "Traz do seu cemitério uma peça (menos a Dama) para uma casa vazia da sua primeira fileira; ela não captura no turno em que chega.",
+      "golpe": "veneno:sombra",
       "arte": "a fallen knight rising from a grave of glowing embers and ash, reborn in golden light"
     },
     {
       "id": "recruta-cemiterio",
       "nome": "Recruta do Cemitério",
       "tipo": "invocacao",
-      "custo": 3,
-      "efeito": "Traz um Peão do cemitério para a sua segunda fileira.",
-      "arte": "a ghostly young soldier climbing out of a misty graveyard with spear in hand"
+      "custo": 2,
+      "efeito": "Traz um Peão do cemitério para a sua segunda fileira; ele não captura no turno em que chega.",
+      "golpe": "veneno:sombra",
+      "arte": "a ghostly young soldier climbing out of a misty graveyard with a short sword in hand"
     },
     {
       "id": "armadilha-espinhos",
@@ -233,6 +260,7 @@
       "tipo": "armadilha",
       "custo": 2,
       "efeito": "A primeira peça inimiga que entrar na casa volta para a origem.",
+      "golpe": "explosao:terra",
       "arte": "sharp stone spikes bursting out of a chessboard square under an enemy warrior's feet"
     },
     {
@@ -241,6 +269,7 @@
       "tipo": "armadilha",
       "custo": 3,
       "efeito": "Anula a próxima carta que o rival jogar.",
+      "golpe": "magia:arcano",
       "arte": "a mage shattering an incoming glowing spell card into fragments with a counter rune"
     },
     {
@@ -249,6 +278,7 @@
       "tipo": "armadilha",
       "custo": 3,
       "efeito": "Atacada, a peça se teleporta para uma casa pré-escolhida e o atacante fica parado e exposto.",
+      "golpe": "magia:sombra",
       "arte": "a sword striking a silhouette of smoke while the real warrior reappears elsewhere in purple shadow"
     },
     {
@@ -257,14 +287,16 @@
       "tipo": "armadilha",
       "custo": 2,
       "efeito": "Atacada, a peça (não o Rei) vira um Peão ilusório e a verdadeira reaparece na sua primeira fileira.",
+      "golpe": "magia:sombra",
       "arte": "an illusory double of a sorceress shattering like glass while the real one appears safely behind"
     },
     {
       "id": "profecia-selada",
       "nome": "Profecia Selada",
       "tipo": "armadilha",
-      "custo": 4,
+      "custo": 3,
       "efeito": "Crave o próximo lance do rival; se acertar, ele é anulado e você ganha +3 essência.",
+      "golpe": "magia:arcano",
       "arte": "a sealed glowing scroll of prophecy with a wax seal, a ghostly predicted move written on it"
     },
     {
@@ -273,6 +305,7 @@
       "tipo": "terreno",
       "custo": 3,
       "efeito": "2 casas viram lava por 2 turnos; ninguém entra nelas.",
+      "golpe": "magia:fogo",
       "arte": "two chessboard squares cracking open into bubbling lava pits with rising embers"
     },
     {
@@ -281,6 +314,7 @@
       "tipo": "terreno",
       "custo": 3,
       "efeito": "As peças inimigas numa área 3×3 andam no máximo 1 casa no próximo turno.",
+      "golpe": "magia:gelo",
       "arte": "a freezing blue mist rolling over an area of the board, warriors slowed and frosted"
     },
     {
@@ -289,6 +323,7 @@
       "tipo": "terreno",
       "custo": 3,
       "efeito": "Ao capturar neste turno, as peças inimigas vizinhas são empurradas 1 casa ou ficam presas 1 turno.",
+      "golpe": "explosao",
       "arte": "a powerful capture creating a shockwave ring that knocks back surrounding warriors"
     },
     {
@@ -297,22 +332,25 @@
       "tipo": "terreno",
       "custo": 3,
       "efeito": "Liga 2 casas vazias; uma peça sua que entra numa pode sair pela outra.",
+      "golpe": "magia:arcano",
       "arte": "two linked glowing rune portals on distant chessboard squares with a bishop stepping through"
     },
     {
       "id": "lanca-fiel",
       "nome": "Lança Fiel",
       "tipo": "artefato",
-      "custo": 1,
-      "efeito": "Espólio do Peão: um Peão seu captura também em linha reta à frente, uma vez.",
-      "arte": "a loyal spear relic glowing with golden runes resting on a stone altar"
+      "custo": 2,
+      "efeito": "Espólio do Peão: o Peão vira Lanceiro para sempre e troca a espada pela lança: além do normal, captura em linha reta à frente a 1 ou 2 casas (a do meio vazia).",
+      "golpe": "arremesso",
+      "arte": "a young foot soldier promoted to lancer, raising a long spear glowing with golden runes, his short sword laid on a stone altar"
     },
     {
       "id": "ferradura-salto",
       "nome": "Ferradura do Salto",
       "tipo": "artefato",
-      "custo": 3,
+      "custo": 5,
       "efeito": "Espólio do Cavalo: uma peça sua faz um salto em L neste turno.",
+      "golpe": "investida",
       "arte": "a glowing silver horseshoe relic with wind runes floating in the air"
     },
     {
@@ -321,22 +359,25 @@
       "tipo": "artefato",
       "custo": 2,
       "efeito": "Espólio do Bispo: compre 2 cartas.",
+      "golpe": "magia:arcano",
       "arte": "an ancient arcane grimoire floating open with glowing violet pages and runes spiraling out"
     },
     {
       "id": "pedra-terra",
       "nome": "Pedra da Terra",
       "tipo": "artefato",
-      "custo": 2,
+      "custo": 3,
       "efeito": "Espólio da Torre: ergue uma muralha numa casa vazia por 2 turnos.",
+      "golpe": "explosao:terra",
       "arte": "a runed earth stone relic glowing amber, a small stone wall rising beside it"
     },
     {
       "id": "coroa-raio",
       "nome": "Coroa do Raio",
       "tipo": "artefato",
-      "custo": 3,
-      "efeito": "Espólio da Dama: uma peça sua move como Dama por 1 turno.",
+      "custo": 7,
+      "efeito": "Espólio da Dama: uma peça sua move como Dama neste turno.",
+      "golpe": "magia:raio",
       "arte": "a crown made of crackling lightning floating above a pedestal in a storm"
     }
   ]

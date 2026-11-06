@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ranking — Arcane Chess</title>
+<meta name="description" content="Ranking do Arcane Chess: as melhores notas Glicko-2 do Xadrez Puro e do Modo Arcano, ligas e como entrar na lista.">
+<meta name="theme-color" content="#0e0d0b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="ranking">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="Arcane Chess, página inicial">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><rect x="11.5" y="11.5" width="17" height="17" transform="rotate(45 20 20)" fill="none" stroke="#8f5c1d" stroke-width="1"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/><path d="M13 27h14" stroke="#e3a548" stroke-width="1.5"/></svg>
+      <span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span>
+    </a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir o menu"><span></span></button>
+    <div class="nav__panel" id="menu">
+      <ul class="nav__links">
+        <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
+        <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
+        <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
+        <li><a data-page="ranking" href="ranking.html">Ranking</a></li>
+        <li><a href="index.html#como-jogar">Como jogar</a></li>
+      </ul>
+      <div class="nav__account"><a class="btn btn--sm btn--primary" href="login.html">Entrar</a></div>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="page-head">
+    <img class="page-head__bg" src="../assets/concepts/arena_medieval_ref.webp" alt="" width="1024" height="442">
+    <div class="wrap">
+      <p class="eyebrow" style="justify-content:center">Glicko-2 · notas firmes</p>
+      <h1>Ranking</h1>
+      <p>Os campeões do Xadrez Puro e do Modo Arcano. Cada modo tem a sua própria nota.</p>
+    </div>
+  </section>
+
+  <section class="section section--alt torn-top" aria-labelledby="lista-t">
+    <div class="wrap">
+      <h2 class="sr-only" id="lista-t">Lista do ranking</h2>
+      <div class="tabs-wrap">
+        <div class="tabs" role="tablist" aria-label="Modo do ranking">
+          <button class="tab" type="button" role="tab" id="tab-xadrez" aria-controls="painel" aria-selected="true" data-pool="xadrez">Xadrez Puro</button>
+          <button class="tab" type="button" role="tab" id="tab-arcano" aria-controls="painel" aria-selected="false" data-pool="arcano" tabindex="-1">Arcano</button>
+        </div>
+      </div>
+      <div id="minha" hidden></div>
+      <div id="painel" role="tabpanel" aria-labelledby="tab-xadrez" aria-live="polite" tabindex="0"></div>
+      <p class="note">O ranking mostra até 50 contas com a nota já firme (incerteza ≤ 110). Convidados jogam ranqueadas, mas só aparecem aqui depois de criar uma conta.</p>
+    </div>
+  </section>
+
+  <section class="section torn-top" style="--sec-bg:var(--basalt)" aria-labelledby="ligas-t">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">As ligas</p>
+        <h2 class="sec-title" id="ligas-t">Da <em>forja</em> ao trono</h2>
+        <p class="sec-lede">A liga vem da sua nota. O título de Grão-Mestre Arcano é dos primeiros do ranking.</p>
+      </header>
+      <div class="leagues" id="ligas"></div>
+    </div>
+  </section>
+
+  <section class="cta torn-top" aria-labelledby="cta-t">
+    <canvas class="cta__embers" data-embers aria-hidden="true"></canvas>
+    <div class="wrap">
+      <h2 id="cta-t">Entre na batalha</h2>
+      <p>Entre na fila ranqueada do Xadrez Puro ou do Arcano e enfrente rivais com nota parecida.</p>
+      <div class="cta__actions"><a class="btn btn--primary" data-game="online" href="../coroa-de-cinzas.html">Jogar ranqueada</a><a class="btn" href="login.html">Entrar</a></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer torn-top">
+  <div class="wrap">
+    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const AC = window.AC, { esc, $, $$ } = AC;
+  const painel = $('#painel'), minha = $('#minha'), tabs = $$('.tab');
+  const crown = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8 36l-3-20 10 8 9-15 9 15 10-8-3 20z"/><path d="M8 41h32"/><circle cx="24" cy="27" r="2.5" fill="currentColor"/></svg>';
+  const GEM = '<svg class="league__gem" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 4l14 14-14 26L10 18z"/><path d="M10 18h28M24 4l-6 14 6 26 6-26z" opacity=".6"/></svg>';
+  let pool = new URLSearchParams(location.search).get('pool') === 'arcano' ? 'arcano' : 'xadrez';
+  let cfg = AC.LEAGUES_FALLBACK, seq = 0;
+
+  function select(p, focus){
+    pool = p;
+    tabs.forEach(t => { const on = t.dataset.pool === p; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); });
+    painel.setAttribute('aria-labelledby', 'tab-' + p);
+    try { const u = new URL(location.href); u.searchParams.set('pool', p); history.replaceState(null, '', u); } catch (e){}
+    load(); mine();
+  }
+  tabs.forEach(t => t.addEventListener('click', () => select(t.dataset.pool)));
+  // teclado nas abas: setas, Home e End
+  $('.tabs').addEventListener('keydown', e => {
+    const i = tabs.findIndex(t => t.dataset.pool === pool);
+    let k = null;
+    if (e.key === 'ArrowRight') k = (i + 1) % tabs.length; else if (e.key === 'ArrowLeft') k = (i - 1 + tabs.length) % tabs.length; else if (e.key === 'Home') k = 0; else if (e.key === 'End') k = tabs.length - 1;
+    if (k != null){ e.preventDefault(); select(tabs[k].dataset.pool, true); }
+  });
+
+  const plural = (n, s) => `${n} ${s}${n === 1 ? '' : 's'}`;
+  const badge = L => `<span class="badge badge--${esc(L.id)}">${esc(L.name)}</span>`;
+
+  async function load(){
+    const my = ++seq;
+    painel.setAttribute('aria-busy', 'true');
+    painel.innerHTML = `<div class="state"><div class="spinner" aria-hidden="true"></div><h3>Carregando</h3><p>Consultando o grimório dos campeões…</p>
+      <div style="max-width:520px;margin:18px auto 0;display:grid;gap:10px" aria-hidden="true"><span class="skel"></span><span class="skel" style="width:86%"></span><span class="skel" style="width:72%"></span></div></div>`;
+    let r = null;
+    try { r = await AC.fetchApi('/api/leaderboard?pool=' + pool, { token:null }); } catch (e){}
+    if (my !== seq) return;
+    painel.removeAttribute('aria-busy');
+    if (!r || !r.ok){
+      painel.innerHTML = `<div class="state state--error" role="alert"><h3>Servidor fora do ar</h3><p>Não foi possível falar com o servidor do Arcane Chess${r ? ` (erro ${r.status})` : ''}. O jogo offline continua funcionando.</p>
+        <button class="btn btn--primary" type="button" id="retry">Tentar de novo</button></div>`;
+      $('#retry').addEventListener('click', load);
+      return;
+    }
+    const top = r.j.top || [];
+    if (!top.length){ painel.innerHTML = AC.emptyRankHTML(false); AC.wireLinks(); return; }
+    const pod = top.slice(0, 3), rest = top;
+    const L = x => AC.leagueOf(cfg, x.r, x.rank);
+    painel.innerHTML = `<ol class="podium" aria-label="Pódio">${pod.map(x => `<li class="podium__slot podium__slot--${x.rank}">
+        <div class="podium__crown">${crown}</div><div class="podium__pos">${x.rank}º lugar</div>
+        <div class="podium__name" title="${esc(x.name)}">${esc(x.name)}</div><div class="podium__r">${x.r}</div>
+        <div class="podium__g">${plural(x.games, 'partida')}</div><div style="margin-top:10px">${badge(L(x))}</div></li>`).join('')}</ol>
+      <div class="table-wrap"><table class="rank-table"><caption class="sr-only">Ranking ${pool === 'arcano' ? 'do Modo Arcano' : 'do Xadrez Puro'}</caption>
+        <thead><tr><th scope="col">Posição</th><th scope="col">Nome</th><th scope="col" class="num">Nota</th><th scope="col" class="num">Partidas</th><th scope="col">Liga</th></tr></thead>
+        <tbody>${rest.map(x => `<tr><td class="pos">${x.rank}º</td><td class="name">${esc(x.name)}</td><td class="r num">${x.r}</td><td class="num">${x.games}</td><td>${badge(L(x))}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  // "Sua nota": só com sessão
+  async function mine(){
+    const d = await AC.me();
+    if (!d || !d.ratings){ minha.hidden = true; return; }
+    const R = d.ratings[pool], u = d.user;
+    if (!R){ minha.hidden = true; return; }
+    minha.hidden = false;
+    const where = R.rank ? `${R.rank}º no ranking` : u.kind !== 'account' ? 'convidados não entram no ranking: crie uma conta para aparecer aqui' : R.provisional ? 'nota provisória: jogue mais ranqueadas para firmar' : 'fora do top 50';
+    minha.innerHTML = `<div class="my-rating"><div class="my-rating__who"><span class="acct__sigil" style="width:48px;height:48px;font-size:1.2rem" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
+      <span><small>Sua nota · ${pool === 'arcano' ? 'Arcano' : 'Xadrez Puro'}</small><b>${esc(u.name)}</b></span></div>
+      <div><span class="my-rating__num">${R.r}${R.provisional ? '<span title="provisória">?</span>' : ''}</span></div>
+      <div class="my-rating__meta">${badge({ id:R.league, name:R.leagueName })}<br>${R.games || 0} ${(R.games || 0) === 1 ? 'partida ranqueada' : 'partidas ranqueadas'} · ${esc(where)}</div>
+      <a class="btn btn--sm" href="${esc(AC.siteUrl('login.html'))}">Sua conta</a></div>`;
+  }
+
+  async function leagues(){
+    cfg = await AC.config();
+    const ls = cfg.leagues.map((x, i) => { const nx = cfg.leagues[i + 1]; return `<div class="league league--${esc(x.id)}">${GEM}<b>${esc(x.name)}</b><span class="min">${x.min}${nx ? `–${nx.min - 1}` : '+'}</span><small>${x.min <= 1500 && (!nx || nx.min > 1500) ? 'Toda nota começa aqui: 1500, provisória.' : i === 0 ? 'Para quem está aprendendo.' : `A partir de ${x.min} pontos.`}</small></div>`; });
+    const gm = cfg.grandmaster;
+    if (gm) ls.push(`<div class="league league--${esc(gm.id)}">${GEM}<b>${esc(gm.name)}</b><span class="min">Top ${gm.top}</span><small>Contas com nota firme entre as ${gm.top} primeiras do ranking.</small></div>`);
+    $('#ligas').innerHTML = ls.join('');
+  }
+
+  leagues().then(() => select(pool));
+});
+</script>
+</body>
+</html>

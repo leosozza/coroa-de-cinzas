@@ -1,0 +1,50 @@
+{
+  "acoes": {
+    "398": "arremesso de frasco/granada (explosao, magia em frasco, veneno)",
+    "421": "arremesso da espada/lança por cima do ombro (arremesso)",
+    "365": "rei se ajoelha no xeque-mate",
+    "551": "captor carrega/conduz o rei preso",
+    "181": "morte por magia (Electrocuted_Fall)",
+    "182": "morte por explosao (Shot_and_Blown_Back)",
+    "184": "morte por arremesso (Shot_and_Fall_Forward)",
+    "185": "morte por flecha (Shot_and_Slow_Fall_Backward)",
+    "186": "morte por veneno (Strangled_and_Fall_Forward)"
+  },
+  "clipes": {
+    "peao": [
+      398,
+      421,
+      181,
+      182,
+      184,
+      186,
+      551
+    ],
+    "bispo": [
+      181,
+      182,
+      184,
+      186,
+      551
+    ],
+    "dama": [
+      398,
+      181,
+      182,
+      184,
+      186,
+      551
+    ],
+    "rei": [
+      365,
+      398
+    ],
+    "arqueiro": [
+      181,
+      182,
+      184,
+      186,
+      185
+    ]
+  }
+}

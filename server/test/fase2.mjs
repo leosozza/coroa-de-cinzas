@@ -27,21 +27,21 @@ function sock(path, token, extra = {}){
   return c;
 }
 const st = f => m => m.t === 'state' && m.state && f(m);
-// joga um turno do Arcano a partir do estado exato do servidor (n): lance preferido (ou o primeiro legal), carta opcional, fim
+// joga um turno do Arcano a partir do estado exato do servidor (n): carta opcional ANTES do lance, e o lance (que encerra o turno)
 async function arcTurn(P, n, prefer, card){
   const m0 = await P.wait(st(m => m.n === n && ARC.actor(m.state) === P.seat && m.state.arc.phase === 'move'));
-  const ms = ARC.legalActions(m0.state, P.seat).filter(a => a.type === 'move');
+  let k = n, played = null, cur = m0.state;
+  if (card){
+    const c = ARC.legalActions(cur, P.seat).find(a => a.type === 'card');
+    // a carta válida na vista do jogador sempre conta uma ação (até anulada por Contrafeitiço); espera exatamente o próximo n
+    if (c){ P.act({ type:'card', uid:c.uid, picks:c.picks }); const m2 = await P.wait(st(m => m.n === k + 1), 15000); k++; played = c.id; cur = m2.state; }
+  }
+  const ms = ARC.legalActions(cur, P.seat).filter(a => a.type === 'move');
   const mv = ms.find(a => prefer && a.from === prefer[0] && a.to === prefer[1]) || ms[0];
   P.act({ type:'move', from:mv.from, to:mv.to, promotion:mv.promotion });
-  const m1 = await P.wait(st(m => m.n === n + 1));
-  let k = n + 1, played = null;
-  if (card && m1.state.arc.phase === 'cards' && m1.state.arc.cardSide === P.seat){
-    const c = ARC.legalActions(m1.state, P.seat).find(a => a.type === 'card');
-    if (c){ P.act({ type:'card', uid:c.uid, picks:c.picks }); const m2 = await P.wait(st(m => m.n === k + 1 || (m.t === 'state' && m.status !== 'playing')), 15000); if (m2.n === k + 1){ k++; played = c.id; } }
-  }
-  const mm = await P.wait(st(m => m.n === k));
-  if (mm.status === 'playing' && mm.state.arc.phase === 'cards'){ P.act({ type:'end' }); await P.wait(st(m => m.n === k + 1)); k++; }
-  return { n:k, played };
+  const m3 = await P.wait(st(m => m.n === k + 1));
+  if (m3.status === 'playing' && ARC.actor(m3.state) === P.seat) throw new Error('o lance não encerrou o turno');
+  return { n:k + 1, played };
 }
 function replay(R){
   let s = R.mode === 'arcano' ? ARC.create({ seed:R.seed, decks:R.decks, oracle:'previsto' }) : ARC.create({ seed:R.seed, pure:true });
@@ -81,7 +81,8 @@ async function main(){
   const plan = [[w, ['e2', 'e4']], [b, ['e7', 'e5']], [w, ['g1', 'f3']], [b, ['b8', 'c6']], [w, ['f1', 'c4']], [b, ['g8', 'f6']]];
   for (const [P, pref] of plan){ const r = await arcTurn(P, n, pref, true); n = r.n; if (r.played) cardsPlayed.push(r.played); }
   ok(cardsPlayed.length >= 1, 'cartas jogadas: ' + cardsPlayed.join(', '));
-  const lastSeen = w.last.state;
+  // a posição exata depois da última ação (o socket das Brancas pode ainda não ter recebido o último lance das Pretas)
+  const lastSeen = (await w.wait(st(m => m.n === n))).state;
   b.send({ t:'resign' });
   const over = await w.wait(st(m => m.status === 'over'));
   ok(over.result.score === '1-0' && over.result.reason === 'desistencia' && over.result.rating && over.result.rating.w.delta > 0, 'ranqueada do Arcano com nota: ' + JSON.stringify(over.result.rating));

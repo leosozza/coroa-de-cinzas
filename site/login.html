@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entrar — Arcane Chess</title>
+<meta name="description" content="Entre no Arcane Chess como convidado ou com a sua conta para guardar a nota do ranking em qualquer aparelho.">
+<meta name="theme-color" content="#0e0d0b">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+</head>
+<body data-page="login">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="Arcane Chess, página inicial">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><rect x="11.5" y="11.5" width="17" height="17" transform="rotate(45 20 20)" fill="none" stroke="#8f5c1d" stroke-width="1"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/><path d="M13 27h14" stroke="#e3a548" stroke-width="1.5"/></svg>
+      <span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span>
+    </a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir o menu"><span></span></button>
+    <div class="nav__panel" id="menu">
+      <ul class="nav__links">
+        <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
+        <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
+        <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
+        <li><a data-page="ranking" href="ranking.html">Ranking</a></li>
+        <li><a href="index.html#como-jogar">Como jogar</a></li>
+      </ul>
+      <div class="nav__account"><a class="btn btn--sm btn--primary" href="login.html">Entrar</a></div>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="page-head">
+    <img class="page-head__bg" src="../assets/concepts/arena_celestial_ref.webp" alt="" width="1024" height="442">
+    <div class="wrap">
+      <p class="eyebrow" style="justify-content:center">Sua conta</p>
+      <h1 id="titulo">Entrar</h1>
+      <p id="subtitulo">Jogue agora como convidado. Com uma conta, a sua nota vale em qualquer aparelho.</p>
+    </div>
+  </section>
+
+  <section class="section section--alt torn-top">
+    <div class="wrap">
+      <div id="aviso" aria-live="polite"></div>
+      <div class="auth">
+        <div class="panel" id="principal" aria-live="polite">
+          <div class="state" style="border:0;background:none"><div class="spinner" aria-hidden="true"></div><p>Conferindo a sua sessão…</p></div>
+        </div>
+        <aside class="panel" aria-labelledby="porque-t">
+          <h2 id="porque-t">Por que entrar</h2>
+          <ul class="perks">
+            <li>Uma nota por modo<small>Glicko-2 separado para o Xadrez Puro e o Arcano.</small></li>
+            <li>Ranking e ligas<small>De Aprendiz a Grão-Mestre Arcano. O ranking lista as contas com nota firme.</small></li>
+            <li>Perfil, histórico e replays<small>As últimas partidas ficam guardadas para rever lance a lance.</small></li>
+            <li>A mesma sessão no jogo<small>Entrou aqui, já entra no jogo neste navegador.</small></li>
+          </ul>
+          <p style="margin-top:18px;font-size:.92rem">Como convidado você joga online e ranqueado, mas a nota fica só neste navegador. Ao entrar com Google ou Discord, o que você fez como convidado vem junto.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer torn-top">
+  <div class="wrap">
+    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const AC = window.AC, { esc, $ } = AC;
+  const box = $('#principal'), aviso = $('#aviso');
+  const NAME_RE = /^[\p{L}\p{N} ._-]{3,20}$/u;
+  const PV_ICON = {
+    google:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 01-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z"/><path fill="currentColor" opacity=".8" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0012 22z"/><path fill="currentColor" opacity=".6" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 000 9.2z"/><path fill="currentColor" opacity=".9" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 003.1 7.4L6.4 10C7.2 7.7 9.4 5.9 12 5.9z"/></svg>',
+    discord:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.5 5.3A16.5 16.5 0 0015.4 4l-.5 1a15 15 0 00-5.8 0l-.5-1a16.4 16.4 0 00-4.1 1.3C1.9 9.2 1.2 13 1.5 16.8a16.6 16.6 0 005 2.6l1.1-1.7c-.6-.2-1.2-.5-1.7-.9l.4-.3a11.8 11.8 0 0011.4 0l.4.3c-.5.4-1.1.7-1.7.9l1.1 1.7a16.5 16.5 0 005-2.6c.4-4.4-.7-8.2-3-11.5zM8.5 14.5c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm7 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>',
+  };
+  const KNOWN = [{ id:'google', name:'Google' }, { id:'discord', name:'Discord' }];
+  let providers = null;
+
+  function notice(msg, kind){
+    aviso.innerHTML = msg ? `<div class="alert ${kind === 'err' ? 'alert--err' : kind === 'ok' ? 'alert--ok' : ''}" role="${kind === 'err' ? 'alert' : 'status'}"><p>${msg}</p></div>` : '';
+  }
+  const loadProviders = async () => {
+    if (providers) return providers;
+    try { const r = await AC.fetchApi('/api/auth/providers', { token:null }); providers = r.ok ? (r.j.providers || []) : []; } catch (e){ providers = []; }
+    return providers;
+  };
+  // Google e Discord sempre aparecem; os que o servidor ainda não liga ficam "em breve"
+  function providerButtons(pv, merge){
+    return `<div class="providers">${KNOWN.map(k => { const on = pv.find(p => p.id === k.id);
+      return `<button class="btn provider" type="button" data-provider="${k.id}" ${on ? '' : 'aria-disabled="true" disabled'}>${PV_ICON[k.id]}<span><span class="provider__pre">${merge ? 'Juntar com' : 'Entrar com'} </span>${esc(on ? on.name : k.name)}</span>${on ? '' : '<span class="soon">em breve</span>'}</button>`; }).join('')}
+      ${pv.filter(p => !KNOWN.some(k => k.id === p.id)).map(p => `<button class="btn provider" type="button" data-provider="${esc(p.id)}">Entrar com ${esc(p.name)}</button>`).join('')}</div>
+      ${pv.length ? '' : '<p style="margin:12px 0 0;font-size:.9rem">O login com Google e Discord chega em breve. Até lá, jogue como convidado: a nota fica guardada neste navegador.</p>'}`;
+  }
+  function wireProviders(){
+    box.querySelectorAll('[data-provider]:not([disabled])').forEach(b => b.addEventListener('click', () => startLogin(b.dataset.provider, b)));
+  }
+  async function startLogin(provider, btn){
+    btn.disabled = true; notice('Abrindo o login…');
+    let r = null;
+    // o token do convidado vai junto: o servidor funde o convidado na conta
+    try { r = await AC.fetchApi('/api/auth/start', { body:{ provider, return:location.origin + location.pathname + location.search } }); } catch (e){}
+    if (!r || !r.ok || !r.j.url){ btn.disabled = false; notice(esc((r && r.j.err) || 'Não foi possível abrir o login.'), 'err'); return; }
+    location.assign(r.j.url);
+  }
+
+  function renderGuestForm(pv){
+    $('#titulo').textContent = 'Entrar';
+    const saved = AC.session.load().name || '';
+    box.innerHTML = `<h2>Jogar agora</h2><p>Escolha um nome para a mesa. Ele aparece para os rivais online.</p>
+      <form id="g" novalidate>
+        <div class="field"><label for="g-nome">Nome de batalha</label>
+          <input id="g-nome" name="nome" autocomplete="nickname" maxlength="20" minlength="3" value="${esc(saved)}" aria-describedby="g-ajuda g-erro" required>
+          <small id="g-ajuda">De 3 a 20 letras ou números (espaço, ponto, hífen e sublinhado valem).</small><span class="field__err" id="g-erro"></span></div>
+        <button class="btn btn--primary btn--block" type="submit">Jogar como convidado</button>
+      </form>
+      <div class="divider">ou entre com</div>${providerButtons(pv, false)}`;
+    wireProviders();
+    const f = $('#g'), inp = $('#g-nome'), err = $('#g-erro');
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = inp.value.normalize('NFC').replace(/\s+/g, ' ').trim();
+      if (!NAME_RE.test(name)){ inp.setAttribute('aria-invalid', 'true'); err.textContent = 'Use de 3 a 20 letras ou números.'; inp.focus(); return; }
+      inp.removeAttribute('aria-invalid'); err.textContent = '';
+      const b = f.querySelector('button'); b.disabled = true; b.textContent = 'Entrando…';
+      let r = null;
+      try { r = await AC.fetchApi('/api/guest', { body:{ name }, token:null }); } catch (e){}
+      if (!r || !r.ok || !r.j.token){ b.disabled = false; b.textContent = 'Jogar como convidado'; notice(esc((r && r.j.err) || 'Servidor fora do ar. Tente de novo em instantes.'), 'err'); return; }
+      AC.session.save(r.j.token, r.j.user.name);
+      notice(`Bem-vindo à mesa, <b>${esc(r.j.user.name)}</b>. A sessão também vale no jogo.`, 'ok');
+      refresh();
+    });
+  }
+
+  const ratingCard = (R, label) => R ? `<div class="rating"><small>${label}</small><b>${R.r}${R.provisional ? '<em title="nota provisória">?</em>' : ''}</b>
+      <span class="badge badge--${esc(R.league)}">${esc(R.leagueName)}</span>
+      <span class="meta">${R.games || 0} ranqueada${R.games === 1 ? '' : 's'}${R.rank ? ` · ${R.rank}º no ranking` : R.provisional ? ' · provisória' : ''}</span></div>` : '';
+
+  function renderAccount(d, pv){
+    const u = d.user, acct = u.kind === 'account', R = d.ratings || {};
+    $('#titulo').textContent = 'Sua conta';
+    $('#subtitulo').textContent = acct ? 'A sua nota fica guardada em qualquer aparelho.' : 'Você joga como convidado neste navegador.';
+    const via = acct && u.logins && u.logins.length ? u.logins.map(x => (pv.find(p => p.id === x) || KNOWN.find(k => k.id === x) || { name:x }).name).join(' e ') : '';
+    box.innerHTML = `<div class="acct"><span class="acct__sigil" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
+        <div><p class="acct__name">${esc(u.name)}</p><span class="acct__kind ${acct ? 'acct__kind--account' : ''}">${acct ? 'Conta' : 'Convidado'}</span>${via ? ` <small style="color:var(--ash)">entrou com ${esc(via)}</small>` : ''}</div></div>
+      <div class="ratings">${ratingCard(R.xadrez, 'Xadrez Puro')}${ratingCard(R.arcano, 'Arcano')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px"><a class="btn btn--primary" href="${esc(AC.gameUrl('online'))}">Jogar online</a><a class="btn" href="${esc(AC.siteUrl('ranking.html'))}">Ver o ranking</a></div>
+      <h3>Trocar o nome</h3>
+      <form id="n" class="row" novalidate>
+        <div class="field"><label for="n-nome">Nome público</label><input id="n-nome" maxlength="20" value="${esc(u.name)}" autocomplete="nickname" aria-describedby="n-erro"><span class="field__err" id="n-erro"></span></div>
+        <button class="btn" type="submit">Salvar</button>
+      </form>
+      ${acct && u.birth === false ? `<h3>Data de nascimento</h3><p style="font-size:.92rem">Pedimos uma vez, ao virar conta. Ela não aparece para ninguém.</p>
+        <form id="b" class="row" novalidate><div class="field"><label for="b-data">Data</label><input id="b-data" type="date" max="${new Date().toISOString().slice(0, 10)}" aria-describedby="b-erro"><span class="field__err" id="b-erro"></span></div><button class="btn" type="submit">Salvar</button></form>` : ''}
+      ${acct ? '' : `<h3>Guardar a nota</h3><p style="font-size:.92rem">Entre com uma conta e leve junto o que você fez como convidado.</p>${providerButtons(pv, true)}`}
+      <div class="divider"></div>
+      <button class="btn btn--sm" type="button" id="sair">Sair</button>
+      <p style="font-size:.86rem;margin:10px 0 0">${acct ? 'Sair só desconecta este navegador. A conta e a nota continuam guardadas.' : 'Sair apaga a sessão de convidado deste navegador. A nota de convidado não pode ser recuperada.'}</p>`;
+    wireProviders();
+    $('#n').addEventListener('submit', async e => {
+      e.preventDefault();
+      const inp = $('#n-nome'), err = $('#n-erro'), name = inp.value.normalize('NFC').replace(/\s+/g, ' ').trim();
+      if (name === u.name) return;
+      if (!NAME_RE.test(name)){ inp.setAttribute('aria-invalid', 'true'); err.textContent = 'Use de 3 a 20 letras ou números.'; inp.focus(); return; }
+      inp.removeAttribute('aria-invalid'); err.textContent = '';
+      let r = null;
+      try { r = await AC.fetchApi('/api/name', { body:{ name } }); } catch (e){}
+      if (r && r.ok && r.j.token){ AC.session.save(r.j.token, r.j.user.name); notice('Nome atualizado.', 'ok'); refresh(); }
+      else { err.textContent = (r && r.j.err) || 'Sem conexão com o servidor.'; inp.setAttribute('aria-invalid', 'true'); }
+    });
+    const bf = $('#b');
+    if (bf) bf.addEventListener('submit', async e => {
+      e.preventDefault();
+      const v = $('#b-data').value, err = $('#b-erro');
+      if (!v){ err.textContent = 'Escolha a data.'; return; }
+      let r = null;
+      try { r = await AC.fetchApi('/api/me/birth', { body:{ birth:v } }); } catch (e){}
+      if (r && r.ok){ notice('Data salva.', 'ok'); refresh(); } else err.textContent = (r && r.j.err) || 'Não foi possível salvar.';
+    });
+    $('#sair').addEventListener('click', () => {
+      AC.session.clear();
+      notice(acct ? 'Você saiu da conta neste aparelho. A conta e a nota continuam guardadas.' : 'Sessão de convidado encerrada neste navegador.', 'ok');
+      refresh();
+    });
+  }
+
+  function renderDown(){
+    box.innerHTML = `<div class="state state--error" role="alert" style="border:0;background:none"><h3>Servidor fora do ar</h3>
+      <p>Não deu para falar com o servidor do Arcane Chess agora. Você ainda pode jogar offline contra a IA.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center"><button class="btn btn--primary" type="button" id="retry">Tentar de novo</button><a class="btn" href="${esc(AC.gameUrl(''))}">Jogar offline</a></div></div>`;
+    $('#retry').addEventListener('click', refresh);
+  }
+
+  async function refresh(){
+    const pv = await loadProviders();
+    const d = await AC.me(true);
+    if (d === undefined){ renderDown(); return; }
+    if (d) renderAccount(d, pv); else renderGuestForm(pv);
+    // atualiza o menu (nome e nota)
+    const navBox = document.querySelector('.nav__account');
+    if (navBox){
+      if (!d) navBox.innerHTML = `<a class="btn btn--sm btn--primary" href="${esc(AC.siteUrl('login.html'))}">Entrar</a>`;
+      else { const r = [d.ratings && d.ratings.xadrez, d.ratings && d.ratings.arcano].filter(Boolean).sort((a, b) => (b.games || 0) - (a.games || 0))[0];
+        navBox.innerHTML = `<a class="nav__me" href="${esc(AC.siteUrl('login.html'))}"><span class="nav__me-sigil" aria-hidden="true">${esc(d.user.name.charAt(0).toUpperCase())}</span><span class="nav__me-txt"><span class="nav__me-name">${esc(d.user.name)}</span><span class="nav__me-r">${r ? `Nota <b>${r.r}${r.provisional ? '?' : ''}</b>` : 'Conectado'}</span></span></a>`; }
+    }
+  }
+
+  // volta do provedor: #login=<código> vira a ficha; #login-erro=<motivo> mostra a mensagem do jogo
+  async function boot(){
+    const lg = location.hash.match(/^#login=([A-Za-z0-9_-]{16,64})$/), le = location.hash.match(/^#login-erro=([a-z]+)$/);
+    if (lg || le){ try { history.replaceState(null, '', location.pathname + location.search); } catch (e){} }
+    if (le) notice(esc(AC.LOGIN_ERR[le[1]] || 'O login não deu certo. Tente de novo.'), 'err');
+    if (lg){
+      box.innerHTML = '<div class="state" style="border:0;background:none"><div class="spinner" aria-hidden="true"></div><p>Conectando a sua conta…</p></div>';
+      let r = null;
+      try { r = await AC.fetchApi('/api/auth/exchange', { body:{ code:lg[1] }, token:null }); } catch (e){}
+      if (r && r.ok && r.j.token){ AC.session.save(r.j.token, r.j.user.name); notice(`Conta conectada: <b>${esc(r.j.user.name)}</b>.`, 'ok'); }
+      else notice('O login expirou. Tente de novo.', 'err');
+    }
+    refresh();
+  }
+  boot();
+  addEventListener('hashchange', () => { if (/^#login(-erro)?=/.test(location.hash)) boot(); });
+});
+</script>
+</body>
+</html>

@@ -32,6 +32,12 @@ async function main(){
   const t0 = Date.now();
   const h = await api('/api/health'); ok(h.j && h.j.ok, 'health');
   ok(h.headers.get('access-control-allow-origin') === ORIGIN, 'CORS da página do jogo');
+  // ranking por modo: lista (talvez vazia) com id, nome, nota, rd e partidas; CORS da página do jogo
+  for (const mode of ['xadrez', 'arcano']){
+    const lb = await api(`/api/leaderboard?mode=${mode}&limit=5`);
+    ok(lb.status === 200 && lb.j.mode === mode && Array.isArray(lb.j.top) && lb.j.top.length <= 5 && lb.j.top.every(x => x.id && x.name && typeof x.rating === 'number' && typeof x.rd === 'number' && x.games > 0), 'ranking ' + mode);
+    ok(lb.headers.get('access-control-allow-origin') === ORIGIN, 'CORS do ranking ' + mode);
+  }
   const A = await guest('Smoke A'), B = await guest('Smoke B');
   ok(A && A.token && B && B.token, 'convidados');
 

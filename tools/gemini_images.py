@@ -28,7 +28,7 @@ STYLE_UNIT = ("Full-body concept art of a game unit, dark fantasy game style, ha
               "plain white background, soft even lighting, single subject, no text. ")
 UNIT = {"cavalo", "torre", "torre_base", "cavalo_montado"}
 PIECES = {
-    "peao": "A young foot soldier representing the chess pawn: round steel kettle helmet, padded gambeson with gold trim, small round shield strapped to the left forearm, short spear held upright in the right hand close to the body.",
+    "peao": "A young foot soldier representing the chess pawn: round steel kettle helmet, padded gambeson with gold trim, small round shield strapped to the left forearm, short steel arming sword held in the right hand, blade pointing down and close to the body. No spear, no polearm.",
     "torre": "A chess rook unit, master of the earth element: a squat round stone watchtower with crenellated battlements and glowing amber earth runes carved into its stones, broken rocks and roots at its base as if it had just risen out of the ground; on top, standing behind the battlements, an archer in ivory and gold armor with a red hood aiming a longbow.",
     "bispo": "A warrior bishop representing the chess bishop: tall pointed mitre, ornate ivory and gold vestments, golden crozier staff topped with a holy flame, held upright at his side.",
     "dama": "A regal warrior queen representing the chess queen, master of lightning and fast as light: tall golden crown, sleek armored gown with a flowing cape, crackling blue-white electric arcs around her raised right hand and swirling around her feet.",

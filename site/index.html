@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arcane Chess — The Battle for the Grimoire</title>
+<meta name="description" content="Xadrez de verdade com guerreiros de RPG em 3D: cada captura vira duelo. Modo Arcano com 41 cartas, online ranqueado com Glicko-2 e dez arenas.">
+<meta name="theme-color" content="#0e0d0b">
+<meta property="og:title" content="Arcane Chess — The Battle for the Grimoire">
+<meta property="og:description" content="Xadrez em 3D com alma de RPG sombrio. Cada captura é um duelo.">
+<meta property="og:image" content="../assets/concepts/arena_infernal_ref.webp">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<link rel="preload" as="image" href="../assets/concepts/arena_infernal_ref.webp" fetchpriority="high">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/hero.js" defer></script>
+</head>
+<body data-page="home">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="Arcane Chess, página inicial">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><rect x="11.5" y="11.5" width="17" height="17" transform="rotate(45 20 20)" fill="none" stroke="#8f5c1d" stroke-width="1"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/><path d="M13 27h14" stroke="#e3a548" stroke-width="1.5"/></svg>
+      <span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span>
+    </a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir o menu"><span></span></button>
+    <div class="nav__panel" id="menu">
+      <ul class="nav__links">
+        <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
+        <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
+        <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
+        <li><a data-page="ranking" href="ranking.html">Ranking</a></li>
+        <li><a href="#como-jogar">Como jogar</a></li>
+      </ul>
+      <div class="nav__account"><a class="btn btn--sm btn--primary" href="login.html">Entrar</a></div>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+  <!-- HERO: transmissão ao vivo -->
+  <section class="hero" data-hero aria-labelledby="hero-title">
+    <img class="hero__poster" src="../assets/concepts/arena_infernal_ref.webp" alt="" width="1024" height="442" fetchpriority="high" decoding="async">
+    <canvas class="hero__canvas" aria-hidden="true"></canvas>
+    <div class="hero__fade" aria-hidden="true"></div>
+    <div class="letterbox" aria-hidden="true"></div>
+    <div class="hero__flash" aria-hidden="true"></div>
+    <div class="hero__vignette" aria-hidden="true"></div>
+    <div class="hero__frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+    <div class="wrap hero__content">
+      <div class="hero__inner">
+        <p class="eyebrow">Transmissão ao vivo · Partida da Ópera, 1858</p>
+        <h1 class="logo" id="hero-title">Arcane Chess<span class="logo__sub">The Battle for the Grimoire</span></h1>
+        <p class="hero__tagline">Xadrez de verdade, com guerreiros de verdade. Cada captura vira duelo, e um peão pode virar lenda.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" data-game="" href="../coroa-de-cinzas.html">Jogar agora</a>
+          <a class="btn" data-game="espectador" href="../coroa-de-cinzas.html"><span class="glyph" aria-hidden="true">◉</span> Assistir ao vivo</a>
+        </div>
+        <div class="hero__links">
+          <a class="link-arrow" data-game="arcano" href="../coroa-de-cinzas.html">Modo Arcano</a>
+          <a class="link-arrow" data-game="online" href="../coroa-de-cinzas.html">Online ranqueado</a>
+        </div>
+      </div>
+      <p class="sr-only">Ao fundo, uma simulação 3D ao vivo da Partida da Ópera (Paul Morphy, 1858): as peças são guerreiros que duelam a cada captura, um peão se transmuta em Lanceiro e o rei negro cai em xeque-mate no 17º lance.</p>
+    </div>
+
+    <div class="bc">
+      <div class="bc-top" aria-hidden="true">
+        <span class="bc-live"><span class="bc-live__dot"></span><span class="bc-live__tag">AO VIVO</span> Arena das Cinzas</span>
+        <div class="bc-score">
+          <div class="bc-score__side bc-score__side--w"><b>Aurora</b><small>Morphy · brancas</small><span class="caps" data-caps-w></span></div>
+          <div class="bc-score__mid"><small>LANCE</small><b data-bc-ply>—</b></div>
+          <div class="bc-score__side bc-score__side--b"><b>Legião</b><small>Duque e Conde · negras</small><span class="caps" data-caps-b></span></div>
+        </div>
+        <span class="bc-cam" data-bc-cam>CÂM 1 · ARENA</span>
+      </div>
+      <div class="bc-stamp" data-bc-stamp hidden aria-hidden="true">Xeque-mate<small>Morphy vence em 17 lances</small></div>
+      <div class="bc-lower">
+        <div class="bc-lower__tag"><b data-bc-tag>Ao vivo</b><small data-bc-sub>Arena das Cinzas</small></div>
+        <div class="bc-lower__txt" data-bc-caption aria-live="off"><span>Preparando a transmissão…</span></div>
+        <div class="bc-lower__ctl">
+          <button class="btn btn--sm bc-start" type="button" data-bc-start hidden>Iniciar a transmissão</button>
+          <button class="bc-btn" type="button" data-bc-sound aria-pressed="false" aria-label="Ligar o som" title="Ligar o som">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"/><path d="M16 9c1.2 1.6 1.2 4.4 0 6M18.5 6.5c2.6 3 2.6 8 0 11"/></svg>
+          </button>
+          <button class="bc-btn" type="button" data-bc-pause aria-pressed="false" aria-label="Pausar a transmissão" title="Pausar"></button>
+        </div>
+        <span class="bc-progress" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- quatro blocos com ícone -->
+  <section class="section section--alt torn-top" aria-labelledby="sobre-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">O jogo</p>
+        <h2 class="sec-title" id="sobre-t">Um tabuleiro. <em>Mil batalhas.</em></h2>
+        <p class="sec-lede">As regras são as do xadrez de sempre. O que muda é o que acontece em cada casa.</p>
+      </header>
+      <div class="features reveal">
+        <article class="feature">
+          <div class="feature__icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 32l18-18M26 14l2-6 4-2-2 4-6 2M10 26l4 4M7 33l3-3"/><path d="M32 32L14 14M14 14l-2-6-4-2 2 4 6 2M30 26l-4 4M33 33l-3-3"/></svg></div>
+          <h3>Xadrez com alma de RPG</h3>
+          <p>Seis personagens em 3D. O peão de escudo e lança, o bispo mago, a torre com arqueiro, a dama do relâmpago. Cada captura é um duelo com golpe e queda próprios.</p>
+        </article>
+        <article class="feature">
+          <div class="feature__icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 10c-4-3-9-3-13-1v22c4-2 9-2 13 1 4-3 9-3 13-1V9c-4-2-9-2-13 1z"/><path d="M20 10v22"/><path d="M27 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="currentColor"/></svg></div>
+          <h3>Modo Arcano</h3>
+          <p><b data-cards-count>41</b> cartas em três grimórios: Tempestade, Cinzas e Arcano. Feitiços, relíquias, armadilhas e invocações pagos com essência.</p>
+        </article>
+        <article class="feature">
+          <div class="feature__icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9 28l-2-14 7 5 6-10 6 10 7-5-2 14z"/><path d="M9 32h22"/><circle cx="20" cy="22" r="2" fill="currentColor"/></svg></div>
+          <h3>Online ranqueado</h3>
+          <p>Notas Glicko-2 separadas para o Xadrez Puro e o Arcano, filas com rivais de nível parecido e quatro ligas, mais o título de Grão-Mestre.</p>
+        </article>
+        <article class="feature">
+          <div class="feature__icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 33V15h5v-4h4v4h3v-6h4v6h3v-4h4v4h5v18z"/><path d="M16 33v-8a4 4 0 018 0v8"/></svg></div>
+          <h3>Dez arenas</h3>
+          <p>Da Fortaleza Medieval ao Monte Olimpo, cada arena com céu, luz, música e ambiente próprios. Troque de arena no meio da partida.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- contadores -->
+  <section class="section section--deep torn-top" aria-label="Em números">
+    <div class="wrap counters">
+      <div class="counter"><b data-count="41">41</b><span>Cartas</span><small>em três grimórios</small></div>
+      <div class="counter"><b data-count="10">10</b><span>Arenas</span><small>com música própria</small></div>
+      <div class="counter"><b data-count="6">6</b><span>Personagens</span><small>com rig e animações</small></div>
+      <div class="counter"><b data-count="5">5</b><span>Ligas</span><small>até Grão-Mestre Arcano</small></div>
+    </div>
+  </section>
+
+  <!-- vitrine das cartas -->
+  <section class="section torn-top" style="--sec-bg:var(--basalt)" aria-labelledby="cartas-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">Modo Arcano</p>
+        <h2 class="sec-title" id="cartas-t">Abra o <em>grimório</em></h2>
+        <p class="sec-lede">Cada turno você pode gastar essência numa carta antes de mover. Um passo de relâmpago, uma fênix, um fosso de lava: o xadrez continua, mas o tabuleiro já não é o mesmo.</p>
+      </header>
+      <div class="carousel" data-carousel data-cards>
+        <div class="carousel__track" tabindex="0" role="region" aria-label="Cartas do Modo Arcano (role para os lados)">
+          <p class="note">Carregando as cartas…</p>
+        </div>
+        <div class="carousel__nav">
+          <button class="carousel__btn" type="button" data-dir="-1" aria-label="Cartas anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="carousel__btn" type="button" data-dir="1" aria-label="Próximas cartas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- galeria das arenas -->
+  <section class="section section--alt torn-top" aria-labelledby="arenas-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">Campos de batalha</p>
+        <h2 class="sec-title" id="arenas-t">Escolha onde <em>sangrar</em></h2>
+      </header>
+      <div class="arenas reveal">
+        <figure class="arena"><img src="../assets/concepts/arena_infernal_ref.webp" alt="Arena Mistério Infernal: tabuleiro sobre rochas de lava com runas acesas e um portal violeta" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Mistério Infernal</b><span>Lava, correntes e um portal que não fecha.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_medieval_ref.webp" alt="Arena Ruínas Medievais: pátio de castelo com tochas e catapultas" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Ruínas Medievais</b><span>Tochas, estandartes e tempestade.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_fogo_gelo_ref1.webp" alt="Arena Fogo x Gelo: metade em chamas, metade congelada" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Fogo x Gelo</b><span>Dois reinos, uma linha.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_zodiaco_ref.webp" alt="Arena Zodíaco: tabuleiro sob um céu de constelações" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Zodíaco</b><span>As estrelas também jogam.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_celestial_ref.webp" alt="Arena Celestial: tabuleiro sobre nuvens douradas" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Celestial</b><span>Acima das nuvens.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_olimpo_ref.webp" alt="Arena Monte Olimpo: templo de mármore no alto da montanha" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Monte Olimpo</b><span>Raios de Zeus como plateia.</span></figcaption></figure>
+        <figure class="arena"><img src="../assets/concepts/arena_multiverso_ref.webp" alt="Arena Multiverso: portais para outros mundos ao redor do tabuleiro" loading="lazy" decoding="async" width="1024" height="442"><figcaption><b>Multiverso</b><span>Um tabuleiro, todos os mundos.</span></figcaption></figure>
+      </div>
+      <p class="arenas__more">E ainda a Fortaleza Medieval, o Covil dos Dragões e a Pedra Filosofal.</p>
+    </div>
+  </section>
+
+  <!-- prévia do ranking -->
+  <section class="section torn-top" style="--sec-bg:var(--basalt)" aria-labelledby="rank-t">
+    <div class="wrap rank-split">
+      <div class="reveal">
+        <p class="eyebrow">Ranking</p>
+        <h2 class="sec-title" id="rank-t">Os nomes no <em>grimório</em></h2>
+        <p class="sec-lede">As melhores notas firmes do Xadrez Puro. Contas entram no ranking depois de algumas partidas ranqueadas, quando a nota Glicko-2 deixa de ser provisória.</p>
+        <p><a class="link-arrow" href="ranking.html">Ver ranking completo</a></p>
+      </div>
+      <div class="reveal" data-rank-preview data-pool="xadrez" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- como jogar -->
+  <section class="section section--alt torn-top" id="como-jogar" aria-labelledby="como-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">Como jogar</p>
+        <h2 class="sec-title" id="como-t">Três passos até o <em>primeiro duelo</em></h2>
+      </header>
+      <ol class="steps reveal" style="list-style:none; padding:0; margin:0">
+        <li class="step"><div class="glyphs" aria-hidden="true">♔♕♖</div><h3>Escolha o modo</h3><p>Xadrez Puro contra a IA (Recruta, Veterano ou Mestre), o Modo Arcano com cartas, ou uma partida online por link ou pela fila.</p></li>
+        <li class="step"><div class="glyphs" aria-hidden="true">♘♗♙</div><h3>Mova como no xadrez</h3><p>As regras são as clássicas: roque, en passant, promoção e empates. Ao capturar, a câmera corta para o duelo.</p></li>
+        <li class="step"><div class="glyphs" aria-hidden="true">✦✧✦</div><h3>Gaste a essência</h3><p>No Arcano, cada turno rende essência para jogar cartas do seu grimório. Uma armadilha bem posta vale uma torre.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- vozes do tabuleiro -->
+  <section class="section section--deep torn-top" aria-labelledby="vozes-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">Vozes do tabuleiro</p>
+        <h2 class="sec-title" id="vozes-t">Quem já <em>lutou</em> aqui</h2>
+      </header>
+      <div class="quotes" data-quotes>
+        <div class="quotes__viewport">
+          <div class="quotes__track">
+            <figure class="quote"><blockquote>Nenhuma guerra começa sem um peão que não recua. E nenhum peão recua.</blockquote><figcaption><span class="quote__sigil"><img src="../assets/meshy/peao/thumbnail.png" alt="" loading="lazy" width="52" height="52"></span><span><b>O Peão</b><span>Soldado de escudo e lança, Ordem da Aurora</span></span></figcaption></figure>
+            <figure class="quote"><blockquote>Eu não ando pelas diagonais. Eu as atravesso.</blockquote><figcaption><span class="quote__sigil"><img src="../assets/meshy/bispo/thumbnail.png" alt="" loading="lazy" width="52" height="52"></span><span><b>O Bispo</b><span>Mestre da magia arcana</span></span></figcaption></figure>
+            <figure class="quote"><blockquote>A Legião tem números. A Aurora tem a mim.</blockquote><figcaption><span class="quote__sigil"><img src="../assets/meshy/dama/thumbnail.png" alt="" loading="lazy" width="52" height="52"></span><span><b>A Dama</b><span>Rainha do relâmpago</span></span></figcaption></figure>
+            <figure class="quote"><blockquote>Da muralha eu vejo o tabuleiro inteiro. E o que eu vejo, eu acerto.</blockquote><figcaption><span class="quote__sigil"><img src="../assets/meshy/arqueiro/thumbnail.png" alt="" loading="lazy" width="52" height="52"></span><span><b>A Torre</b><span>Arqueiro da muralha</span></span></figcaption></figure>
+            <figure class="quote"><blockquote>Ajoelhar-se não é perder. Perder é esquecer o nome de quem caiu por você.</blockquote><figcaption><span class="quote__sigil"><img src="../assets/meshy/rei/thumbnail.png" alt="" loading="lazy" width="52" height="52"></span><span><b>O Rei</b><span>Senhor da coroa de cinzas</span></span></figcaption></figure>
+          </div>
+        </div>
+        <div class="quotes__dots"></div>
+        <p class="quotes__note">Falas dos personagens do jogo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- faixa de chamada -->
+  <section class="cta torn-top" aria-labelledby="cta-t">
+    <canvas class="cta__embers" data-embers aria-hidden="true"></canvas>
+    <div class="wrap">
+      <h2 id="cta-t">Entre na batalha</h2>
+      <p>Abra o jogo no navegador, sem instalar nada. Jogue contra a IA agora ou entre na fila ranqueada e firme o seu nome no grimório.</p>
+      <div class="cta__actions">
+        <a class="btn btn--primary" data-game="" href="../coroa-de-cinzas.html">Jogar agora</a>
+        <a class="btn" data-game="online" href="../coroa-de-cinzas.html">Jogar online</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer torn-top">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="index.html"><svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/></svg><span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span></a>
+        <p style="margin-top:16px">Xadrez clássico em 3D com alma de RPG sombrio. Ordem da Aurora contra a Legião Cinzenta.</p>
+      </div>
+      <nav aria-label="Jogar"><h4>Jogar</h4><ul><li><a data-game="" href="../coroa-de-cinzas.html">Xadrez Puro</a></li><li><a data-game="arcano" href="../coroa-de-cinzas.html">Modo Arcano</a></li><li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li><li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li></ul></nav>
+      <nav aria-label="Comunidade"><h4>Comunidade</h4><ul><li><a href="ranking.html">Ranking</a></li><li><a href="login.html">Entrar</a></li><li><a href="#como-jogar">Como jogar</a></li></ul></nav>
+      <div><h4>Ao vivo</h4><p>A partida do topo é a Partida da Ópera, jogada por Paul Morphy em Paris, em 1858, recriada lance a lance.</p></div>
+    </div>
+    <div class="footer__base"><span>© <span data-year>2026</span> Arcane Chess</span><span>Feito com Three.js, chess.js e muita brasa.</span></div>
+  </div>
+</footer>
+</body>
+</html>

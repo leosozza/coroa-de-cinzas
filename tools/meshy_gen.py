@@ -29,7 +29,7 @@ IDLE, DEAD = 0, 189
 CHARS = {
     # Os dois exércitos usam os mesmos modelos; o lado preto é tingido no jogo.
     # rig=False: não é humanoide (Cavalo com cavaleiro, Torre com atirador); o jogo anima o modelo inteiro.
-    "peao":      dict(height=1.6, walk=560, attack=240, prompt=AURORA + "young squire soldier, kettle helmet, gambeson with gold trim, round wooden shield on left arm, spear in right hand"),
+    "peao":      dict(height=1.6, walk=560, attack=240, prompt=AURORA + "young squire soldier, kettle helmet, gambeson with gold trim, round wooden shield on left arm, short steel arming sword held in right hand, no spear, no polearm"),
     "torre":     dict(height=2.6, rig=False, prompt=AURORA + "stone watchtower with battlements and an archer on top"),
     "bispo":     dict(height=1.9, walk=30,  attack=125, prompt=AURORA + "warrior bishop priest, tall pointed mitre, ornate ivory and gold vestments, golden crozier staff topped with a glowing holy flame"),
     "dama":      dict(height=1.9, walk=30,  attack=129, prompt=AURORA + "regal warrior queen, tall golden crown, elegant armored gown with flowing cape, crackling lightning around her raised hand"),

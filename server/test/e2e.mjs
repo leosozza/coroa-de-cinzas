@@ -81,20 +81,21 @@ async function main(){
   ok(a.last.state.arc.hand.b.every(x => x.id !== '?') && a.last.state.arc.hand.w.every(x => x.id === '?'), 'Pretas veem só a própria mão');
   ok(c.last.state.arc.hand.w.every(x => x.id === '?') && c.last.state.arc.hand.b.every(x => x.id === '?'), 'espectador não vê mãos');
   ok(typeof a.last.state.arc.deck.w === 'number' && a.last.state.rng === 0, 'grimório e sorteio escondidos');
-  b.move('e2', 'e4'); await b.wait(st(m => m.state.arc.phase === 'cards'));
-  a.send({ t:'act', a:{ type:'end' } }); ok((await a.wait(m => m.t === 'error')).err === 'Não é a sua vez.', 'Pretas não fecham o turno das Brancas');
-  b.send({ t:'act', a:{ type:'end' } }); await a.wait(st(m => m.state.turn === 'b' && m.state.arc.phase === 'move'));
+  // regra nova: as cartas vêm antes do lance e o lance encerra o turno (não existe "encerrar turno")
+  a.move('e7', 'e5'); ok((await a.wait(m => m.t === 'error')).err === 'Não é a sua vez.', 'Pretas não jogam na vez das Brancas');
+  b.send({ t:'act', a:{ type:'end' } }); ok(/lance encerra o turno/.test((await b.wait(m => m.t === 'error')).err), 'encerrar o turno sem lance é recusado');
+  b.move('e2', 'e4'); await a.wait(st(m => m.n === 1 && m.state.turn === 'b' && m.state.arc.phase === 'move'));
+  ok(true, 'o lance encerrou o turno das Brancas');
   // jogar 6 turnos completos: compras do rival chegam mascaradas
   // cada turno parte do estado exato do servidor (contador de ações n): o socket de quem joga pode ainda não ter recebido
   // o fim do turno do rival, e um "último estado" velho fazia a espera procurar o histórico errado (falha intermitente)
-  let N = 2;
+  let N = 1;
   for (let k = 0; k < 6; k++){
     const me = k % 2 === 0 ? a : b, mine = me.seat, n0 = N;
     const s = (await me.wait(st(m => m.n === n0 && m.state.turn === mine && m.state.arc.phase === 'move'))).state;
     const moves = { b:[['e7', 'e5'], ['d7', 'd6'], ['g8', 'f6']], w:[['d2', 'd4'], ['g1', 'f3'], ['b1', 'c3']] }[mine][Math.floor(k / 2)];
-    me.move(...moves); await me.wait(st(m => m.n === n0 + 1 && m.state.arc.phase === 'cards' && m.state.arc.cardSide === mine && m.state.hist.length === s.hist.length + 1));
-    me.send({ t:'act', a:{ type:'end' } }); await me.wait(st(m => m.n === n0 + 2 && m.state.turn !== mine && m.state.arc.phase === 'move'));
-    N = n0 + 2;
+    me.move(...moves); await me.wait(st(m => m.n === n0 + 1 && m.state.turn !== mine && m.state.hist.length === s.hist.length + 1));
+    N = n0 + 1;
   }
   await sleep(300);
   const leaks = [a, b].flatMap(x => x.msgs.filter(m => m.t === 'state').flatMap(m => m.events.filter(e => (e.k === 'draw' || e.k === 'burn') && e.side !== x.seat && e.card.id !== '?')));
