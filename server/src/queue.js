@@ -1,7 +1,7 @@
 // Fila (Durable Object): uma por fila e ritmo, ex. "ranked:10+0". Junta jogadores por nota com uma janela que abre
 // conforme a espera; achou o par, cria a sala já com os dois lugares e avisa os dois. Sem rival em 30 s, oferece a IA
 // (no aparelho do jogador, sem nota) e continua procurando enquanto ele quiser.
-import { verifyToken, randomId } from './auth.js';
+import { verifySession, randomId } from './auth.js';
 import { getRating } from './ratings.js';
 
 export const QUEUES = { ranked:['10+0', '3+2'], casual:['10+0', '3+2', '5+3'] };
@@ -34,7 +34,7 @@ export class Matchmaker {
     const t = ws.deserializeAttachment() || {};
     if (m.t === 'ping') return this.send(ws, { t:'pong' });
     if (t.uid || m.t !== 'hello') return;
-    const p = await verifyToken(m.token, this.env.SESSION_SECRET);
+    const p = await verifySession(m.token, this.env);
     if (!p){ this.send(ws, { t:'error', err:'Sessão inválida.', code:'auth' }); ws.close(4001, 'auth'); return; }
     // a mesma pessoa em duas abas: fica só a mais nova
     for (const x of this.tickets()) if (x.t.uid === p.uid && x.ws !== ws){ x.t.done = true; x.ws.serializeAttachment(x.t); this.send(x.ws, { t:'replaced' }); try { x.ws.close(4002, 'outra aba'); } catch (e){} }

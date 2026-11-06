@@ -3,7 +3,7 @@
 // O .dev.vars local deve ter RECONNECT_MS=3000, FIRST_MOVE_MS=8000 e DEV_TC=1 para os testes de tempo rodarem rápido.
 const BASE = process.argv[2] || 'http://127.0.0.1:8787', WSB = BASE.replace(/^http/, 'ws');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-let fails = 0, passes = 0;
+let fails = 0, passes = 0, STEP = 0;
 const ok = (c, msg) => { if (c) passes++; else { fails++; console.log('FALHOU:', msg); } };
 async function api(path, o = {}){
   const r = await fetch(BASE + path, { method:o.body ? 'POST' : 'GET', headers:{ 'content-type':'application/json', ...(o.token ? { Authorization:'Bearer ' + o.token } : {}) }, body:o.body ? JSON.stringify(o.body) : undefined });
@@ -18,7 +18,7 @@ function client(room, token){
     wait:(pred, ms = 5000) => new Promise((res, rej) => {
       const hit = msgs.find(pred); if (hit) return res(hit);
       const w = { pred, res }; waiters.push(w);
-      setTimeout(() => { const i = waiters.indexOf(w); if (i >= 0){ waiters.splice(i, 1); rej(new Error('tempo esgotado esperando mensagem')); } }, ms);
+      setTimeout(() => { const i = waiters.indexOf(w); if (i >= 0){ waiters.splice(i, 1); rej(new Error(`tempo esgotado na etapa ${STEP} esperando ${String(pred).slice(0, 90)} · últimas: ${JSON.stringify(msgs.slice(-3).map(m => ({ t:m.t, status:m.status, n:m.n, err:m.err, h:m.state && m.state.hist && m.state.hist.length })))}`)); } }, ms);
     }),
     clear:() => { msgs.length = 0; },
     move:(from, to, promotion) => c.send({ t:'act', a:{ type:'move', from, to, promotion } }),
@@ -45,11 +45,15 @@ async function main(){
   ok((await api('/api/me', { token:A.token + 'x' })).status === 401, 'ficha adulterada recusada');
   ok((await api('/api/rooms', { body:{ mode:'xadrez' } })).status === 401, 'sala exige sessão');
 
+  STEP = 1;
   // 1) Xadrez Puro por link: mate do pastor, lances fora da vez e ilegais recusados
   let r = (await api('/api/rooms', { token:A.token, body:{ mode:'xadrez', tc:'3+2', color:'w' } })).j;
   ok(/^[a-z0-9]{8}$/.test(r.id) && r.link.endsWith('#sala=' + r.id), 'link da sala');
-  let a = client(r.id, A.token), b = client(r.id, B.token), c = client(r.id, C.token);
-  await a.wait(m => m.t === 'welcome'); await b.wait(m => m.t === 'welcome'); await c.wait(m => m.t === 'welcome');
+  // os lugares vão para quem chega primeiro: conectar em ordem (os dois jogadores, depois o espectador); em paralelo,
+  // às vezes o espectador chegava antes do segundo jogador e ficava com o lugar (falha intermitente)
+  let a = client(r.id, A.token); await a.wait(m => m.t === 'welcome');
+  let b = client(r.id, B.token); await b.wait(m => m.t === 'welcome');
+  let c = client(r.id, C.token); await c.wait(m => m.t === 'welcome');
   ok(a.seat === 'w' && b.seat === 'b' && c.seat === null, `lugares ${a.seat} ${b.seat} ${c.seat}`);
   await a.wait(st(m => m.status === 'playing'));
   b.move('e7', 'e5'); ok((await b.wait(m => m.t === 'error')).err === 'Não é a sua vez.', 'fora da vez');
@@ -64,9 +68,12 @@ async function main(){
   a.close(); b.close(); c.close();
   const info = (await api('/api/rooms/' + r.id)).j; ok(info.status === 'over' && info.result.score === '1-0', 'info da sala');
 
+  STEP = 2;
   // 2) Arcano: mãos e armadilhas escondidas do rival e do espectador
   r = (await api('/api/rooms', { token:A.token, body:{ mode:'arcano', tc:'livre', color:'b', deck:'cinzas' } })).j;
-  a = client(r.id, A.token); b = client(r.id, B.token); c = client(r.id, C.token);
+  a = client(r.id, A.token); await a.wait(m => m.t === 'welcome');
+  b = client(r.id, B.token); await b.wait(m => m.t === 'welcome');
+  c = client(r.id, C.token); await c.wait(m => m.t === 'welcome');
   await a.wait(st(m => m.status === 'playing')); await b.wait(st(m => m.status === 'playing')); await c.wait(st(m => m.status === 'playing'));
   ok(a.seat === 'b' && b.seat === 'w', 'cor escolhida pelo criador');
   ok(a.last.state.arc.decks.b === 'cinzas' && a.last.state.arc.decks.w !== 'cinzas', 'grimórios: ' + JSON.stringify(a.last.state.arc.decks));
@@ -78,11 +85,16 @@ async function main(){
   a.send({ t:'act', a:{ type:'end' } }); ok((await a.wait(m => m.t === 'error')).err === 'Não é a sua vez.', 'Pretas não fecham o turno das Brancas');
   b.send({ t:'act', a:{ type:'end' } }); await a.wait(st(m => m.state.turn === 'b' && m.state.arc.phase === 'move'));
   // jogar 6 turnos completos: compras do rival chegam mascaradas
+  // cada turno parte do estado exato do servidor (contador de ações n): o socket de quem joga pode ainda não ter recebido
+  // o fim do turno do rival, e um "último estado" velho fazia a espera procurar o histórico errado (falha intermitente)
+  let N = 2;
   for (let k = 0; k < 6; k++){
-    const me = k % 2 === 0 ? a : b, mine = me.seat;
-    const s = me.last.state, moves = { b:[['e7', 'e5'], ['d7', 'd6'], ['g8', 'f6']], w:[['d2', 'd4'], ['g1', 'f3'], ['b1', 'c3']] }[mine][Math.floor(k / 2)];
-    me.move(...moves); await me.wait(st(m => m.state.arc.phase === 'cards' && m.state.arc.cardSide === mine && m.state.hist.length === s.hist.length + 1));
-    me.send({ t:'act', a:{ type:'end' } }); await me.wait(st(m => m.state.turn !== mine && m.state.arc.phase === 'move' && m.state.hist.length === s.hist.length + 1));
+    const me = k % 2 === 0 ? a : b, mine = me.seat, n0 = N;
+    const s = (await me.wait(st(m => m.n === n0 && m.state.turn === mine && m.state.arc.phase === 'move'))).state;
+    const moves = { b:[['e7', 'e5'], ['d7', 'd6'], ['g8', 'f6']], w:[['d2', 'd4'], ['g1', 'f3'], ['b1', 'c3']] }[mine][Math.floor(k / 2)];
+    me.move(...moves); await me.wait(st(m => m.n === n0 + 1 && m.state.arc.phase === 'cards' && m.state.arc.cardSide === mine && m.state.hist.length === s.hist.length + 1));
+    me.send({ t:'act', a:{ type:'end' } }); await me.wait(st(m => m.n === n0 + 2 && m.state.turn !== mine && m.state.arc.phase === 'move'));
+    N = n0 + 2;
   }
   await sleep(300);
   const leaks = [a, b].flatMap(x => x.msgs.filter(m => m.t === 'state').flatMap(m => m.events.filter(e => (e.k === 'draw' || e.k === 'burn') && e.side !== x.seat && e.card.id !== '?')));
@@ -90,6 +102,7 @@ async function main(){
   ok(drawsSeen.length > 0 && leaks.length === 0, `compras do rival mascaradas (${drawsSeen.length} compras, ${leaks.length} vazamentos)`);
   a.close(); b.close(); c.close();
 
+  STEP = 3;
   // 3) Reconexão: volta em menos de 3 s continua; ausência acima de 3 s perde por abandono
   r = (await api('/api/rooms', { token:A.token, body:{ mode:'xadrez', tc:'livre', color:'w' } })).j;
   a = client(r.id, A.token); b = client(r.id, B.token);
@@ -101,6 +114,7 @@ async function main(){
   b.close(); const ab = await a.wait(st(m => m.status === 'over'), 9000);
   ok(ab.result.score === '1-0' && ab.result.reason === 'abandono', 'abandono: ' + JSON.stringify(ab.result)); a.close();
 
+  STEP = 4;
   // 4) Tempo esgotado (3 s de relógio, só no modo de teste)
   r = (await api('/api/rooms', { token:A.token, body:{ mode:'xadrez', tc:'0.05+0', color:'w' } })).j;
   a = client(r.id, A.token); b = client(r.id, B.token);
@@ -108,11 +122,13 @@ async function main(){
   const to = await a.wait(st(m => m.status === 'over'), 9000);
   ok(to.result.score === '1-0' && to.result.reason === 'tempo' && to.clocks.b === 0, 'tempo: ' + JSON.stringify(to.result)); a.close(); b.close();
 
+  STEP = 5;
   // 5) Sem primeiro lance em 8 s: partida cancelada, sem resultado
   r = (await api('/api/rooms', { token:A.token, body:{ mode:'xadrez', tc:'10+0', color:'w' } })).j;
   a = client(r.id, A.token); b = client(r.id, B.token);
   const ab2 = await a.wait(st(m => m.status === 'aborted'), 14000); ok(ab2.result.score === 'abortada', 'cancelada sem primeiro lance'); a.close(); b.close();
 
+  STEP = 6;
   // 6) Empate por acordo e 7) desistência
   r = (await api('/api/rooms', { token:A.token, body:{ mode:'xadrez', tc:'10+0', color:'w' } })).j;
   a = client(r.id, A.token); b = client(r.id, B.token);
@@ -124,6 +140,7 @@ async function main(){
   await a.wait(st(m => m.status === 'playing')); a.move('d2', 'd4'); await b.wait(plies(1)); b.send({ t:'resign' });
   const rs = await a.wait(st(m => m.status === 'over')); ok(rs.result.score === '1-0' && rs.result.reason === 'desistencia', 'desistência'); a.close(); b.close();
 
+  STEP = 8;
   // 8) Ficha inválida no WebSocket
   const bad = client(r.id, 'x.y'); const e = await bad.wait(m => m.t === 'error'); ok(e.code === 'auth', 'ficha inválida no WebSocket'); bad.close();
 

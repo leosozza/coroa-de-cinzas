@@ -85,6 +85,14 @@ async function main(){
   const m3 = await me(L3.ex.j.token);
   ok(m3.ratings.xadrez.games === 2 && m3.ratings.xadrez.r === wr.r, 'notas fundidas: fica a de mais partidas (empate: a mais firme), partidas somam: ' + JSON.stringify(m3.ratings.xadrez));
   ok((await api('/api/me', { token:loser.token })).status === 401, 'ficha do convidado fundido não vale mais');
+  // e também não entra em sala nem em fila (a sala e a fila conferem users.deleted no hello)
+  const rr = (await api('/api/rooms', { token:L3.ex.j.token, body:{ mode:'xadrez', tc:'livre', color:'w' } })).j;
+  const rs = sock(`/api/rooms/${rr.id}/ws`, loser.token), re = await rs.wait(m => m.t === 'error' || m.t === 'welcome'); rs.close();
+  ok(re.t === 'error' && re.code === 'auth', 'sala recusa a ficha do convidado fundido');
+  const qs = sock('/api/queue/casual/5+3/ws', loser.token), qe = await qs.wait(m => m.t === 'error' || m.t === 'queued'); qs.close();
+  ok(qe.t === 'error' && qe.code === 'auth', 'fila recusa a ficha do convidado fundido');
+  const ok2 = sock(`/api/rooms/${rr.id}/ws`, L3.ex.j.token), we = await ok2.wait(m => m.t === 'error' || m.t === 'welcome'); ok2.close();
+  ok(we.t === 'welcome' && we.you.seat === 'w', 'a ficha nova da conta entra normalmente');
 
   // 4) convidado novo sem partidas, identidade nova: conta nova a partir dele, nota inicial
   const G3 = await guest('Caio');

@@ -3,7 +3,7 @@
 // WebSocket com hibernação: a sala dorme entre lances e acorda com o estado salvo.
 import arcanoRules from '../../engine/arcano-rules.js';
 import catalog from '../../data/cartas.json';
-import { verifyToken } from './auth.js';
+import { verifySession } from './auth.js';
 import { rateGame } from './ratings.js';
 
 const ARC = arcanoRules(catalog.cartas);
@@ -114,7 +114,7 @@ export class GameRoom {
     const at = ws.deserializeAttachment() || {};
     if (!at.uid){
       if (m.t !== 'hello') return this.send(ws, { t:'error', err:'Identifique-se primeiro.' });
-      const p = await verifyToken(m.token, this.env.SESSION_SECRET);
+      const p = await verifySession(m.token, this.env);
       if (!p){ this.send(ws, { t:'error', err:'Sessão inválida.', code:'auth' }); ws.close(4001, 'auth'); return; }
       at.uid = p.uid; at.name = p.name;
       return this.join(ws, at);

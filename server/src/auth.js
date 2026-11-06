@@ -40,3 +40,12 @@ export function randomId(n = 8){
   for (const x of b) s += ALPHA[x % ALPHA.length];
   return s;
 }
+
+// sessão de sala e fila: além da assinatura, a conta ainda existe e não foi fundida noutra (1 consulta por conexão)
+export async function verifySession(token, env){
+  const p = await verifyToken(token, env.SESSION_SECRET);
+  if (!p || !env.DB) return p;
+  const row = await env.DB.prepare('SELECT deleted, merged_into FROM users WHERE id = ?').bind(p.uid).first();
+  if (!row || row.deleted) return null;
+  return p;
+}
