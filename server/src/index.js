@@ -1,7 +1,8 @@
 // API do Arcane Chess online (Cloudflare Worker). Fase 1: convidado, partida por link, relógio e reconexão.
 //   GET  /api/health
 //   POST /api/guest            { name? }                 -> { token, user }
-//   GET  /api/me               (Bearer)                  -> { user }
+//   GET  /api/me               (Bearer)                  -> { user, ratings }
+//   POST /api/name             (Bearer) { name }         -> { token, user }
 //   POST /api/rooms            (Bearer) { mode, tc, color, deck } -> { id, link, room }
 //   GET  /api/rooms/:id                                  -> room
 //   GET  /api/rooms/:id/ws     WebSocket; 1ª mensagem { t:'hello', token }
@@ -58,6 +59,17 @@ export default {
         const user = row || { id:u.uid, name:u.name, kind:u.kind };
         const ratings = { xadrez:await publicRating(env.DB, user.id, user.kind, 'xadrez'), arcano:await publicRating(env.DB, user.id, user.kind, 'arcano') };
         return json(req, env, { user, ratings });
+      }
+
+      // trocar o nome público mantém o id (e a nota); devolve uma ficha nova com o nome
+      if (p === '/api/name' && req.method === 'POST'){
+        const u = await auth(req, env);
+        if (!u) return json(req, env, { err:'Sessão inválida.' }, 401);
+        const name = cleanName((await body(req)).name);
+        if (!name) return json(req, env, { err:'Use de 3 a 20 letras ou números.' }, 400);
+        if (env.DB) await env.DB.prepare('UPDATE users SET name = ? WHERE id = ? AND deleted = 0').bind(name, u.uid).run();
+        const token = await signToken({ uid:u.uid, name, kind:u.kind }, env.SESSION_SECRET);
+        return json(req, env, { token, user:{ id:u.uid, name, kind:u.kind } });
       }
 
       if (p === '/api/rooms' && req.method === 'POST'){

@@ -489,6 +489,31 @@ details.rules[open] summary::before{content:"▾ "}
 .setup h3{margin:0 0 10px; font-family:var(--f-engrave); letter-spacing:.08em; color:#f0d48a; font-size:1rem}
 .setup .row{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px}
 .setup .acts{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+/* Jogar online */
+.setup input[type=text]{font-family:var(--f-body); font-size:.95rem; color:var(--bone); background:var(--stone); border:1px solid var(--seam); border-radius:3px; padding:8px 12px; min-height:40px; width:100%; min-width:0}
+.setup input[type=text]:focus-visible{outline:2px solid var(--ember); outline-offset:1px}
+.setup .flabel{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.1em; color:var(--ash)}
+.on-rating{font-family:var(--f-ui); color:var(--bone); min-height:40px; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.on-rating em{font-style:normal; color:#f0d48a}
+.on-off{display:grid; gap:8px; padding:12px; border:1px solid rgba(255,106,90,.45); border-radius:4px; background:rgba(60,18,16,.35); color:var(--bone)}
+.on-off b{color:#ff9a8a; font-family:var(--f-engrave); letter-spacing:.06em}
+.on-off button{justify-self:start}
+.on-tabs{display:flex; gap:6px; margin:14px 0 10px; flex-wrap:wrap}
+.on-tabs button[aria-selected=true]{border-color:var(--ember); color:#f0d48a}
+.on-link{display:grid; gap:4px; margin-top:12px}
+.on-link label{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.1em; color:var(--ash)}
+.on-linkrow{display:flex; gap:8px}
+.on-join{margin-top:14px}
+.onbar{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:6px 10px; margin:6px 0; border:1px solid var(--seam); border-radius:6px; background:rgba(16,14,20,.88); font-family:var(--f-ui); font-size:.85rem; color:var(--bone)}
+.onbar .on-vs{display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; flex:1 1 220px; min-width:0}
+.onbar .on-p{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+.onbar .on-p.off{color:#ff9a8a}
+.onbar .on-tag{font-size:.72rem; letter-spacing:.08em; padding:2px 6px; border:1px solid var(--seam); border-radius:10px; color:#f0d48a}
+.onbar .on-st{color:var(--ash)}
+.onbar .on-acts{display:flex; flex-wrap:wrap; gap:6px}
+.onbar button{min-height:36px; padding:4px 10px; font-size:.85rem}
+.onbar button.warn{border-color:#d24a58; color:#ffb3a8}
+.on-toast{position:fixed; z-index:60; left:50%; bottom:calc(90px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); max-width:calc(100vw - 32px); padding:8px 14px; border:1px solid var(--ember-deep); border-radius:6px; background:rgba(16,14,20,.95); color:var(--bone); font-family:var(--f-ui); font-size:.9rem}
 .title-continue{font-family:var(--f-engrave); letter-spacing:.08em}
 .arena-pick{width:100%}
 .arena-pick h3{margin:6px 0 8px; font-family:var(--f-engrave); letter-spacing:.12em; font-size:.85rem; color:var(--ash); text-transform:uppercase}
@@ -506,6 +531,8 @@ details.rules[open] summary::before{content:"▾ "}
 @media (max-width:560px){ .logo-sub{letter-spacing:.2em} .modes{grid-template-columns:1fr 1fr} .mode-card{min-height:96px; padding:14px 12px 12px} .mode-card span{font-size:.82rem} }
 @media (prefers-reduced-motion: reduce){ .logo-word::after{animation:none; opacity:.7} }
 @media (prefers-reduced-motion: reduce){ .thinking .sigil, .hud-phase.check b, .hud-phase.think b::after, .cine .flash.go{animation:none} .meter > i, .cine .bar, .cine .vig, .cine .cap{transition:none} }
+body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-top, 0px)); left:50%; transform:translateX(-50%); width:min(620px, calc(100vw - 24px)); margin:0}
+@media (max-width:900px), (pointer:coarse){ .onbar button{min-height:44px} }
 /* alvos de toque: no celular e no tablet, nada abaixo de 44 px (no fim, para vencer as regras base) */
 @media (max-width:900px), (pointer:coarse){
   button, select{min-height:44px}
@@ -600,6 +627,7 @@ details.rules[open] summary::before{content:"▾ "}
       <button class="mode-card" type="button" data-mode="spec"><b>Modo Espectador</b><span>IA contra IA: assista, pause, volte um lance ou assuma um lado.</span></button>
       <button class="mode-card" type="button" data-mode="aprendiz"><b>Modo Aprendiz</b><span>Sete lições guiadas, dicas do motor e insígnias.</span><em id="apr-count">0/7 insígnias</em></button>
       <button class="mode-card" type="button" data-mode="arcano"><b>Modo Arcano</b><span>Xadrez com cartas, essência e o Grimório. Dois jogadores no mesmo aparelho.</span></button>
+      <button class="mode-card" type="button" data-mode="online"><b>Jogar online</b><span>Partida por link com um amigo (Xadrez Puro ou Arcano) e filas casual e ranqueada.</span></button>
     </div>
     <div class="setup" id="setup-padrao" hidden>
       <h3>Modo Padrão</h3>
@@ -635,6 +663,52 @@ details.rules[open] summary::before{content:"▾ "}
       <p class="hint">Cada turno: +1 essência, um lance de xadrez e até uma carta. Capturar dá +2 essência e o artefato da peça. As 4 casas centrais são runas: terminar o turno numa delas dá uma carta.</p>
       <div class="acts"><button class="btn-main" id="a-start" type="button">Começar</button><button id="t-back4" type="button">Voltar</button></div>
     </div>
+    <div class="setup" id="setup-online" hidden>
+      <h3>Jogar online</h3>
+      <p class="hint" id="on-status" aria-live="polite">Conectando ao servidor…</p>
+      <div class="on-off" id="on-off" role="status" hidden>
+        <b>Servidor indisponível.</b>
+        <span>O modo online precisa do servidor do jogo, que não respondeu: sem internet, servidor fora do ar ou uma página que não permite conexões externas. Todos os outros modos continuam funcionando.</span>
+        <button type="button" id="on-retry">Tentar de novo</button>
+      </div>
+      <div id="on-body" hidden>
+        <div class="row">
+          <div class="field"><label for="on-name">Seu nome</label><input id="on-name" type="text" maxlength="20" autocomplete="nickname" spellcheck="false"></div>
+          <div class="field"><span class="flabel">Sua nota</span><span class="on-rating" id="on-rating">—</span></div>
+        </div>
+        <div class="on-tabs" role="tablist" aria-label="Como jogar">
+          <button type="button" role="tab" id="on-tab-q" aria-selected="true" aria-controls="on-q-p">Fila</button>
+          <button type="button" role="tab" id="on-tab-l" aria-selected="false" aria-controls="on-l-p">Partida por link</button>
+        </div>
+        <div id="on-q-p" role="tabpanel" aria-labelledby="on-tab-q">
+          <div class="row">
+            <div class="field"><label for="on-q">Fila de Xadrez Puro</label><select id="on-q"><option value="casual">Casual (sem nota)</option><option value="ranked">Ranqueada</option></select></div>
+            <div class="field"><label for="on-qtc">Ritmo</label><select id="on-qtc"></select></div>
+          </div>
+          <p class="hint" id="on-qmsg" aria-live="polite"></p>
+          <div class="acts"><button class="btn-main" id="on-qgo" type="button">Procurar rival</button><button id="on-qcancel" type="button" hidden>Sair da fila</button><button id="on-ai" type="button" hidden></button></div>
+        </div>
+        <div id="on-l-p" role="tabpanel" aria-labelledby="on-tab-l" hidden>
+          <div class="row">
+            <div class="field"><label for="on-lmode">Regras</label><select id="on-lmode"><option value="xadrez">Xadrez Puro</option><option value="arcano">Arcano (cartas)</option></select></div>
+            <div class="field"><label for="on-ltc">Ritmo</label><select id="on-ltc"></select></div>
+            <div class="field"><label for="on-lcolor">Sua cor</label><select id="on-lcolor"><option value="random">Sortear</option><option value="w">Ordem da Aurora</option><option value="b">Legião Cinzenta</option></select></div>
+            <div class="field" id="on-ldeck-f" hidden><label for="on-ldeck">Seu grimório</label><select id="on-ldeck"><option value="tempestade">Tempestade</option><option value="cinzas">Cinzas</option><option value="arcano">Arcano</option></select></div>
+          </div>
+          <div class="acts"><button class="btn-main" id="on-create" type="button">Criar link</button></div>
+          <div class="on-link" id="on-linkbox" hidden>
+            <label for="on-link">Envie este link para o seu rival</label>
+            <div class="on-linkrow"><input id="on-link" type="text" readonly><button type="button" id="on-copy">Copiar</button></div>
+          </div>
+          <div class="row on-join">
+            <div class="field"><label for="on-code">Recebeu um link? Cole aqui</label><input id="on-code" type="text" placeholder="link ou código de 8 letras" autocomplete="off" spellcheck="false"></div>
+          </div>
+          <div class="acts"><button id="on-join" type="button">Entrar na partida</button></div>
+          <p class="hint" id="on-lmsg" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="acts"><button id="t-back5" type="button">Voltar</button></div>
+    </div>
     <div class="setup" id="setup-aprendiz" hidden>
       <h3>Modo Aprendiz</h3>
       <p class="hint">Sete lições curtas, do primeiro lance ao xeque-mate, e uma partida guiada no fim. Cada lição concluída vale uma insígnia.</p>
@@ -648,6 +722,7 @@ details.rules[open] summary::before{content:"▾ "}
   <main class="stage" id="stage">
     <section class="board-col">
       <div class="turn" id="turn" aria-live="polite"></div>
+      <div class="onbar" id="onbar" role="region" aria-label="Partida online" hidden></div>
       <div class="specbar" id="specbar" hidden>
         <span class="score" id="spec-score"></span>
         <button id="spec-pause" type="button">Pausar</button>
@@ -9301,7 +9376,7 @@ const CLK = { on:false, ms:{ w:0, b:0 }, inc:0, last:0, thinking:false };
 const SERIES = { n:1, w:0, b:0, d:0, t:0, cine:null, view:null };
 const ui = { sel:null, acts:[], hover:null, inspect:null, hoverId:null, cursor:{ r:6, c:4 }, kb:false };
 const $ = id => document.getElementById(id);
-const human = side => cfg.mode === 'pvp' || (cfg.mode === 'ai' && side === cfg.human);
+const human = side => cfg.mode === 'pvp' || ((cfg.mode === 'ai' || cfg.mode === 'online') && side === cfg.human);
 const aiLevel = side => cfg.mode === 'spec' ? (side === 'w' ? cfg.diffW : cfg.diffB) : cfg.diff;
 const pieceAt = (r, c) => S.board[r * 8 + c];
 const moveNo = () => Number(G.fen().split(' ')[5]) || 1;
@@ -9335,6 +9410,7 @@ function resetUI(){
   Object.assign(ui, { sel:null, acts:[], inspect:null, hoverId:null });
 }
 function newGame(){
+  onlineLeave();
   if (APR.on && APR.scripted){ aprStartLesson(APR.L); return; }
   if (cfg.arc){ arcNewGame(); return; }
   aiToken++;
@@ -9365,7 +9441,8 @@ function renderTurn(){
   const el = $('turn');
   const side = S.turn, thinking = !S.over && !human(side);
   let txt;
-  if (S.over) txt = S.over.kind === 'mate' ? `${FACTION[S.over.winner]} vence por xeque-mate` : 'Empate';
+  if (S.over) txt = S.over.kind === 'mate' ? `${FACTION[S.over.winner]} vence por xeque-mate` : S.over.kind === 'abortada' ? 'Partida cancelada' : S.over.winner ? `${FACTION[S.over.winner]} vence` : 'Empate';
+  else if (cfg.mode === 'online') txt = !cfg.human ? `Assistindo · vez da ${FACTION[side]}` : side === cfg.human ? `Sua vez · ${FACTION[side]}` : `Vez de ${onlineOppName()}`;
   else if (cfg.mode === 'ai') txt = side === cfg.human ? `Sua vez · ${FACTION[side]}` : `A ${FACTION[side]} trama seu golpe…`;
   else if (cfg.mode === 'spec') txt = cfg.paused ? 'Partida pausada' : `A ${FACTION[side]} pensa · ${LEVEL[aiLevel(side)]}`;
   else txt = `Vez da ${FACTION[side]}`;
@@ -9636,6 +9713,8 @@ function eventsFor(res, mover){
 }
 async function doMove(m){
   if (!m || S.over) return;
+  // online: o lance vai ao servidor; só anda na tela quando ele confirma (onlineState chama doMove de novo com NET.applying)
+  if (cfg.mode === 'online' && !NET.applying){ onlineMove(m); return; }
   const mover = pieceAt(...rcOf(m.from));
   const res = G.move({ from:m.from, to:m.to, promotion:m.promotion });
   if (!res || !mover) return;
@@ -9709,6 +9788,7 @@ function aiThink(fen, diff){
   }).then(r => r === undefined ? local() : r);
 }
 function maybeAI(){
+  if (cfg.mode === 'online') return;
   if (cfg.arc){ arcAIContinue(); return; }
   if (S.over || human(S.turn) || cfg.paused || TITLE.open || (APR.on && APR.scripted)) return;
   busy = true; CLK.thinking = true;
@@ -9755,7 +9835,8 @@ function showEnd(){
       good = o.winner === cfg.human;
       text = cfg.human === 'w' ? (good ? AR().win : AR().lose)
         : good ? `O Rei da Ordem da Aurora não tem para onde fugir. A Legião Cinzenta reclama a coroa.${AR().tail}` : `O seu Rei está cercado. A Ordem da Aurora vence.${AR().tail}`;
-    } else { good = true; text = `A ${FACTION[o.winner]} vence: o rei inimigo não tem saída.${AR().tail}`; }
+    } else if (cfg.mode === 'online' && cfg.human){ good = o.winner === cfg.human; text = good ? `Xeque-mate! Você vence a partida online com a ${FACTION[cfg.human]}.${AR().tail}` : `Xeque-mate. ${onlineOppName()} venceu desta vez.${AR().tail}`; }
+    else { good = true; text = `A ${FACTION[o.winner]} vence: o rei inimigo não tem saída.${AR().tail}`; }
     pushLog(`<b>Xeque-mate.</b> A ${FACTION[o.winner]} vence a batalha.`);
   } else {
     const T = {
@@ -9763,10 +9844,15 @@ function showEnd(){
       rep:['Empate por repetição', 'A mesma posição surgiu três vezes. As cinzas assentam sem coroa.'],
       material:['Empate por material insuficiente', 'Não restam peças capazes de dar xeque-mate.'],
       fifty:['Empate pelos 50 lances', 'Cinquenta lances de cada lado sem captura nem movimento de peão.'],
-      tempo:['Tempo esgotado', o.winner ? `O relógio da ${FACTION[other(o.winner)]} zerou. A ${FACTION[o.winner]} vence.` : ''],
-    }[o.kind];
+      tempo:['Tempo esgotado', o.winner ? `O relógio da ${FACTION[other(o.winner)]} zerou. A ${FACTION[o.winner]} vence.` : 'O relógio zerou, mas quem ficou não tem material para dar mate: empate.'],
+      abandono:['Vitória por abandono', o.winner ? `A ${FACTION[other(o.winner)]} saiu e não voltou a tempo. A ${FACTION[o.winner]} vence.` : 'Os dois lados saíram da partida.'],
+      desistencia:['Desistência', o.winner ? `A ${FACTION[other(o.winner)]} desistiu. A ${FACTION[o.winner]} vence.` : ''],
+      acordo:['Empate combinado', 'Os dois lados aceitaram o empate.'],
+      abortada:['Partida cancelada', 'A partida foi cancelada antes de começar de verdade e não vale nota.'],
+    }[o.kind] || ['Fim de partida', ''];
     title = T[0]; text = T[1] + AR().tail;
     if (o.kind === 'tempo'){ good = cfg.mode !== 'ai' || o.winner === cfg.human; color = o.winner === 'w' ? 'var(--ember)' : 'var(--blood)'; }
+    if (cfg.mode === 'online' && o.winner){ good = o.winner === cfg.human; color = o.winner === 'w' ? 'var(--ember)' : 'var(--blood)'; }
     pushLog(`<b>${title}.</b>`);
   }
   $('end-title').textContent = title;
@@ -9779,6 +9865,8 @@ function showEnd(){
   if (o.kind === 'mate'){ if (!MATE.sounded){ snd(good ? 'vitoria' : 'derrota', { delay:0.5 }); snd(good ? 'v_vitoria' : 'v_derrota', { delay:1.1 }); } }
   else snd('v_empate', { delay:0.8 });
   updateUndo();
+  $('again').textContent = cfg.mode === 'online' ? 'Jogar online de novo' : 'Nova partida';
+  if (cfg.mode === 'online') onlineEndExtra();
   if (cfg.mode === 'spec') seriesEnd();
   setTimeout(() => { if (S.over){ $('end').hidden = false; $('again').focus(); } }, 650 * SPD);
 }
@@ -10370,8 +10458,9 @@ $('arena').value = arena;
 $('arena').addEventListener('change', e => { audio(); setArena(e.target.value); });
 scene.addEventListener('pointerdown', e => { if (e.target !== cv && cineSkip()) e.preventDefault(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.activeElement !== cv) cineSkip(); });
-$('newgame').addEventListener('click', () => { audio(); newGame(); });
-$('again').addEventListener('click', () => { audio(); newGame(); cv.focus(); });
+// online: "Nova partida" abre o menu online sem sair da partida (Voltar à partida retoma; outro modo encerra a conexão)
+$('newgame').addEventListener('click', () => { audio(); if (cfg.mode === 'online' && NET.began && !NET.ended){ openTitle(); showSetup('online'); return; } newGame(); });
+$('again').addEventListener('click', () => { audio(); if (cfg.mode === 'online'){ $('end').hidden = true; openTitle(); showSetup('online'); return; } newGame(); cv.focus(); });
 $('undo').addEventListener('click', () => { audio(); doUndo(); });
 $('end-undo').addEventListener('click', () => { audio(); doUndo(); cv.focus(); });
 $('mode').addEventListener('change', e => { $('diff').disabled = $('t-color').disabled = e.target.value === 'pvp'; undoNote(); });
@@ -10425,18 +10514,22 @@ function clockStart(minMs){
 const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 function clockHtml(){
   if (!CLK.on) return '';
-  return ['w', 'b'].map(s0 => `<span class="clock ${S && S.turn === s0 && !S.over ? 'run' : ''} ${CLK.ms[s0] < 20000 ? 'low' : ''}" id="clk-${s0}" aria-label="Relógio da ${FACTION[s0]}">${s0 === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[s0])}</span>`).join('');
+  const runSide = cfg.mode === 'online' ? NET.running : S && S.turn;
+  return ['w', 'b'].map(s0 => `<span class="clock ${runSide === s0 && S && !S.over ? 'run' : ''} ${CLK.ms[s0] < 20000 ? 'low' : ''}" id="clk-${s0}" aria-label="Relógio da ${FACTION[s0]}">${s0 === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[s0])}</span>`).join('');
 }
-function clockMoved(){ if (CLK.on && S && G.history().length) CLK.ms[other(G.turn())] += CLK.inc; }
+function clockMoved(){ if (cfg.mode === 'online') return; if (CLK.on && S && G.history().length) CLK.ms[other(G.turn())] += CLK.inc; }
 setInterval(() => {
   const now = performance.now(), dt = now - CLK.last;
   CLK.last = now;
-  if (!CLK.on || !S || S.over || TITLE.open || (busy && !CLK.thinking) || !$('promo').hidden && !promoResolve) return;
-  const side = S.turn;
+  const online = cfg.mode === 'online';
+  if (!CLK.on || !S || S.over || (!online && (TITLE.open || (busy && !CLK.thinking) || !$('promo').hidden && !promoResolve))) return;
+  const side = online ? NET.running : S.turn;
+  if (!side) return;
   CLK.ms[side] -= dt;
   const el = $('clk-' + side);
   if (el){ el.textContent = `${side === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[side])}`; el.classList.toggle('low', CLK.ms[side] < 20000); }
   if (CLK.ms[side] <= 0){
+    if (online){ CLK.ms[side] = 0; return; }
     aiToken++; busy = false; CLK.thinking = false;
     S.over = { kind:'tempo', winner:other(side) };
     renderAll(); showEnd();
@@ -10445,7 +10538,7 @@ setInterval(() => {
 // partida salva para "Continuar partida" (só Padrão e dois jogadores)
 function saveGame(){
   try {
-    if (cfg.mode === 'spec' || APR.on || cfg.arc) return;
+    if (cfg.mode === 'spec' || cfg.mode === 'online' || APR.on || cfg.arc) return;
     if (!G || S.over || !G.history().length){ localStorage.removeItem(SAVE_KEY); return; }
     localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign(serialize(), { clock:CLK.on ? { ...CLK.ms } : null, arena })));
   } catch (e){}
@@ -10493,7 +10586,9 @@ function showSetup(id){
   $('setup-spec').hidden = id !== 'spec';
   $('setup-aprendiz').hidden = id !== 'aprendiz';
   $('setup-arcano').hidden = id !== 'arcano';
+  $('setup-online').hidden = id !== 'online';
   $('t-modes').hidden = !!id;
+  if (id === 'online'){ onlineOpen(); return; }
   if (id === 'arcano'){ $('a-start').focus(); return; }
   if (id === 'aprendiz'){ aprRenderList(); const b = $('apr-lessons').querySelector(`[data-l="${APR.on ? APR.L : aprNext()}"]`); if (b) b.focus(); return; }
   if (id === 'padrao') undoNote();
@@ -10666,7 +10761,8 @@ class ArcanoG {
   turn(){ return this.s.turn; }
   fen(){ return ARC.fen(this.s); }
   moves(o = {}){ const ms = ARC.legalMoves(this.s, o.square); return o.verbose ? ms : ms.map(m => m.san); }
-  move(m){ const r = ARC.applyMove(this.s, typeof m === 'string' ? this.moves({ verbose:true }).find(x => x.san === m) || {} : m); if (!r.ok) return null; this.s = r.state; this.events = r.events; return r.move; }
+  // online: o estado e o lance já vêm do servidor (pending); a cena anima exatamente o que ele aplicou
+  move(m){ if (this.pending){ const p = this.pending; this.pending = null; this.s = p.state; this.events = p.events || []; return p.move; } const r = ARC.applyMove(this.s, typeof m === 'string' ? this.moves({ verbose:true }).find(x => x.san === m) || {} : m); if (!r.ok) return null; this.s = r.state; this.events = r.events; return r.move; }
   history(o = {}){ return o.verbose ? this.s.hist.slice() : this.s.hist.map(m => m.san); }
   in_check(){ return ARC.status(this.s).check; }
   in_checkmate(){ return !!(this.s.over && this.s.over.kind === 'mate'); }
@@ -10699,14 +10795,14 @@ function arcRender(){
   const on = cfg.arc && G && G.s && !TITLE.open;
   $('arc').hidden = !on;
   if (!on) return;
-  const s = G.s, actor = ARC.actor(s) || s.turn, act = cfg.mode === 'ai' ? cfg.human : actor, op = other(act);
+  const s = G.s, actor = ARC.actor(s) || s.turn, act = cfg.mode === 'ai' || (cfg.mode === 'online' && cfg.human) ? cfg.human : actor, op = other(act);
   const who = $('arc-who');
   who.className = 'arc-who ' + act;
-  who.textContent = s.over ? 'Partida encerrada' : arcIsAI(actor) ? `A ${FACTION[actor]} ${s.arc.phase === 'cards' ? 'escolhe as cartas' : 'pensa no lance'}…` : `${FACTION[act]} · ${s.arc.phase === 'cards' ? 'fase de cartas' : 'faça o seu lance'}`;
+  who.textContent = s.over ? 'Partida encerrada' : cfg.mode === 'online' && actor !== act ? `Vez do rival · ${s.arc.phase === 'cards' ? 'fase de cartas' : 'lance de xadrez'}` : arcIsAI(actor) ? `A ${FACTION[actor]} ${s.arc.phase === 'cards' ? 'escolhe as cartas' : 'pensa no lance'}…` : `${FACTION[act]} · ${s.arc.phase === 'cards' ? 'fase de cartas' : 'faça o seu lance'}`;
   const e = s.arc.ess[act];
   $('arc-ess').innerHTML = Array.from({ length:ARC.ESS_MAX }, (_, i) => `<i class="${i < e ? 'on' : ''}"></i>`).join('') + `<b>${e}</b>`;
   $('arc-ess').setAttribute('aria-label', `Essência: ${e} de ${ARC.ESS_MAX}`);
-  $('arc-info').textContent = `Grimório ${s.arc.deck[act].length} · ${op === 'w' ? 'Aurora' : 'Legião'}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
+  $('arc-info').textContent = `Grimório ${typeof s.arc.deck[act] === 'number' ? s.arc.deck[act] : s.arc.deck[act].length} · ${op === 'w' ? 'Aurora' : 'Legião'}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
   const cardsPhase = s.arc.phase === 'cards' && !busy && !s.over && !arcIsAI(actor) && actor === act;
   $('arc-end').hidden = !cardsPhase;
   $('arc-end').disabled = !!ARCUI.sel && ARCUI.picks.length > 0;
@@ -10945,6 +11041,7 @@ function arcTile(r, c){
 }
 async function arcPlay(){
   if (!ARCUI.sel || busy) return;
+  if (cfg.mode === 'online' && !NET.applying){ onlineCard(); return; }
   const r = ARC.playCard(G.s, ARCUI.sel, ARCUI.picks);
   if (!r.ok){ arcMsg(r.err); return; }
   G.s = r.state;
@@ -11095,7 +11192,7 @@ async function arcEvents(ev){
   let sceneAfter = null;
   for (const e of ev){
     if (e.k === 'card'){
-      const d = arcCard(e.card.id);
+      const d = e.card.id === '?' ? { nome:'Armadilha escondida', tipo:'armadilha', custo:0, efeito:'' } : arcCard(e.card.id);
       snd('carta_jogar'); snd(ARC_CARD_SND[e.card.id] || 'arcano_carga', { delay:0.15 });
       pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> usa a carta <b>${d.nome}</b>.`);
       arcMsg(`${d.nome}!`);
@@ -11174,7 +11271,7 @@ async function arcEvents(ev){
       sceneAfter = { kind:'phoenix', eid:e.id, side:e.side };
     } else if (e.k === 'oracle'){
       if (cfg.mode !== 'ai' || e.side === cfg.human){ ARCUI.arrows = e.moves.slice(); arcMarks(); }
-      pushLog(`O Oráculo revela ${e.moves.length} lances prováveis da ${e.side === 'w' ? 'Legião' : 'Aurora'}.`);
+      pushLog(e.moves.length ? `O Oráculo revela ${e.moves.length} lances prováveis da ${e.side === 'w' ? 'Legião' : 'Aurora'}.` : `A ${FACTION[e.side]} consulta o Oráculo.`);
     } else if (e.k === 'oracleEnd'){
       ARCUI.arrows = [];
       if (e.hit) pushLog('A previsão do Oráculo se cumpre.');
@@ -11219,10 +11316,10 @@ async function arcEvents(ev){
       pushLog(`${e.kind === 'lava' ? 'A lava esfria' : e.kind === 'portal' ? 'O portal se fecha' : 'A muralha desmorona'} em ${e.sqs.join(', ')}.`);
     } else if (e.k === 'draw'){
       snd('carta_comprar', { vol:0.7 });
-      pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> recebe uma carta (${ARC_WHY[e.why] || e.why})${e.why === 'espolio' || e.why === 'promocao' ? `: <b>${arcCard(e.card.id).nome}</b>` : ''}.`);
+      pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> recebe uma carta (${ARC_WHY[e.why] || e.why})${(e.why === 'espolio' || e.why === 'promocao') && e.card.id !== '?' ? `: <b>${arcCard(e.card.id).nome}</b>` : ''}.`);
     } else if (e.k === 'burn'){
       snd('carta_queimar', { vol:0.7 });
-      pushLog(`Mão cheia: <b>${arcCard(e.card.id).nome}</b> queima e vai ao descarte.`);
+      pushLog(e.card.id === '?' ? `Mão cheia: uma carta da ${FACTION[e.side]} queima.` : `Mão cheia: <b>${arcCard(e.card.id).nome}</b> queima e vai ao descarte.`);
     } else if (e.k === 'essence'){
       if (e.why === 'espolio' || e.why === 'profecia'){
         snd(e.why === 'espolio' ? 'espolio' : 'essencia', { vol:0.7 });
@@ -11269,7 +11366,7 @@ async function arcEventsOld(ev){
     } else if (e.k === 'draw'){
       pushLog(`<b class="${e.side}">${e.side === 'w' ? 'Aurora' : 'Legião'}</b> recebe uma carta (${ARC_WHY[e.why] || e.why})${e.why === 'espolio' || e.why === 'promocao' ? `: <b>${arcCard(e.card.id).nome}</b>` : ''}.`);
     } else if (e.k === 'burn'){
-      pushLog(`Mão cheia: <b>${arcCard(e.card.id).nome}</b> queima e vai ao descarte.`);
+      pushLog(e.card.id === '?' ? `Mão cheia: uma carta da ${FACTION[e.side]} queima.` : `Mão cheia: <b>${arcCard(e.card.id).nome}</b> queima e vai ao descarte.`);
     } else if (e.k === 'essence' && e.why === 'espolio'){
       const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side === e.side);
       if (k) floatText(k, `+${e.delta} essência`, '#cbb8ff', 0.26, 11, 0.1);
@@ -11293,11 +11390,13 @@ function arcEnterCards(){
     busy = false;
     arcRender(); arcMarks();
     if (arcIsAI(G.s.arc.cardSide)) { arcMsg(`A ${FACTION[G.s.arc.cardSide]} escolhe as cartas…`); arcAIContinue(); }
+    else if (cfg.mode === 'online' && G.s.arc.cardSide !== cfg.human) arcMsg(`A ${FACTION[G.s.arc.cardSide]} está na fase de cartas…`);
     else arcMsg('Fase de cartas: jogue até uma carta ou encerre o turno.');
   });
 }
 async function arcEndTurn(){
   if (!G || !G.s || G.s.arc.phase !== 'cards' || busy) return;
+  if (cfg.mode === 'online'){ if (G.s.arc.cardSide === cfg.human && onlineSend({ type:'end' })){ busy = true; arcRender(); } return; }
   const r = ARC.endTurn(G.s);
   if (!r.ok){ arcMsg(r.err); return; }
   G.s = r.state;
@@ -11342,7 +11441,7 @@ function arcThink(state, side, level){
 }
 const arcIsAI = side => cfg.arc && (cfg.mode === 'spec' || (cfg.mode === 'ai' && side !== cfg.human));
 // de quem é a mão e as armadilhas mostradas: contra a IA, sempre as do jogador; a dois ou no Espectador, de quem age
-const arcViewer = () => !G || !G.s ? null : cfg.mode === 'ai' ? cfg.human : ARC.actor(G.s);
+const arcViewer = () => !G || !G.s ? null : cfg.mode === 'ai' || (cfg.mode === 'online' && cfg.human) ? cfg.human : ARC.actor(G.s);
 const arcGap = () => cfg.mode === 'spec' ? ({ slow:1400, normal:800, fast:200 })[cfg.speed] || 800 : 520;
 // a IA age quando é a vez dela (lance ou cartas); chamada depois de cada passo e ao voltar do menu
 async function arcAIContinue(){
@@ -11398,6 +11497,7 @@ function arcReady(){
   if (S.inCheck) snd('xeque', { vol:0.6 });
 }
 function arcNewGame(){
+  onlineLeave();
   aiToken++;
   const seed = (Math.random() * 4294967296) >>> 0;
   ARCAI.tok++; ARCAI.running = false;
@@ -11814,7 +11914,440 @@ document.addEventListener('keydown', e => {
 aprRenderList();
 
 /* ---------- Inicialização ---------- */
+/* ---------- Jogar online (fase 1) ----------
+   O servidor (Worker + Durable Objects, pasta server/) é a autoridade: o lance só anda na tela quando ele confirma, e a vez
+   do rival chega pelo mesmo caminho da IA (doMove, arcPlay, arcEndTurn). Sem servidor (sem rede, servidor fora do ar ou o
+   Artifact, cuja CSP bloqueia outras origens), o menu só mostra "servidor indisponível" e o resto do jogo segue igual. */
+// endereço do servidor online: trocar aqui quando o Worker for publicado
+const ONLINE_API = 'https://arcane-chess-api.arcanechess.workers.dev';
+const ONLINE_KEY = 'coroa-de-cinzas:online';
+const ONLINE_TC = { xadrez:[['10+0', '10 min'], ['3+2', '3 min + 2 s'], ['5+3', '5 min + 3 s'], ['livre', 'Sem relógio']], arcano:[['12+5', '12 min + 5 s'], ['livre', 'Sem relógio']],
+  queue:[['10+0', '10 min'], ['3+2', '3 min + 2 s'], ['5+3', '5 min + 3 s']] };
+const NET = { api:'', ok:null, checking:null, token:null, user:null, ratings:null, ws:null, qws:null, room:null, info:null, seat:null, n:0, chain:Promise.resolve(),
+  players:null, drawOffer:null, status:null, result:null, running:null, firstMoveBy:0, retry:0, retryT:0, applying:false, pend:false, began:false, ended:false,
+  wantResign:false, aiLevel:2, pendingRoom:null, mode:null };
+// teste local: ?api=http://127.0.0.1:8787 (só endereços locais; em produção vale a constante)
+function netApi(){
+  try { const q = new URLSearchParams(location.search).get('api'); if (q && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(q)) return q; } catch (e){}
+  return ONLINE_API;
+}
+const netWs = () => NET.api.replace(/^http/, 'ws');
+const netEsc = t => String(t == null ? '' : t).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]);
+const netSleep = ms => new Promise(r => setTimeout(r, ms));
+// espera as animações terminarem (não espera uma ação nossa a caminho do servidor: essa é resolvida pela própria fila)
+async function netIdle(){ for (let i = 0; i < 400 && busy && !NET.pend; i++) await netSleep(50); }
+function netLoad(){ try { return JSON.parse(localStorage.getItem(ONLINE_KEY) || 'null') || {}; } catch (e){ return {}; } }
+function netSave(){ try { localStorage.setItem(ONLINE_KEY, JSON.stringify({ token:NET.token, name:NET.user && NET.user.name })); } catch (e){} }
+async function netFetch(path, o = {}){
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const t = setTimeout(() => { if (ctl) ctl.abort(); }, o.timeout || 6000);
+  try {
+    const r = await fetch(NET.api + path, { method:o.body ? 'POST' : 'GET', cache:'no-store', signal:ctl ? ctl.signal : undefined,
+      headers:Object.assign({ 'content-type':'application/json' }, NET.token ? { Authorization:'Bearer ' + NET.token } : {}), body:o.body ? JSON.stringify(o.body) : undefined });
+    // o corpo é lido dentro do prazo: se o prazo vencer aqui, o AbortError sobe (e o chamador pode repetir)
+    const txt = await r.text();
+    let j = {}; try { j = JSON.parse(txt || '{}'); } catch (e){}
+    return { ok:r.ok, status:r.status, j };
+  } finally { clearTimeout(t); }
+}
+// confere o servidor e garante a sessão de convidado; qualquer falha (rede, CSP, servidor fora) vira "indisponível"
+function netReady(){
+  if (NET.ok) return Promise.resolve(true);
+  if (NET.checking) return NET.checking;
+  NET.api = netApi();
+  NET.checking = (async () => {
+    try {
+      // o tempo esgotado pode ser só a página ocupada carregando a cena (link aberto direto): tenta de novo com folga.
+      // Falha de rede, servidor fora ou CSP (Artifact) recusam na hora e não repetem.
+      let h = null;
+      for (const ms of [5000, 12000]){
+        try { h = await netFetch('/api/health', { timeout:ms }); break; }
+        catch (e){ if (!e || e.name !== 'AbortError') throw e; }
+      }
+      if (!h || !h.ok || !h.j.ok) throw new Error('servidor');
+      const saved = netLoad();
+      NET.token = saved.token || null;
+      if (NET.token){ const me = await netFetch('/api/me'); if (me.ok){ NET.user = me.j.user; NET.ratings = me.j.ratings; } else NET.token = null; }
+      if (!NET.token){
+        const g = await netFetch('/api/guest', { body:{ name:saved.name || '' } });
+        if (!g.ok) throw new Error('convidado');
+        NET.token = g.j.token; NET.user = g.j.user; netSave();
+        const me = await netFetch('/api/me'); if (me.ok) NET.ratings = me.j.ratings;
+      }
+      NET.ok = true;
+    } catch (e){ NET.ok = false; NET.err = String(e && e.message || e); }
+    NET.checking = null;
+    return NET.ok;
+  })();
+  return NET.checking;
+}
+function onlineToast(t){
+  let el = $('on-toast');
+  if (!el){ el = document.createElement('div'); el.id = 'on-toast'; el.className = 'on-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = t; el.hidden = false;
+  clearTimeout(onlineToast.t); onlineToast.t = setTimeout(() => { el.hidden = true; }, 3600);
+}
+const onlineOppName = () => { const p = NET.players, s = cfg.human ? other(cfg.human) : null; return (s && p && p[s] && p[s].name) || 'o rival'; };
+
+/* ---- menu ---- */
+function onlineFillTc(sel, list, keep){
+  const v = keep || sel.value;
+  sel.innerHTML = list.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+  if (list.some(x => x[0] === v)) sel.value = v;
+}
+function onlineOpen(){
+  onlineFillTc($('on-qtc'), ONLINE_TC.queue);
+  onlineFillTc($('on-ltc'), ONLINE_TC[$('on-lmode').value]);
+  $('on-ldeck-f').hidden = $('on-lmode').value !== 'arcano';
+  $('on-status').textContent = 'Conectando ao servidor…'; $('on-status').hidden = false;
+  $('on-body').hidden = true; $('on-off').hidden = true;
+  if (NET.ok === false) NET.ok = null;
+  netReady().then(ok => {
+    if ($('setup-online').hidden) return;
+    $('on-status').hidden = true;
+    if (!ok){ $('on-off').hidden = false; $('on-retry').focus(); return; }
+    $('on-body').hidden = false;
+    onlineRenderMe();
+    if (NET.pendingRoom){ const id = NET.pendingRoom; NET.pendingRoom = null; onlineTab('l'); onlineJoin(id); }
+    else if (!NET.qws) $('on-qgo').focus();
+  });
+}
+function onlineRenderMe(){
+  if (NET.user) $('on-name').value = NET.user.name;
+  const r = NET.ratings && NET.ratings.xadrez;
+  $('on-rating').innerHTML = r ? `Xadrez Puro <em>${r.r}${r.provisional ? '?' : ''}</em> · ${netEsc(r.leagueName)}${r.games ? ` · ${r.games} ranqueada${r.games === 1 ? '' : 's'}` : ''}` : '—';
+}
+function onlineTab(k){
+  $('on-tab-q').setAttribute('aria-selected', String(k === 'q')); $('on-tab-l').setAttribute('aria-selected', String(k === 'l'));
+  $('on-q-p').hidden = k !== 'q'; $('on-l-p').hidden = k !== 'l';
+}
+async function onlineRename(){
+  const name = $('on-name').value.trim();
+  if (!NET.ok || !NET.user || name === NET.user.name) return;
+  try {
+    const r = await netFetch('/api/name', { body:{ name } });
+    if (r.ok){ NET.token = r.j.token; NET.user = r.j.user; netSave(); onlineToast('Nome atualizado.'); }
+    else { onlineToast(r.j.err || 'Nome recusado.'); $('on-name').value = NET.user.name; }
+  } catch (e){ onlineToast('Sem conexão com o servidor.'); $('on-name').value = NET.user.name; }
+}
+const onlineQMsg = t => { $('on-qmsg').textContent = t; };
+function onlineQReset(){ $('on-qgo').hidden = false; $('on-qcancel').hidden = true; $('on-ai').hidden = true; }
+function onlineCloseQueue(){ const q = NET.qws; NET.qws = null; if (q){ try { q.close(1000); } catch (e){} } if ($('on-qgo')) onlineQReset(); }
+function onlineQueue(){
+  if (!NET.ok) return;
+  onlineCloseQueue();
+  const q = $('on-q').value, tc = $('on-qtc').value;
+  let ws;
+  try { ws = new WebSocket(`${netWs()}/api/queue/${q}/${tc}/ws`); } catch (e){ onlineQMsg('Servidor indisponível.'); return; }
+  NET.qws = ws;
+  onlineQMsg('Entrando na fila…');
+  $('on-qgo').hidden = true; $('on-qcancel').hidden = false; $('on-ai').hidden = true;
+  ws.onopen = () => ws.send(JSON.stringify({ t:'hello', token:NET.token }));
+  ws.onmessage = ev => {
+    if (NET.qws !== ws) return;
+    let m; try { m = JSON.parse(ev.data); } catch (e){ return; }
+    if (m.t === 'queued') onlineQMsg(`Na fila ${q === 'ranked' ? 'ranqueada' : 'casual'} (${tc}) com nota ${m.r}. Procurando rival…`);
+    else if (m.t === 'waiting') onlineQMsg(`Procurando rival… ${fmtClock(m.waited)} · ${m.size} na fila${m.window < 9999 ? ` · janela de ±${m.window}` : ''}`);
+    else if (m.t === 'offer-ai'){ NET.aiLevel = m.level; $('on-ai').hidden = false; $('on-ai').textContent = `Jogar contra a IA (${LEVEL[m.level]}), sem nota`; }
+    else if (m.t === 'match'){ NET.qws = null; onlineQReset(); onlineQMsg(`Rival encontrado: ${m.opponent.name} (${m.opponent.r}). Entrando na partida…`); onlineJoin(m.room); }
+    else if (m.t === 'replaced'){ NET.qws = null; onlineQReset(); onlineQMsg('Você entrou na fila por outra aba.'); }
+    else if (m.t === 'error') onlineQMsg(m.err || 'Erro na fila.');
+  };
+  ws.onerror = () => {};
+  ws.onclose = () => { if (NET.qws === ws){ NET.qws = null; onlineQReset(); onlineQMsg('A conexão com a fila caiu. Tente de novo.'); } };
+}
+// sem rival: a IA no próprio aparelho (Modo Padrão, sem nota), no nível que a fila sugeriu
+function onlineAi(){
+  const tc = $('on-qtc').value;
+  onlineCloseQueue();
+  $('mode').value = 'ai'; $('diff').value = String(NET.aiLevel || 2); $('t-color').value = 'r'; $('t-clock').value = tc === '3+2' ? '3+2' : '10';
+  startPadrao();
+}
+async function onlineCreate(){
+  if (!NET.ok) return;
+  const mode = $('on-lmode').value, body = { mode, tc:$('on-ltc').value, color:$('on-lcolor').value, deck:mode === 'arcano' ? $('on-ldeck').value : undefined };
+  $('on-lmsg').textContent = 'Criando a partida…';
+  let r;
+  try { r = await netFetch('/api/rooms', { body }); } catch (e){ r = null; }
+  if (!r || !r.ok){ $('on-lmsg').textContent = (r && r.j.err) || 'Servidor indisponível.'; return; }
+  const link = location.origin + location.pathname + location.search + '#sala=' + r.j.id;
+  $('on-link').value = link; $('on-linkbox').hidden = false;
+  onlineJoin(r.j.id);
+}
+function onlineCopy(){
+  const v = $('on-link').value;
+  const done = () => onlineToast('Link copiado.');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done, () => { $('on-link').select(); });
+  else { $('on-link').select(); try { document.execCommand('copy'); done(); } catch (e){} }
+}
+const onlineCodeOf = t => { const m = String(t || '').toLowerCase().match(/(?:sala=)?([a-km-np-z2-9]{8})\s*$/); return m ? m[1] : null; };
+function onlineJoinTyped(){
+  const id = onlineCodeOf($('on-code').value.trim());
+  if (!id){ $('on-lmsg').textContent = 'Código inválido: são 8 letras e números (ou o link inteiro).'; return; }
+  onlineJoin(id);
+}
+// #sala=<id> ao abrir a página (ou ao mudar o endereço): abre o menu online e entra
+function onlineHash(){
+  const m = location.hash.match(/^#sala=([a-km-np-z2-9]{8})$/);
+  if (!m || (NET.room === m[1] && NET.ws)) return;
+  NET.pendingRoom = m[1];
+  if (!TITLE.open) openTitle();
+  showSetup('online');
+}
+
+/* ---- sala ---- */
+function onlineJoin(id){
+  onlineLeave(true);
+  Object.assign(NET, { room:id, seat:null, info:null, n:-1, began:false, ended:false, status:null, result:null, players:null, drawOffer:null, retry:0, pend:false, applying:false, wantResign:false, running:null, chain:Promise.resolve() });
+  try { history.replaceState(null, '', location.pathname + location.search + '#sala=' + id); } catch (e){}
+  $('on-lmsg').textContent = 'Conectando à partida…';
+  onlineConnect();
+}
+function onlineConnect(){
+  const id = NET.room;
+  if (!id) return;
+  let ws;
+  try { ws = new WebSocket(`${netWs()}/api/rooms/${id}/ws`); } catch (e){ onlineToast('Servidor indisponível.'); return; }
+  NET.ws = ws;
+  ws.onopen = () => { NET.retry = 0; ws.send(JSON.stringify({ t:'hello', token:NET.token })); onlineBar(); };
+  ws.onmessage = ev => { if (NET.ws !== ws) return; let m; try { m = JSON.parse(ev.data); } catch (e){ return; } onlineMsg(m); };
+  ws.onerror = () => {};
+  ws.onclose = () => {
+    if (NET.ws !== ws) return;
+    NET.ws = null;
+    if (NET.room && !NET.ended){ const d = Math.min(15000, 1000 * 2 ** NET.retry++); clearTimeout(NET.retryT); NET.retryT = setTimeout(onlineConnect, d); }
+    onlineBar();
+  };
+}
+function onlineLeave(keep){
+  clearTimeout(NET.retryT);
+  // só limpa o #sala= de quem estava numa sala (na abertura da página o link ainda vai ser lido)
+  const had = !!NET.room;
+  NET.room = null; NET.began = false;
+  const ws = NET.ws; NET.ws = null;
+  if (ws){ try { ws.close(1000); } catch (e){} }
+  onlineCloseQueue();
+  if (!keep && had && /^#sala=/.test(location.hash)){ try { history.replaceState(null, '', location.pathname + location.search); } catch (e){} }
+  const bar = $('onbar'); if (bar) bar.hidden = true;
+}
+function onlineSend(a){
+  if (!NET.ws || NET.ws.readyState !== 1){ onlineToast('Sem conexão com o servidor. Reconectando…'); return false; }
+  NET.ws.send(JSON.stringify({ t:'act', a }));
+  NET.pend = true;
+  return true;
+}
+function onlineMove(m){
+  if (NET.pend || !NET.seat || ARC_actorOnline() !== NET.seat || NET.status !== 'playing') return;
+  resetUI();
+  if (onlineSend({ type:'move', from:m.from, to:m.to, promotion:m.promotion })){ busy = true; renderAll(); }
+}
+function onlineCard(){
+  const o = ARC.cardOptions(G.s, ARCUI.sel, ARCUI.picks);
+  if (!o.ready){ arcMsg(o.err || o.prompt); return; }
+  if (onlineSend({ type:'card', uid:ARCUI.sel, picks:ARCUI.picks.slice() })){ busy = true; arcMsg('Enviando a carta…'); arcRender(); }
+}
+const ARC_actorOnline = () => cfg.arc && G && G.s ? ARC.actor(G.s) : S && S.turn;
+function onlineMsg(m){
+  if (m.t === 'welcome'){ NET.seat = m.you.seat; NET.info = m.room; if (!NET.began) $('on-lmsg').textContent = m.you.seat ? 'Aguardando o rival entrar pelo link…' : 'Você vai assistir a esta partida.'; return; }
+  if (m.t === 'error'){
+    if (m.code === 'auth'){ NET.token = null; NET.ok = null; netSave(); onlineToast('Sessão expirada. Abra o menu online de novo.'); return; }
+    onlineToast(m.err || 'Ação recusada.');
+    if (NET.pend){ NET.pend = false; busy = false; renderAll(); if (cfg.arc){ arcRender(); arcMarks(); } }
+    return;
+  }
+  if (m.t !== 'state') return;
+  NET.chain = NET.chain.then(() => onlineState(m)).catch(err => { console.error(err); onlineResync(m); });
+}
+async function onlineState(m){
+  NET.players = m.players; NET.drawOffer = m.drawOffer; NET.status = m.status;
+  // a nossa ação chegou ao servidor quando o contador de ações anda (presença e relógio não liberam a interface)
+  if (NET.pend && m.n !== NET.n){ NET.pend = false; busy = false; }
+  if (!m.state){
+    if (!NET.began && !$('setup-online').hidden) $('on-lmsg').textContent = NET.seat ? 'Aguardando o rival entrar pelo link…' : 'Aguardando os jogadores…';
+    onlineClocks(m); onlineBar(); return;
+  }
+  if (!NET.began){ onlineBegin(m); NET.n = m.n; }
+  else if (m.mode === 'arcano'){
+    if (m.n === NET.n + 1 && m.last) await onlineApplyArc(m);
+    else if (m.n !== NET.n) onlineResync(m);
+    else G.s = m.state;
+  } else {
+    const L = G.history().length, H = m.state.hist.length;
+    if (H === L + 1){
+      await netIdle();
+      const h = m.state.hist[H - 1];
+      NET.applying = true;
+      try { await doMove({ from:h.from, to:h.to, promotion:h.promotion }); } finally { NET.applying = false; }
+      if (onlineFen(m) !== G.fen().split(' ').slice(0, 4).join(' ')) onlineResync(m);
+    } else if (H !== L) onlineResync(m);
+  }
+  NET.n = m.n;
+  onlineClocks(m); onlineBar();
+  if ((m.status === 'over' || m.status === 'aborted') && !NET.ended) onlineOver(m);
+}
+// FEN da posição (só peças, vez, roque e en passant) a partir do estado do servidor, para conferir a cena
+function onlineFen(m){ try { return ARC.fen(m.state).split(' ').slice(0, 4).join(' '); } catch (e){ return ''; } }
+async function onlineApplyArc(m){
+  await netIdle();
+  const L = m.last;
+  if (L.move){
+    G.pending = { state:m.state, move:L.move, events:m.events };
+    NET.applying = true;
+    try { await doMove({ from:L.move.from, to:L.move.to, promotion:L.move.promotion }); } finally { NET.applying = false; G.pending = null; }
+    await netIdle();
+    G.s = m.state;
+    if (!onlineScene()) onlineResync(m);
+    return;
+  }
+  G.s = m.state;
+  ARCUI.sel = null; ARCUI.picks = []; ARCUI.opts = []; arcMarks();
+  busy = true; arcRender(); renderAll();
+  try { await arcEvents(m.events || []); } finally { busy = false; }
+  S.turn = G.turn(); S.inCheck = G.in_check();
+  if (L.type === 'end'){ ARCUI.hidden = false; ARCUI.arrows = []; arcMsg(G.s.turn === cfg.human ? `${FACTION[G.s.turn]}: +1 essência. Faça o seu lance.` : cfg.human ? 'Vez do rival.' : `Vez da ${FACTION[G.s.turn]}.`); }
+  if (!onlineScene()) onlineResync(m);
+  renderAll(); arcRender(); arcMarks();
+}
+// a cena bate com o motor? (peça e lado em cada casa)
+function onlineScene(){
+  const b = G.board();
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
+    const q = b[r][c], p = pieceAt(r, c);
+    if (!!q !== !!p || (q && (q.type !== p.t || q.color !== p.side))) return false;
+  }
+  return true;
+}
+// reconstrói a partida a partir do estado do servidor (entrada, reconexão ou qualquer diferença)
+function onlineResync(m){
+  aiToken++; busy = false; NET.applying = false;
+  if (m.mode === 'arcano') G = new ArcanoG(m.state);
+  else { G = new Chess(); for (const h of m.state.hist) if (!G.move({ from:h.from, to:h.to, promotion:h.promotion })) break; }
+  resetUI(); resetFx(); syncState();
+  S.over = null;
+  renderAll();
+  if (cfg.arc){ ARCUI.sel = null; ARCUI.picks = []; ARCUI.opts = []; arcRender(); arcMarks(); }
+}
+function onlineBegin(m){
+  NET.began = true; NET.ended = false;
+  aprExit(); leaveSpec();
+  const arc = m.mode === 'arcano';
+  if (!arc) arcExit();
+  Object.assign(cfg, { mode:'online', arc, human:NET.seat, diff:2, undoLeft:0, clock:'none', paused:false });
+  if (arc && AC) for (const id of ARC_SFX) loadOne(id);
+  LOG = [];
+  closePromo(null);
+  $('end').hidden = true; $('arc-pass').hidden = true;
+  Object.assign(ARCUI, { sel:null, picks:[], opts:[], hidden:false, arrows:[], reply:null, reveal:false });
+  onlineResync(m);
+  const opp = NET.seat && m.players && m.players[other(NET.seat)];
+  pushLog(NET.seat ? `Partida online${NET.info && NET.info.ranked ? ' <b>ranqueada</b>' : ''} contra <b>${netEsc(opp ? opp.name : 'o rival')}</b>. Você joga com a ${FACTION[NET.seat]}.` : 'Você está assistindo a uma partida online.');
+  snd('v_inicio', { delay:0.3 });
+  closeTitle();
+  setFlip(NET.seat === 'b');
+  syncViewUI(); layout();
+  renderAll();
+  if (arc){ arcRender(); arcMarks(); arcMsg(NET.seat === 'w' ? 'A Aurora começa: faça o seu lance; depois vem a fase de cartas.' : 'A Aurora começa.'); }
+}
+function onlineClocks(m){
+  const c = m.clocks;
+  if (!c) return;
+  CLK.on = !!(NET.info && NET.info.tc !== 'livre');
+  CLK.ms.w = c.w; CLK.ms.b = c.b;
+  NET.running = c.running; NET.firstMoveBy = c.firstMoveBy || 0;
+  if (c.running) CLK.ms[c.running] -= Math.max(0, c.now - c.since);
+  CLK.last = performance.now();
+}
+const ONLINE_KIND = { mate:'mate', afogamento:'stalemate', repeticao:'rep', material:'material', '50 lances':'fifty', tempo:'tempo', 'tempo sem material':'tempo', abandono:'abandono', desistencia:'desistencia', acordo:'acordo' };
+function onlineOver(m){
+  NET.ended = true;
+  const r = m.result || {};
+  NET.result = r;
+  clearTimeout(NET.retryT);
+  const ws = NET.ws; NET.ws = null; NET.room = null;
+  if (ws){ try { ws.close(1000); } catch (e){} }
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e){}
+  const kind = r.score === 'abortada' ? 'abortada' : ONLINE_KIND[r.reason] || 'acordo';
+  aiToken++; busy = false;
+  if (S.over){ onlineEndExtra(); }
+  else {
+    if (TITLE.open && NET.began) closeTitle();
+    S.over = { kind, winner:r.winner || null };
+    if (NET.began){ renderAll(); if (cfg.arc) arcRender(); showEnd(); }
+    else $('on-lmsg').textContent = kind === 'abortada' ? 'A partida foi cancelada.' : 'A partida já terminou.';
+  }
+  onlineBar();
+  netFetch('/api/me').then(x => { if (x.ok){ NET.ratings = x.j.ratings; onlineRenderMe(); } }).catch(() => {});
+}
+// linha extra no fim: nota antes e depois (ranqueada) e o motivo vindo do servidor
+function onlineEndExtra(){
+  const r = NET.result, el = $('end-text');
+  if (!r || !el || el.dataset.online === (NET.info ? NET.info.id : '')) return;
+  const rt = r.rating && cfg.human && r.rating[cfg.human];
+  if (rt) el.textContent += ` Sua nota: ${rt.before} → ${rt.after} (${rt.delta >= 0 ? '+' : ''}${rt.delta}).`;
+  el.dataset.online = NET.info ? NET.info.id : '';
+}
+function onlineBar(){
+  const bar = $('onbar');
+  const on = cfg.mode === 'online' && NET.began;
+  bar.hidden = !on;
+  if (!on) return;
+  const P = NET.players || {}, me = NET.seat, op = me ? other(me) : null, now = Date.now();
+  const tag = s => {
+    const x = P[s];
+    if (!x) return '';
+    const away = !x.online && x.away ? ` · caiu, volta em ${fmtClock(Math.max(0, x.away - now))}` : !x.online && !NET.ended ? ' · desconectado' : '';
+    return `<span class="on-p side-${s}${away ? ' off' : ''}">${s === me ? 'Você' : netEsc(x.name)} (${s === 'w' ? 'Aurora' : 'Legião'})${away}</span>`;
+  };
+  const kind = NET.info ? (NET.info.ranked ? 'Ranqueada' : 'Online') + ` · ${NET.info.tc === 'livre' ? 'sem relógio' : NET.info.tc}` : 'Online';
+  let st = '';
+  if (NET.ended) st = 'Partida encerrada';
+  else if (!NET.ws) st = 'Reconectando ao servidor…';
+  else if (NET.pend) st = 'Enviando…';
+  else if (NET.firstMoveBy && NET.status === 'playing') st = `As Brancas têm ${fmtClock(Math.max(0, NET.firstMoveBy - now))} para o 1º lance`;
+  let acts = '';
+  if (me && !NET.ended && NET.status === 'playing'){
+    if (NET.drawOffer === op) acts += '<button type="button" data-on="accept">Aceitar empate</button><button type="button" data-on="decline">Recusar</button>';
+    else if (NET.drawOffer === me) acts += '<span class="on-st">Empate oferecido</span>';
+    else if (!NET.firstMoveBy) acts += '<button type="button" data-on="offer">Oferecer empate</button>';
+    acts += NET.wantResign ? '<button type="button" class="warn" data-on="resign-ok">Confirmar desistência</button><button type="button" data-on="resign-no">Continuar</button>'
+      : `<button type="button" data-on="resign">${NET.firstMoveBy ? 'Cancelar partida' : 'Desistir'}</button>`;
+  }
+  bar.innerHTML = `<span class="on-tag">${kind}</span><span class="on-vs">${tag('w')}<span aria-hidden="true">×</span>${tag('b')}</span>${st ? `<span class="on-st" aria-live="polite">${st}</span>` : ''}<span class="on-acts">${acts}</span>`;
+}
+// liga os controles do menu e da barra (o módulo é carregado uma vez)
+(function onlineWire(){
+  $('t-back5').addEventListener('click', () => { onlineCloseQueue(); showSetup(null); });
+  $('on-retry').addEventListener('click', () => { audio(); onlineOpen(); });
+  $('on-tab-q').addEventListener('click', () => onlineTab('q'));
+  $('on-tab-l').addEventListener('click', () => onlineTab('l'));
+  $('on-lmode').addEventListener('change', () => { onlineFillTc($('on-ltc'), ONLINE_TC[$('on-lmode').value]); $('on-ldeck-f').hidden = $('on-lmode').value !== 'arcano'; });
+  $('on-name').addEventListener('change', onlineRename);
+  $('on-qgo').addEventListener('click', () => { audio(); onlineQueue(); });
+  $('on-qcancel').addEventListener('click', () => { onlineCloseQueue(); onlineQMsg('Você saiu da fila.'); });
+  $('on-ai').addEventListener('click', () => { audio(); onlineAi(); });
+  $('on-create').addEventListener('click', () => { audio(); onlineCreate(); });
+  $('on-copy').addEventListener('click', onlineCopy);
+  $('on-join').addEventListener('click', () => { audio(); onlineJoinTyped(); });
+  $('on-code').addEventListener('keydown', e => { if (e.key === 'Enter') onlineJoinTyped(); });
+  $('onbar').addEventListener('click', e => {
+    const b = e.target.closest('button[data-on]');
+    if (!b || !NET.ws) return;
+    const k = b.dataset.on, send = o => { try { NET.ws.send(JSON.stringify(o)); } catch (err){} };
+    if (k === 'offer') send({ t:'draw', op:'offer' });
+    else if (k === 'accept') send({ t:'draw', op:'accept' });
+    else if (k === 'decline') send({ t:'draw', op:'decline' });
+    else if (k === 'resign'){ NET.wantResign = true; onlineBar(); return; }
+    else if (k === 'resign-no'){ NET.wantResign = false; onlineBar(); return; }
+    else if (k === 'resign-ok'){ NET.wantResign = false; send({ t:'resign' }); }
+    onlineBar();
+  });
+  // contagem do prazo de volta do rival e do primeiro lance
+  setInterval(() => { if (cfg.mode === 'online' && NET.began && !NET.ended && (NET.firstMoveBy || Object.values(NET.players || {}).some(x => x && !x.online))) onlineBar(); }, 1000);
+})();
+
 function serialize(){
+  // a partida online não vira partida local ao recarregar: o servidor devolve o estado ao reconectar
+  if (cfg.mode === 'online') return {};
   return { fen:G.fen(), hist:G.history(), cfg:{ ...cfg }, log:LOG.slice(0, 40) };
 }
 function start(data){
@@ -11850,7 +12383,8 @@ pvInit();
 initWorker();
 const hot = window.claude && window.claude.hot;
 if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => serialize());
-if (hot && typeof hot.ready === 'function') hot.ready(d => { start(d); openTitle(); }); else { start((hot && hot.data) || {}); openTitle(); }
+if (hot && typeof hot.ready === 'function') hot.ready(d => { start(d); openTitle(); onlineHash(); }); else { start((hot && hot.data) || {}); openTitle(); onlineHash(); }
+window.addEventListener('hashchange', onlineHash);
 
 new ResizeObserver(() => layout()).observe(scene);
 window.addEventListener('resize', () => requestAnimationFrame(() => { layout(); panelApply(); }));

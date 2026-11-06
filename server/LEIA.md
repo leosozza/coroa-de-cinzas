@@ -31,3 +31,8 @@ Durable Objects com SQLite e D1 cabem no plano gratuito. `DEV_TC`, `RECONNECT_MS
 - Fila: `GET /api/queue/ranked|casual/<ritmo>/ws`, 1ª mensagem `{t:'hello', token}`. A fila manda `queued`, `waiting` (espera, tamanho, janela), `offer-ai` (nível 1–3), `match` (`room`, `color`, `ranked`, `opponent`) ou `replaced` (outra aba). Depois do `match`, o cliente entra na sala pelo WebSocket da sala.
 - `GET /api/me` traz `ratings.xadrez` e `ratings.arcano` (`r`, `rd`, `games`, `provisional`, `league`, `leagueName`, `rank`). `GET /api/leaderboard?pool=xadrez`. `GET /api/config` (ritmos, filas, ligas).
 - Fim de partida ranqueada: `result.rating = { w:{ before, after, delta, rd }, b:{…} }`.
+
+## Cliente no jogo
+- O endereço do servidor é a constante `ONLINE_API` em `coroa-de-cinzas.html` (procure por `ONLINE_API =`). Teste local: abra o jogo servido em `http://localhost:8767/...?api=http://127.0.0.1:8787` (o `?api=` só aceita localhost e 127.0.0.1).
+- Para testar duas abas reais com recarga de página, use no `.dev.vars` `RECONNECT_MS=30000` e `FIRST_MOVE_MS=60000` (a página leva alguns segundos para carregar a cena); para `test/e2e.mjs` volte a 3000 e 8000.
+- `POST /api/name {name}` troca o nome público sem perder a nota (devolve uma ficha nova).

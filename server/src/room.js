@@ -178,7 +178,8 @@ export class GameRoom {
     if (g.s.turn !== turnBefore && g.base && g.started) g.clocks[side] += g.inc;
     g.turnStart = now;
     if (g.drawOffer && g.drawOffer !== side) g.drawOffer = null;
-    const last = r.move ? { from:r.move.from, to:r.move.to, san:r.move.san, side } : { type:act.type, side };
+    // o lance completo (bandeiras, captura, resultado) para o cliente animar exatamente o que o servidor aplicou
+    const last = r.move ? { from:r.move.from, to:r.move.to, san:r.move.san, side, move:r.move } : { type:act.type, side };
     if (g.s.over){
       const o = g.s.over;
       return this.finish(o.kind === 'mate' ? o.winner : null, REASON[o.kind] || o.kind, r.events, last);
