@@ -9053,8 +9053,10 @@ async function kingdomLoad(id){
         A.frames = [];       // as armas já vêm na malha
       }
       A.kingdom = id;
-      // Dragões: esqueleto da Tripo (nomes diferentes dos da Meshy): sem os golpes.glb; o ataque longo fica só no trecho do golpe (1–3,5 s)
-      if (id === 'dragoes'){
+      // esqueleto da Tripo (sem o osso Hips da Meshy): sem os golpes.glb; o ataque longo fica só no trecho do golpe (1–3,5 s).
+      // Com o esqueleto da Meshy (Aurora, Ferro Negro e os Dragões refeitos), os golpes.glb da Aurora servem como estão.
+      let meshyRig = false; g.scene.traverse(o => { if (o.isBone && /(^|[_:])Hips$/.test(o.name)) meshyRig = true; });
+      if (A.rigged && !meshyRig){
         A.tripo = true;
         if (A.clips.attack && A.clips.attack.duration > 4){ try { A.clips.attack = THREE.AnimationUtils.subclip(A.clips.attack, 'golpe', 30, 105, 30); A.impact = 1.1; } catch (e){} }
       } else kingdomClips(A, t);

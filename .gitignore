@@ -19,3 +19,7 @@ assets/meshy/dragao/animated.brilho.glb
 data/audio-exemplos/
 assets/meshy/**/tripo_original/
 assets/meshy/reinos/dragoes/dama_v*/
+assets/meshy/reinos/**/tripo_rig/
+assets/meshy/reinos/**/meshy_*.glb
+assets/meshy/reinos/**/modelo_z.glb
+assets/meshy/reinos/**/meshy_rig.json

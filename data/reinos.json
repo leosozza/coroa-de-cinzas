@@ -124,10 +124,12 @@
           "arte": "assets/concepts/reinos/dragoes/peao.png",
           "rig": true,
           "clipes": {
-            "parado": "idle",
-            "golpe": "slash",
-            "morte": "fall"
-          }
+            "parado": "Idle",
+            "golpe": "Thrust_Slash",
+            "morte": "dying_backwards"
+          },
+          "golpes_extras": "assets/meshy/peao/golpes.glb",
+          "walk": "assets/meshy/reinos/dragoes/peao/walk.gltf.json"
         },
         "b": {
           "modelo": "assets/meshy/reinos/dragoes/bispo/animated.opt.glb",
@@ -138,10 +140,12 @@
           "arte": "assets/concepts/reinos/dragoes/bispo.png",
           "rig": true,
           "clipes": {
-            "parado": "idle",
-            "golpe": "cast_a_spell",
-            "morte": "fall"
-          }
+            "parado": "Idle",
+            "golpe": "Charged_Spell_Cast",
+            "morte": "dying_backwards"
+          },
+          "golpes_extras": "assets/meshy/bispo/golpes.glb",
+          "walk": "assets/meshy/reinos/dragoes/bispo/walk.gltf.json"
         },
         "q": {
           "modelo": "assets/meshy/reinos/dragoes/dama/animated.opt.glb",
@@ -152,10 +156,12 @@
           "arte": "assets/concepts/reinos/dragoes/dama.png",
           "rig": true,
           "clipes": {
-            "parado": "idle",
-            "golpe": "cast_a_spell",
-            "morte": "fall"
-          }
+            "parado": "Idle",
+            "golpe": "mage_soell_cast",
+            "morte": "dying_backwards"
+          },
+          "golpes_extras": "assets/meshy/dama/golpes.glb",
+          "walk": "assets/meshy/reinos/dragoes/dama/walk.gltf.json"
         },
         "k": {
           "modelo": "assets/meshy/reinos/dragoes/rei/animated.opt.glb",
@@ -166,10 +172,12 @@
           "arte": "assets/concepts/reinos/dragoes/rei.png",
           "rig": true,
           "clipes": {
-            "parado": "idle",
-            "golpe": "slash",
-            "morte": "fall"
-          }
+            "parado": "Idle",
+            "golpe": "Right_Hand_Sword_Slash",
+            "morte": "dying_backwards"
+          },
+          "golpes_extras": "assets/meshy/rei/golpes.glb",
+          "walk": "assets/meshy/reinos/dragoes/rei/walk.gltf.json"
         },
         "n": {
           "modelo": "assets/meshy/reinos/dragoes/cavaleiro/model.opt.glb",
@@ -207,8 +215,8 @@
         "nome_arena": "Covil dos Dragões",
         "toque": "o Dragão das Cinzas realista anda, ruge e voa; aurora verde-azulada no céu, castelo de janelas azuis, dragões ao longe"
       },
-      "origem": "Tripo (modelo v3.1, rig biped v1.0, presets idle/slash/cast_a_spell/fall)",
-      "esqueleto": "Tripo, 41 ossos (R_Hand, L_Hand, Spine02...); não compartilha os golpes.glb do Meshy; já orientado e escalado como as peças do Meshy"
+      "origem": "modelos da Tripo (v3.1) com esqueleto e animações do Meshy (24 ossos, mesmo padrão das outras peças)",
+      "esqueleto": "Meshy, 24 ossos (Hips, Spine02, LeftHand, RightHand...): usa os golpes.glb da Aurora como as outras peças; asas, cabelo e armas presos no Blender"
     }
   ],
   "regra_golpes": "Cada reino tem golpes próprios (efeito visual e som). O tipo de golpe da matriz (lâmina, arremesso, magia...) continua o mesmo para as regras e a morte da vítima; o reino do ATACANTE troca só a aparência: cor, elemento e partículas. A morte da vítima usa o 'morte_vitima' do reino do atacante quando houver."

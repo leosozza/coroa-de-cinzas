@@ -12,7 +12,7 @@ cp "$ROOT"/assets/audio/*.mp3 "$W/assets/audio/"
 [ -d "$ROOT/assets/audio/narr" ] && mkdir -p "$W/assets/audio/narr" && cp "$ROOT"/assets/audio/narr/*.mp3 "$W/assets/audio/narr/"
 mkdir -p "$W/assets/cards/web" && cp "$ROOT"/assets/cards/web/*.jpg "$W/assets/cards/web/"
 mkdir -p "$W/assets/meshy" && cp "$ROOT/assets/meshy/manifest.json" "$W/assets/meshy/manifest.json"
-(cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*" -not -path "*/meshy_original/*" -not -path "*/tripo_original/*" -not -path "*/v1_sem_arma/*" -not -path "*/dama_v*/*" -not -path "./peao_meshy/*" -not -path "./peao_v1/*") | while read -r f; do
+(cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*" -not -path "*/meshy_original/*" -not -path "*/tripo_original/*" -not -path "*/tripo_rig/*" -not -path "*/v1_sem_arma/*" -not -path "*/dama_v*/*" -not -path "./peao_meshy/*" -not -path "./peao_v1/*") | while read -r f; do
   mkdir -p "$W/assets/meshy/$(dirname "$f")"; cp "$ROOT/assets/meshy/$f" "$W/assets/meshy/$f"
 done
 # site (página inicial com o hero, ranking e login): o jogo vai para /jogar.html e as páginas para a raiz
