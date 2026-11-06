@@ -356,6 +356,7 @@ const arcanoRules = (catalog = []) => {
     return p;
   }
   function loot(s, c, t, ev){
+    if (s.arc.opts.pure) return;
     gainEss(s, c, 2, 'espolio', ev);
     if (LOOT[t] && CARD[LOOT[t]]) giveCard(s, c, newCard(s, LOOT[t]), 'espolio', ev);
     ev.push({ k:'loot', side:c, piece:t });
@@ -624,9 +625,11 @@ const arcanoRules = (catalog = []) => {
         traps:[], blocked:{}, portals:[], anchors:[], trails:[], sideFx:[], oracle:null,
         lim:{ summon:{ w:0, b:0 }, sacr:{ w:0, b:0 }, legend:{ w:0, b:0 }, phoenix:{ w:0, b:0 } }, uid:0, decks:{ w:'tempestade', b:'cinzas' },
         // Oráculo: 'garantido' (a IA se compromete com o lance revelado) ou 'previsto' (o melhor lance que o motor prevê, contra humanos)
-        opts:{ oracle:o.oracle || 'previsto' } } };
+        opts:{ oracle:o.oracle || 'previsto', pure:!!o.pure } } };
+    // Xadrez Puro (online ranqueado): o mesmo motor, sem cartas, essência, espólio nem runas; o turno fecha sozinho depois do lance
     loadFen(s, o.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
     for (const c of ['w', 'b']){
+      if (o.pure){ s.arc.decks[c] = null; continue; }
       const dn = (o.decks && o.decks[c]) || s.arc.decks[c], list = Array.isArray(dn) ? dn : (DECKS[dn] || DECKS.tempestade).cartas;
       s.arc.decks[c] = Array.isArray(dn) ? 'custom' : DECKS[dn] ? dn : 'tempestade';
       s.arc.deck[c] = shuffle(s, list.filter(id => CARD[id]).map(id => newCard(s, id)));
@@ -634,7 +637,7 @@ const arcanoRules = (catalog = []) => {
     }
     for (const q of RUNES) s.arc.runes[q] = null;
     s.keys[posKey(s)] = 1;
-    gainEss(s, s.turn, 1, 'inicio', []);
+    if (!o.pure) gainEss(s, s.turn, 1, 'inicio', []);
     return s;
   }
   function legalMoves(s, from){
@@ -755,11 +758,12 @@ const arcanoRules = (catalog = []) => {
     if (c === 'b') s.full++;
     s.turn = o;
     s.hist.push(v);
-    if (m.pr && result === 'normal' && RARE.length) giveCard(s, c, newCard(s, RARE[Math.floor(rnd(s) * RARE.length)]), 'promocao', ev);
+    if (m.pr && result === 'normal' && RARE.length && !s.arc.opts.pure) giveCard(s, c, newCard(s, RARE[Math.floor(rnd(s) * RARE.length)]), 'promocao', ev);
     if (s.arc.oracle && s.arc.oracle.side === c){ ev.push({ k:'oracleEnd', hit:s.arc.oracle.moves.some(x => x.from === v.from && x.to === v.to) }); s.arc.oracle = null; }
     s.arc.phase = 'cards'; s.arc.cardSide = c; s.arc.played = false;
     const st = status(s);
     if (st.mate){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); }
+    if (s.arc.opts.pure && !s.over){ const e = endTurn(s); return { ok:true, state:e.state, move:v, events:ev.concat(e.events) }; }
     return { ok:true, state:s, move:v, events:ev };
   }
   function cardOptions(s, uid, picks = []){
@@ -819,11 +823,12 @@ const arcanoRules = (catalog = []) => {
     if (s0.arc.phase !== 'cards') return { ok:false, err:'Faça o seu lance primeiro.' };
     const s = clone(s0), ev = [], c = s.arc.cardSide;
     s.arc.turns[c]++;
-    for (const q of RUNES){
+    const pure = s.arc.opts.pure;
+    if (!pure) for (const q of RUNES){
       const p = s.board[fromS(q)];
       if (p && p.c === c && !s.arc.runes[q]){ s.arc.runes[q] = c; ev.push({ k:'rune', side:c, sq:q }); draw(s, c, 1, 'runa', ev); }
     }
-    if (s.arc.turns[c] % 2 === 0) draw(s, c, 1, 'turno', ev);
+    if (!pure && s.arc.turns[c] % 2 === 0) draw(s, c, 1, 'turno', ev);
     // contadores das peças do lado que terminou
     for (const i of ALL){
       const p = s.board[i];
@@ -856,7 +861,7 @@ const arcanoRules = (catalog = []) => {
     s.keys[key] = (s.keys[key] || 0) + 1;
     const st = status(s);
     if (st.over){ s.over = st.over; s.arc.phase = 'over'; ev.push({ k:'over', over:s.over }); return { ok:true, state:s, events:ev }; }
-    gainEss(s, s.turn, 1, 'inicio', ev);
+    if (!pure) gainEss(s, s.turn, 1, 'inicio', ev);
     ev.push({ k:'turn', side:s.turn });
     return { ok:true, state:s, events:ev };
   }

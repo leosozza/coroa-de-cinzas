@@ -33,3 +33,22 @@ Doc original: https://claude.ai/artifact/3paPjdZHueCGXtBjXxABHL. O usuário apro
 2. Engajamento: Grimório e decks, ranqueada Arcano, perfil com estatísticas, histórico e replays, temporadas, missões diárias, desafio do dia.
 3. Monetização: Gemas, loja de cosméticos, Passe Arcano, maestria, pacotes por Ouro, Stripe com Pix, termos e privacidade. Passa só com parecer jurídico sobre compras e menores (Lei 15.211/2025, ECA Digital) e pagamento testado no modo de teste do Stripe.
 4. Depois: apps nas lojas, torneios, clãs, espectador online.
+
+## Fase 1 — decisões de implementação (06/11/2026, aprovadas de antemão pelo usuário)
+
+Ordem de entrega: (a) convidado + partida por link + relógio + reconexão; (b) Glicko-2, ligas, filas casual e ranqueada de Xadrez Puro, IA de reserva; (c) Google e Discord com o convidado virando conta; (d) cliente online no jogo.
+
+| # | Tema | Decisão |
+|---|---|---|
+| F1 | Motor no servidor | O servidor usa `engine/arcano-rules.js` sem cópia. O Xadrez Puro é o mesmo motor com `create({ pure:true })`: sem cartas, essência, espólio nem runas, e o turno fecha sozinho depois do lance. Conferido contra o chess.js (200 partidas, 60.900 lances, 0 divergências) |
+| F2 | Sessão | Ficha assinada com HMAC-SHA256 (`SESSION_SECRET` só como segredo do Worker), válida por 90 dias. O convidado ganha um id `g_…` e um nome (3 a 20 caracteres, só letras, números, espaço, ponto, hífen e sublinhado; sem nome vira "Convidado 1234") |
+| F3 | WebSocket | A ficha vai na 1ª mensagem (`hello`), nunca na URL |
+| F4 | Sala por link | Id de 8 caracteres sem letras ambíguas. O criador escolhe a cor (ou sorteio) e, no Arcano, o grimório; o rival recebe outro grimório. Quem chega depois dos dois lugares assiste. Link: `arcanechess.pages.dev/#sala=<id>` |
+| F5 | Ritmos | Xadrez Puro 10+0 (padrão), 3+2 e 5+3; Arcano 12+5 (padrão); amistosa também "livre" (sem relógio). O relógio do Arcano corre na fase de lance e na de cartas de quem age; o incremento entra quando a vez passa |
+| F6 | Primeiro lance | O relógio só começa no 1º lance. Se as Brancas não lançarem em 60 s, a partida é cancelada sem resultado. Desistir antes do 1º lance também só cancela |
+| F7 | Tempo esgotado | Perde quem zerou. No Xadrez Puro vira empate se o vencedor não tiver material para dar mate (só Rei ou uma peça menor), como no xadrez |
+| F8 | Reconexão | Ao cair, o jogador tem 60 s para voltar ao mesmo lugar (outra aba conta). Se os dois caírem, perde quem caiu primeiro; se os prazos vencerem juntos, empate |
+| F9 | Informação escondida | Cada jogador recebe `viewFor` do motor. Os eventos também são filtrados: compras e queimas do rival, qual armadilha foi armada e onde, e a previsão do Oráculo chegam mascaradas. O espectador não vê mão nem armadilha de ninguém |
+| F10 | Registro | Toda partida terminada (ou cancelada) vai para a tabela `games` do D1 com resultado, motivo, número de lances e o SAN (replay básico) |
+| F11 | IA de reserva | Roda no aparelho do jogador (o mesmo motor e a mesma IA do jogo offline) e não vale nota. Assim não gasta CPU do Worker, que tem limite curto por requisição |
+| F12 | Origem | O Worker só aceita chamadas de `arcanechess.pages.dev` e do servidor local de teste (CORS) |

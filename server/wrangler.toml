@@ -1,0 +1,28 @@
+# Arcane Chess online — API (Worker) + salas (Durable Objects) + D1.
+# Local: npx -y wrangler@4 dev (veja server/LEIA.md). A criação remota fica com o dono da conta:
+#   npx wrangler@4 d1 create arcane-chess        -> cole o database_id abaixo
+#   npx wrangler@4 d1 migrations apply arcane-chess --remote
+#   npx wrangler@4 secret put SESSION_SECRET      (valor aleatório longo; nunca no código)
+#   npx wrangler@4 deploy
+name = "arcane-chess-api"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://arcanechess.pages.dev,http://localhost:8767,http://127.0.0.1:8767"
+PUBLIC_URL = "https://arcanechess.pages.dev"
+
+[[durable_objects.bindings]]
+name = "GAME"
+class_name = "GameRoom"
+
+# Durable Objects com SQLite (disponível no plano gratuito)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "arcane-chess"
+database_id = "00000000-0000-0000-0000-000000000000"   # trocar pelo id real depois do `d1 create`
+migrations_dir = "migrations"

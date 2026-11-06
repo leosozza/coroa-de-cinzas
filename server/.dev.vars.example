@@ -1,0 +1,2 @@
+# Copie para .dev.vars (fora do git) e troque o valor. Em produção use: npx wrangler@4 secret put SESSION_SECRET
+SESSION_SECRET=troque-por-um-valor-aleatorio-longo
