@@ -484,10 +484,10 @@ const arcanoRules = (catalog = []) => {
     'vinganca-isca':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Peão ou Cavalo seu.', ownPieces(s, c, q => q.t === 'p' || q.t === 'n')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'vinganca', kind:'relic' }); ev.push({ k:'fx', sq:p[0], id:'vinganca' }); } },
     // transmutações (relíquias que transformam: ocupam o mesmo lugar da relíquia)
     'bispo-oraculo':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Bispo seu.', ownPieces(s, c, q => q.t === 'b')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'oraculo_b', kind:'relic', trans:true }, 3); ev.push({ k:'trans', sq:p[0], id:'oraculo_b' }); } },
-    'pegaso':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Cavalo seu.', ownPieces(s, c, q => q.t === 'n')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'pegaso', kind:'relic', trans:true }, 3); ev.push({ k:'trans', sq:p[0], id:'pegaso' }); } },
+    'pegaso':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha um Cavalo seu.', ownPieces(s, c, q => q.t === 'n')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'pegaso', kind:'relic', trans:true }, 2); ev.push({ k:'trans', sq:p[0], id:'pegaso' }); } },
     'dragao-cinzas':{
       targets:(s, c, p) => s.arc.lim.legend[c] >= 1 ? { err:'O Dragão das Cinzas é lendário: 1 por partida.' } : p.length ? { ready:true } : step('Escolha um Cavalo seu.', ownPieces(s, c, q => q.t === 'n')),
-      apply(s, c, p, ev){ s.arc.lim.legend[c]++; addFx(s, s.board[fromS(p[0])], { id:'dragao', kind:'relic', trans:true }, 2); ev.push({ k:'trans', sq:p[0], id:'dragao' }); },
+      apply(s, c, p, ev){ s.arc.lim.legend[c]++; addFx(s, s.board[fromS(p[0])], { id:'dragao', kind:'relic', trans:true }, 1); ev.push({ k:'trans', sq:p[0], id:'dragao' }); },
     },
     'canhao-cerco':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma Torre sua.', ownPieces(s, c, q => q.t === 'r')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'canhao', kind:'relic', trans:true }, 3); ev.push({ k:'trans', sq:p[0], id:'canhao' }); } },
     'golem-pedra':{ targets:(s, c, p) => p.length ? { ready:true } : step('Escolha uma Torre sua.', ownPieces(s, c, q => q.t === 'r')), apply(s, c, p, ev){ addFx(s, s.board[fromS(p[0])], { id:'golem', kind:'relic', trans:true }, 3); ev.push({ k:'trans', sq:p[0], id:'golem' }); } },
@@ -916,6 +916,16 @@ const arcanoRules = (catalog = []) => {
   const AI_LV = { 1:{ ms:250, noise:70, cardP:0.45 }, 2:{ ms:700, noise:12, cardP:1 }, 3:{ ms:1400, noise:0, cardP:1 } };
   const FX_VAL = { escudo:90, martir:80, golem:120, heranca:90, coroa:140, coroa_raio:70, coroa_herdada:160, alcance:60, vinganca:40, salto_herdado:60, visao_arcana:50, muralha_viva:120,
     oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanca:30, ferradura:25, paralisado:-1, nevoa:-30 };
+  // valor de carta que a avaliação do tabuleiro não enxerga (armadilhas, informação, portais): sem isso a IA sem ruído nunca as joga
+  const CARD_AI = { 'armadilha-espinhos':40, 'troca-sombra':45, 'duplo-corpo':45, 'profecia-selada':40, 'visao-oraculo':30, 'veu-sombras':15, 'bispo-oraculo':55,
+    'portal-runa':25, 'ponto-ancoragem':20, 'necromante-cinzas':15, 'grimorio-arcano':10 };
+  function cardAI(s, s0, me, id){
+    let v = CARD_AI[id] || 0;
+    if (id === 'contrafeitico') v += s.arc.hand[other(me)].length ? 50 : 0;
+    if (id === 'olho-bispo') v += 30 * s0.arc.traps.filter(t => t.side !== me && !t.seen).length;
+    if (id === 'repercussao-impacto') v += legalMoves(s).some(m => m.captured) ? 35 : 0;
+    return v;
+  }
   function aiView(s, me){ const v = clone(s); v.arc.traps = v.arc.traps.filter(t => t.side === me || t.seen); return v; }
   function evalFor(s, me){
     if (s.over) return s.over.kind === 'mate' ? (s.over.winner === me ? 100000 : -100000) : 0;
@@ -1013,7 +1023,8 @@ const arcanoRules = (catalog = []) => {
         if (!r.ok) continue;
         const cost = (CARD[a.id] || {}).custo || 0;
         // a essência gasta já sai da avaliação; um pequeno bônus para cartas que viram valor no tabuleiro
-        let v = evalFor(r.state, me) - (level >= 2 ? hanging(r.state, me) * 0.8 : 0) + cost * 4;
+        // a carta jogada sai da mão mas vira efeito (+18 devolve o valor de mão); a essência gasta já sai da avaliação
+        let v = evalFor(r.state, me) - (level >= 2 ? hanging(r.state, me) * 0.8 : 0) + cost * 4 + 18 + cardAI(s, s0, me, a.id);
         if (r.state.over && r.state.over.kind === 'mate' && r.state.over.winner === me) v = 1e6;
         v += (rnd01() - 0.5) * 2 * L.noise;
         if (v > best.v + 8){ const x = { type:'card', uid:a.uid, picks:a.picks }; if (okReal(x)) best = { a:x, v }; }

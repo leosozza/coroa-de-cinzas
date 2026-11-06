@@ -15,7 +15,7 @@ Fonte: documento "Modos de Jogo do Arcane Chess" (https://claude.ai/artifact/HFV
 - **Espólio:** cada peça carrega um artefato (Peão: Lança Fiel; Cavalo: Ferradura do Salto; Bispo: Grimório Arcano; Torre: Pedra da Terra; Dama: Coroa do Raio). Quem captura ganha a carta.
 - **Vitória:** xeque-mate. O Rei é imune a cartas (nenhuma carta move, troca, prende, captura, sacrifica ou dá aura a um Rei). Nenhuma carta pode deixar o próprio Rei em xeque; com o Rei em xeque, só cartas que tiram o xeque. Uma carta pode dar xeque.
 - **Limites:** 1 carta por turno; 1 relíquia por peça (outra substitui); no máximo 2 invocações por partida e a Dama nunca volta (exceção: Fênix, 1 vez por partida); no máximo 2 armadilhas armadas; peça invocada não captura no turno em que chega; no máximo 2 sacrifícios por partida. Empates seguem o xadrez; os 50 lances zeram quando uma carta captura ou invoca.
-- **Transmutações:** comuns duram 3 turnos, lendárias 2 (contador sobre a peça). Lendárias (Dragão das Cinzas) custam 8 e valem 1 por partida. Visual: efeitos sobre o modelo atual (asas, chamas, armadura) primeiro; modelos novos depois.
+- **Transmutações:** comuns duram 3 turnos (exceção: Ascensão do Pegaso, 2), lendárias 1 (contador sobre a peça). Lendárias (Dragão das Cinzas) custam 8 e valem 1 por partida. Visual: efeitos sobre o modelo atual (asas, chamas, armadura) primeiro; modelos novos depois.
 - **Armadilhas:** escondidas; o rival vê só um brilho suspeito na casa. Proibidas no Rei.
 - **Oráculo:** contra a IA a primeira previsão é garantida (a IA se compromete com o lance revelado); contra pessoas são só prováveis.
 - **Sacrifício (Rito do Sacrifício):** a peça sacrificada (não o Rei) vai ao cemitério sem dar espólio; a aura vai para outra peça sua conforme a sacrificada: Peão → Escudo do Mártir (sobrevive à 1ª captura, 3 turnos); Cavalo → Salto Herdado (também salta em L, 3); Bispo → Visão Arcana (diagonais + vê a melhor resposta do rival, 2); Torre → Muralha Viva (anda como Torre e imune a cartas do rival, 3); Dama → Coroa Herdada (move como Dama, 3). Não pode deixar o Rei em xeque.
@@ -42,3 +42,25 @@ Mão em leque na base da cena (faixa rolável no celular); barra de cristais de 
 - **Berserker:** conta como sacrifício (no máximo 2 por partida, junto com o Rito do Sacrifício).
 - **Ressurreição das Cinzas:** o tipo da peça é escolhido entre os que estão no seu cemitério (nunca a Dama nem o Rei).
 - **Promoção por lance extra:** um Peão que chega à última fileira por um movimento de carta (por exemplo a Herança do Cavaleiro) é promovido a Dama.
+
+## Balanceamento (Fase E, 06/11/2026)
+
+Medido com a IA no nível 3 (a mais forte), 216 partidas por rodada, todos os confrontos entre grimórios e os dois lados. Taxas ajustadas pelo lado.
+
+| Carta | Antes | Depois | Motivo |
+|---|---|---|---|
+| Dragão das Cinzas | custo 8, 2 turnos | custo 8, 1 turno | 76% de vitória mesmo custando 8 |
+| Ascensão do Pegaso | custo 4, 3 turnos | custo 5, 2 turnos | entre 56% e 66% em todas as rodadas; com custo 5 passa a ser carta rara (prêmio da promoção do Peão) |
+| Fênix | 6 | 7 | acima de 55% |
+| Rito do Sacrifício | 2 | 3 | acima de 55% |
+| Aura do Cavaleiro | 3 | 4 | acima de 55% |
+| Ferradura do Salto | 2 | 3 | espólio forte demais para o custo |
+| Golem de Pedra | 4 | 3 | 38,8% → 54,5% |
+| Fosso de Lava | 4 | 3 | 37,6% → 49,9% |
+| Duplo de Corpo | 3 | 2 | ~42% (margem de ±10) |
+
+- **IA:** no nível 3 a IA nunca jogava armadilhas nem cartas de informação (a avaliação do tabuleiro não vê o valor delas). A IA agora soma o valor da carta que vira efeito e um valor situacional por carta (Contrafeitiço só se o rival tem cartas na mão, Olho do Bispo conforme as armadilhas escondidas, Repercussão só com captura disponível). Com isso o grimório Arcano subiu de 44% para 49%.
+- **Coroa do Raio:** os 74% vinham de quem já tinha capturado a Dama rival. O efeito real da carta é de +0,5 a +3 pontos; o custo continua 3.
+- **Vantagem das Brancas:** os 62,5% só aparecem no nível 2. No nível 3 as Brancas ficam entre 47% e 54%, então não há compensação para a Legião.
+- **Resultado (validação final, sementes novas):** grimórios entre 48,6% e 51,7%, confrontos entre 46,9% e 53,1% (antes 35%–65%), Brancas com 47,5%. A única carta claramente acima de 55% é a Coroa do Raio, por viés de seleção (efeito real +2,3 pontos). Ficam em observação, sem mudança: Pégaso (66%, provável), Dragão (61%, provável); Centurião, Névoa Fria e Rito do Sacrifício (42%–44%, prováveis abaixo).
+
