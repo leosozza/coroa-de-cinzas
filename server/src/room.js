@@ -4,6 +4,7 @@
 import arcanoRules from '../../engine/arcano-rules.js';
 import catalog from '../../data/cartas.json';
 import { verifyToken } from './auth.js';
+import { rateGame } from './ratings.js';
 
 const ARC = arcanoRules(catalog.cartas);
 const TRAP = new Set(catalog.cartas.filter(c => c.tipo === 'armadilha').map(c => c.id));
@@ -65,8 +66,9 @@ export class GameRoom {
         firstMoveBy:0, away:{ w:0, b:0 }, drawOffer:null, result:null, n:0,
       };
       // na fila os dois lugares já vêm marcados
-      if (b.seats) for (const c of ['w', 'b']) if (b.seats[c]) this.g.seats[c] = b.seats[c];
+      if (b.seats){ for (const c of ['w', 'b']) if (b.seats[c]) this.g.seats[c] = b.seats[c]; this.g.queue = b.queue || null; this.g.showBy = Date.now() + (+this.env.SHOW_MS || 30000); }
       await this.save();
+      if (this.g.showBy) await this.schedule();
       return json(this.info());
     }
     if (path === '/info') return this.g ? json(this.info()) : json({ err:'Sala não encontrada.' }, 404);
@@ -138,7 +140,8 @@ export class GameRoom {
     }
     at.seat = seat; ws.serializeAttachment(at);
     if (seat && g.away[seat]) g.away[seat] = 0;
-    if (g.status === 'waiting' && g.seats.w && g.seats.b) this.start();
+    // começa quando os dois lugares estão ocupados e os dois jogadores conectados (na fila os lugares já vêm marcados)
+    if (g.status === 'waiting' && g.seats.w && g.seats.b && this.online('w') && this.online('b')) this.start();
     this.send(ws, { t:'welcome', you:{ uid:at.uid, name:at.name, seat }, room:this.info() });
     await this.schedule(); await this.save();
     this.broadcast();
@@ -224,7 +227,10 @@ export class GameRoom {
     g.status = 'over'; g.result = { winner, reason, score:RESULT(winner) };
     if (g.s && !g.s.over) g.s.over = { kind:'servidor', winner, reason };
     await this.ctx.storage.deleteAlarm(); await this.save(); await this.record();
-    if (this.env.QUEUE && g.ranked) await this.reportRanked();
+    if (g.ranked && this.env.DB && g.seats.w && g.seats.b){
+      try { g.result.rating = await rateGame(this.env.DB, g.mode, g.seats.w.uid, g.seats.b.uid, winner === 'w' ? 1 : winner === 'b' ? 0 : 0.5); await this.save(); }
+      catch (e){ console.log('nota', e.message); }
+    }
     this.broadcast(events, last);
   }
   canMate(side){
@@ -240,13 +246,17 @@ export class GameRoom {
       else if (g.base) at.push(g.turnStart + Math.max(0, g.clocks[ARC.actor(g.s)]));
       for (const c of ['w', 'b']) if (g.away[c]) at.push(g.away[c]);
     }
+    // sala da fila: os dois têm 30 s para aparecer
+    if (g.status === 'waiting' && g.showBy) at.push(g.showBy);
     if (at.length) await this.ctx.storage.setAlarm(Math.min(...at));
     else await this.ctx.storage.deleteAlarm();
   }
   async alarm(){
     const g = this.g;
-    if (!g || g.status !== 'playing') return;
+    if (!g) return;
     const now = Date.now();
+    if (g.status === 'waiting' && g.showBy && now >= g.showBy) return this.abort('rival não apareceu');
+    if (g.status !== 'playing') return;
     if (!g.started && now >= g.firstMoveBy) return this.abort('sem primeiro lance');
     if (g.started && g.base){
       const side = ARC.actor(g.s);
@@ -265,5 +275,4 @@ export class GameRoom {
           g.s ? g.s.hist.length : 0, g.created, Date.now(), g.s ? g.s.hist.map(h => h.san).join(' ') : '').run();
     } catch (e){ console.log('record', e.message); }
   }
-  async reportRanked(){}
 }

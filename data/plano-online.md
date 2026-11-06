@@ -52,3 +52,9 @@ Ordem de entrega: (a) convidado + partida por link + relógio + reconexão; (b) 
 | F10 | Registro | Toda partida terminada (ou cancelada) vai para a tabela `games` do D1 com resultado, motivo, número de lances e o SAN (replay básico) |
 | F11 | IA de reserva | Roda no aparelho do jogador (o mesmo motor e a mesma IA do jogo offline) e não vale nota. Assim não gasta CPU do Worker, que tem limite curto por requisição |
 | F12 | Origem | O Worker só aceita chamadas de `arcanechess.pages.dev` e do servidor local de teste (CORS) |
+| F13 | Glicko-2 | Cada partida ranqueada é um período. Antes dela o desvio cresce com os dias parados (σ por dia), entre 45 e 350; τ = 0,5. Nota provisória (mostrada com "?") enquanto o desvio passar de 110. Conferido contra o exemplo do artigo de Glickman (1464,05 / 151,52 / 0,06) |
+| F14 | Ligas | Pela nota: Aprendiz < 1200, Alquimista 1200–1499, Mestre Arcano 1500–1799, Inquisidor da Aurora 1800+. Grão-Mestre Arcano: os 500 primeiros entre contas com nota firme. O convidado joga a ranqueada e leva a nota quando virar conta, mas não entra no ranking nem no topo |
+| F15 | Filas | Ranqueada de Xadrez Puro 10+0 e 3+2; casual 10+0, 3+2 e 5+3 (a casual também pareia pela nota, mas não mexe nela). Janela de nota: 150 pontos, +25 por segundo de espera; na ranqueada até 500, na casual sem limite depois de 20 s. Cores sorteadas. A mesma pessoa em duas abas: fica a mais nova |
+| F16 | IA de reserva | Aos 30 s sem rival a fila oferece a IA pelo nível da nota (Recruta < 1300, Veterano < 1700, Mestre acima) e continua procurando; aceitar sai da fila e joga no aparelho, sem nota |
+| F17 | Sala da fila | Os dois têm 30 s para entrar; se um não aparece, a sala é cancelada sem nota. Na ranqueada contam mate, tempo, abandono, desistência e empates; partida cancelada não conta |
+| F18 | Arcano ranqueado | Fica para a fase 2 (plano). A nota do Arcano já existe separada, começando em 1500 |

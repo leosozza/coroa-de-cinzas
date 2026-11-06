@@ -16,10 +16,18 @@ PUBLIC_URL = "https://arcanechess.pages.dev"
 name = "GAME"
 class_name = "GameRoom"
 
+[[durable_objects.bindings]]
+name = "QUEUE"
+class_name = "Matchmaker"
+
 # Durable Objects com SQLite (disponível no plano gratuito)
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["GameRoom"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Matchmaker"]
 
 [[d1_databases]]
 binding = "DB"

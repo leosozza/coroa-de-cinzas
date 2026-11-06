@@ -5,11 +5,16 @@
 //   POST /api/rooms            (Bearer) { mode, tc, color, deck } -> { id, link, room }
 //   GET  /api/rooms/:id                                  -> room
 //   GET  /api/rooms/:id/ws     WebSocket; 1ª mensagem { t:'hello', token }
+//   GET  /api/queue/:fila/:ritmo/ws   fila casual ou ranqueada de Xadrez Puro (WebSocket; avisa o par ou oferece a IA)
+//   GET  /api/leaderboard?pool=xadrez  ranking (notas firmes de contas)
 import { GameRoom, TC } from './room.js';
+import { Matchmaker, QUEUES } from './queue.js';
 import { signToken, verifyToken, bearer, randomId } from './auth.js';
-export { GameRoom };
+import { publicRating } from './ratings.js';
+import { LEAGUES, GRANDMASTER, PROVISIONAL_RD } from './glicko2.js';
+export { GameRoom, Matchmaker };
 
-const VERSION = 'fase1-a';
+const VERSION = 'fase1-b';
 function cors(req, env){
   const origin = req.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -50,7 +55,9 @@ export default {
           if (!row) return json(req, env, { err:'Conta não encontrada.' }, 401);
           await env.DB.prepare('UPDATE users SET last_seen = ? WHERE id = ?').bind(Date.now(), u.uid).run();
         }
-        return json(req, env, { user:row || { id:u.uid, name:u.name, kind:u.kind } });
+        const user = row || { id:u.uid, name:u.name, kind:u.kind };
+        const ratings = { xadrez:await publicRating(env.DB, user.id, user.kind, 'xadrez'), arcano:await publicRating(env.DB, user.id, user.kind, 'arcano') };
+        return json(req, env, { user, ratings });
       }
 
       if (p === '/api/rooms' && req.method === 'POST'){
@@ -76,6 +83,20 @@ export default {
         return json(req, env, await r.json(), r.status);
       }
 
+      const q = p.match(/^\/api\/queue\/(ranked|casual)\/([0-9+]+)\/ws$/);
+      if (q){
+        if (!(QUEUES[q[1]] || []).includes(q[2])) return json(req, env, { err:'Fila desconhecida.' }, 404);
+        if (req.headers.get('Upgrade') !== 'websocket') return json(req, env, { err:'Use WebSocket.' }, 426);
+        return env.QUEUE.get(env.QUEUE.idFromName(q[1] + ':' + q[2])).fetch(req);
+      }
+
+      if (p === '/api/leaderboard'){
+        const pool = url.searchParams.get('pool') === 'arcano' ? 'arcano' : 'xadrez';
+        const rows = env.DB ? (await env.DB.prepare("SELECT users.name AS name, ratings.r AS r, ratings.games AS games FROM ratings JOIN users ON users.id = ratings.user_id WHERE pool = ? AND rd <= ? AND users.kind = 'account' AND users.deleted = 0 ORDER BY r DESC LIMIT 50").bind(pool, PROVISIONAL_RD).all()).results : [];
+        return json(req, env, { pool, top:rows.map((x, i) => ({ rank:i + 1, name:x.name, r:Math.round(x.r), games:x.games })) });
+      }
+
+      if (p === '/api/config') return json(req, env, { tc:Object.keys(TC), queues:QUEUES, leagues:LEAGUES, grandmaster:GRANDMASTER, provisionalRd:PROVISIONAL_RD });
       if (p === '/api/tc') return json(req, env, { tc:Object.keys(TC) });
       return json(req, env, { err:'Rota desconhecida.' }, 404);
     } catch (e){
