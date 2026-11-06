@@ -63,6 +63,6 @@ function view(id, files, opt){
   window.__cmp[id] = { play, seek:(t)=>{ if(mix.act){ mix.act.time=t; mix.m.update(0); r.render(sc,cam);} }, clips:()=>mix.clips.map(c=>c.name+' '+c.duration.toFixed(1)+'s') };
 }
 const Q=new URLSearchParams(location.search); const GP='../assets/meshy/peao/golpes.glb';
-view('tripo', [Q.get('a')||'../assets/meshy/peao/animated.glb', GP], {scale:1});
-view('combo', [Q.get('b')||'../assets/meshy/peao/animated.glb', GP], {scale:1});
+view('tripo', [Q.get('a')||'../assets/meshy/peao/animated.glb'].concat(Q.get('ga')===null?[GP]:[]), {scale:+(Q.get('s')||1), rotY:+(Q.get('r')||0)});
+view('combo', [Q.get('b')||'../assets/meshy/peao/animated.glb'].concat(Q.get('ga')===null?[GP]:[]), {scale:+(Q.get('s2')||Q.get('s')||1), rotY:+(Q.get('r2')||Q.get('r')||0)});
 </script></body></html>

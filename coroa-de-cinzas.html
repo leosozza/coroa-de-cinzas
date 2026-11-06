@@ -536,6 +536,20 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 .mode-card.soon{opacity:.62; cursor:default; padding-bottom:32px}
 .mode-card em{position:absolute; right:12px; bottom:10px; font-style:normal; font-family:var(--f-ui); font-size:.7rem; letter-spacing:.1em; color:#bfa8ff; border:1px solid rgba(170,120,255,.5); padding:1px 7px; border-radius:10px}
 .setup{width:100%; max-width:640px; padding:16px; border:1px solid rgba(232,192,112,.35); border-radius:4px; background:rgba(16,14,20,.94); text-align:left}
+.kg-pick{margin:12px 0 2px}
+.kg-pick h4{margin:0 0 4px; font-family:var(--f-engrave); letter-spacing:.08em; color:#f0d48a; font-size:.9rem}
+.kg-row{display:grid; gap:6px; margin-top:8px}
+.kg-side{font-family:var(--f-ui); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ash)}
+.kg-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px}
+.kg-card{display:grid; grid-template-rows:auto auto 1fr; gap:3px; text-align:left; padding:6px; min-height:44px; background:rgba(20,16,24,.9); border:1px solid rgba(232,192,112,.3); border-radius:4px; color:var(--bone); cursor:pointer}
+.kg-card img{width:100%; height:68px; object-fit:cover; border-radius:3px; background:#0c0a10}
+.kg-card b{font-family:var(--f-engrave); font-size:.82rem; color:#f0d48a}
+.kg-card span{font-size:.75rem; color:#bdb4a2; line-height:1.25}
+.kg-card.on{border-color:#f0cf7a; box-shadow:0 0 0 2px rgba(240,207,122,.35)}
+.kg-card:focus-visible{outline:2px solid #ffcf6a; outline-offset:2px}
+body.reino-b-ferro_negro .side-b, body.reino-w-ferro_negro .side-w{--k-acc:#c0392b}
+body.reino-b-ferro_negro .force.b .meter i, body.reino-w-ferro_negro .force.w .meter i{background:linear-gradient(90deg, #3b3835, #7a1c1c, #d6a842)}
+body.reino-b-dragoes .force.b .meter i, body.reino-w-dragoes .force.w .meter i{background:linear-gradient(90deg, #2a2524, #9b1d14, #ff7a1a)}
 .setup h3{margin:0 0 10px; font-family:var(--f-engrave); letter-spacing:.08em; color:#f0d48a; font-size:1rem}
 .setup .row{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px}
 .setup .acts{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
@@ -655,13 +669,13 @@ body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-t
           <optgroup label="Clássicas">
             <option value="fortaleza">Fortaleza Medieval</option>
             <option value="medieval">Ruínas Medievais</option>
-            <option value="dragoes">Covil dos Dragões</option>
+            <option value="dragoes">Covil dos Dragões — Reino dos Dragões</option>
             <option value="gelo">Fogo x Gelo</option>
           </optgroup>
           <optgroup label="Místicas">
             <option value="zodiaco">Zodíaco</option>
             <option value="multiverso">Multiverso</option>
-            <option value="infernal">Mistério Infernal</option>
+            <option value="infernal">Mistério Infernal — Legião do Ferro Negro</option>
           </optgroup>
           <optgroup label="Divinas">
             <option value="celestial">Celestial</option>
@@ -4762,6 +4776,7 @@ function paintBackdropInfernal(c){
   bdFade(g, w, h);
 }
 function buildEnvInfernal(){
+  setTimeout(buildCrimson, 0);
   const rnd = seeded(181);
   themeMats({ stone:0x2e2828, dark:0x161212, iron:0x1e1c20, wood:0x241812 });
   const constO = constellationTex(211, 'rgba(255,150,70,1)', 'rgba(255,90,30,.8)');
@@ -5396,6 +5411,7 @@ function buildEnvDragon(){
   ENVX.glider = makeGlider();
   backdrop.add(ENVX.glider.g);
   buildFlyingDragons(rnd);
+  buildDragonWorld();
   // numa captura, um dos dragões pode rugir (e às vezes soltar fogo)
   ENVX.onCapture = () => {
     const D = ENVX.dragons, n = performance.now();
@@ -5531,6 +5547,8 @@ function updateDragons(now, dt){
   const top = pitch - THREE.MathUtils.degToRad(camera.fov) / 2;
   if (!RM && !D.swoop && now > D.nextSwoop && !cine.active) D.swoop = { d:D.list[Math.floor(Math.random() * D.list.length)], t0:now, dur:7500 };
   for (const d of D.list){
+    // pousado (anda, ruge, decola): a órbita espera
+    if (d.landing){ if (d.post) d.post(); continue; }
     let e = 0;
     if (D.swoop && D.swoop.d === d){
       const u = (now - D.swoop.t0) / D.swoop.dur;
@@ -6857,7 +6875,9 @@ function dragonsUpgrade(){
     const wl = new THREE.Object3D(), wr = new THREE.Object3D(), tail = B.tail.map(() => new THREE.Object3D());
     d.wl = wl; d.wr = wr; d.tail = tail;
     if (B.tip) d.mouth = B.tip;
+    if (A.clips.walk){ d.mixer = new THREE.AnimationMixer(model); d.walkAct = d.mixer.clipAction(A.clips.walk); d.walkAct.play(); }
     d.post = () => {
+      if (d.walk) return;
       for (const b of B.all) b.quaternion.copy(B.rest.get(b));
       if (B.wings[0]) dgAdd(B.wings[0], 0, 0, wl.rotation.z * 2.2);
       if (B.wings[1]) dgAdd(B.wings[1], 0, 0, wr.rotation.z * 2.2);
@@ -7236,6 +7256,7 @@ async function loadModels(){
   { const base = 'assets/meshy/dragao/animated.opt', list = opt ? (DRACO.mod ? [base + '.c.gltf.json', base + '.c.glb'] : []).concat([base + '.gltf.json', base + '.glb']) : [];
     const dg = list.length ? await loadGltf(loader, list) : null;
     if (dg){ try { GLB.dg = prepDragon(dg); dragonsUpgrade(); } catch (e){ delete GLB.dg; glbLog.push(`dragao: falha ao preparar (${e.message})`); } } }
+  setTimeout(kingdomApply, 0);
   if (lz){ try { GLB.pl = prepAsset('p', lz, null); GLB.pl.lanceiro = true; if (GLB.pl.rigged) GLB.pl.frames = propFrames(lz.scene, 'pl'); glbLog.push('peao_lanca: modelo do Lanceiro'); } catch (e){ glbLog.push(`peao_lanca: falha ao preparar (${e.message})`); } }
 }
 // assets/meshy/<slug>/<nome>.gltf.json (reserva .glb): só o clipe interessa, o modelo de 16 px é descartado
@@ -7330,7 +7351,8 @@ function makeGlbCharacter(type, side, A){
   const wrap = new THREE.Group();
   wrap.add(model); wrap.scale.set(A.scale, A.scaleY || A.scale, A.scale); wrap.position.copy(A.off);
   holder.add(wrap);
-  applySideTint(model, side);
+  // modelos de um reino já têm a cor própria; a tinta escura só quando os dois lados usam o mesmo reino
+  if (!A.kingdom || (KINGDOM.w === KINGDOM.b && side === 'b')) applySideTint(model, side);
   // adereços nas mãos (já na paleta do lado; a tinta não se aplica a eles)
   let tipObj = null, zap = null;
   // lança procedural do cavaleiro (modelo montado com a mão vazia): de pé em repouso, deitada e cravada no ataque
@@ -7851,6 +7873,8 @@ function makeGlbCharacter(type, side, A){
   return api;
 }
 function makeCharacter(type, side){
+  { const KA = typeof kingdomAsset === 'function' ? kingdomAsset(type, side) : null;
+    if (KA){ try { const c = makeGlbCharacter(type, side, KA); c.kingdom = KA.kingdom; return c; } catch (e){ glbLog.push(`reino: falha ao instanciar ${type} (${e.message})`); } } }
   if (type === 'dg'){
     let c = null;
     if (GLB.dg){ try { c = makeGlbCharacter('n', side, GLB.dg); c.dragonModel = true; } catch (e){ glbLog.push(`dragao: falha ao instanciar (${e.message})`); delete GLB.dg; } }
@@ -8572,6 +8596,7 @@ function animMove(p, r, c){
 async function slay(v, kind, killer = 'w', knock, g, atk){
   const ch = chOf(v), X = FXC[killer], E = golpeEl(g);
   cineImpact(v);
+  if (atk && g) reinoImpact(g, atk, v);
   // cada arena pode reagir à captura (constelação, portal, selo...)
   if (GLOK && ENVX.onCapture) try { ENVX.onCapture(v.dx, v.dz, killer); } catch (e){}
   if (GLOK){
@@ -8600,6 +8625,7 @@ async function slay(v, kind, killer = 'w', knock, g, atk){
   if (v.t === 'n') back = await riderFall(v, g, atk ? atk.dx : kx - 0.5, atk ? atk.dz : kz);
   if (!back) await ch.play('death', { clips:g ? GOLPE_DEATH[g.morte] || GOLPE_DEATH[g.tipo] : null });
   if (g && g.el === 'gelo' && GLOK) iceShards(chestOf(v, 0.4), nFx(8));
+  reinoDeath(g, v);
   dustAt(v.dx, v.dz, 12, 0.7);
   if (cine.mode !== 'fast') cineRelease(v);
   await tween(440, k => {
@@ -8697,7 +8723,8 @@ function golpeDe(a, v, ctx = {}){
   g.texto = `${gName(a)} ${lead}${golpeFrase(g.tpl, v)}`;
   g.html = (wa, wv) => `${wa} ${c ? `usa <i>${c.nome}</i> e ` : ''}${golpeFrase(g.tpl, v, wv)}`;
   g.cap = c ? c.nome.toUpperCase() : g.lanceiro ? 'LANÇA FIEL' : g.justa ? 'JUSTA' : g.tipo === 'magia' ? (GOLPE_EL[g.el] || GOLPE_EL.arcano).cap : GOLPE_CAP[g.tipo] || 'GOLPE FATAL';
-  return g;
+  g.v = v;
+  return typeof golpeReino === 'function' ? golpeReino(g, a) : g;
 }
 const golpeEl = g => (g && g.el && GOLPE_EL[g.el]) || null;
 const golpeLite = () => RM || W < 560;
@@ -8737,6 +8764,7 @@ function golpesLoad(){
       for (const [n, c] of pool) if (!A.clips[n]){ const k = c.clone(); k.tracks = k.tracks.filter(x => /\.quaternion$/.test(x.name)); A.clips[n] = k; lent.push(n); }
       if (lent.length) glbLog.push(`${GLB_SLUG[t] || t}: clipes emprestados ${lent.join(', ')}`);
     }
+    kingdomClipsAll();
     GOLPES.state = 'done';
   }, () => { GOLPES.state = 'done'; });
   return GOLPES.p;
@@ -8784,6 +8812,7 @@ function explosionFx(at, el = 'fogo'){
   dust.burst(at, nFx(16), ['#3a3430', '#5a5048'], 3.0, { life:700, size:0.05, grav:-7, drag:0.5 });
   const sm = ['#6a625a', '#8a8278', '#4a4440'];
   for (let i = 0; i < nFx(14); i++) dust.emit(at.x + (Math.random() - 0.5) * 0.3, at.y - 0.1, at.z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.5, 0.35 + Math.random() * 0.6, (Math.random() - 0.5) * 0.5, 1300 + Math.random() * 900, 0.26 + Math.random() * 0.24, sm[i % 3], 0.55, 0.25, 0.6);
+  if (E.smoke) smokeBurst(at, el, 18);
   shake(0.14);
   snd('raio_golpe', { vol:0.8, rate:0.7 });
 }
@@ -8812,6 +8841,7 @@ function elementBurst(at, el, v){
     tween(320, k => { sky.k = 1 - k; sky.update(!RM && Math.random() < 0.5); }).then(() => sky.dispose());
   }
   if (el === 'arcano' || el === 'sombra') spawnRing(at.x, at.z, E.hex, 1.0, 420);
+  if (E.smoke) smokeBurst(at, el, 10);
   if (el === 'terra' && v) dustAt(v.dx, v.dz, nFx(16), 0.9, ['#8a6a3a', '#c9a26a']);
 }
 // arma que gira no ar e crava na vítima; devolve o objeto (some com a vítima)
@@ -8983,6 +9013,269 @@ function splitMount(A){
   return true;
 }
 
+/* ---------- Reinos (data/reinos.json): cada lado escolhe um reino, só a aparência muda (mesmas regras e balanceamento) ----------
+   Aurora é o visual de sempre. A Legião do Ferro Negro tem modelos próprios (assets/meshy/reinos/ferro_negro/); o Reino dos
+   Dragões usa os da Aurora até os seus chegarem. Cada reino troca a cor e as partículas dos golpes do atacante, a morte da
+   vítima, o anel e os acentos da interface, e tem o seu mundo (arena sugerida ao escolher). Só o reino escolhido é carregado. */
+const REINOS = {
+  aurora:{ id:'aurora', nome:'Reino da Aurora', desc:'Marfim, ouro e vermelho: o visual de sempre, de aço e luz dourada.', img:'assets/concepts/rei.jpg', mundo:null },
+  ferro_negro:{ id:'ferro_negro', nome:'Legião do Ferro Negro', desc:'Aço escurecido, espinhos, capas rasgadas, névoa negra e brasas carmesim.', img:'assets/concepts/reinos/ferro_negro/referencia.png', mundo:'infernal',
+    pal:{ principal:'#1a1714', metal:'#3b3835', acento:'#7a1c1c', brilho:'#d6a842' }, ring:0xc0302a, dir:'assets/meshy/reinos/ferro_negro/',
+    pecas:{ p:['peao', 'animated'], b:['bispo', 'animated'], q:['dama', 'animated'], k:['rei', 'animated'], n:['cavaleiro', 'model'], r:['torre', 'model'] } },
+  dragoes:{ id:'dragoes', nome:'Reino dos Dragões', desc:'Fogo de dragão, brasas e runas de fogo-gelo. Os cavalos cospem fogo.', img:'assets/concepts/reinos/dragoes/referencia.jpg', mundo:'dragoes',
+    pal:{ principal:'#160c0a', metal:'#2a2524', acento:'#9b1d14', brilho:'#ff7a1a', runa:'#5fc8ff' }, ring:0xff7a1a, dir:'assets/meshy/reinos/dragoes/',
+    pecas:{ p:['peao', 'animated'], b:['bispo', 'animated'], q:['dama', 'animated'], k:['rei', 'animated'], n:['cavaleiro', 'model'], r:['torre', 'model'] } },
+};
+const MUNDO_REINO = { infernal:'ferro_negro', dragoes:'dragoes' };
+const KINGDOM_KEY = 'arcane-chess:reinos';
+const KINGDOM = (() => { try { const v = JSON.parse(localStorage.getItem(KINGDOM_KEY) || 'null'); if (v && REINOS[v.w] && REINOS[v.b]) return v; } catch (e){} return { w:'aurora', b:'aurora' }; })();
+const GLBK = {};
+let KPEND = false;
+const RING_BASE = { w:RING_COL.w, b:RING_COL.b };
+function kingdomSave(){ try { localStorage.setItem(KINGDOM_KEY, JSON.stringify(KINGDOM)); } catch (e){} }
+// carrega os modelos de um reino (Draco, depois .opt; sem arquivo, a peça fica com o modelo da Aurora)
+async function kingdomLoad(id){
+  const R = REINOS[id];
+  if (!R || !R.dir || GLBK[id] || !GOLPES.loader) return;
+  GLBK[id] = {};
+  const L = GOLPES.loader, out = GLBK[id];
+  await Promise.all(Object.entries(R.pecas).map(async ([t, [slug, name]]) => {
+    const base = R.dir + slug + '/' + name + '.opt', list = (DRACO.mod ? [base + '.c.gltf.json', base + '.c.glb'] : []).concat([base + '.gltf.json', base + '.glb']);
+    const g = await loadGltf(L, list);
+    if (!g) return;
+    try {
+      let A;
+      if (t === 'n'){ A = prepAsset('n', g, null); try { splitMount(A); } catch (e){} }
+      else if (t === 'r') A = prepAsset('r', g, null);
+      else {
+        const walk = await loadGltf(L, [R.dir + slug + '/walk.gltf.json', R.dir + slug + '/walk.glb']);
+        A = prepAsset(t, g, walk);
+        A.frames = [];       // as armas já vêm na malha
+      }
+      A.kingdom = id;
+      // Dragões: esqueleto da Tripo (nomes diferentes dos da Meshy): sem os golpes.glb; o ataque longo fica só no trecho do golpe (1–3,5 s)
+      if (id === 'dragoes'){
+        A.tripo = true;
+        if (A.clips.attack && A.clips.attack.duration > 4){ try { A.clips.attack = THREE.AnimationUtils.subclip(A.clips.attack, 'golpe', 30, 105, 30); A.impact = 1.1; } catch (e){} }
+      } else kingdomClips(A, t);
+      out[t] = A;
+    } catch (e){ glbLog.push(`${id}/${slug}: falha ao preparar (${e.message})`); }
+  }));
+  glbLog.push(`reino ${id}: modelos ${Object.keys(out).join('') || 'nenhum (usa a Aurora)'}`);
+  KPEND = true;
+}
+// os clipes extras (golpes, comemoração) vêm das figuras da Aurora: o mesmo esqueleto da Meshy, só rotações
+function kingdomClips(A, t){
+  const src = GLB[t];
+  if (!A || A.tripo || !A.rigged || !src || !src.clips) return;
+  for (const [n, c] of Object.entries(src.clips)){
+    if (!c || A.clips[n] || ['idle', 'walk', 'attack', 'death'].includes(n)) continue;
+    const k = c.clone(); k.tracks = k.tracks.filter(x => /\.quaternion$/.test(x.name)); A.clips[n] = k;
+  }
+}
+function kingdomClipsAll(){ for (const id in GLBK) for (const [t, A] of Object.entries(GLBK[id])) kingdomClips(A, t); }
+const kingdomOf = side => KINGDOM[side] || 'aurora';
+// modelo do reino do lado (null: o da Aurora)
+function kingdomAsset(type, side){
+  const id = kingdomOf(side);
+  if (id === 'aurora' || type === 'pl' || type === 'dg') return null;
+  const A = GLBK[id] && GLBK[id][type];
+  return A || null;
+}
+// aparência: anel do lado e acentos da interface pela paleta; carrega o que faltar e troca as peças fora das animações
+function kingdomApply(){
+  for (const s of ['w', 'b']){ const R = REINOS[kingdomOf(s)]; RING_COL[s] = R.ring || RING_BASE[s]; }
+  const b = document.body;
+  for (const c of [...b.classList]) if (/^reino-[wb]-/.test(c)) b.classList.remove(c);
+  b.classList.add('reino-w-' + kingdomOf('w'), 'reino-b-' + kingdomOf('b'));
+  for (const s of ['w', 'b']){ const R = REINOS[kingdomOf(s)]; if (R.pal){ b.style.setProperty('--k' + s + '-acc', R.pal.acento); b.style.setProperty('--k' + s + '-glow', R.pal.brilho); } else { b.style.removeProperty('--k' + s + '-acc'); b.style.removeProperty('--k' + s + '-glow'); } }
+  for (const s of ['w', 'b']) kingdomLoad(kingdomOf(s));
+  KPEND = true;
+}
+function kingdomTick(){
+  if (!KPEND || busy || !GLOK || !S || cine.active) return;
+  KPEND = false;
+  buildChars();
+}
+/* escolha do reino: cartões com a imagem do time, o nome e a descrição; um por lado; lembrado neste navegador */
+function kingdomPickerHtml(scope){
+  const row = (s, label) => `<div class="kg-row" role="radiogroup" aria-label="Reino das ${label}"><span class="kg-side side-${s}">${label}</span><div class="kg-cards">${Object.values(REINOS).map(R =>
+    `<button type="button" class="kg-card" role="radio" data-kside="${s}" data-k="${R.id}" aria-checked="false"><img src="${R.img}" alt="" loading="lazy" decoding="async"><b>${R.nome}</b><span>${R.desc}</span></button>`).join('')}</div></div>`;
+  return `<div class="kg-pick" data-scope="${scope}"><h4>Reinos</h4><p class="hint">Só a aparência muda: as regras são as mesmas para todos.</p>${row('w', 'Brancas')}${row('b', 'Negras')}<p class="hint kg-note" aria-live="polite"></p></div>`;
+}
+function kingdomPickerRender(){
+  for (const c of document.querySelectorAll('.kg-card')){ const on = KINGDOM[c.dataset.kside] === c.dataset.k; c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); }
+}
+function kingdomPickerInit(){
+  for (const id of ['setup-padrao', 'setup-spec', 'setup-arcano']){
+    const box = $(id); if (!box || box.querySelector('.kg-pick')) continue;
+    const acts = box.querySelector('.acts');
+    const d = document.createElement('div'); d.innerHTML = kingdomPickerHtml(id);
+    box.insertBefore(d.firstChild, acts);
+  }
+  document.addEventListener('click', e => {
+    const c = e.target.closest('.kg-card'); if (!c) return;
+    KINGDOM[c.dataset.kside] = c.dataset.k; kingdomSave(); kingdomPickerRender();
+    // o mundo do reino vira a arena sugerida (o jogador pode trocar)
+    const R = REINOS[c.dataset.k], note = c.closest('.kg-pick').querySelector('.kg-note');
+    if (R.mundo && ARENAS[R.mundo] && (c.dataset.kside === kingdomHuman() || c.dataset.kside === 'w')){
+      if (arena !== R.mundo) setArena(R.mundo);
+      if (note) note.textContent = `Arena sugerida: ${arenaLabel(R.mundo)}. Pode trocar abaixo.`;
+    } else if (note) note.textContent = '';
+    kingdomLoad(c.dataset.k);
+  });
+  kingdomPickerRender();
+}
+const kingdomHuman = () => cfg.mode === 'ai' ? cfg.human : 'w';
+const arenaLabel = id => (ARENAS[id] ? ARENAS[id].name : id) + (MUNDO_REINO[id] ? ' — ' + REINOS[MUNDO_REINO[id]].nome : '');
+
+/* golpes por reino: o tipo da matriz fica (regras e morte); o reino do atacante troca a cor, as partículas e o som */
+Object.assign(GOLPE_EL, {
+  fumaca:{ c:['#1a1416', '#3a2e30', '#c0392b'], hex:0x7a1c1c, rgb:[0.62, 0.45, 0.45], cap:'FUMAÇA NEGRA', smoke:true },
+  carmesim:{ c:['#7a1c1c', '#c0392b', '#ff6a5a'], hex:0xc0392b, rgb:[1.35, 0.5, 0.5], cap:'NÉVOA CARMESIM', smoke:true },
+  luz_fumaca:{ c:['#ffe6a0', '#d6a842', '#2a2226'], hex:0xd6a842, rgb:[1.3, 1.1, 0.7], cap:'LUZ DA CRUZ NEGRA', smoke:true },
+  fogo_azul:{ c:['#e8f8ff', '#5fc8ff', '#2a7aff'], hex:0x5fc8ff, rgb:[0.7, 1.0, 1.55], cap:'VIROTE DE FOGO AZUL' },
+});
+const REINO_CAP = { ferro_negro:{ k:'MARTELO NEGRO', n:'INVESTIDA SOMBRIA' }, dragoes:{ n:'SOPRO DO DRAGÃO', k:'VÓRTICE DE CHAMAS', q:'ONDA DE CHAMAS', b:'BOLA DE FOGO' } };
+function golpeReino(g, a){
+  const id = kingdomOf(a.side);
+  g.reino = id;
+  if (id === 'ferro_negro'){
+    if (g.carta) return g;
+    g.el = a.t === 'b' ? 'luz_fumaca' : a.t === 'q' ? 'carmesim' : 'fumaca';
+  } else if (id === 'dragoes'){
+    if (g.carta) return g;
+    g.el = a.t === 'r' ? 'fogo_azul' : 'fogo';
+  } else return g;
+  g.cap = (REINO_CAP[id] && REINO_CAP[id][a.t]) || GOLPE_EL[g.el].cap;
+  // o texto acompanha a aparência na magia e nos tiros da torre (o resto da matriz fica como está)
+  const T = REINO_TXT[id], tpl = a.t === 'r' ? T.r : g.tipo === 'magia' ? T[g.el] : null;
+  if (tpl && g.v){ g.tpl = tpl; g.texto = `${gName(a)} ${golpeFrase(tpl, g.v)}`; g.html = (wa, wv) => `${wa} ${golpeFrase(tpl, g.v, wv)}`; }
+  return g;
+}
+const REINO_TXT = {
+  ferro_negro:{ r:'crava flechas negras fumegantes {no}', fumaca:'envolve em fumaça negra {o}', carmesim:'envolve em névoa carmesim {o}', luz_fumaca:'fere com a luz da cruz negra {o}' },
+  dragoes:{ r:'crava um virote de fogo azul {no}', fogo:'lança uma onda de chamas {no}', fogo_azul:'crava um virote de fogo azul {no}' },
+};
+// fumaça negra (com brasas carmesim) num ponto
+function smokeBurst(at, el = 'fumaca', n = 16){
+  if (!GLOK) return;
+  const E = GOLPE_EL[el] || GOLPE_EL.fumaca, dark = ['#141012', '#221a1c', '#2e2426'];
+  for (let i = 0; i < nFx(n); i++) dust.emit(at.x + (Math.random() - 0.5) * 0.3, at.y - 0.1 + Math.random() * 0.2, at.z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.6, 0.25 + Math.random() * 0.55, (Math.random() - 0.5) * 0.6, 1200 + Math.random() * 900, 0.24 + Math.random() * 0.22, el === 'fumaca' ? dark[i % 3] : E.c[i % 2], 0.7, 0.2, 0.6);
+  sparks.burst(at, nFx(Math.round(n * 0.8)), ['#c0392b', '#ff6a3a', '#7a1c1c'], 1.6, { life:900, size:0.05, grav:0.8, upward:true });
+}
+// rastro entre o atacante e a vítima (lâmina e investida): fumaça no Ferro Negro, brasa nos Dragões
+function reinoTrail(g, a, b){
+  if (!GLOK || !g || g.reino === 'aurora') return;
+  const fire = g.reino === 'dragoes', n = nFx(14);
+  for (let i = 0; i < n; i++){
+    const k = i / n, x = mix(a.x, b.x, k), y = mix(a.y, b.y, k), z = mix(a.z, b.z, k);
+    if (fire) sparks.emit(x, y, z, (Math.random() - 0.5) * 0.4, 0.3 + Math.random() * 0.5, (Math.random() - 0.5) * 0.4, 600, 0.07, FIRE_COLS[i % 4], 1, 0.8, 0.6);
+    else dust.emit(x, y, z, (Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.3, (Math.random() - 0.5) * 0.2, 900 + Math.random() * 600, 0.16 + Math.random() * 0.12, i % 3 ? '#1c1618' : '#5a1414', 0.6, 0.1, 0.6);
+  }
+}
+// o toque do reino no impacto: fumaça e brasas carmesim; ou chamas
+function reinoImpact(g, p, v){
+  if (!GLOK || !g || g.reino === 'aurora') return;
+  const at = chestOf(v, 0.55);
+  reinoTrail(g, chestOf(p, 0.6), at);
+  if (g.reino === 'ferro_negro'){
+    smokeBurst(at, g.el);
+    // o martelo do rei: onda de choque com fumaça negra
+    if (p.t === 'k'){ spawnRing(v.dx, v.dz, 0x7a1c1c, 1.4, 520); dustAt(v.dx, v.dz, nFx(20), 1.1, ['#1a1416', '#3a2e30']); shake(0.12); }
+    snd('sombra', { vol:0.6 });
+  } else {
+    elementBurst(at, g.el === 'fogo_azul' ? 'fogo_azul' : 'fogo', v);
+    // o escudo de redemoinho do rei: um vórtice de chamas
+    if (p.t === 'k') for (let i = 0; i < nFx(24); i++){ const an = i / 24 * TAU * 2, r = 0.25 + i * 0.012; sparks.emit(v.dx + Math.cos(an) * r, 0.1 + i * 0.03, v.dz + Math.sin(an) * r, -Math.sin(an) * 1.2, 0.8, Math.cos(an) * 1.2, 700, 0.08, FIRE_COLS[i % 4], 1, 0.4, 0.6); }
+    snd('sopro_fogo', { vol:0.55 });
+  }
+}
+// a vítima conforme o reino de quem a abateu: cinzas e fumaça negra, ou fogo e brasas
+function reinoDeath(g, v){
+  if (!GLOK || !g || g.reino === 'aurora') return;
+  const at = chestOf(v, 0.45);
+  if (g.reino === 'ferro_negro'){
+    for (let i = 0; i < nFx(22); i++) dust.emit(v.dx + (Math.random() - 0.5) * 0.5, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.3, 0.35 + Math.random() * 0.5, (Math.random() - 0.5) * 0.3, 1500 + Math.random() * 900, 0.18 + Math.random() * 0.18, i % 4 ? '#6a6460' : '#1a1416', 0.65, 0.15, 0.6);
+    smokeBurst(at, 'fumaca', 10);
+  } else {
+    sparks.burst(at, nFx(36), FIRE_COLS, 1.4, { life:1100, size:0.07, grav:1.4, upward:true });
+    flashLight(at, 0xff7a2a, 3, 700);
+  }
+}
+
+/* Mistério Infernal, o mundo do Ferro Negro: névoa carmesim, brasas vermelhas, estandartes carmesim rasgados, runas e luzes
+   vermelho-sangue na beira do tabuleiro, céu de tempestade com clarões vermelhos (o fogo, o brilho e a música ficam) */
+const CRIM = { g:null, mists:[], next:0, flash:0 };
+function buildCrimson(){
+  CRIM.g = null; CRIM.mists = []; CRIM.flash = 0; CRIM.next = performance.now() + 4000;
+  if (!GLOK || !envRoot) return;
+  const g = new THREE.Group(); g.name = 'carmesim'; envRoot.add(g); CRIM.g = g;
+  const lite = W < 560 || RM;
+  for (let i = 0; i < (lite ? 1 : 2); i++){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x8a1414 : 0x5a0c10), transparent:true, opacity:i ? 0.22 : 0.3, depthWrite:false, blending:THREE.AdditiveBlending }));
+    m.rotation.x = -Math.PI / 2; m.position.y = 0.35 + i * 0.4; m.renderOrder = 3; g.add(m); CRIM.mists.push(m);
+  }
+  // estandartes carmesim rasgados nos cantos
+  const tex = bannerTex({ field:'#5a0c0c', dark:'#1a0404', gold:'#8a2a1a' }), wood = new THREE.MeshStandardMaterial({ color:C(0x1c1414), roughness:0.8 });
+  for (const [x, z] of [[-5.4, -5.4], [5.4, -5.4], [-5.4, 5.4], [5.4, 5.4]]){
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.6, 6), wood); pole.position.set(x, 1.3, z);
+    const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 1.3), new THREE.MeshStandardMaterial({ map:tex, side:THREE.DoubleSide, roughness:0.9, color:C(0xd04040), transparent:true, alphaTest:0.1 }));
+    cloth.position.set(x + 0.36, 1.85, z); cloth.rotation.y = Math.atan2(-x, -z);
+    g.add(pole, cloth); ENVX.spin.push({ o:cloth, ax:'y', v:0.00012 * (x > 0 ? 1 : -1) });
+  }
+  // runas vermelho-sangue em volta do tabuleiro
+  const ring = groundDecal(ringTex, 0, 0, 11.5, 0x9a1010, true, 0.012); ring.material.opacity = 0.55; g.add(ring);
+}
+function crimsonTick(now){
+  if (!CRIM.g || arena !== 'infernal') return;
+  for (let i = 0; i < CRIM.mists.length; i++) CRIM.mists[i].rotation.z += (i ? -1 : 1) * 0.0004;
+  if (GLOK && !RM && Math.random() < (W < 560 ? 0.25 : 0.6)) sparks.emit((Math.random() - 0.5) * 9, 0.05, (Math.random() - 0.5) * 9, (Math.random() - 0.5) * 0.15, 0.4 + Math.random() * 0.6, (Math.random() - 0.5) * 0.15, 2600, 0.05, Math.random() < 0.5 ? '#ff3a2a' : '#c0392b', 0.9, 0.15, 0.6, 1);
+  // clarão vermelho da tempestade
+  if (!RM && now > CRIM.next){ CRIM.flash = 1; CRIM.next = now + 5000 + Math.random() * 9000; }
+  if (CRIM.flash > 0.01 && backdrop){ backdrop.material.color.setRGB(1 + CRIM.flash * 1.4, 1 + CRIM.flash * 0.1, 1 + CRIM.flash * 0.1); CRIM.flash *= 0.9; }
+}
+
+/* Covil dos Dragões, o mundo dos Dragões: aurora verde-azulada no céu e um dragão realista que pousa na borda, anda, ruge e volta a voar */
+function buildDragonWorld(){
+  if (!GLOK || !envRoot || RM) return;
+  for (let i = 0; i < (W < 560 ? 1 : 2); i++){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(60, 9), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x2affc8 : 0x3a8aff), transparent:true, opacity:0.16, depthWrite:false, blending:THREE.AdditiveBlending, fog:false }));
+    m.position.set(0, 16 + i * 2.5, -26); m.rotation.x = 0.35; m.renderOrder = 0; envRoot.add(m);
+    ENVX.spin.push({ o:m, ax:'z', v:0.00004 * (i ? -1 : 1) });
+  }
+}
+// pouso: um dos dragões realistas desce numa rocha além da borda, anda alguns passos, ruge e decola
+function dragonLandTick(now, dt){
+  const D = ENVX.dragons;
+  if (!D || !D.glb || RM || cine.active) return;
+  if (!D.land){
+    if (!D.nextLand) D.nextLand = now + 14000;
+    if (now < D.nextLand || D.swoop) return;
+    const d = D.list.find(x => x.post && x.mixer);
+    if (!d) return;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    D.land = { d, t0:now, from:d.g.position.clone(), to:new THREE.Vector3(side * 6.2, GROUND_Y + 0.05, (Math.random() - 0.5) * 4), dir:-side, roared:false };
+  }
+  const L = D.land, d = L.d, u = now - L.t0;
+  d.landing = true;
+  const P = d.g.position;
+  if (u < 2600){ const k = easeIO(u / 2600); P.lerpVectors(L.from, L.to, k); P.y = mix(L.from.y, L.to.y, k) + Math.sin(Math.PI * k) * 1.2; d.g.rotation.set(0.2 * (1 - k), Math.atan2(L.to.x - L.from.x, L.to.z - L.from.z), 0); d.walk = 0; }
+  else if (u < 6200){
+    // anda alguns passos com o clipe da Tripo
+    d.walk = 1; P.x += L.dir * 0.0006 * dt; P.y = L.to.y; d.g.rotation.set(0, Math.atan2(L.dir, 0), 0);
+  } else if (u < 7600){
+    d.walk = 0;
+    if (!L.roared){
+      L.roared = true; snd('rugido_dragao', { vol:0.6 });
+      if (d.mouth && Math.random() < 0.7){ const a = d.mouth.getWorldPosition(new THREE.Vector3()), b = a.clone().add(new THREE.Vector3(L.dir * 2.8, -0.6, 0)); fireStream(a, b, 700); }
+    }
+  } else if (u < 9800){ const k = easeIO((u - 7600) / 2200); P.y = L.to.y + k * 6; d.walk = 0; }
+  else { d.landing = false; D.land = null; D.nextLand = now + 20000 + Math.random() * 20000; }
+  // o clipe de andar só roda enquanto anda (parado, as asas e a cauda voltam ao voo procedural)
+  if (d.mixer && d.walk){ d.walkAct.setEffectiveWeight(1); d.mixer.update(dt / 1000); }
+}
+
 /* capturas por tipo */
 async function meleeCapture(p, v, tx, tz, g){
   const ch = charOf(p);
@@ -9004,6 +9297,7 @@ async function lanceCharge(p, v, tx, tz, g){
   if (L > 1.35){ await gallopLeap(p, p.dx + dx / L * (L - 1.15), p.dz + dz / L * (L - 1.15)); dx = v.dx - p.dx; dz = v.dz - p.dz; L = Math.hypot(dx, dz); }
   const ux = dx / L, uz = dz / L;
   ch.faceTowards(v.dx, v.dz, 3400);
+  if (g && g.reino === 'dragoes' && !ch.dragonModel) await fireStream(chestOf(p, 0.8), chestOf(v, 0.55), 480);
   // a investida: ferraduras na arrancada; o relincho vem junto com o golpe
   hooves({ len:0.7 });
   const fx = p.dx, fz = p.dz, reach = Math.max(0, L - 0.9), D0 = 1150, vx0 = v.dx, vz0 = v.dz, justa = g && g.justa, sword = g && g.tipo === 'lamina';
@@ -9040,7 +9334,7 @@ async function towerVolley(p, v, tx, tz, g){
   const shots = [];
   for (let i = 0; i < 3; i++){
     const tgt = to.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.18, (Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.18));
-    shots.push(wait(i * 90).then(() => arrowFx(from, tgt, 360, golpeEl(g) && g.tipo !== 'flecha' ? golpeEl(g).c[1] : null)));
+    shots.push(wait(i * 90).then(() => arrowFx(from, tgt, 360, golpeEl(g) && (g.tipo !== 'flecha' || g.reino !== 'aurora') ? golpeEl(g).c[1] : null)));
   }
   shots[0].then(() => snd('flecha_impacto'));
   await Promise.all(shots);
@@ -9992,7 +10286,7 @@ function updateEnv(now, dt){
     if (k > 1) ENVX.burst = null;
     else if (k > 0) fb = (k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88) * (0.85 + 0.15 * Math.sin(now * 0.05));
   }
-  if (ENVX.dragons) updateDragons(now, dt);
+  if (ENVX.dragons){ updateDragons(now, dt); dragonLandTick(now, dt); }
   // o dragão plana pelo céu de vez em quando
   const G1 = ENVX.glider;
   if (G1){
@@ -10033,6 +10327,7 @@ function updateEnv(now, dt){
   boardMat.emissiveIntensity *= 1 - 0.5 * dk;
   if (dr) backdrop.material.color.setRGB(1 + fb * 0.9, 1 + fb * 0.5, 1 + fb * 0.3);
   else backdrop.material.color.setScalar(1 + fl * 1.4);
+  if (CRIM.g) crimsonTick(performance.now());
 }
 let lastT = performance.now(), checkSide = null;
 function frame(now){
@@ -10053,6 +10348,7 @@ function frame(now){
     if (arenaPending && !busy && !cine.active) applyArena();
     updateCamera(rdt);
     applyLoadedModels();
+    kingdomTick();
     checkSide = S.inCheck && !S.over ? S.turn : null;
     updateGraves(dt);
     updateFocusOcc(rdt);
@@ -11708,6 +12004,7 @@ function openTitle(){
   setTimeout(() => { const b = t.querySelector('.mode-card'); if (b) b.focus(); }, 30);
 }
 function closeTitle(){
+  kingdomApply();
   TITLE.open = false;
   { const qb = document.getElementById('quit-btn'); if (qb) qb.hidden = false; }
   if (typeof arcRender === 'function') setTimeout(arcRender, 0);
@@ -11823,7 +12120,7 @@ function renderThumbs(){
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'thumb'; b.dataset.arena = id;
       const cv0 = mkCanvas(160, 90); cv0.setAttribute('aria-hidden', 'true');
-      const sp = document.createElement('span'); sp.textContent = ARENAS[id].name;
+      const sp = document.createElement('span'); sp.textContent = arenaLabel(id);
       b.append(cv0, sp);
       b.addEventListener('click', () => { audio(); setArena(id); syncThumbs(); });
       box.appendChild(b);
@@ -13932,6 +14229,7 @@ function start(data){
   } else newGame();
 }
 pvInit();
+kingdomPickerInit();
 initWorker();
 const hot = window.claude && window.claude.hot;
 if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => serialize());

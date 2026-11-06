@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tripo_test as T
 
-LIMITE = 520  # arte (105) + 3D aprovado pelo usuário (~400)
+LIMITE = 710  # arte (105) + 3D (400) + 2 versões da rainha (~200), pedidas pelo usuário
 ESTILO = ("Ultra detailed, high resolution dark fantasy character concept art matching the team reference exactly: same "
           "painterly realism, palette of obsidian black, deep crimson, molten gold and glowing ember orange with icy blue "
           "magic accents, dragon-scale armor, dragon horns, wing motifs and dragon-skull details. Full body from head to feet, "
@@ -35,10 +35,12 @@ PECAS = {
            "mask, crimson and gold dragon-scale armor, huge crimson dragon wings folded behind the shoulders, a round shield "
            "swirling with fire and arcane light on the LEFT forearm held away from the body, a gold-hilted longsword in the "
            "RIGHT fist pointing down and outward.",
-    "dama": "Redraw ONLY the horned dark winged figure right of center in [image 1] as the chess queen: dark dragon sorceress "
-            "warrior with curved horns and a skull-like mask, black spiked dragon-scale armor, large bat-like dragon wings "
-            "behind, tattered black cloak, a long blade glowing with icy blue runes in the RIGHT hand pointing down and "
-            "outward away from the body, LEFT gauntlet open.",
+    "dama": "Redraw the dark winged queen of [image 1] as the chess queen, a beautiful dragon sorceress queen: a beautiful HUMAN "
+            "woman's face (no mask, no skull), elegant features, glowing amber eyes, small dark curved dragon horns and a dark "
+            "gold tiara, VERY LONG flowing silver-white hair with ember-red streaks reaching down to her KNEES behind her back, "
+            "black spiked dragon-scale armor with gold trim and ember veins, large bat-like dragon wings with glowing ember veins "
+            "behind. NO sword, NO weapon: a blazing SPHERE OF FIRE floats just above her open RIGHT palm, held out away from "
+            "the body; LEFT hand open with faint embers. Hair stays behind the back and shoulders, not covering the arms.",
     "torre": "Redraw ONLY the dark tower on the far right of [image 1] as the chess rook: tall obsidian fortress tower with "
              "glowing icy blue windows and runes, iron spikes, a small dragon perched on the battlements and an archer with "
              "a glowing blue crossbow on top. Whole tower visible, front three-quarter view, plain background.",

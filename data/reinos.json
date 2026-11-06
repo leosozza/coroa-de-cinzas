@@ -8,6 +8,9 @@
       "golpes": {
         "tema": "aço, luz dourada e arcano",
         "base": "matriz de data/plano-golpes.md (lâmina, arremesso, explosão, magia, veneno, investida, flecha)"
+      },
+      "mundo": {
+        "arenas": "as arenas atuais (Medieval, Celestial, Olimpo, Zodíaco, Multiverso, Pedra Filosofal...)"
       }
     },
     {
@@ -93,6 +96,11 @@
         "k": "martelo dourado em chamas: impacto no chão com onda de choque e fumaça negra",
         "r": "flechas negras fumegantes do arqueiro de chifres",
         "morte_vitima": "a vítima se desfaz em cinzas e fumaça negra antes do corpo cair"
+      },
+      "mundo": {
+        "arena": "infernal",
+        "nome_arena": "Mistério Infernal",
+        "toque": "elementos carmesim: névoa e fumaça carmesim, brasas vermelhas, estandartes rasgados carmesim, runas e luzes vermelho-sangue, céu de tempestade com clarões vermelhos"
       }
     },
     {
@@ -106,7 +114,82 @@
         "brilho": "#ff7a1a",
         "runa": "#5fc8ff"
       },
-      "pecas": "em produção (3D na Tripo)",
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/dragoes/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/peao.png",
+          "rig": true,
+          "clipes": {
+            "parado": "idle",
+            "golpe": "slash",
+            "morte": "fall"
+          }
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/dragoes/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/bispo.png",
+          "rig": true,
+          "clipes": {
+            "parado": "idle",
+            "golpe": "cast_a_spell",
+            "morte": "fall"
+          }
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/dragoes/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/dama.png",
+          "rig": true,
+          "clipes": {
+            "parado": "idle",
+            "golpe": "cast_a_spell",
+            "morte": "fall"
+          }
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/dragoes/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/rei.png",
+          "rig": true,
+          "clipes": {
+            "parado": "idle",
+            "golpe": "slash",
+            "morte": "fall"
+          }
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/dragoes/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/dragoes/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/dragoes/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/dragoes/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/dragoes/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/dragoes/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/dragoes/torre.png",
+          "rig": false
+        }
+      },
       "artes": "assets/concepts/reinos/dragoes/<peça>.png",
       "referencia": "assets/concepts/reinos/dragoes/referencia.jpg",
       "golpes": {
@@ -118,7 +201,14 @@
         "k": "o escudo de redemoinho de fogo dispara um vórtice de chamas e a espada longa corta",
         "r": "besta com virote de fogo azul e o pequeno dragão no alto cospe fogo",
         "morte_vitima": "a vítima pega fogo e vira brasa e cinza"
-      }
+      },
+      "mundo": {
+        "arena": "dragoes",
+        "nome_arena": "Covil dos Dragões",
+        "toque": "o Dragão das Cinzas realista anda, ruge e voa; aurora verde-azulada no céu, castelo de janelas azuis, dragões ao longe"
+      },
+      "origem": "Tripo (modelo v3.1, rig biped v1.0, presets idle/slash/cast_a_spell/fall)",
+      "esqueleto": "Tripo, 41 ossos (R_Hand, L_Hand, Spine02...); não compartilha os golpes.glb do Meshy; já orientado e escalado como as peças do Meshy"
     }
   ],
   "regra_golpes": "Cada reino tem golpes próprios (efeito visual e som). O tipo de golpe da matriz (lâmina, arremesso, magia...) continua o mesmo para as regras e a morte da vítima; o reino do ATACANTE troca só a aparência: cor, elemento e partículas. A morte da vítima usa o 'morte_vitima' do reino do atacante quando houver."
