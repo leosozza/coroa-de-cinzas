@@ -42,3 +42,12 @@ Durable Objects com SQLite e D1 cabem no plano gratuito. `DEV_TC`, `RECONNECT_MS
 - Ids públicos: `GOOGLE_CLIENT_ID` e `DISCORD_CLIENT_ID` em `[vars]` do `wrangler.toml` (vazios escondem o botão). Segredos só com `npx wrangler@4 secret put GOOGLE_CLIENT_SECRET` e `npx wrangler@4 secret put DISCORD_CLIENT_SECRET`.
 - Teste local: `DEV_AUTH=1` no `.dev.vars` liga o provedor falso (`/api/auth/fake/…`, com página de login e conferência real do PKCE); `node test/auth.mjs` (23 verificações). Nunca usar `DEV_AUTH` em produção.
 - Migração nova: `migrations/0002_oauth.sql` (`oauth_states`, `login_codes`, `users.merged_into`). Na nuvem: `npx wrangler@4 d1 migrations apply arcane-chess --remote`.
+
+## No ar (06/11/2026)
+
+- API: https://arcane-chess-api.leonardo-zogbi.workers.dev (o `ONLINE_API` do jogo aponta para ela).
+- D1 `arcane-chess` criado e com as migrações 0001 e 0002 aplicadas; `SESSION_SECRET` gravado como segredo (gerado na máquina, nunca impresso).
+- Teste rápido contra o servidor publicado: `node test/smoke.mjs https://arcane-chess-api.leonardo-zogbi.workers.dev`
+  (10 verificações: health, CORS, sala por link com mate, mão escondida no Arcano, pareamento na fila casual).
+- Em produção nunca criar `DEV_AUTH`, `DEV_TC`, `RECONNECT_MS`, `FIRST_MOVE_MS`, `QUEUE_AI_MS` ou `SHOW_MS`.
+- Login Google/Discord continua escondido até os apps serem registrados (ids em `wrangler.toml`, segredos por `wrangler secret put`).

@@ -58,7 +58,7 @@ Ordem de entrega: (a) convidado + partida por link + relógio + reconexão; (b) 
 | F16 | IA de reserva | Aos 30 s sem rival a fila oferece a IA pelo nível da nota (Recruta < 1300, Veterano < 1700, Mestre acima) e continua procurando; aceitar sai da fila e joga no aparelho, sem nota |
 | F17 | Sala da fila | Os dois têm 30 s para entrar; se um não aparece, a sala é cancelada sem nota. Na ranqueada contam mate, tempo, abandono, desistência e empates; partida cancelada não conta |
 | F18 | Arcano ranqueado | Fica para a fase 2 (plano). A nota do Arcano já existe separada, começando em 1500 |
-| F19 | Endereço do servidor | Uma constante no jogo: `ONLINE_API` (hoje `https://arcane-chess-api.arcanechess.workers.dev`). Para teste local vale `?api=http://127.0.0.1:8787`, aceito só para localhost/127.0.0.1 |
+| F19 | Endereço do servidor | Uma constante no jogo: `ONLINE_API` (hoje `https://arcane-chess-api.leonardo-zogbi.workers.dev`). Para teste local vale `?api=http://127.0.0.1:8787`, aceito só para localhost/127.0.0.1 |
 | F20 | Sem servidor | O menu "Jogar online" mostra "Servidor indisponível" com "Tentar de novo"; nada mais muda. No Artifact a CSP bloqueia a conexão e cai no mesmo aviso. Os outros modos não tocam na rede |
 | F21 | Autoridade no cliente | O lance (e a carta, e o fim do turno) só anda na tela quando o servidor confirma; a vez do rival entra pelo mesmo caminho da IA, com as mesmas animações. Qualquer diferença (reconexão, mensagem perdida) reconstrói a cena a partir do estado do servidor |
 | F22 | Link e reconexão | Link `<página>#sala=<código>`; o código também pode ser colado (maiúsculas ou minúsculas). Ao cair, o jogo reconecta sozinho (1, 2, 4… até 15 s) e a barra mostra "Reconectando"; recarregar a página com o link volta à partida |

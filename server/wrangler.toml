@@ -36,5 +36,5 @@ new_sqlite_classes = ["Matchmaker"]
 [[d1_databases]]
 binding = "DB"
 database_name = "arcane-chess"
-database_id = "00000000-0000-0000-0000-000000000000"   # trocar pelo id real depois do `d1 create`
+database_id = "8293d6c4-96a1-45f4-a942-57a7700eb119"
 migrations_dir = "migrations"
