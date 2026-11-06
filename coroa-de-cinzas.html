@@ -490,6 +490,14 @@ details.rules[open] summary::before{content:"▾ "}
 .setup .row{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px}
 .setup .acts{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
 /* Jogar online */
+.setup input[type=date]{font-family:var(--f-body); font-size:.95rem; color:var(--bone); background:var(--stone); border:1px solid var(--seam); border-radius:3px; padding:8px 12px; min-height:40px; min-width:0; color-scheme:dark}
+.on-acct{display:grid; gap:8px; margin-top:12px; padding:10px 12px; border:1px solid var(--seam); border-radius:4px; background:rgba(30,24,44,.35)}
+.on-acct .hint{margin:0}
+.on-acct-btns{display:flex; flex-wrap:wrap; gap:8px}
+.on-acct #on-logout{justify-self:start}
+.on-birth{display:grid; gap:4px; margin-top:10px}
+.on-birth label{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.1em; color:var(--ash)}
+.on-birth label span{letter-spacing:0; text-transform:none}
 .setup input[type=text]{font-family:var(--f-body); font-size:.95rem; color:var(--bone); background:var(--stone); border:1px solid var(--seam); border-radius:3px; padding:8px 12px; min-height:40px; width:100%; min-width:0}
 .setup input[type=text]:focus-visible{outline:2px solid var(--ember); outline-offset:1px}
 .setup .flabel{font-family:var(--f-ui); font-size:.72rem; letter-spacing:.1em; color:var(--ash)}
@@ -532,7 +540,7 @@ details.rules[open] summary::before{content:"▾ "}
 @media (prefers-reduced-motion: reduce){ .logo-word::after{animation:none; opacity:.7} }
 @media (prefers-reduced-motion: reduce){ .thinking .sigil, .hud-phase.check b, .hud-phase.think b::after, .cine .flash.go{animation:none} .meter > i, .cine .bar, .cine .vig, .cine .cap{transition:none} }
 body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-top, 0px)); left:50%; transform:translateX(-50%); width:min(620px, calc(100vw - 24px)); margin:0}
-@media (max-width:900px), (pointer:coarse){ .onbar button{min-height:44px} }
+@media (max-width:900px), (pointer:coarse){ .onbar button{min-height:44px} .setup input[type=text], .setup input[type=date]{min-height:44px} }
 /* alvos de toque: no celular e no tablet, nada abaixo de 44 px (no fim, para vencer as regras base) */
 @media (max-width:900px), (pointer:coarse){
   button, select{min-height:44px}
@@ -675,6 +683,15 @@ body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-t
         <div class="row">
           <div class="field"><label for="on-name">Seu nome</label><input id="on-name" type="text" maxlength="20" autocomplete="nickname" spellcheck="false"></div>
           <div class="field"><span class="flabel">Sua nota</span><span class="on-rating" id="on-rating">—</span></div>
+        </div>
+        <div class="on-acct" id="on-acct">
+          <p class="hint" id="on-acct-txt"></p>
+          <div class="on-acct-btns" id="on-login"></div>
+          <button type="button" id="on-logout" hidden>Sair da conta</button>
+        </div>
+        <div class="on-birth" id="on-birth" hidden>
+          <label for="on-bdate">Sua data de nascimento <span>(pedida para contas, pela lei; ninguém mais vê)</span></label>
+          <div class="on-linkrow"><input id="on-bdate" type="date" min="1900-01-01"><button type="button" id="on-bsave">Salvar</button></div>
         </div>
         <div class="on-tabs" role="tablist" aria-label="Como jogar">
           <button type="button" role="tab" id="on-tab-q" aria-selected="true" aria-controls="on-q-p">Fila</button>
@@ -11974,6 +11991,7 @@ function netReady(){
         NET.token = g.j.token; NET.user = g.j.user; netSave();
         const me = await netFetch('/api/me'); if (me.ok) NET.ratings = me.j.ratings;
       }
+      try { const pv = await netFetch('/api/auth/providers'); NET.providers = pv.ok ? pv.j.providers || [] : []; } catch (e){ NET.providers = []; }
       NET.ok = true;
     } catch (e){ NET.ok = false; NET.err = String(e && e.message || e); }
     NET.checking = null;
@@ -12012,8 +12030,58 @@ function onlineOpen(){
     else if (!NET.qws) $('on-qgo').focus();
   });
 }
+const LOGIN_ERR = { estado:'O login expirou ou já foi usado. Tente de novo.', cancelado:'Login cancelado.', pkce:'Falha de segurança no login (PKCE). Tente de novo.', provedor:'O provedor recusou o login. Tente de novo.' };
+function onlineRenderAcct(){
+  const u = NET.user, acct = u && u.kind === 'account', pv = NET.providers || [];
+  const via = acct && u.logins && u.logins.length ? u.logins.map(x => (pv.find(p => p.id === x) || { name:x === 'google' ? 'Google' : x === 'discord' ? 'Discord' : 'Teste' }).name).join(' e ') : '';
+  $('on-acct-txt').textContent = acct ? `Conta: ${u.name}${via ? ` (entrou com ${via})` : ''}. A sua nota fica guardada em qualquer aparelho.`
+    : pv.length ? 'Você joga como convidado. Entre para guardar a nota em qualquer aparelho; o que você já fez como convidado vem junto.' : 'Você joga como convidado.';
+  const box = $('on-login');
+  box.innerHTML = '';
+  if (!acct) for (const p of pv){
+    const b = document.createElement('button'); b.type = 'button'; b.id = 'on-login-' + p.id; b.textContent = `Entrar com ${p.name}`;
+    b.addEventListener('click', () => { audio(); onlineLogin(p.id); });
+    box.appendChild(b);
+  }
+  box.hidden = acct || !pv.length;
+  $('on-logout').hidden = !acct;
+  $('on-birth').hidden = !(acct && u.birth === false);
+}
+async function onlineLogin(provider){
+  if (!NET.ok) return;
+  $('on-acct-txt').textContent = 'Abrindo o login…';
+  let r = null;
+  try { r = await netFetch('/api/auth/start', { body:{ provider, return:location.origin + location.pathname + location.search } }); } catch (e){}
+  if (!r || !r.ok || !r.j.url){ onlineToast((r && r.j.err) || 'Não foi possível abrir o login.'); onlineRenderAcct(); return; }
+  location.assign(r.j.url);
+}
+// volta do provedor: #login=<código de uso único> vira a ficha da conta (a ficha nunca passa pela URL)
+async function onlineLoginReturn(code){
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e){}
+  NET.api = netApi();
+  let r = null;
+  try { r = await netFetch('/api/auth/exchange', { body:{ code } }); } catch (e){}
+  if (r && r.ok && r.j.token){ NET.token = r.j.token; NET.user = r.j.user; netSave(); NET.ok = null; onlineToast(`Conta conectada: ${r.j.user.name}.`); }
+  else onlineToast('O login expirou. Tente de novo.');
+  if (!TITLE.open) openTitle();
+  showSetup('online');
+}
+async function onlineLogout(){
+  NET.token = null; NET.user = null; NET.ratings = null; netSave(); NET.ok = null;
+  onlineToast('Você saiu da conta. Neste aparelho você volta a jogar como convidado; a conta e a nota continuam guardadas.');
+  onlineOpen();
+}
+async function onlineBirth(){
+  const v = $('on-bdate').value;
+  if (!v){ onlineToast('Escolha a data.'); return; }
+  let r = null;
+  try { r = await netFetch('/api/me/birth', { body:{ birth:v } }); } catch (e){}
+  if (r && r.ok){ if (NET.user) NET.user.birth = true; onlineRenderAcct(); onlineToast('Data salva.'); }
+  else onlineToast((r && r.j.err) || 'Não foi possível salvar.');
+}
 function onlineRenderMe(){
   if (NET.user) $('on-name').value = NET.user.name;
+  onlineRenderAcct();
   const r = NET.ratings && NET.ratings.xadrez;
   $('on-rating').innerHTML = r ? `Xadrez Puro <em>${r.r}${r.provisional ? '?' : ''}</em> · ${netEsc(r.leagueName)}${r.games ? ` · ${r.games} ranqueada${r.games === 1 ? '' : 's'}` : ''}` : '—';
 }
@@ -12088,6 +12156,10 @@ function onlineJoinTyped(){
 }
 // #sala=<id> ao abrir a página (ou ao mudar o endereço): abre o menu online e entra
 function onlineHash(){
+  const lg = location.hash.match(/^#login=([A-Za-z0-9_-]{16,64})$/);
+  if (lg){ onlineLoginReturn(lg[1]); return; }
+  const le = location.hash.match(/^#login-erro=([a-z]+)$/);
+  if (le){ try { history.replaceState(null, '', location.pathname + location.search); } catch (e){} onlineToast(LOGIN_ERR[le[1]] || 'O login não deu certo. Tente de novo.'); if (!TITLE.open) openTitle(); showSetup('online'); return; }
   const m = location.hash.match(/^#sala=([a-km-np-z2-9]{8})$/);
   if (!m || (NET.room === m[1] && NET.ws)) return;
   NET.pendingRoom = m[1];
@@ -12329,6 +12401,8 @@ function onlineBar(){
   $('on-copy').addEventListener('click', onlineCopy);
   $('on-join').addEventListener('click', () => { audio(); onlineJoinTyped(); });
   $('on-code').addEventListener('keydown', e => { if (e.key === 'Enter') onlineJoinTyped(); });
+  $('on-logout').addEventListener('click', () => { audio(); onlineLogout(); });
+  $('on-bsave').addEventListener('click', () => { audio(); onlineBirth(); });
   $('onbar').addEventListener('click', e => {
     const b = e.target.closest('button[data-on]');
     if (!b || !NET.ws) return;

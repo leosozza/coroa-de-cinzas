@@ -11,6 +11,10 @@ compatibility_date = "2025-09-01"
 [vars]
 ALLOWED_ORIGINS = "https://arcanechess.pages.dev,http://localhost:8767,http://127.0.0.1:8767"
 PUBLIC_URL = "https://arcanechess.pages.dev"
+# ids públicos dos apps de login (preencher depois de registrar; vazio = botão escondido).
+# Os segredos vão só por `npx wrangler@4 secret put GOOGLE_CLIENT_SECRET` e `... DISCORD_CLIENT_SECRET`.
+GOOGLE_CLIENT_ID = ""
+DISCORD_CLIENT_ID = ""
 
 [[durable_objects.bindings]]
 name = "GAME"

@@ -8,14 +8,20 @@
 //   GET  /api/rooms/:id/ws     WebSocket; 1ª mensagem { t:'hello', token }
 //   GET  /api/queue/:fila/:ritmo/ws   fila casual ou ranqueada de Xadrez Puro (WebSocket; avisa o par ou oferece a IA)
 //   GET  /api/leaderboard?pool=xadrez  ranking (notas firmes de contas)
+//   GET  /api/auth/providers                      provedores de login configurados
+//   POST /api/auth/start   (Bearer do convidado) { provider, return } -> { url } (state + PKCE)
+//   GET  /api/auth/:provedor/callback             volta do provedor -> página do jogo #login=<código>
+//   POST /api/auth/exchange { code }              -> { token, user }
+//   POST /api/me/birth     (Bearer) { birth:'AAAA-MM-DD' }
 import { GameRoom, TC } from './room.js';
 import { Matchmaker, QUEUES } from './queue.js';
 import { signToken, verifyToken, bearer, randomId } from './auth.js';
 import { publicRating } from './ratings.js';
+import { enabled as authProviders, startLogin, callback as authCallback, fakeAuthorize, exchangeLogin } from './oauth.js';
 import { LEAGUES, GRANDMASTER, PROVISIONAL_RD } from './glicko2.js';
 export { GameRoom, Matchmaker };
 
-const VERSION = 'fase1-b';
+const VERSION = 'fase1-c';
 function cors(req, env){
   const origin = req.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -52,11 +58,12 @@ export default {
         if (!u) return json(req, env, { err:'Sessão inválida.' }, 401);
         let row = null;
         if (env.DB){
-          row = await env.DB.prepare('SELECT id, kind, name, created FROM users WHERE id = ? AND deleted = 0').bind(u.uid).first();
+          row = await env.DB.prepare('SELECT id, kind, name, created, birth FROM users WHERE id = ? AND deleted = 0').bind(u.uid).first();
           if (!row) return json(req, env, { err:'Conta não encontrada.' }, 401);
           await env.DB.prepare('UPDATE users SET last_seen = ? WHERE id = ?').bind(Date.now(), u.uid).run();
         }
-        const user = row || { id:u.uid, name:u.name, kind:u.kind };
+        const user = row ? { id:row.id, kind:row.kind, name:row.name, created:row.created, birth:!!row.birth } : { id:u.uid, name:u.name, kind:u.kind };
+        if (row && env.DB) user.logins = (await env.DB.prepare('SELECT provider FROM identities WHERE user_id = ?').bind(row.id).all()).results.map(x => x.provider);
         const ratings = { xadrez:await publicRating(env.DB, user.id, user.kind, 'xadrez'), arcano:await publicRating(env.DB, user.id, user.kind, 'arcano') };
         return json(req, env, { user, ratings });
       }
@@ -70,6 +77,32 @@ export default {
         if (env.DB) await env.DB.prepare('UPDATE users SET name = ? WHERE id = ? AND deleted = 0').bind(name, u.uid).run();
         const token = await signToken({ uid:u.uid, name, kind:u.kind }, env.SESSION_SECRET);
         return json(req, env, { token, user:{ id:u.uid, name, kind:u.kind } });
+      }
+
+      // login (Google, Discord; o falso só com DEV_AUTH=1)
+      if (p === '/api/auth/providers') return json(req, env, { providers:authProviders(env) });
+      if (p === '/api/auth/start' && req.method === 'POST'){
+        if (!env.DB) return json(req, env, { err:'Servidor sem banco.' }, 500);
+        const b = await body(req), u = await auth(req, env);
+        const r = await startLogin(req, env, u && u.kind === 'guest' ? u : null, String(b.provider || ''), String(b.return || ''));
+        return r.err ? json(req, env, { err:r.err }, r.status) : json(req, env, { url:r.url });
+      }
+      if (p === '/api/auth/fake/authorize') return fakeAuthorize(req, env);
+      const cb = p.match(/^\/api\/auth\/(google|discord|fake)\/callback$/);
+      if (cb){ if (cb[1] === 'fake' && env.DEV_AUTH !== '1') return json(req, env, { err:'Rota desconhecida.' }, 404); return authCallback(req, env, cb[1]); }
+      if (p === '/api/auth/exchange' && req.method === 'POST'){
+        const r = await exchangeLogin(env, (await body(req)).code);
+        return r ? json(req, env, r) : json(req, env, { err:'Código de login inválido ou expirado.' }, 400);
+      }
+      // data de nascimento (pedida ao virar conta; não aparece para ninguém)
+      if (p === '/api/me/birth' && req.method === 'POST'){
+        const u = await auth(req, env);
+        if (!u) return json(req, env, { err:'Sessão inválida.' }, 401);
+        const b = String((await body(req)).birth || ''), m = b.match(/^(\d{4})-(\d{2})-(\d{2})$/), d = m && new Date(b + 'T00:00:00Z');
+        const age = d && !isNaN(d) ? (Date.now() - d.getTime()) / (365.25 * 86400000) : -1;
+        if (!d || isNaN(d) || d.toISOString().slice(0, 10) !== b || age < 3 || age > 120) return json(req, env, { err:'Data inválida.' }, 400);
+        await env.DB.prepare('UPDATE users SET birth = ? WHERE id = ? AND deleted = 0').bind(b, u.uid).run();
+        return json(req, env, { ok:true });
       }
 
       if (p === '/api/rooms' && req.method === 'POST'){

@@ -36,3 +36,9 @@ Durable Objects com SQLite e D1 cabem no plano gratuito. `DEV_TC`, `RECONNECT_MS
 - O endereço do servidor é a constante `ONLINE_API` em `coroa-de-cinzas.html` (procure por `ONLINE_API =`). Teste local: abra o jogo servido em `http://localhost:8767/...?api=http://127.0.0.1:8787` (o `?api=` só aceita localhost e 127.0.0.1).
 - Para testar duas abas reais com recarga de página, use no `.dev.vars` `RECONNECT_MS=30000` e `FIRST_MOVE_MS=60000` (a página leva alguns segundos para carregar a cena); para `test/e2e.mjs` volte a 3000 e 8000.
 - `POST /api/name {name}` troca o nome público sem perder a nota (devolve uma ficha nova).
+
+## Login (Google e Discord)
+- Fluxo: `POST /api/auth/start {provider, return}` (com a ficha do convidado) → URL do provedor com `state` e PKCE S256 → `GET /api/auth/<provedor>/callback` → página do jogo com `#login=<código de uso único>` → `POST /api/auth/exchange {code}` → `{ token, user }`. `GET /api/auth/providers` diz quais botões mostrar. `POST /api/me/birth {birth}`.
+- Ids públicos: `GOOGLE_CLIENT_ID` e `DISCORD_CLIENT_ID` em `[vars]` do `wrangler.toml` (vazios escondem o botão). Segredos só com `npx wrangler@4 secret put GOOGLE_CLIENT_SECRET` e `npx wrangler@4 secret put DISCORD_CLIENT_SECRET`.
+- Teste local: `DEV_AUTH=1` no `.dev.vars` liga o provedor falso (`/api/auth/fake/…`, com página de login e conferência real do PKCE); `node test/auth.mjs` (23 verificações). Nunca usar `DEV_AUTH` em produção.
+- Migração nova: `migrations/0002_oauth.sql` (`oauth_states`, `login_codes`, `users.merged_into`). Na nuvem: `npx wrangler@4 d1 migrations apply arcane-chess --remote`.
