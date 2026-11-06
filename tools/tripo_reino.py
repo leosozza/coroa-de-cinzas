@@ -24,10 +24,13 @@ PECAS = {
     "bispo": "Redraw ONLY the second figure from the left of [image 1] as the chess bishop: dragon priest with a winged "
              "dragon-crest helm and gold circlet, ornate scale robes, a tall dragon-headed staff holding a glowing ember orb "
              "gripped in the RIGHT hand and held away from the body, LEFT hand open with faint embers.",
-    "cavaleiro": "Redraw ONLY the armored rider on the dragon-masked warhorse of [image 1] as the chess knight: a huge black "
-                 "warhorse in spiked dragon-scale barding with a horned dragon-skull chanfron, the rider in heavy dark "
-                 "dragon-scale plate with a horned helm, a long lance upright in the RIGHT hand and a shield on the LEFT arm. "
-                 "Side three-quarter view, whole horse visible from ears to hooves, standing still on four legs.",
+    "cavaleiro": "Redraw ONLY the armored rider on the warhorse of [image 1] as the chess knight: a real, natural black warhorse "
+                 "(correct horse anatomy and horse head shape) wearing a full DRAGON-HEAD armored chanfron: a sculpted dark metal "
+                 "dragon face plate with a dragon snout, fangs along the edge, glowing ember eyes and long swept-back dragon horns "
+                 "and spines, matching the dragon helm of [image 2]. NOT a skull, NOT a ram or goat, NO curled horns. Spiked "
+                 "dragon-scale barding and a crimson caparison. The rider in dark dragon-scale plate with a horned dragon helm, "
+                 "a long lance upright in the RIGHT hand and a dragon-emblem shield on the LEFT arm. Side three-quarter view, "
+                 "whole horse visible from ears to hooves, standing still on four legs.",
     "rei": "Redraw ONLY the crowned winged figure in the center of [image 1] as the chess king: golden spiked crown over a dark "
            "mask, crimson and gold dragon-scale armor, huge crimson dragon wings folded behind the shoulders, a round shield "
            "swirling with fire and arcane light on the LEFT forearm held away from the body, a gold-hilted longsword in the "
