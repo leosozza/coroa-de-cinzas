@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reino feito inteiro na Tripo: artes (image-to-image, Nano Banana Pro) a partir da referência da equipe.
 
-Uso: python3 tools/tripo_reino.py dragoes arte [peao bispo ...]
+Uso: python3 tools/tripo_reino.py dragoes arte [peao bispo ...]   |   python3 tools/tripo_reino.py dragoes modelo [peao ...]
 Progresso em assets/tripo/reino_<reino>.json (não paga duas vezes). Limite de gasto do reino: LIMITE créditos.
 Saída: assets/concepts/reinos/<reino>/<peça>.png
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tripo_test as T
 
-LIMITE = 550
+LIMITE = 520  # arte (105) + 3D aprovado pelo usuário (~400)
 ESTILO = ("Ultra detailed, high resolution dark fantasy character concept art matching the team reference exactly: same "
           "painterly realism, palette of obsidian black, deep crimson, molten gold and glowing ember orange with icy blue "
           "magic accents, dragon-scale armor, dragon horns, wing motifs and dragon-skull details. Full body from head to feet, "
@@ -81,5 +81,54 @@ def main():
     print(f"gasto do reino até agora: {s['saldo_inicial'] - T.balance()} créditos; saldo {T.balance()}", flush=True)
 
 
+# 3D: modelo (image-to-model) -> rig biped v1.0 (presets de combate) -> 3 animações; cavaleiro e torre sem rig
+PECAS3D = {
+    "peao": dict(rig=True, golpe="preset:biped:slash"),
+    "bispo": dict(rig=True, golpe="preset:biped:cast_a_spell"),
+    "dama": dict(rig=True, golpe="preset:biped:cast_a_spell"),
+    "rei": dict(rig=True, golpe="preset:biped:slash"),
+    "cavaleiro": dict(rig=False),
+    "torre": dict(rig=False),
+}
+
+
+def modelo(reino, slugs):
+    st = T.ROOT / "assets" / "tripo" / f"reino_{reino}.json"
+    s = json.loads(st.read_text())
+    save = lambda: st.write_text(json.dumps(s, indent=2))
+    pasta = T.ROOT / "assets" / "concepts" / "reinos" / reino
+    for slug in slugs:
+        spec = PECAS3D[slug]; out = T.ROOT / "assets" / "meshy" / "reinos" / reino / slug
+        gasto = s["saldo_inicial"] - T.balance()
+        if gasto > LIMITE: sys.exit(f"Limite do reino atingido ({gasto}) antes de {slug}")
+        if f"img3d_{slug}" not in s: s[f"img3d_{slug}"] = upload(pasta / f"{slug}.png"); save()
+        if f"m3d_{slug}" not in s:
+            s[f"m3d_{slug}"] = T.req("POST", "/generation/image-to-model", {
+                "input": s[f"img3d_{slug}"], "model": "v3.1-20260211", "texture": True, "pbr": True,
+                "face_limit": 16000, "texture_quality": "standard", "orientation": "align_image"})["task_id"]; save()
+        t = T.wait(s[f"m3d_{slug}"], f"{slug} modelo"); s[f"custo_m3d_{slug}"] = t.get("credits_consumed"); save()
+        for k, v in T.urls(t).items():
+            T.dl(v, out / ("preview.png" if "image" in k else "model.glb"))
+        if not spec["rig"]:
+            continue
+        if f"rig_{slug}" not in s:
+            s[f"rig_{slug}"] = T.req("POST", "/animations/rig", {"input": s[f"m3d_{slug}"], "model": "v1.0-20240301",
+                                                                 "rig_type": "biped", "out_format": "glb"})["task_id"]; save()
+        r = T.wait(s[f"rig_{slug}"], f"{slug} rig"); s[f"custo_rig_{slug}"] = r.get("credits_consumed"); save()
+        for k, v in T.urls(r).items():
+            if "image" not in k: T.dl(v, out / "rigged.glb")
+        if f"anim_{slug}" not in s:
+            s[f"anim_{slug}"] = T.req("POST", "/animations/retarget", {"input": s[f"rig_{slug}"], "out_format": "glb",
+                "animations": ["preset:biped:idle", spec["golpe"], "preset:biped:fall"],
+                "export_with_geometry": True, "animate_in_place": True})["task_id"]; save()
+        a = T.wait(s[f"anim_{slug}"], f"{slug} animações"); s[f"custo_anim_{slug}"] = a.get("credits_consumed"); save()
+        for k, v in T.urls(a).items():
+            if "image" not in k: T.dl(v, out / "animated.glb")
+    print(f"gasto do reino: {s['saldo_inicial'] - T.balance()} créditos; saldo {T.balance()}", flush=True)
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 2 and sys.argv[2] == "modelo":
+        modelo(sys.argv[1], sys.argv[3:] or list(PECAS3D))
+    else:
+        main()

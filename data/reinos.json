@@ -4,7 +4,11 @@
       "id": "aurora",
       "nome": "Reino da Aurora",
       "descricao": "o visual atual: marfim, ouro e vermelho",
-      "pecas": "assets/meshy/<peça>/ (atual)"
+      "pecas": "assets/meshy/<peça>/ (atual)",
+      "golpes": {
+        "tema": "aço, luz dourada e arcano",
+        "base": "matriz de data/plano-golpes.md (lâmina, arremesso, explosão, magia, veneno, investida, flecha)"
+      }
     },
     {
       "id": "ferro_negro",
@@ -79,7 +83,43 @@
         "q": "Charged_Slash",
         "k": "Heavy_Hammer_Swing"
       },
-      "referencia": "assets/concepts/reinos/ferro_negro/referencia.png"
+      "referencia": "assets/concepts/reinos/ferro_negro/referencia.png",
+      "golpes": {
+        "tema": "fumaça negra, brasas carmesim e aço escurecido",
+        "p": "lâmina com rastro de fumaça negra; granada de fumaça negra contra a torre",
+        "n": "investida com rastro de fumaça negra saindo da barda; a lança deixa um corte de sombra",
+        "b": "a cruz-cajado solta uma onda de luz dourada envolta em fumaça negra",
+        "q": "fumaça carmesim que sobe da mão esquerda e envolve a vítima (veneno de sombra); golpe da espada dentada",
+        "k": "martelo dourado em chamas: impacto no chão com onda de choque e fumaça negra",
+        "r": "flechas negras fumegantes do arqueiro de chifres",
+        "morte_vitima": "a vítima se desfaz em cinzas e fumaça negra antes do corpo cair"
+      }
+    },
+    {
+      "id": "dragoes",
+      "nome": "Reino dos Dragões",
+      "descricao": "armaduras de escama de dragão, asas, chifres, fogo e brasas",
+      "paleta": {
+        "principal": "#160c0a",
+        "metal": "#2a2524",
+        "acento": "#9b1d14",
+        "brilho": "#ff7a1a",
+        "runa": "#5fc8ff"
+      },
+      "pecas": "em produção (3D na Tripo)",
+      "artes": "assets/concepts/reinos/dragoes/<peça>.png",
+      "referencia": "assets/concepts/reinos/dragoes/referencia.jpg",
+      "golpes": {
+        "tema": "fogo de dragão, brasas e runas de fogo-gelo",
+        "p": "lâmina com rastro de brasa; contra a torre, frasco de fogo",
+        "n": "o cavalo de cabeça de dragão CUSPE FOGO na vítima (rajada de chamas do focinho) e o cavaleiro completa com a lança",
+        "b": "o cajado de dragão dispara uma bola de fogo do orbe de brasa",
+        "q": "poder elemental de FOGO, como o bispo: a lâmina se incendeia e ela lança uma onda de chamas (as runas azuis viram fogo-gelo)",
+        "k": "o escudo de redemoinho de fogo dispara um vórtice de chamas e a espada longa corta",
+        "r": "besta com virote de fogo azul e o pequeno dragão no alto cospe fogo",
+        "morte_vitima": "a vítima pega fogo e vira brasa e cinza"
+      }
     }
-  ]
+  ],
+  "regra_golpes": "Cada reino tem golpes próprios (efeito visual e som). O tipo de golpe da matriz (lâmina, arremesso, magia...) continua o mesmo para as regras e a morte da vítima; o reino do ATACANTE troca só a aparência: cor, elemento e partículas. A morte da vítima usa o 'morte_vitima' do reino do atacante quando houver."
 }
