@@ -15,6 +15,9 @@ mkdir -p "$W/assets/meshy" && cp "$ROOT/assets/meshy/manifest.json" "$W/assets/m
 (cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*" -not -path "*/meshy_original/*" -not -path "*/tripo_original/*" -not -path "*/tripo_rig/*" -not -path "*/v1_sem_arma/*" -not -path "*/dama_v*/*" -not -path "./peao_meshy/*" -not -path "./peao_v1/*") | while read -r f; do
   mkdir -p "$W/assets/meshy/$(dirname "$f")"; cp "$ROOT/assets/meshy/$f" "$W/assets/meshy/$f"
 done
+# imagens dos cartões de reino (escolha do reino em cada modo)
+mkdir -p "$W/assets/concepts" && cp "$ROOT/assets/concepts/rei.jpg" "$W/assets/concepts/"
+for f in "$ROOT"/assets/concepts/reinos/*/referencia.*; do d="$W/assets/concepts/reinos/$(basename "$(dirname "$f")")"; mkdir -p "$d"; cp "$f" "$d/"; done
 # site (página inicial com o hero, ranking e login): o jogo vai para /jogar.html e as páginas para a raiz
 GAME="index.html"
 if [ -f "$ROOT/site/index.html" ]; then

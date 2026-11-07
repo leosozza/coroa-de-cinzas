@@ -9064,6 +9064,7 @@ async function kingdomLoad(id){
     } catch (e){ glbLog.push(`${id}/${slug}: falha ao preparar (${e.message})`); }
   }));
   glbLog.push(`reino ${id}: modelos ${Object.keys(out).join('') || 'nenhum (usa a Aurora)'}`);
+  if (!Object.keys(out).length) for (const n of document.querySelectorAll('.kg-note')) n.textContent = `Os modelos do reino ${R.nome} não carregaram aqui; as peças usam o visual da Aurora.`;
   KPEND = true;
 }
 // os clipes extras (golpes, comemoração) vêm das figuras da Aurora: o mesmo esqueleto da Meshy, só rotações
@@ -9092,7 +9093,31 @@ function kingdomApply(){
   b.classList.add('reino-w-' + kingdomOf('w'), 'reino-b-' + kingdomOf('b'));
   for (const s of ['w', 'b']){ const R = REINOS[kingdomOf(s)]; if (R.pal){ b.style.setProperty('--k' + s + '-acc', R.pal.acento); b.style.setProperty('--k' + s + '-glow', R.pal.brilho); } else { b.style.removeProperty('--k' + s + '-acc'); b.style.removeProperty('--k' + s + '-glow'); } }
   for (const s of ['w', 'b']) kingdomLoad(kingdomOf(s));
+  kingdomNames();
   KPEND = true;
+}
+// nome do lado nos textos ("Sua vez · Hoste dos Dragões"); Aurora fica com os nomes de sempre
+const FACTION_BASE = { w:'Ordem da Aurora', b:'Legião Cinzenta' };
+const sideCurto = s => ({ dragoes:'Dragões', ferro_negro:'Ferro Negro' })[kingdomOf(s)] || (s === 'w' ? 'Aurora' : 'Legião');
+const sideTurno = s => ({ dragoes:'DOS DRAGÕES', ferro_negro:'DO FERRO NEGRO' })[kingdomOf(s)] || (s === 'w' ? 'DA AURORA' : 'DA LEGIÃO');
+const FACTION_REINO = { ferro_negro:'Legião do Ferro Negro', dragoes:'Hoste dos Dragões' };
+function kingdomNames(){
+  const same = kingdomOf('w') === kingdomOf('b');
+  for (const s of ['w', 'b']){
+    const n = FACTION_REINO[kingdomOf(s)];
+    FACTION[s] = n ? n + (same ? (s === 'w' ? ' (claras)' : ' (escuras)') : '') : FACTION_BASE[s];
+  }
+}
+// a arena de um reino é o mundo dele: escolher o Covil dos Dragões (ou o Mistério Infernal) veste o seu lado com esse reino
+function arenaKingdom(id){
+  const k = MUNDO_REINO[id];
+  if (!k || !REINOS[k]) return;
+  const s = kingdomHuman();
+  if (KINGDOM[s] === k) return;
+  KINGDOM[s] = k; kingdomSave(); kingdomPickerRender(); kingdomNames();
+  for (const n of document.querySelectorAll('.kg-note')) n.textContent = `Reino do seu lado: ${REINOS[k].nome}, o mundo desta arena. Pode trocar acima.`;
+  kingdomLoad(k);
+  if (!TITLE.open) kingdomApply();
 }
 function kingdomTick(){
   if (!KPEND || busy || !GLOK || !S || cine.active) return;
@@ -9117,7 +9142,7 @@ function kingdomPickerInit(){
   }
   document.addEventListener('click', e => {
     const c = e.target.closest('.kg-card'); if (!c) return;
-    KINGDOM[c.dataset.kside] = c.dataset.k; kingdomSave(); kingdomPickerRender();
+    KINGDOM[c.dataset.kside] = c.dataset.k; kingdomSave(); kingdomPickerRender(); kingdomNames();
     // o mundo do reino vira a arena sugerida (o jogador pode trocar)
     const R = REINOS[c.dataset.k], note = c.closest('.kg-pick').querySelector('.kg-note');
     if (R.mundo && ARENAS[R.mundo] && (c.dataset.kside === kingdomHuman() || c.dataset.kside === 'w')){
@@ -9126,7 +9151,7 @@ function kingdomPickerInit(){
     } else if (note) note.textContent = '';
     kingdomLoad(c.dataset.k);
   });
-  kingdomPickerRender();
+  kingdomPickerRender(); kingdomNames();
 }
 const kingdomHuman = () => cfg.mode === 'ai' ? cfg.human : 'w';
 const arenaLabel = id => (ARENAS[id] ? ARENAS[id].name : id) + (MUNDO_REINO[id] ? ' — ' + REINOS[MUNDO_REINO[id]].nome : '');
@@ -10147,8 +10172,8 @@ function hudPhaseText(){
   if (!S || S.over) return null;
   const mine = human(S.turn), chk = checkSide === S.turn && !busy;
   let t, s, cls = S.turn;
-  if (cfg.mode === 'ai') { t = mine ? 'SUA VEZ' : S.turn === 'w' ? 'TURNO DA AURORA' : 'TURNO DA LEGIÃO'; s = mine ? FACTION[S.turn] : `A ${S.turn === 'w' ? 'Aurora' : 'Legião'} trama seu golpe…`; }
-  else { t = S.turn === 'w' ? 'TURNO DA AURORA' : 'TURNO DA LEGIÃO'; s = FACTION[S.turn]; }
+  if (cfg.mode === 'ai') { t = mine ? 'SUA VEZ' : 'TURNO ' + sideTurno(S.turn); s = mine ? FACTION[S.turn] : `A ${FACTION[S.turn]} trama seu golpe…`; }
+  else { t = 'TURNO ' + sideTurno(S.turn); s = FACTION[S.turn]; }
   if (cfg.arc && G && G.s && G.s.arc.phase === 'cards'){ const cs = G.s.arc.cardSide; t = 'FASE DE CARTAS'; s = FACTION[cs]; cls = cs; return { t, s, cls, think:false }; }
   if (chk){ s = t === 'SUA VEZ' ? 'Sua vez · proteja o rei' : t.charAt(0) + t.slice(1).toLowerCase(); t = 'XEQUE!'; cls = 'check'; }
   return { t, s, cls, think:!mine && !S.over };
@@ -10819,7 +10844,7 @@ function renderForces(){
     for (const p of S.pieces) if (p.side === s && !p.dead) mat += TYPES[p.t].val;
     const v = Math.round(Math.min(1, mat / 39) * 100);
     const caps = hist.filter(m => m.color === s && m.captured).map(m => GL[m.captured] + VS).join('');
-    return `<div class="force ${s}"><span class="side-${s}">${s === 'w' ? 'Aurora' : 'Legião'}</span><div class="meter"><i style="width:${v}%"></i></div><span class="pct">${mat}</span>
+    return `<div class="force ${s}"><span class="side-${s}">${sideCurto(s)}</span><div class="meter"><i style="width:${v}%"></i></div><span class="pct">${mat}</span>
       <span class="caps" aria-label="Peças capturadas">${caps || '<em>nenhuma captura ainda</em>'}</span></div>`;
   }).join('');
 }
@@ -10918,7 +10943,8 @@ function pvShow(t, side, label){
   PV.wrap.className = `unit-view side-${side} ar-${arena}`;
   PV.label.textContent = label || '';
   PV.canvas.setAttribute('aria-label', `${t === 'pl' ? 'Lanceiro' : TYPES[t].name} da ${FACTION[side]} em 3D, girando`);
-  const key = t + side + arena;
+  // a chave inclui o reino do lado e se o modelo dele já chegou (senão a ficha ficava com a figura da Aurora)
+  const key = t + side + arena + kingdomOf(side) + (kingdomAsset(t === 'pl' ? 'p' : t, side) ? '+' : '');
   // troca o modelo quando muda o tipo ou o lado, ou quando o GLB dele termina de carregar
   if (PV.key === key && PV.ch && !(PV.ch.kind === 'proc' && GLB[t === 'pl' ? 'p' : t]) && !(t === 'pl' && GLB.pl && !PV.ch.lanceiroModel)) return;
   if (PV.ch) PV.ch.dispose();
@@ -11838,7 +11864,7 @@ function applyArena(){
 }
 document.body.dataset.arena = arena;
 $('arena').value = arena;
-$('arena').addEventListener('change', e => { audio(); setArena(e.target.value); });
+$('arena').addEventListener('change', e => { audio(); setArena(e.target.value); arenaKingdom(e.target.value); });
 scene.addEventListener('pointerdown', e => { if (e.target !== cv && cineSkip()) e.preventDefault(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.activeElement !== cv) cineSkip(); });
 // online: "Nova partida" abre o menu online sem sair da partida (Voltar à partida retoma; outro modo encerra a conexão)
@@ -11900,7 +11926,7 @@ const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${
 function clockHtml(){
   if (!CLK.on) return '';
   const runSide = cfg.mode === 'online' ? NET.running : S && S.turn;
-  return ['w', 'b'].map(s0 => `<span class="clock ${runSide === s0 && S && !S.over ? 'run' : ''} ${CLK.ms[s0] < 20000 ? 'low' : ''}" id="clk-${s0}" aria-label="Relógio da ${FACTION[s0]}">${s0 === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[s0])}</span>`).join('');
+  return ['w', 'b'].map(s0 => `<span class="clock ${runSide === s0 && S && !S.over ? 'run' : ''} ${CLK.ms[s0] < 20000 ? 'low' : ''}" id="clk-${s0}" aria-label="Relógio da ${FACTION[s0]}">${sideCurto(s0)} ${fmtClock(CLK.ms[s0])}</span>`).join('');
 }
 function clockMoved(){ if (cfg.mode === 'online') return; if (CLK.on && S && G.history().length) CLK.ms[other(G.turn())] += CLK.inc; }
 setInterval(() => {
@@ -11912,7 +11938,7 @@ setInterval(() => {
   if (!side) return;
   CLK.ms[side] -= dt;
   const el = $('clk-' + side);
-  if (el){ el.textContent = `${side === 'w' ? 'Aurora' : 'Legião'} ${fmtClock(CLK.ms[side])}`; el.classList.toggle('low', CLK.ms[side] < 20000); }
+  if (el){ el.textContent = `${sideCurto(side)} ${fmtClock(CLK.ms[side])}`; el.classList.toggle('low', CLK.ms[side] < 20000); }
   if (CLK.ms[side] <= 0){
     if (online){ CLK.ms[side] = 0; return; }
     aiToken++; busy = false; CLK.thinking = false;
@@ -12124,7 +12150,7 @@ function renderThumbs(){
       const cv0 = mkCanvas(160, 90); cv0.setAttribute('aria-hidden', 'true');
       const sp = document.createElement('span'); sp.textContent = arenaLabel(id);
       b.append(cv0, sp);
-      b.addEventListener('click', () => { audio(); setArena(id); syncThumbs(); });
+      b.addEventListener('click', () => { audio(); setArena(id); arenaKingdom(id); syncThumbs(); });
       box.appendChild(b);
     }
   }
@@ -12327,7 +12353,7 @@ function arcRender(){
   const e = s.arc.ess[act];
   $('arc-ess').innerHTML = Array.from({ length:ARC.ESS_MAX }, (_, i) => `<i class="${i < e ? 'on' : ''}"></i>`).join('') + `<b>${e}</b>`;
   $('arc-ess').setAttribute('aria-label', `Essência: ${e} de ${ARC.ESS_MAX}`);
-  $('arc-info').textContent = `Grimório ${typeof s.arc.deck[act] === 'number' ? s.arc.deck[act] : s.arc.deck[act].length} · ${op === 'w' ? 'Aurora' : 'Legião'}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
+  $('arc-info').textContent = `Grimório ${typeof s.arc.deck[act] === 'number' ? s.arc.deck[act] : s.arc.deck[act].length} · ${sideCurto(op)}: ${s.arc.hand[op].length} cartas, ${s.arc.ess[op]} de essência`;
   // cartas na sua vez, antes do lance (o lance encerra o turno; não existe "encerrar turno"). No replay as cartas só se mostram
   const cardsPhase = s.arc.phase === 'move' && !busy && !s.over && !arcIsAI(actor) && actor === act && cfg.mode !== 'replay' && cfg.mode !== 'spec' && !(cfg.mode === 'online' && NET.pend);
   $('arc-end').hidden = true;
@@ -12791,7 +12817,7 @@ async function arcBlocked(res, mover){
   const ev = G.events || []; G.events = [];
   await arcEvents(ev);
 }
-const ARC_SIDE = c => c === 'w' ? 'Aurora' : 'Legião';
+const ARC_SIDE = c => sideCurto(c);
 // os efeitos que o motor devolve viram animação, texto e som
 async function arcEvents(ev){
   const hints = {};
@@ -12961,7 +12987,7 @@ async function arcEventsOld(ev){
     if (e.k === 'card'){
       const d = arcCard(e.card.id);
       snd('arcano_carga');
-      pushLog(`<b class="${e.side}">${e.side === 'w' ? 'Aurora' : 'Legião'}</b> usa a carta <b>${d.nome}</b>.`);
+      pushLog(`<b class="${e.side}">${sideCurto(e.side)}</b> usa a carta <b>${d.nome}</b>.`);
       arcMsg(`${d.nome}!`);
       const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side === e.side);
       const at = e.picks && e.picks[0] ? pieceAt(...rcOf(e.picks[0])) : k;
@@ -12976,7 +13002,7 @@ async function arcEventsOld(ev){
       snd('raio_dash');
       await animMove(p, tr, tc2);
     } else if (e.k === 'draw'){
-      pushLog(`<b class="${e.side}">${e.side === 'w' ? 'Aurora' : 'Legião'}</b> recebe uma carta (${ARC_WHY[e.why] || e.why})${e.why === 'espolio' || e.why === 'promocao' ? `: <b>${arcCard(e.card.id).nome}</b>` : ''}.`);
+      pushLog(`<b class="${e.side}">${sideCurto(e.side)}</b> recebe uma carta (${ARC_WHY[e.why] || e.why})${e.why === 'espolio' || e.why === 'promocao' ? `: <b>${arcCard(e.card.id).nome}</b>` : ''}.`);
     } else if (e.k === 'burn'){
       pushLog(e.card.id === '?' ? `Mão cheia: uma carta da ${FACTION[e.side]} queima.` : `Mão cheia: <b>${arcCard(e.card.id).nome}</b> queima e vai ao descarte.`);
     } else if (e.k === 'essence' && e.why === 'espolio'){
@@ -12986,7 +13012,7 @@ async function arcEventsOld(ev){
       const [r, c] = rcOf(e.sq), [x, z] = tc(r, c);
       snd('selo_runico', { vol:0.7 });
       if (GLOK){ spawnRing(x, z, 0xa985ff, 1.2, 700); sparks.burst(new THREE.Vector3(x, 0.3, z), 26, ['#e6dbff', '#a985ff'], 1.8, { life:700, size:0.06, grav:1, upward:true }); }
-      pushLog(`A runa de <b>${e.sq}</b> desperta para a <b class="${e.side}">${e.side === 'w' ? 'Aurora' : 'Legião'}</b>.`);
+      pushLog(`A runa de <b>${e.sq}</b> desperta para a <b class="${e.side}">${sideCurto(e.side)}</b>.`);
     } else if (e.k === 'reveal'){
       pushLog(e.traps.length ? `O Olho do Bispo revela armadilhas em ${e.traps.join(', ')}.` : 'O Olho do Bispo não encontra armadilhas.');
     }
