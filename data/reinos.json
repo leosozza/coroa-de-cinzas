@@ -224,6 +224,125 @@
       },
       "origem": "modelos da Tripo (v3.1) com esqueleto e animações do Meshy (24 ossos, mesmo padrão das outras peças)",
       "esqueleto": "Meshy, 24 ossos (Hips, Spine02, LeftHand, RightHand...): usa os golpes.glb da Aurora como as outras peças; asas, cabelo e armas presos no Blender"
+    },
+    {
+      "id": "lua_nova",
+      "nome": "Alpha da Lua Nova",
+      "descricao": "lobos: aço cinza, prata, couro escuro e pelo cinza-lobo, com a luz fria da lua e o vermelho-sangue",
+      "paleta": {
+        "principal": "#1c2028",
+        "metal": "#8a94a4",
+        "acento": "#9a1a1e",
+        "brilho": "#bfd8ff",
+        "runa": "#6aa8ff"
+      },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/lua_nova/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/peao.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/lua_nova/peao/walk.gltf.json"
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/lua_nova/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/bispo.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/lua_nova/bispo/walk.gltf.json"
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/lua_nova/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/dama.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/lua_nova/dama/walk.gltf.json"
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/lua_nova/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/rei.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/lua_nova/rei/walk.gltf.json"
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/lua_nova/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/lua_nova/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/lua_nova/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/lua_nova/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/lua_nova/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/lua_nova/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/lua_nova/torre.png",
+          "rig": false
+        }
+      },
+      "clipes": {
+        "p": "Idle, Punch_Combo (garras), dying_backwards",
+        "b": "Idle, Charged_Spell_Cast, dying_backwards (cajado rígido na mão esquerda)",
+        "q": "Idle, Charged_Spell_Cast_1, dying_backwards",
+        "k": "Idle, Thrust_Slash (garra como espada), dying_backwards",
+        "n": "estático: o guerreiro-lobo montado no lobo gigante (cai inteiro: o corte da sela pegaria o dorso do lobo)",
+        "r": "estático: a torre com o lobo uivando no topo e as garras-bumerangue"
+      },
+      "artes": "assets/concepts/reinos/lua_nova/<peça>.png",
+      "referencia": "assets/concepts/reinos/lua_nova/referencia.jpg",
+      "golpes": {
+        "tema": "garras de prata, lobos espectrais, a lua de prata e a lua de sangue",
+        "p": "golpe com as garras: três rasgos de luz prateada no ar",
+        "r": "o lobo do topo uiva e lança garras que giram como bumerangue até a vítima e voltam",
+        "b": "magia da lua de prata e da lua de sangue: abre uma fenda luminosa no chão de onde saltam lobos espectrais (azul-prata) que mordem a vítima",
+        "n": "o lobo gigante salta e esmaga a vítima com a pata (tremor, poeira, marcas de garra no chão)",
+        "q": "olhos dourados: lança uma esfera que parece uma pequena lua de sangue na vítima",
+        "k": "olhos azuis: crava a garra como uma espada no peito da vítima",
+        "morte_vitima": "a vítima é rasgada por garras e se desfaz em névoa prateada",
+        "xeque_mate": "o lobo gigante chega correndo, uiva, vira lobisomem diante do Rei derrotado e o derruba com as garras; o Rei se desfaz em névoa prateada e o lobisomem uiva para a lua"
+      },
+      "mundo": {
+        "arena": "lunar",
+        "nome_arena": "Vigília da Lua Cheia",
+        "toque": "planície rochosa ao luar, cogumelos azuis luminosos, o castelo gótico do rei-lobo e a torre da Vigília ao fundo, uma lua enorme rachada com um pedaço arrancado e fragmentos flutuando, névoa baixa e estandartes azuis com o lobo e a lua; um lobo gigante anda pela borda e de tempos em tempos (e nas capturas) uiva e vira lobisomem, que ruge e dá socos",
+        "musica": "musica_zodiaco",
+        "ambiente": "ambiente_zodiaco"
+      },
+      "mascote": {
+        "lobo": "assets/meshy/chefes/lobo_gigante/model.opt.gltf.json",
+        "lobisomem": "assets/meshy/chefes/lobisomem/animated.opt.gltf.json (Idle, Punch_Forward_with_Both_Fists, Punch_Combo)"
+      },
+      "arcano": {
+        "pegaso": "LOBO DA TEMPESTADE (o Cavaleiro vira o lobo gigante)",
+        "dragao": "LOBISOMEM (o Cavaleiro vira lobisomem no lance)",
+        "golem": "COLOSSO DE GELO LUNAR",
+        "berserk": "FÚRIA DA LUA DE SANGUE",
+        "fenix": "FÊNIX DA LUA CHEIA / RENASCE SOB A LUA CHEIA",
+        "lanceiro": "CAÇADOR DE PRATA",
+        "canhao": "BALISTA DE PRATA",
+        "centuriao": "GUARDA DA ALCATEIA",
+        "andarilho": "ANDARILHO DA NÉVOA",
+        "necro": "XAMÃ DA LUA NOVA",
+        "oraculo_b": "OLHO DA LUA",
+        "summon": "A ALCATEIA TRAZ"
+      },
+      "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
     }
   ],
   "regra_golpes": "Cada reino tem golpes próprios (efeito visual e som). O tipo de golpe da matriz (lâmina, arremesso, magia...) continua o mesmo para as regras e a morte da vítima; o reino do ATACANTE troca só a aparência: cor, elemento e partículas. A morte da vítima usa o 'morte_vitima' do reino do atacante quando houver."

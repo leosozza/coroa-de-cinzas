@@ -440,6 +440,8 @@ body[data-arena="olimpo"]{--glow-top:#3a3424; --glow-low:#202436}
 body[data-arena="alquimia"]{--glow-top:#14182e; --glow-low:#2a0c14}
 body[data-arena="dragoes"]{--glow-top:#331509; --glow-low:#3a0d06}
 body[data-arena="gelo"]{--glow-top:#132230; --glow-low:#3a1208}
+body[data-arena="lunar"]{--glow-top:#16223a; --glow-low:#0e1626}
+.unit-view.ar-lunar{background:radial-gradient(ellipse 80% 70% at 50% 38%, #1e2a40 0%, #0e1420 58%, #05070c 100%)}
 .unit-view canvas{display:block; width:100%; touch-action:pan-y; cursor:grab}
 .unit-view canvas:active{cursor:grabbing}
 .uv-tip{position:absolute; right:8px; bottom:6px; font-family:var(--f-ui); font-size:.66rem; letter-spacing:.08em; color:var(--ash); opacity:.8; pointer-events:none}
@@ -550,6 +552,8 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 body.reino-b-ferro_negro .side-b, body.reino-w-ferro_negro .side-w{--k-acc:#c0392b}
 body.reino-b-ferro_negro .force.b .meter i, body.reino-w-ferro_negro .force.w .meter i{background:linear-gradient(90deg, #3b3835, #7a1c1c, #d6a842)}
 body.reino-b-dragoes .force.b .meter i, body.reino-w-dragoes .force.w .meter i{background:linear-gradient(90deg, #2a2524, #9b1d14, #ff7a1a)}
+body.reino-b-lua_nova .side-b, body.reino-w-lua_nova .side-w{--k-acc:#9fc8ff}
+body.reino-b-lua_nova .force.b .meter i, body.reino-w-lua_nova .force.w .meter i{background:linear-gradient(90deg, #3a4048, #9a1a1e, #bfd8ff)}
 .setup h3{margin:0 0 10px; font-family:var(--f-engrave); letter-spacing:.08em; color:#f0d48a; font-size:1rem}
 .setup .row{display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px}
 .setup .acts{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
@@ -764,6 +768,7 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
             <option value="zodiaco">Zodíaco</option>
             <option value="multiverso">Multiverso</option>
             <option value="infernal">Mistério Infernal — Legião do Ferro Negro</option>
+            <option value="lunar">Vigília da Lua Cheia — Alpha da Lua Nova</option>
           </optgroup>
           <optgroup label="Divinas">
             <option value="celestial">Celestial</option>
@@ -2577,6 +2582,16 @@ const ARENAS = {
     win:'O Rei da Legião Cinzenta não tem para onde fugir. A Pedra Filosofal brilha para a Aurora.',
     lose:'O seu Rei está cercado. A Legião transmuta a vitória em ouro.',
     tail:' Diante do portal, a Pedra continua girando.' },
+  lunar:{ name:'Vigília da Lua Cheia', fog:0x0c1220, near:22, far:56, exposure:1.25, bright:true, dais:true, boardGlow:0xbfd8ff, sideGlow:0x6a9aff,
+    hemi:[0x8aa0c8, 0x1c2232, 0.75], moon:[0xc8dcff, 1.6], warm:[0x6a9aff, 0.45], warmPos:[-6, 5, -8],
+    env:[['#5a7098', 0], ['#1a2234', 0.42], ['#2a3446', 0.55], ['#0a0e16', 1]],
+    envSpots:[[30, 64, 12, '#9fc8ff'], [100, 62, 10, '#6a9aff'], [170, 64, 12, '#9fc8ff'], [230, 62, 10, '#ff4a4a'], [80, 18, 40, '#dfe8ff']],
+    music:'musica_zodiaco', amb:'ambiente_zodiaco', ash:0.004,
+    // câmera um pouco mais baixa e o horizonte mais embaixo: a lua enorme cabe no céu
+    cam:{ pitch:0.5, pad:1.35, drop:0.5, hz:0.6 },
+    win:'O Rei da Legião Cinzenta não tem para onde fugir. Sob a lua partida, a Aurora vence a noite.',
+    lose:'O seu Rei está cercado ao luar. A alcateia uiva para a lua.',
+    tail:' Sob a lua partida, um uivo corta a planície.' },
 };
 let arena = 'fortaleza', arenaPending = null;
 try { const a = localStorage.getItem(ARENA_KEY); if (ARENAS[a]) arena = a; } catch (e){}
@@ -2765,6 +2780,7 @@ function rune(g, x, y, s, rnd){
 function paintBoard(map, emis){
   if (arena === 'dragoes') return paintBoardDragon(map, emis);
   if (arena === 'gelo') return paintBoardSplit(map, emis);
+  if (arena === 'lunar') return paintBoardLunar(map, emis);
   const g = map.getContext('2d'), e = emis.getContext('2d'), rnd = seeded(7);
   g.fillStyle = '#1e1a16'; g.fillRect(0, 0, BS, BS);
   for (let i = 0; i < 2500; i++){
@@ -3203,8 +3219,10 @@ function paintBackdrop(c){
 // o fundo (céu de tempestade e fortaleza) é um cartaz voltado para a câmera, com o horizonte
 // fixado logo acima da última fileira na tela; é reposicionado a cada enquadramento
 const BD = { w:30, h:3.8, horizon:0.2, zh:-8.6 };
-function buildBackdrop(paint = paintBackdrop){
-  const c = mkCanvas(2048, 300);
+function buildBackdrop(paint = paintBackdrop, o = {}){
+  // uma arena pode pedir um céu mais alto (o mesmo tanto de pixels por unidade)
+  BD.h = o.h || 3.8; BD.horizon = o.horizon || 0.2;
+  const c = mkCanvas(2048, o.ch || 300);
   paint(c);
   const geo = new THREE.PlaneGeometry(BD.w, BD.h);
   backdrop = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map:canvasTex(c), fog:false, transparent:true, depthWrite:true, toneMapped:false }));
@@ -3337,6 +3355,7 @@ function buildEnvironment(){
   else if (arena === 'celestial') buildEnvCelestial();
   else if (arena === 'olimpo') buildEnvOlympus();
   else if (arena === 'alquimia') buildEnvAlchemy();
+  else if (arena === 'lunar') buildEnvLunar();
   else buildEnvMedieval();
 }
 
@@ -6834,6 +6853,8 @@ const GLB_SPEC = {
   k:{ rigged:true, h:1.46, w:0.8 },
   n:{ rigged:false, h:1.45, w:1.0 },
   r:{ rigged:false, h:1.66, w:0.85, stretch:1.36 },
+  // o lobisomem como peça (forma do Cavaleiro da Lua Nova no Dragão das Cinzas)
+  lw:{ rigged:true, h:1.8, w:1.05 },
 };
 const GLB = {};
 let glbPending = new Set(), glbLog = [];
@@ -6935,16 +6956,19 @@ function prepDragon(g){
 }
 // o Cavaleiro vira dragão (ou volta): pilar de fogo, brasas e o rugido
 function dragonForm(p, on){
-  const bone = on && kingdomOf(p.side) === 'ferro_negro' && AVT.dragao_ossos;
-  if (!GLOK || (!GLB.dg && !bone && on)) return;
+  const kk = kingdomOf(p.side), bone = on && kk === 'ferro_negro' && AVT.dragao_ossos, wolf = on && kk === 'lua_nova' && AVT.lwForm;
+  // a Lua Nova vira lobisomem (sem o modelo, o Cavaleiro fica como está)
+  if (on && kk === 'lua_nova' && !wolf) return;
+  if (!GLOK || (!GLB.dg && !bone && !wolf && on)) return;
   const e = CH[p.id];
-  if (!e || !!e.c.dragonModel === on || p.dead) return;
-  const face = e.c.root.rotation.y;
-  spawnPillar(p.dx, p.dz, on ? 0xff7a2a : 0xffd8a0, 900);
-  sparks.burst(chestOf(p, 0.5), nFx(50), FIRE_COLS, 2.6, { life:800, size:0.08, grav:-1 });
-  flashLight(chestOf(p, 0.5), 0xff7a2a, 4, 600);
-  if (on) snd('rugido_dragao');
-  swapModel(p, on ? (bone ? 'do' : 'dg') : p.dt).root.rotation.y = face;
+  if (!e || !!(e.c.dragonModel || e.c.werewolfModel) === on || p.dead) return;
+  const face = e.c.root.rotation.y, lua = wolf || e.c.werewolfModel;
+  spawnPillar(p.dx, p.dz, lua ? 0xbfd8ff : on ? 0xff7a2a : 0xffd8a0, 900);
+  sparks.burst(chestOf(p, 0.5), nFx(50), lua ? LUA_COLS.concat('#9fc8ff') : FIRE_COLS, 2.6, { life:800, size:0.08, grav:-1 });
+  flashLight(chestOf(p, 0.5), lua ? 0xcfe0ff : 0xff7a2a, 4, 600);
+  if (lua && GLOK) silverMist(p.dx, 0.05, p.dz, 16, 0.8);
+  if (on){ if (wolf){ howl({ vol:0.8, dur:1.8 }); growl({ vol:0.8, delay:0.3 }); } else snd('rugido_dragao'); }
+  swapModel(p, on ? (wolf ? 'lw' : bone ? 'do' : 'dg') : p.dt).root.rotation.y = face;
 }
 // o sopro de fogo do dragão até a vítima
 function fireStream(a, b, dur = 560){
@@ -7994,7 +8018,12 @@ function makeGlbCharacter(type, side, A){
   return api;
 }
 function makeCharacter(type, side){
-  if (type === 'ps' || type === 'sp' || type === 'do'){ let c = null; try { c = makeFormCharacter(type, side); } catch (e){ glbLog.push(`forma ${type}: falha ao instanciar (${e.message})`); } return c || makeCharacter(type === 'do' ? 'dg' : 'n', side); }
+  if (type === 'ps' || type === 'sp' || type === 'do' || type === 'lb'){ let c = null; try { c = makeFormCharacter(type, side); } catch (e){ glbLog.push(`forma ${type}: falha ao instanciar (${e.message})`); } return c || makeCharacter(type === 'do' ? 'dg' : 'n', side); }
+  if (type === 'lw'){
+    let c = null;
+    if (AVT.lwForm){ try { c = makeGlbCharacter('k', side, AVT.lwForm); c.werewolfModel = true; c.kingdom = 'lua_nova'; } catch (e){ glbLog.push(`lobisomem: falha ao instanciar (${e.message})`); } }
+    return c || makeCharacter('n', side);
+  }
   { const KA = typeof kingdomAsset === 'function' ? kingdomAsset(type, side) : null;
     if (KA){ try { const c = makeGlbCharacter(type, side, KA); c.kingdom = KA.kingdom; return c; } catch (e){ glbLog.push(`reino: falha ao instanciar ${type} (${e.message})`); } } }
   if (type === 'dg'){
@@ -8716,7 +8745,7 @@ function animMove(p, r, c){
     case 'n': if (kingdomOf(p.side) === 'ferro_negro' && GLOK){ const stop = fireTrail(p); return gallopLeap(p, tx, tz).finally(stop); } return gallopLeap(p, tx, tz);
     case 'r': return earthMove(p, tx, tz);
     case 'q': return lightningDash(p, tx, tz);
-    case 'b': if (cfg.arc && GLOK && p.eid != null && G && G.s){ const ek = kingdomOf(p.side), en = arcEngPiece(p.eid); if (en && en.fx.some(f => f.id === 'andarilho') && ek !== 'aurora') return ek === 'dragoes' ? fireBlink(p).then(() => arcaneBlink(p, tx, tz)).then(() => fireBlink(p)) : (() => { const stop = setInterval(() => { soulsRise(p, 1); const S2 = smokeSys(); S2.emit(p.dx, 0.05, p.dz, 0, 0.1, 0, 1300, 0.45, '#3a1a20', 0.4, 0, 0.5); }, 120); return arcaneBlink(p, tx, tz).finally(() => clearInterval(stop)); })(); }
+    case 'b': if (cfg.arc && GLOK && p.eid != null && G && G.s){ const ek = kingdomOf(p.side), en = arcEngPiece(p.eid); if (en && en.fx.some(f => f.id === 'andarilho') && ek !== 'aurora') return ek === 'dragoes' ? fireBlink(p).then(() => arcaneBlink(p, tx, tz)).then(() => fireBlink(p)) : ek === 'lua_nova' ? mistBlink(p).then(() => arcaneBlink(p, tx, tz)).then(() => { silverMist(p.dx, 0.05, p.dz, 10, 0.5); }) : (() => { const stop = setInterval(() => { soulsRise(p, 1); const S2 = smokeSys(); S2.emit(p.dx, 0.05, p.dz, 0, 0.1, 0, 1300, 0.45, '#3a1a20', 0.4, 0, 0.5); }, 120); return arcaneBlink(p, tx, tz).finally(() => clearInterval(stop)); })(); }
       return arcaneBlink(p, tx, tz);
     default: return walkTo(p, tx, tz);
   }
@@ -9065,6 +9094,8 @@ async function queenBlade(p, v, tx, tz, g){
 async function golpeCapture(p, v, tx, tz, g){
   // a coreografia do reino (luz sagrada, arranca-alma, fogo-gelo); o cavaleiro do Ferro Negro deixa fogo negro
   { const fx = golpeReinoFx(p, g); if (fx) return fx(p, v, tx, tz, g); }
+  // o Cavaleiro da Lua Nova em forma de lobisomem (Dragão das Cinzas): socos e garras
+  if (charOf(p).werewolfModel) return werewolfStrike(p, v, tx, tz, g);
   if (p.t === 'n' && g.reino === 'ferro_negro' && !g.carta){ const stop = fireTrail(p); try { if (g.tipo === 'investida' || g.tipo === 'lamina') return await lanceCharge(p, v, tx, tz, g); await rangedStrike(p, v, g); await moveIn(p, tx, tz); return; } finally { stop(); } }
   if (p.t === 'n' && (g.tipo === 'investida' || g.tipo === 'lamina')) return lanceCharge(p, v, tx, tz, g);
   if (g.tipo === 'lamina' && (p.t === 'p' || p.t === 'k')) return meleeCapture(p, v, tx, tz, g);
@@ -9157,8 +9188,11 @@ const REINOS = {
   dragoes:{ id:'dragoes', nome:'Reino dos Dragões', desc:'Fogo de dragão, brasas e runas de fogo-gelo. Os cavalos cospem fogo.', img:'assets/concepts/reinos/dragoes/referencia.jpg', mundo:'dragoes',
     pal:{ principal:'#160c0a', metal:'#2a2524', acento:'#9b1d14', brilho:'#ff7a1a', runa:'#5fc8ff' }, ring:0xff7a1a, dir:'assets/meshy/reinos/dragoes/',
     pecas:{ p:['peao', 'animated'], b:['bispo', 'animated'], q:['dama', 'animated'], k:['rei', 'animated'], n:['cavaleiro', 'model'], r:['torre', 'model'] } },
+  lua_nova:{ id:'lua_nova', nome:'Alpha da Lua Nova', desc:'Aço cinza, prata, couro e pelo de lobo sob a lua cheia: garras, uivos e a lua de sangue.', img:'assets/concepts/reinos/lua_nova/referencia.jpg', mundo:'lunar',
+    pal:{ principal:'#1c2028', metal:'#8a94a4', acento:'#9a1a1e', brilho:'#bfd8ff', runa:'#6aa8ff' }, ring:0x9fc8ff, dir:'assets/meshy/reinos/lua_nova/',
+    pecas:{ p:['peao', 'animated'], b:['bispo', 'animated'], q:['dama', 'animated'], k:['rei', 'animated'], n:['cavaleiro', 'model'], r:['torre', 'model'] } },
 };
-const MUNDO_REINO = { infernal:'ferro_negro', dragoes:'dragoes' };
+const MUNDO_REINO = { infernal:'ferro_negro', dragoes:'dragoes', lunar:'lua_nova' };
 const KINGDOM_KEY = 'arcane-chess:reinos';
 const KINGDOM = (() => { try { const v = JSON.parse(localStorage.getItem(KINGDOM_KEY) || 'null'); if (v && REINOS[v.w] && REINOS[v.b]) return v; } catch (e){} return { w:'aurora', b:'aurora' }; })();
 const GLBK = {};
@@ -9177,7 +9211,8 @@ async function kingdomLoad(id){
     if (!g) return;
     try {
       let A;
-      if (t === 'n'){ A = prepAsset('n', g, null); try { splitMount(A); } catch (e){} }
+      // o lobo da Lua Nova tem a cabeça na altura do guerreiro: o corte pela sela pegaria o dorso do lobo; ele cai inteiro
+      if (t === 'n'){ A = prepAsset('n', g, null); if (id !== 'lua_nova') try { splitMount(A); } catch (e){} }
       else if (t === 'r') A = prepAsset('r', g, null);
       else {
         const walk = await loadGltf(L, [R.dir + slug + '/walk.gltf.json', R.dir + slug + '/walk.glb']);
@@ -9231,14 +9266,19 @@ function kingdomApply(){
 }
 // nome do lado nos textos ("Sua vez · Hoste dos Dragões"); Aurora fica com os nomes de sempre
 const FACTION_BASE = { w:'Ordem da Aurora', b:'Legião Cinzenta' };
-const sideCurto = s => ({ dragoes:'Dragões', ferro_negro:'Ferro Negro' })[kingdomOf(s)] || (s === 'w' ? 'Aurora' : 'Legião');
-const sideTurno = s => ({ dragoes:'DOS DRAGÕES', ferro_negro:'DO FERRO NEGRO' })[kingdomOf(s)] || (s === 'w' ? 'DA AURORA' : 'DA LEGIÃO');
-const FACTION_REINO = { ferro_negro:'Legião do Ferro Negro', dragoes:'Hoste dos Dragões' };
+const sideCurto = s => ({ dragoes:'Dragões', ferro_negro:'Ferro Negro', lua_nova:'Lua Nova' })[kingdomOf(s)] || (s === 'w' ? 'Aurora' : 'Legião');
+const sideTurno = s => ({ dragoes:'DOS DRAGÕES', ferro_negro:'DO FERRO NEGRO', lua_nova:'DA LUA NOVA' })[kingdomOf(s)] || (s === 'w' ? 'DA AURORA' : 'DA LEGIÃO');
+const FACTION_REINO = { ferro_negro:'Legião do Ferro Negro', dragoes:'Hoste dos Dragões', lua_nova:'Alcateia da Lua Nova' };
+// artigo do nome curto ("Assumir a Aurora", "Assumir os Dragões")
+const sideArt = s => ({ dragoes:'os', ferro_negro:'o' })[kingdomOf(s)] || 'a';
 function kingdomNames(){
   const same = kingdomOf('w') === kingdomOf('b');
   for (const s of ['w', 'b']){
     const n = FACTION_REINO[kingdomOf(s)];
     FACTION[s] = n ? n + (same ? (s === 'w' ? ' (claras)' : ' (escuras)') : '') : FACTION_BASE[s];
+    // os botões do Espectador (também na barra do modo cinema) com o nome do reino de cada lado
+    const b = document.getElementById('spec-take-' + s);
+    if (b) b.textContent = `Assumir ${sideArt(s)} ${sideCurto(s)}${same && kingdomOf(s) !== 'aurora' ? (s === 'w' ? ' (claras)' : ' (escuras)') : ''}`;
   }
 }
 // a arena de um reino é o mundo dele: escolher o Covil dos Dragões (ou o Mistério Infernal) veste o seu lado com esse reino
@@ -9295,15 +9335,20 @@ Object.assign(GOLPE_EL, {
   carmesim:{ c:['#7a1c1c', '#c0392b', '#ff6a5a'], hex:0xc0392b, rgb:[1.35, 0.5, 0.5], cap:'NÉVOA CARMESIM', smoke:true },
   luz_fumaca:{ c:['#ffe6a0', '#d6a842', '#2a2226'], hex:0xd6a842, rgb:[1.3, 1.1, 0.7], cap:'LUZ DA CRUZ NEGRA', smoke:true },
   fogo_azul:{ c:['#e8f8ff', '#5fc8ff', '#2a7aff'], hex:0x5fc8ff, rgb:[0.7, 1.0, 1.55], cap:'VIROTE DE FOGO AZUL' },
+  garra:{ c:['#ffffff', '#dfe8f4', '#9fb4d0'], hex:0xcfe0ff, rgb:[0.45, 0.55, 0.8], cap:'GARRAS DE PRATA' },
+  lua_prata:{ c:['#ffffff', '#bfe0ff', '#6aa8ff'], hex:0x9fd0ff, rgb:[0.35, 0.6, 1.05], cap:'LOBOS ESPECTRAIS' },
+  lua_sangue:{ c:['#ffd8c8', '#ff3a34', '#7a0a10'], hex:0xff2a2a, rgb:[1.1, 0.16, 0.18], cap:'LUA DE SANGUE' },
 });
 const REINO_CAP = { ferro_negro:{ k:'MARTELO NEGRO', n:'FOGO NEGRO', q:'ARRANCA-ALMA' }, dragoes:{ n:'SOPRO DO DRAGÃO', k:'VÓRTICE DE CHAMAS', q:'FOGO-GELO', b:'BOLA DE FOGO' },
-  aurora:{ b:'RAIO DE LUZ', q:'LÂMINAS DE LUZ', k:'JULGAMENTO DOURADO' } };
+  aurora:{ b:'RAIO DE LUZ', q:'LÂMINAS DE LUZ', k:'JULGAMENTO DOURADO' },
+  lua_nova:{ p:'GARRAS DE PRATA', r:'GARRAS-BUMERANGUE', b:'LOBOS ESPECTRAIS', n:'PATA DO LOBO GIGANTE', q:'LUA DE SANGUE', k:'GARRA DO ALFA' } };
 function golpeReino(g, a){
   const id = kingdomOf(a.side);
   g.reino = id;
   if (g.carta) return g;
   if (id === 'ferro_negro') g.el = a.t === 'b' ? 'luz_fumaca' : a.t === 'q' ? 'alma' : 'fumaca';
   else if (id === 'dragoes') g.el = a.t === 'r' ? 'fogo_azul' : a.t === 'q' ? 'fogo_gelo' : 'fogo';
+  else if (id === 'lua_nova'){ if (g.lanceiro) return g; g.el = a.t === 'q' ? 'lua_sangue' : a.t === 'b' ? 'lua_prata' : 'garra'; }
   else {
     // Aurora, luz sagrada: o bispo, a dama e o rei mudam; o resto fica como na matriz
     if (!'bqk'.includes(a.t)) return g;
@@ -9319,6 +9364,7 @@ const REINO_TXT = {
   aurora:{ b:'fere com um raio de luz sagrada {o}', q:'faz cair lâminas de luz sobre {o}' },
   ferro_negro:{ q:'arranca a alma d{o}', r:'crava flechas negras fumegantes {no}', fumaca:'envolve em fumaça negra {o}', carmesim:'envolve em névoa carmesim {o}', luz_fumaca:'fere com a luz da cruz negra {o}' },
   dragoes:{ q:'congela e estilhaça em brasa {o}', r:'crava um virote de fogo azul {no}', fogo:'lança uma onda de chamas {no}', fogo_azul:'crava um virote de fogo azul {no}' },
+  lua_nova:{ p:'rasga com as garras {o}', r:'lança garras-bumerangue {no}', b:'solta os lobos espectrais da lua sobre {o}', n:'esmaga com a pata do lobo gigante {o}', q:'lança a lua de sangue {no}', k:'crava a garra no peito d{o}' },
 };
 // fumaça negra (com brasas carmesim) num ponto
 function smokeBurst(at, el = 'fumaca', n = 16){
@@ -9347,6 +9393,8 @@ function reinoImpact(g, p, v){
     if (p.t === 'k' && !g.carta){ spawnPillar(v.dx, v.dz, 0xffe6a0, 1300); spawnRing(v.dx, v.dz, 0xffd36a, 1.5, 700); flashLight(at, 0xffd36a, 4, 700); sparks.burst(at, nFx(30), GOLPE_EL.luz.c, 2, { life:900, size:0.06, grav:1, upward:true }); snd('selo_celestial', { vol:0.5 }); }
     return;
   }
+  // Lua Nova: um brilho de prata no impacto (o rasgo e a névoa vêm na coreografia e na morte)
+  if (g.reino === 'lua_nova'){ sparks.burst(at, nFx(14), LUA_COLS, 1.6, { life:420, size:0.05, grav:-2 }); return; }
   reinoTrail(g, chestOf(p, 0.6), at, p.t === 'n');
   if (g.reino === 'ferro_negro'){
     if (g.el !== 'alma') smokeBurst(at, g.el);
@@ -9368,6 +9416,14 @@ function reinoDeath(g, v){
   if (g.reino === 'aurora'){
     // quem a Aurora abate se desfaz em pó dourado
     for (let i = 0; i < nFx(30); i++) sparks.emit(v.dx + (Math.random() - 0.5) * 0.45, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.45, (Math.random() - 0.5) * 0.25, 0.3 + Math.random() * 0.6, (Math.random() - 0.5) * 0.25, 1300 + Math.random() * 900, 0.035 + Math.random() * 0.035, ['#fff2c0', '#ffd36a', '#e0a040'][i % 3], 1, -0.15, 0.55, 1);
+    return;
+  }
+  // quem a Lua Nova abate é rasgado por garras e se desfaz em névoa prateada
+  if (g.reino === 'lua_nova'){
+    clawRake(at, { size:0.8, ms:620, rot:-0.3 });
+    silverMist(v.dx, 0.05, v.dz, 22, 0.55);
+    for (let i = 0; i < nFx(20); i++) sparks.emit(v.dx + (Math.random() - 0.5) * 0.45, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.45, (Math.random() - 0.5) * 0.2, 0.3 + Math.random() * 0.5, (Math.random() - 0.5) * 0.2, 1300 + Math.random() * 800, 0.035 + Math.random() * 0.03, LUA_COLS[i % 3], 1, -0.12, 0.55, 1);
+    snd('nevoa', { vol:0.35 });
     return;
   }
   if (g.reino === 'ferro_negro'){
@@ -9534,7 +9590,802 @@ function golpeReinoFx(p, g){
   if (g.reino === 'aurora'){ if (p.t === 'b') return holyBeam; if (p.t === 'q') return lightBlades; }
   if (g.reino === 'ferro_negro' && p.t === 'q') return soulRip;
   if (g.reino === 'dragoes' && p.t === 'q') return frostFire;
+  if (g.reino === 'lua_nova' && !g.lanceiro) return LUA_FX[p.t] || null;
   return null;
+}
+
+/* ---------- Alpha da Lua Nova (lobos): golpes, morte da vítima, a arena "lunar" e o seu mascote ----------
+   Só visual (as regras e o tipo do golpe ficam). Garras de prata, lobos espectrais, a lua de prata e a lua de sangue:
+   o Peão rasga com as garras (três rasgos de luz prateada no ar); a Torre uiva e lança garras que voltam como bumerangue;
+   o Bispo abre uma fenda de luar no chão e dela saltam lobos espectrais que mordem; o lobo gigante do Cavaleiro salta e
+   esmaga com a pata; a Dama (olhos dourados) lança uma pequena lua de sangue; o Rei (olhos azuis) crava a garra como uma
+   espada no peito. Quem a Lua Nova abate é rasgado e se desfaz em névoa prateada. Os uivos são sintetizados (WebAudio). */
+const LUA_COLS = ['#ffffff', '#dfe8f4', '#9fb4d0'], LUA_BLUE = ['#e8f4ff', '#9fd0ff', '#5a8ad8'], LUA_RED = ['#ffd8c8', '#ff3a34', '#7a0a10'];
+// uivo de lobo: três osciladores que sobem e descem com vibrato, num filtro de banda, e um sopro de ar
+function howl(o = {}){
+  AUD.log.push({ name:'uivo', t:Math.round(performance.now()), via:'sintetizado' }); if (AUD.log.length > 200) AUD.log.shift();
+  if (!soundOn || !AC || !AUD.started) return;
+  try {
+    const t = AC.currentTime + (o.delay || 0), dur = (o.dur || 2.3) / (RM ? 1 : 1), r = o.rate || 1;
+    const out = AC.createGain(); out.gain.value = (o.vol != null ? o.vol : 0.7) * 0.2;
+    const f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1100 * r; f.Q.value = 0.7;
+    const env = AC.createGain();
+    env.gain.setValueAtTime(0.0001, t); env.gain.exponentialRampToValueAtTime(1, t + 0.4); env.gain.setValueAtTime(1, t + dur * 0.72); env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = 5.2; lg.gain.value = 7 * r; lfo.connect(lg);
+    for (const [type, mul, g0] of [['sawtooth', 1, 0.28], ['triangle', 2.01, 0.45], ['sine', 1, 0.9]]){
+      const os = AC.createOscillator(), og = AC.createGain(), f0 = 330 * r * mul;
+      os.type = type; og.gain.value = g0;
+      os.frequency.setValueAtTime(f0, t); os.frequency.exponentialRampToValueAtTime(f0 * 1.7, t + dur * 0.3);
+      os.frequency.setValueAtTime(f0 * 1.7, t + dur * 0.62); os.frequency.exponentialRampToValueAtTime(f0 * 1.15, t + dur);
+      lg.connect(os.frequency); os.connect(og).connect(env); os.start(t); os.stop(t + dur + 0.1);
+    }
+    env.connect(f).connect(out).connect(AUD.bus.sfx || AC.destination);
+    lfo.start(t); lfo.stop(t + dur + 0.1);
+    noise(dur * 0.8, 0.025 * (o.vol != null ? o.vol : 0.7), 'bandpass', 1400 * r, 900 * r, o.delay || 0);
+  } catch (e){}
+}
+// rosnado grave (lobo gigante, lobisomem)
+function growl(o = {}){
+  if (!soundOn || !AC || !AUD.started) return;
+  try { const d = o.delay || 0, v = o.vol != null ? o.vol : 1; tone('sawtooth', 92, 64, 0.8, 0.07 * v, d); tone('sawtooth', 95, 61, 0.8, 0.05 * v, d); noise(0.8, 0.1 * v, 'lowpass', 520, 160, d); } catch (e){}
+}
+// três rasgos de garra (crescentes afilados) brancos com brilho azul-prata
+function clawTex(){
+  if (TEXC.claw) return TEXC.claw;
+  const c = mkCanvas(256, 256), g = c.getContext('2d');
+  g.translate(128, 128);
+  const slash = () => { g.beginPath(); g.moveTo(-36, -108); g.quadraticCurveTo(30, -8, -12, 108); g.quadraticCurveTo(-4, -8, -36, -108); g.closePath(); };
+  for (let i = -1; i <= 1; i++){
+    g.save(); g.translate(i * 44, i * 6);
+    g.shadowColor = 'rgba(140,195,255,1)'; g.shadowBlur = 24; g.fillStyle = 'rgba(160,205,255,.85)'; slash(); g.fill();
+    g.shadowBlur = 6; g.shadowColor = 'rgba(255,255,255,1)'; g.fillStyle = '#ffffff'; g.translate(-6, 0); g.scale(0.62, 0.94); slash(); g.fill();
+    g.restore();
+  }
+  return (TEXC.claw = canvasTex(c));
+}
+// marcas de garra cravadas no chão (sulcos escuros com a borda acesa de luar)
+function clawScarTex(){
+  if (TEXC.clawScar) return TEXC.clawScar;
+  const c = mkCanvas(256, 256), g = c.getContext('2d');
+  g.translate(128, 128);
+  for (let i = -1; i <= 1; i++){
+    g.save(); g.translate(i * 40, 0);
+    g.beginPath(); g.moveTo(-10, -96); g.quadraticCurveTo(16, 0, -4, 96); g.quadraticCurveTo(-2, 0, -10, -96); g.closePath();
+    g.shadowColor = 'rgba(120,170,255,.9)'; g.shadowBlur = 10; g.fillStyle = 'rgba(8,10,16,.95)'; g.fill();
+    g.shadowBlur = 0; g.strokeStyle = 'rgba(170,205,255,.55)'; g.lineWidth = 2; g.stroke();
+    g.restore();
+  }
+  return (TEXC.clawScar = canvasTex(c));
+}
+// a fenda de luar no chão (linha quebrada branca com brilho azul)
+function riftTex(){
+  if (TEXC.rift) return TEXC.rift;
+  const c = mkCanvas(256, 256), g = c.getContext('2d'), rnd = seeded(97);
+  const pts = []; for (let i = 0; i <= 14; i++) pts.push([16 + i * 16, 128 + (rnd() - 0.5) * 34 * Math.sin(Math.PI * i / 14)]);
+  const line = w => { g.lineWidth = w; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const p of pts) g.lineTo(p[0], p[1]); g.stroke(); };
+  g.lineCap = g.lineJoin = 'round';
+  g.shadowColor = 'rgba(110,170,255,1)'; g.shadowBlur = 30; g.strokeStyle = 'rgba(110,170,255,.8)'; line(22);
+  g.shadowBlur = 12; g.strokeStyle = 'rgba(200,230,255,1)'; line(9);
+  g.shadowBlur = 0; g.strokeStyle = '#ffffff'; line(3);
+  for (let i = 0; i < 6; i++){ const p = pts[2 + Math.floor(rnd() * 10)]; g.lineWidth = 2; g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(p[0] + (rnd() - 0.5) * 40, p[1] + (rnd() < 0.5 ? -1 : 1) * (14 + rnd() * 22)); g.stroke(); }
+  return (TEXC.rift = canvasTex(c));
+}
+// disco de lua (prata ou sangue) com crateras e o escuro da borda
+function moonTex(kind){
+  const key = 'moon_' + kind;
+  if (TEXC[key]) return TEXC[key];
+  const c = mkCanvas(256, 256), g = c.getContext('2d'), rnd = seeded(kind === 'sangue' ? 71 : 73), blood = kind === 'sangue';
+  const rg = g.createRadialGradient(108, 104, 10, 128, 128, 120);
+  rg.addColorStop(0, blood ? '#ffd0b8' : '#ffffff'); rg.addColorStop(0.55, blood ? '#e0402e' : '#dfe8f4'); rg.addColorStop(1, blood ? '#5a0608' : '#7a8aa4');
+  g.fillStyle = rg; g.beginPath(); g.arc(128, 128, 120, 0, TAU); g.fill();
+  g.save(); g.beginPath(); g.arc(128, 128, 120, 0, TAU); g.clip();
+  for (let i = 0; i < 9; i++){ const x = 50 + rnd() * 156, y = 50 + rnd() * 156, r = 14 + rnd() * 34; g.fillStyle = blood ? 'rgba(90,0,6,.28)' : 'rgba(80,96,124,.22)'; g.beginPath(); g.ellipse(x, y, r * 1.3, r, rnd() * 3, 0, TAU); g.fill(); }
+  for (let i = 0; i < 26; i++){ const x = 20 + rnd() * 216, y = 20 + rnd() * 216, r = 2 + rnd() * 10;
+    g.fillStyle = blood ? 'rgba(70,0,4,.35)' : 'rgba(70,84,110,.32)'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+    g.strokeStyle = blood ? 'rgba(255,190,170,.35)' : 'rgba(255,255,255,.4)'; g.lineWidth = 1.2; g.beginPath(); g.arc(x - r * 0.15, y - r * 0.15, r, Math.PI * 0.9, Math.PI * 1.7); g.stroke(); }
+  g.restore();
+  return (TEXC[key] = canvasTex(c));
+}
+// três rasgos de luz prateada no ar, de frente para a câmera, sobre um ponto
+function clawRake(at, o = {}){
+  if (!GLOK) return wait(200);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:clawTex(), color:C(o.hex || 0xffffff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  const s = o.size || 0.9;
+  sp.material.rotation = o.rot != null ? o.rot : 0.35 + (Math.random() - 0.5) * 0.7;
+  sp.position.copy(at).addScaledVector(V3().subVectors(camera.position, at).normalize(), o.near != null ? o.near : 0.35);
+  sp.renderOrder = 8; world.add(sp);
+  for (let i = 0; i < nFx(10); i++) sparks.emit(at.x + (Math.random() - 0.5) * 0.4, at.y + (Math.random() - 0.5) * 0.5, at.z + (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 1.2, (Math.random() - 0.2) * 1.2, (Math.random() - 0.5) * 1.2, 420, 0.04, o.cols ? o.cols[i % o.cols.length] : LUA_COLS[i % 3], 1, -2, 0.4);
+  return tween(o.ms || 520, q => {
+    sp.material.opacity = q < 0.18 ? q / 0.18 : 1 - (q - 0.18) / 0.82;
+    sp.scale.set(s * (0.75 + 0.25 * Math.min(1, q * 5)), s * Math.min(1, 0.2 + q * 6), 1);
+  }, linE).then(() => { world.remove(sp); sp.material.dispose(); });
+}
+// névoa prateada rasteira (mistura normal: fumaça clara de verdade)
+function silverMist(x, y, z, n = 14, spread = 0.45, cols = ['#c8d4e4', '#8a9ab0', '#e8f0ff']){
+  if (!GLOK) return;
+  for (let i = 0; i < nFx(n); i++) dust.emit(x + (Math.random() - 0.5) * spread, y + Math.random() * 0.3, z + (Math.random() - 0.5) * spread, (Math.random() - 0.5) * 0.35, 0.1 + Math.random() * 0.3, (Math.random() - 0.5) * 0.35,
+    1400 + Math.random() * 1100, 0.22 + Math.random() * 0.26, cols[i % cols.length], 0.4, 0.04, 0.6);
+}
+// olhos que acendem por um instante (Dama: dourados; Rei: azuis)
+function eyeGlow(p, hex, ms = 900){
+  const ch = chOf(p);
+  if (!GLOK || !ch) return;
+  const ry = ch.root.rotation.y, fx = Math.sin(ry), fz = Math.cos(ry), h = heightOf(p) * 0.93 + p.lift, L = [];
+  for (const s of [-1, 1]){
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(hex), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    sp.position.set(p.dx + fx * 0.09 + fz * s * 0.035, h, p.dz + fz * 0.09 - fx * s * 0.035); sp.scale.setScalar(0.12); sp.renderOrder = 8; world.add(sp); L.push(sp);
+  }
+  tween(ms, q => { const o = q < 0.2 ? q / 0.2 : 1 - (q - 0.2) / 0.8; for (const sp of L){ sp.material.opacity = o; sp.scale.setScalar(0.1 + 0.06 * o); } }, linE).then(() => { for (const sp of L){ world.remove(sp); sp.material.dispose(); } });
+}
+// Peão: chega perto e rasga com as garras
+async function lunaClaw(p, v, tx, tz, g){
+  const ch = charOf(p);
+  const dx = v.dx - p.dx, dz = v.dz - p.dz, L = Math.hypot(dx, dz) || 1, stop = Math.max(0, L - 0.64);
+  if (stop > 0.05) await walkTo(p, p.dx + dx / L * stop, p.dz + dz / L * stop);
+  ch.faceTowards(v.dx, v.dz, 2500);
+  growl({ vol:0.5 });
+  snd('espada', { rate:1.5, vol:0.5 });
+  await ch.play('attack');
+  const at = chestOf(v, 0.62);
+  clawRake(at, { size:0.95, rot:0.45 });
+  setTimeout(() => clawRake(chestOf(v, 0.5), { size:0.8, rot:-0.5 }), 170);
+  snd('espada', { rate:1.9, vol:0.45, delay:0.15 });
+  if (GLOK){ sparks.burst(at, nFx(20), LUA_COLS, 2.2, { life:460, size:0.05, grav:-3 }); flashLight(at, 0xcfe0ff, 3, 420); }
+  await slay(v, 'melee', p.side, golpeKnock(g, p, v), g, p);
+  await walkTo(p, tx, tz, true);
+}
+// garra-bumerangue: três lâminas curvas de prata em estrela, deitadas, que giram
+function boomerangMesh(){
+  const g = new THREE.Group(), spin = new THREE.Group();
+  spin.rotation.x = -Math.PI / 2; g.add(spin);
+  const sh = new THREE.Shape(); sh.absarc(0, 0, 0.17, -1.25, 1.25, false); sh.absarc(0.06, 0, 0.13, 1.18, -1.18, true);
+  const geo = new THREE.ShapeGeometry(sh, 8);
+  const mat = new THREE.MeshStandardMaterial({ color:C(0xdfe6f0), metalness:0.9, roughness:0.22, emissive:C(0x3a5a8a), emissiveIntensity:0.8, side:THREE.DoubleSide });
+  for (let i = 0; i < 3; i++){ const a = i * TAU / 3, b = new THREE.Mesh(geo, mat); b.rotation.z = a; b.position.set(Math.cos(a) * 0.05, Math.sin(a) * 0.05, 0); spin.add(b); }
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0x9fc8ff), transparent:true, opacity:0.7, blending:THREE.AdditiveBlending, depthWrite:false }));
+  glow.scale.setScalar(0.5); g.add(glow);
+  g.userData.spin = spin;
+  return g;
+}
+// voa numa gota: vai por um lado até a vítima e volta pelo outro; onHit no meio do caminho
+function boomerangFly(from, to, side, ms, onHit){
+  if (!GLOK){ return wait(ms * 0.5).then(() => { if (onHit) onHit(); return wait(ms * 0.5); }); }
+  const g = boomerangMesh(); world.add(g);
+  const d = V3().subVectors(to, from), perp = V3(-d.z, 0, d.x).normalize().multiplyScalar(Math.max(0.5, d.length() * 0.38) * side);
+  let hit = false;
+  snd('espada', { rate:0.6, vol:0.35 });
+  return tween(ms, q => {
+    const a = q * TAU, k = (1 - Math.cos(a)) / 2, s = Math.sin(a);
+    g.position.copy(from).addScaledVector(d, k).addScaledVector(perp, s);
+    g.position.y += Math.sin(Math.PI * k) * 0.3;
+    g.userData.spin.rotation.z = q * TAU * 7 * side;
+    if (Math.random() < (golpeLite() ? 0.4 : 0.9)) sparks.emit(g.position.x, g.position.y, g.position.z, 0, 0.05, 0, 320, 0.05, Math.random() < 0.5 ? '#dfe8f4' : '#9fc8ff', 1, 0, 0.4);
+    if (!hit && q >= 0.5){ hit = true; if (onHit) onHit(); }
+  }, linE).then(() => { golpeDispose(g); sparks.burst(from, nFx(8), LUA_COLS, 1, { life:300, size:0.04, grav:0 }); });
+}
+// Torre: o lobo do topo uiva e lança as garras-bumerangue
+async function lunaBoomerang(p, v, tx, tz, g){
+  const ch = charOf(p);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  const top = V3(p.dx, heightOf(p) * 0.96 + p.lift, p.dz);
+  howl({ vol:0.75, dur:1.6 });
+  if (GLOK){ spawnRing(p.dx, p.dz, 0x9fc8ff, 1.1, 700); flashLight(top, 0xbfd8ff, 3, 700); for (let i = 0; i < nFx(14); i++) sparks.emit(top.x + (Math.random() - 0.5) * 0.3, top.y, top.z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, 0.8 + Math.random() * 0.8, (Math.random() - 0.5) * 0.3, 900, 0.05, LUA_BLUE[i % 3], 1, 0.2, 0.6, 1); }
+  await Promise.race([ch.play('attack', { dur:620, key:0.5 }), wait(520)]);
+  await wait(golpeLite() ? 200 : 420);
+  const to = chestOf(v, 0.6);
+  let dead = null;
+  const hitFx = () => {
+    if (dead) return;
+    snd('espada', { rate:1.6, vol:0.6 });
+    clawRake(chestOf(v, 0.6), { size:0.85 });
+    if (GLOK){ sparks.burst(to, nFx(18), LUA_COLS, 2.2, { life:420, size:0.05, grav:-3 }); flashLight(to, 0xcfe0ff, 3, 400); }
+    dead = slay(v, 'melee', p.side, golpeKnock(g, p, v), g, p);
+  };
+  const n = golpeLite() ? 1 : 2, fly = [];
+  for (let i = 0; i < n; i++) fly.push(wait(i * 130).then(() => boomerangFly(top, to.clone().add(V3(0, (i - 0.5) * 0.14, 0)), i ? -1 : 1, 1150, hitFx)));
+  await Promise.all(fly);
+  if (!dead) hitFx();
+  await dead;
+  ch.play('idle');
+  await moveIn(p, tx, tz);
+}
+// as duas luas do bispo (prata e sangue) girando sobre o cajado
+function twinMoons(p, ms){
+  if (!GLOK) return { done:() => {}, pos:() => [chestOf(p, 1.1), chestOf(p, 1.1)] };
+  const L = ['prata', 'sangue'].map(k => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:moonTex(k), transparent:true, opacity:0, depthWrite:false, toneMapped:false })); s.renderOrder = 8; world.add(s);
+    const h = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(k === 'sangue' ? 0xff3a34 : 0xbfd8ff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false })); h.renderOrder = 7; world.add(h); return { s, h }; });
+  const c = () => V3(p.dx, heightOf(p) * 1.12 + p.lift + 0.2, p.dz);
+  let on = true;
+  const t0 = performance.now();
+  const step = () => {
+    if (!on) return;
+    const u = (performance.now() - t0) / ms, o = Math.min(1, u * 4) * (u > 0.85 ? Math.max(0, (1 - u) / 0.15) : 1), cc = c();
+    L.forEach((m, i) => { const a = u * TAU * 1.4 + i * Math.PI; m.s.position.set(cc.x + Math.cos(a) * 0.26, cc.y + Math.sin(a * 2) * 0.05, cc.z + Math.sin(a) * 0.26); m.h.position.copy(m.s.position); m.s.scale.setScalar(0.2); m.h.scale.setScalar(0.6); m.s.material.opacity = o; m.h.material.opacity = 0.7 * o; });
+    if (u < 1) requestAnimationFrame(step); else done();
+  };
+  const done = () => { if (!on) return; on = false; for (const m of L){ world.remove(m.s, m.h); m.s.material.dispose(); m.h.material.dispose(); } };
+  step();
+  return { done, pos:() => L.map(m => m.s.position.clone()) };
+}
+// um lobo espectral (o modelo do lobo gigante em luz azul-prata; sem ele, um vulto de luz)
+function spectralWolf(h){
+  const A = AVT.lobo_gigante, g = new THREE.Group();
+  let mat;
+  if (A){
+    mat = new THREE.MeshBasicMaterial({ map:A.map, color:C(0x8ac4ff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false });
+    const m = new THREE.Mesh(A.geo, mat); m.scale.setScalar(h); m.position.z = -A.d * h * 0.5; m.userData.sharedGeo = true; m.userData.keepMat = true; m.renderOrder = 7; g.add(m); g.userData.mat = mat;
+  } else {
+    mat = new THREE.SpriteMaterial({ map:glowTex, color:C(0x8ac4ff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false });
+    const s = new THREE.Sprite(mat); s.scale.set(h * 1.3, h * 0.7, 1); s.position.y = h * 0.4; g.add(s);
+  }
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0x5a9aff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false }));
+  halo.scale.setScalar(h * 1.8); halo.position.y = h * 0.45; g.add(halo);
+  g.userData.fade = o => { mat.opacity = o * (A ? 0.9 : 0.8); halo.material.opacity = o * 0.35; };
+  return g;
+}
+// salta de um ponto do chão até a vítima, morde e se desfaz em luz
+function wolfLeap(from, to, ms, h){
+  if (!GLOK) return wait(ms);
+  const g = spectralWolf(h); world.add(g);
+  const d = V3().subVectors(to, from), yaw = Math.atan2(d.x, d.z), hv = Math.hypot(d.x, d.z);
+  return tween(ms, q => {
+    const y = mix(from.y, to.y - h * 0.45, q) + Math.sin(Math.PI * q) * (0.45 + hv * 0.15);
+    g.position.set(mix(from.x, to.x, q), y, mix(from.z, to.z, q));
+    const vy = Math.cos(Math.PI * q) * (0.45 + hv * 0.15) * Math.PI + (to.y - h * 0.45 - from.y);
+    g.rotation.set(-Math.atan2(vy, hv) * 0.6, yaw, 0, 'YXZ');
+    g.userData.fade(Math.min(1, q * 4) * (q > 0.88 ? (1 - q) / 0.12 : 1));
+    if (Math.random() < (golpeLite() ? 0.4 : 0.9)) sparks.emit(g.position.x + (Math.random() - 0.5) * 0.2, g.position.y + h * 0.4, g.position.z + (Math.random() - 0.5) * 0.2, 0, 0.2, 0, 500, 0.05, LUA_BLUE[(Math.random() * 3) | 0], 1, 0, 0.5);
+  }, linE).then(() => { sparks.burst(to, nFx(16), LUA_BLUE, 1.8, { life:420, size:0.05, grav:-1 }); golpeDispose(g); if (g.userData.mat) g.userData.mat.dispose(); });
+}
+// Bispo: a lua de prata e a lua de sangue abrem uma fenda de luar no chão; dela saltam lobos espectrais que mordem
+async function lunaWolves(p, v, tx, tz, g){
+  const ch = charOf(p), vc = chOf(v);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  snd('selo_runico', { vol:0.5 });
+  const moons = twinMoons(p, 1500);
+  await Promise.race([ch.play('cast'), wait(480)]);
+  let dx = v.dx - p.dx, dz = v.dz - p.dz; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;
+  const back = Math.min(0.95, L * 0.5), rx = v.dx - dx * back, rz = v.dz - dz * back;
+  // os raios das duas luas descem até o chão e abrem a fenda
+  if (GLOK){ const [a, b] = moons.pos(); beamFx(a, V3(rx, 0.02, rz), 0xbfd8ff, 520, 0.03); beamFx(b, V3(rx, 0.02, rz), 0xff3a34, 520, 0.03); }
+  snd('portal', { vol:0.55 }); snd('nevoa', { vol:0.4, delay:0.2 });
+  let rift = null;
+  if (GLOK){
+    rift = groundDecal(riftTex(), rx, rz, 1, 0xffffff, true, 0.03); rift.scale.set(1.6, 1, 0.9); rift.rotation.y = Math.atan2(dx, dz) + Math.PI / 2;
+    tween(260, q => { rift.material.opacity = q; }, easeOut);
+    flashLight(V3(rx, 0.3, rz), 0x9fc8ff, 3.5, 900); spawnRing(rx, rz, 0x9fc8ff, 1.2, 600);
+    silverMist(rx, 0.02, rz, 10, 0.9, ['#9fc8ff', '#c8d8f0', '#5a7ab0']);
+  }
+  await wait(280);
+  const n = golpeLite() ? 2 : 3, to = chestOf(v, 0.55), jobs = [];
+  for (let i = 0; i < n; i++){
+    const off = (i - (n - 1) / 2) * 0.32;
+    jobs.push(wait(i * 150).then(() => { growl({ vol:0.35 }); return wolfLeap(V3(rx - dz * off, -0.05, rz + dx * off), to.clone().add(V3(-dz * off * 0.3, (Math.random() - 0.5) * 0.12, dx * off * 0.3)), 520, 0.55); }));
+  }
+  await jobs[0];
+  // a mordida
+  snd('espada', { rate:0.8, vol:0.55 }); snd('gelo_golpe', { vol:0.35, rate:1.3 });
+  if (vc && vc.setFlash) vc.setFlash(1, GOLPE_EL.lua_prata.rgb);
+  if (GLOK){ clawRake(to, { size:0.7, hex:0xbfe0ff, rot:Math.PI / 2 + 0.2 }); flashLight(to, 0x9fd0ff, 4, 500); }
+  const dead = slay(v, 'arcane', p.side, golpeKnock(g, p, v), g, p);
+  await Promise.all(jobs);
+  moons.done();
+  if (rift) tween(600, q => { rift.material.opacity = 1 - q; }).then(() => dropDecal(rift));
+  ch.play('idle');
+  await dead;
+  await moveIn(p, tx, tz);
+}
+// Cavaleiro: o lobo gigante salta e esmaga a vítima com a pata (tremor, poeira, marcas de garra no chão)
+async function lunaStomp(p, v, tx, tz, g){
+  const ch = charOf(p);
+  let dx = v.dx - p.dx, dz = v.dz - p.dz; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;
+  ch.faceTowards(v.dx, v.dz, 3200);
+  growl({ vol:0.9 });
+  await Promise.race([ch.play('attack', { dur:420, key:0.45 }), wait(360)]);
+  const fx = p.dx, fz = p.dz, ex = v.dx - dx * 0.3, ez = v.dz - dz * 0.3, hgt = 0.9 + L * 0.16;
+  ch.play('jump', { dur:780 });
+  snd('raio_dash', { vol:0.3, rate:0.6 });
+  await tween(520 + L * 60, k => { p.dx = mix(fx, ex, k); p.dz = mix(fz, ez, k); p.lift = Math.sin(Math.PI * k) * hgt; }, easeIO);
+  p.lift = 0;
+  shake(0.2);
+  snd('cavalo_pouso', { vol:1, rate:0.75 }); snd('terra_afunda', { vol:0.55 });
+  if (GLOK){
+    dustAt(v.dx, v.dz, nFx(30), 1.5, ['#6a7080', '#3a3e48', '#9aa4b4']); spawnRing(v.dx, v.dz, 0x9fb4d0, 1.5, 520);
+    const scar = groundDecal(clawScarTex(), v.dx + dx * 0.1, v.dz + dz * 0.1, 0.95, 0xffffff, false, 0.025); scar.rotation.y = Math.atan2(dx, dz);
+    tween(160, q => { scar.material.opacity = q; }).then(() => wait(2400)).then(() => tween(900, q => { scar.material.opacity = 1 - q; })).then(() => dropDecal(scar));
+    sparks.burst(chestOf(v, 0.4), nFx(18), LUA_COLS, 2, { life:500, size:0.05, grav:-4 });
+  }
+  await slay(v, 'earth', p.side, golpeKnock(g, p, v), g, p);
+  await moveIn(p, tx, tz);
+}
+// pequena lua (esfera com o disco da lua e o halo)
+function moonOrb(kind, r = 0.1){
+  const g = new THREE.Group();
+  const s = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), new THREE.MeshBasicMaterial({ map:moonTex(kind), toneMapped:false }));
+  const h = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(kind === 'sangue' ? 0xff3028 : 0xbfd8ff), transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false }));
+  h.scale.setScalar(r * 5.5); g.add(s, h); g.userData.ball = s;
+  return g;
+}
+// Dama: olhos dourados; lança uma pequena lua de sangue na vítima
+async function lunaBloodMoon(p, v, tx, tz, g){
+  const ch = charOf(p), vc = chOf(v);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  eyeGlow(p, 0xffc040, 1100);
+  snd('sombra', { vol:0.5 });
+  await Promise.race([ch.play('cast'), wait(420)]);
+  const from = handOf(p), to = chestOf(v, 0.55);
+  if (GLOK){
+    const orb = moonOrb('sangue'); orb.position.copy(from); world.add(orb);
+    await tween(300, q => { orb.scale.setScalar(0.2 + 0.8 * easeOut(q)); orb.userData.ball.rotation.y = q * 2; });
+    snd('misseis', { vol:0.45, rate:0.8 });
+    const d = from.distanceTo(to);
+    await arcThrow(orb, from.clone(), to, 380 + d * 80, 0.25 + d * 0.05, (o, k) => { o.userData.ball.rotation.y = k * 6; }, q => sparks.emit(q.x, q.y, q.z, (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, 420, 0.07, LUA_RED[(Math.random() * 3) | 0], 1, 0, 0.4));
+    golpeDispose(orb);
+  } else await wait(500);
+  // a lua de sangue estoura na vítima
+  snd('raio_golpe', { vol:0.7, rate:0.6 }); snd('sombra', { vol:0.6 });
+  shake(0.1);
+  if (vc && vc.setFlash) vc.setFlash(1, GOLPE_EL.lua_sangue.rgb);
+  if (GLOK){ flashLight(to, 0xff2a2a, 5, 650); spawnRing(v.dx, v.dz, 0xff3a34, 1.3, 600); sparks.burst(to, nFx(40), LUA_RED.concat('#ffffff'), 2.8, { life:700, size:0.07, grav:-1.5 }); silverMist(v.dx, 0.2, v.dz, 8, 0.5, ['#7a1014', '#3a0608', '#c04040']); }
+  ch.play('idle');
+  await slay(v, 'arcane', p.side, golpeKnock(g, p, v), g, p);
+  await moveIn(p, tx, tz);
+}
+// Rei: olhos azuis; crava a garra como uma espada no peito da vítima
+async function lunaAlphaClaw(p, v, tx, tz, g){
+  const ch = charOf(p);
+  let dx = v.dx - p.dx, dz = v.dz - p.dz; const L = Math.hypot(dx, dz) || 1, stop = Math.max(0, L - 0.62);
+  if (stop > 0.05) await walkTo(p, p.dx + dx / L * stop, p.dz + dz / L * stop);
+  dx /= L; dz /= L;
+  ch.faceTowards(v.dx, v.dz, 2500);
+  eyeGlow(p, 0x6ab8ff, 1300);
+  growl({ vol:0.6 });
+  snd('espada', { rate:0.85, vol:0.7 });
+  await ch.play('attack');
+  const at = chestOf(v, 0.62), from = V3(p.dx + dx * 0.2, heightOf(p) * 0.6 + p.lift, p.dz + dz * 0.2);
+  snd('lanca', { vol:0.8 });
+  shake(0.1);
+  if (GLOK){
+    beamFx(from, at.clone().add(V3(dx * 0.28, 0, dz * 0.28)), 0xcfe4ff, 420, 0.03);
+    clawRake(at, { size:0.85, rot:0.1 });
+    flashLight(at, 0x9fc8ff, 4.5, 520);
+    for (let i = 0; i < nFx(22); i++) sparks.emit(at.x, at.y, at.z, dx * (1.2 + Math.random() * 1.6) + (Math.random() - 0.5) * 0.6, (Math.random() - 0.3) * 0.8, dz * (1.2 + Math.random() * 1.6) + (Math.random() - 0.5) * 0.6, 520, 0.05, LUA_COLS[i % 3], 1, -2, 0.4);
+  }
+  await slay(v, 'melee', p.side, golpeKnock(g, p, v), g, p);
+  await walkTo(p, tx, tz, true);
+}
+// o Cavaleiro em forma de lobisomem (Dragão das Cinzas da Lua Nova): chega perto e derruba com socos e garras
+async function werewolfStrike(p, v, tx, tz, g){
+  const ch = charOf(p);
+  const dx = v.dx - p.dx, dz = v.dz - p.dz, L = Math.hypot(dx, dz) || 1, stop = Math.max(0, L - 0.75);
+  if (stop > 0.05) await walkTo(p, p.dx + dx / L * stop, p.dz + dz / L * stop, true);
+  ch.faceTowards(v.dx, v.dz, 2500);
+  growl({ vol:1 }); snd('rugido_dragao', { vol:0.5, rate:1.25 });
+  await ch.play('attack');
+  const at = chestOf(v, 0.6);
+  shake(0.12);
+  clawRake(at, { size:1.05, rot:0.4 });
+  setTimeout(() => clawRake(chestOf(v, 0.5), { size:0.9, rot:-0.4, hex:0xffd0d0 }), 160);
+  snd('espada', { rate:1.3, vol:0.6 });
+  if (GLOK){ sparks.burst(at, nFx(26), LUA_COLS.concat('#ff3a34'), 2.4, { life:500, size:0.06, grav:-3 }); flashLight(at, 0xcfe0ff, 4, 450); }
+  await slay(v, 'melee', p.side, golpeKnock(g, p, v), g, p);
+  await walkTo(p, tx, tz, true);
+}
+const LUA_FX = { p:lunaClaw, r:lunaBoomerang, b:lunaWolves, n:lunaStomp, q:lunaBloodMoon, k:lunaAlphaClaw };
+// o lobisomem como peça (forma do Cavaleiro no Dragão das Cinzas): o modelo da Meshy com o andar do Rei da Lua Nova
+function lwFormLoad(){
+  if (AVT.p.lwForm) return AVT.p.lwForm;
+  return AVT.p.lwForm = chefeLoad('lobisomem').then(async A => {
+    if (!A || !THREE.SkeletonUtils || !A.clips.idle) return null;
+    const walk = GOLPES.loader ? await loadGltf(GOLPES.loader, ['assets/meshy/reinos/lua_nova/rei/walk.gltf.json', 'assets/meshy/reinos/lua_nova/rei/walk.glb']) : null;
+    if (walk) for (const c of walk.animations || []) c.tracks = c.tracks.filter(t => /\.quaternion$/.test(t.name));
+    try {
+      const F = prepAsset('lw', { scene:THREE.SkeletonUtils.clone(A.scene), animations:[A.clips.idle, A.clips.punch || A.clips.combo].filter(Boolean) }, walk);
+      F.frames = []; F.kingdom = 'lua_nova';
+      AVT.lwForm = F; glbLog.push(`lobisomem (forma): ${F.height.toFixed(2)} de altura`);
+      return F;
+    } catch (e){ glbLog.push(`lobisomem (forma): falha ao preparar (${e.message})`); return null; }
+  }, () => null);
+}
+
+/* Vigília da Lua Cheia, o mundo da Lua Nova: planície rochosa ao luar, cogumelos azuis luminosos, o castelo gótico do
+   rei-lobo e a torre da Vigília ao fundo, uma lua enorme rachada (um pedaço arrancado e os fragmentos flutuando), névoa
+   baixa e estandartes azuis com o lobo e a lua. Um lobo gigante anda pela borda e de tempos em tempos (e nas capturas) uiva
+   para a lua e vira um lobisomem musculoso, que ruge e dá socos, e depois volta a ser lobo. Sem os modelos, sem o mascote. */
+const LUNA = { on:false, d:null, shroom:null, frags:[], pulse:0, loading:false };
+// tabuleiro: pedra prateada e ardósia, juntas com um fio de luar
+function paintBoardLunar(map, emis){
+  const g = map.getContext('2d'), e = emis.getContext('2d'), rnd = seeded(43);
+  g.fillStyle = '#12161e'; g.fillRect(0, 0, BS, BS);
+  e.fillStyle = '#000'; e.fillRect(0, 0, BS, BS);
+  speckle(g, rnd, 0, 0, BS, BS, 1600, r => `rgba(200,220,255,${0.02 + r() * 0.04})`, r => `rgba(0,0,0,${0.1 + r() * 0.1})`, 3);
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++){
+    const x = BM + c * BT, y = BM + r * BT, light = (r + c) % 2 === 0, j = (rnd() - 0.5) * 12;
+    const lg = g.createLinearGradient(x, y, x + BT, y + BT);
+    if (light){ lg.addColorStop(0, `rgb(${Math.round(112 + j)},${Math.round(120 + j)},${Math.round(134 + j)})`); lg.addColorStop(1, `rgb(${Math.round(84 + j)},${Math.round(92 + j)},${Math.round(108 + j)})`); }
+    else { lg.addColorStop(0, `rgb(${Math.round(40 + j * 0.4)},${Math.round(45 + j * 0.4)},${Math.round(56 + j * 0.4)})`); lg.addColorStop(0.5, 'rgb(22,25,32)'); lg.addColorStop(1, 'rgb(32,36,46)'); }
+    g.fillStyle = lg; g.fillRect(x, y, BT, BT);
+    speckle(g, rnd, x, y, BT, BT, light ? 220 : 110, r2 => `rgba(235,242,255,${0.03 + r2() * 0.06})`, r2 => `rgba(10,14,24,${0.06 + r2() * 0.12})`, light ? 4 : 2);
+    if (rnd() < 0.5){ g.strokeStyle = 'rgba(10,12,20,.45)'; g.lineWidth = 1.4; strokePts(g, tileCrack(rnd, r, c), 1.4); }
+    g.fillStyle = 'rgba(230,240,255,.07)'; g.fillRect(x, y, BT, 3); g.fillRect(x, y, 3, BT);
+    g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(x, y + BT - 3, BT, 3); g.fillRect(x + BT - 3, y, 3, BT);
+  }
+  // juntas com luar (finas, azuladas)
+  e.lineCap = 'round'; e.shadowColor = 'rgba(110,170,255,1)'; e.shadowBlur = 8; e.strokeStyle = 'rgba(120,175,255,.55)';
+  for (let i = 1; i < 8; i++){ strokePts(e, jagLine(rnd, BM + i * BT, BM, BM + i * BT, BM + 8 * BT, 30, 3), 1.6); strokePts(e, jagLine(rnd, BM, BM + i * BT, BM + 8 * BT, BM + i * BT, 30, 3), 1.6); }
+  e.shadowBlur = 0;
+  // fases da lua gravadas na moldura
+  g.strokeStyle = 'rgba(200,214,236,.75)'; g.lineWidth = 4; g.strokeRect(BM - 4, BM - 4, BT * 8 + 8, BT * 8 + 8);
+  e.strokeStyle = 'rgba(140,190,255,.5)'; e.lineWidth = 2; e.strokeRect(BM - 4, BM - 4, BT * 8 + 8, BT * 8 + 8);
+  for (let i = 0; i < 8; i++){
+    const k = i / 7;
+    for (const [x, y] of [[BM + BT * (0.5 + i), BM * 0.5], [BM + BT * (0.5 + i), BS - BM * 0.18]]){
+      if (y > BS - BM * 0.3) continue;
+      e.fillStyle = 'rgba(190,215,255,.75)'; e.beginPath(); e.arc(x + BT * 0.32, y, 6, 0, TAU); e.fill();
+      e.fillStyle = '#000'; e.beginPath(); e.arc(x + BT * 0.32 + 12 * (k - 0.5) * 2, y, 6, 0, TAU); e.fill();
+    }
+  }
+  boardLabels(g, () => 'rgba(220,230,248,.75)', 'rgba(220,230,248,.75)');
+}
+// a lua enorme e partida, pintada num pano próprio: o disco, o pedaço arrancado, as rachaduras acesas e os fragmentos
+function paintBrokenMoon(g, cx, cy, r, sx = 1){
+  const c = mkCanvas(Math.ceil(r * 2.6), Math.ceil(r * 2.6)), m = c.getContext('2d'), R = r, o = c.width / 2, rnd = seeded(77);
+  const rg = m.createRadialGradient(o - R * 0.25, o - R * 0.3, R * 0.1, o, o, R);
+  rg.addColorStop(0, '#ffffff'); rg.addColorStop(0.5, '#e4ecf8'); rg.addColorStop(0.85, '#b4c2d8'); rg.addColorStop(1, '#8a9ab4');
+  m.fillStyle = rg; m.beginPath(); m.arc(o, o, R, 0, TAU); m.fill();
+  m.save(); m.beginPath(); m.arc(o, o, R, 0, TAU); m.clip();
+  for (let i = 0; i < 10; i++){ const x = o + (rnd() - 0.5) * R * 1.6, y = o + (rnd() - 0.5) * R * 1.6, rr = R * (0.1 + rnd() * 0.25); m.fillStyle = 'rgba(96,112,142,.25)'; m.beginPath(); m.ellipse(x, y, rr * 1.4, rr, rnd() * 3, 0, TAU); m.fill(); }
+  for (let i = 0; i < 40; i++){ const x = o + (rnd() - 0.5) * R * 1.9, y = o + (rnd() - 0.5) * R * 1.9, rr = R * (0.015 + rnd() * 0.07);
+    m.fillStyle = 'rgba(90,104,132,.3)'; m.beginPath(); m.arc(x, y, rr, 0, TAU); m.fill();
+    m.strokeStyle = 'rgba(255,255,255,.35)'; m.lineWidth = 1; m.beginPath(); m.arc(x - rr * 0.15, y - rr * 0.15, rr, Math.PI * 0.9, Math.PI * 1.7); m.stroke(); }
+  m.restore();
+  // o pedaço arrancado (no alto, à direita): borda irregular
+  const a0 = -0.95, a1 = 0.05, chunk = [];
+  for (let k = 0; k <= 10; k++){ const a = mix(a0, a1, k / 10); chunk.push([o + Math.cos(a) * R * 1.05, o + Math.sin(a) * R * 1.05]); }
+  const inner = [];
+  for (let k = 0; k <= 9; k++){ const t = k / 9, a = mix(a1, a0, t), rr = R * (0.55 + 0.18 * Math.sin(t * 9) + (rnd() - 0.5) * 0.14); inner.push([o + Math.cos(a) * rr, o + Math.sin(a) * rr]); }
+  m.globalCompositeOperation = 'destination-out';
+  m.beginPath(); m.moveTo(...chunk[0]); for (const q of chunk) m.lineTo(...q); for (const q of inner) m.lineTo(...q); m.closePath(); m.fill();
+  m.globalCompositeOperation = 'source-over';
+  // a borda da ferida: sombra e um fio de luz azul
+  m.strokeStyle = 'rgba(40,50,70,.8)'; m.lineWidth = 4; m.beginPath(); m.moveTo(...inner[0]); for (const q of inner) m.lineTo(...q); m.stroke();
+  m.shadowColor = 'rgba(140,200,255,1)'; m.shadowBlur = 10; m.strokeStyle = 'rgba(200,230,255,.9)'; m.lineWidth = 1.5; m.stroke(); m.shadowBlur = 0;
+  // rachaduras que saem da ferida pelo disco
+  m.save(); m.beginPath(); m.arc(o, o, R, 0, TAU); m.clip();
+  for (let i = 0; i < 6; i++){
+    const st = inner[1 + Math.floor(rnd() * 7)], pts = [st[0], st[1]]; let x = st[0], y = st[1], ang = Math.atan2(y - o, x - o) + Math.PI + (rnd() - 0.5) * 1.4;
+    for (let k = 0; k < 8; k++){ x += Math.cos(ang) * R * 0.11; y += Math.sin(ang) * R * 0.11; ang += (rnd() - 0.5) * 0.8; pts.push(x, y); }
+    m.strokeStyle = 'rgba(30,40,60,.75)'; strokePts(m, pts, 3);
+    m.shadowColor = 'rgba(150,205,255,1)'; m.shadowBlur = 8; m.strokeStyle = 'rgba(210,235,255,.8)'; strokePts(m, pts, 1); m.shadowBlur = 0;
+  }
+  m.restore();
+  // o halo frio e a lua no céu
+  const hg = g.createRadialGradient(cx, cy, r * 0.8, cx, cy, r * 2.2);
+  hg.addColorStop(0, 'rgba(170,205,255,.42)'); hg.addColorStop(1, 'rgba(120,160,230,0)');
+  g.fillStyle = hg; g.fillRect(cx - r * 2.3 * sx, cy - r * 2.3, r * 4.6 * sx, r * 4.6);
+  g.drawImage(c, cx - o * sx, cy - o, c.width * sx, c.height);
+  // os fragmentos soltos, afastando-se do pedaço arrancado
+  for (let i = 0; i < 9; i++){
+    const a = mix(a0, a1, rnd()), d = R * (1.12 + rnd() * 0.55), x = cx + Math.cos(a) * d * sx, y = cy + Math.sin(a) * d, s = R * (0.03 + rnd() * 0.08);
+    g.fillStyle = rnd() < 0.5 ? '#c8d4e6' : '#9aaac2'; g.beginPath();
+    for (let k = 0; k < 6; k++){ const b = k * TAU / 6 + rnd() * 0.6, rr = s * (0.6 + rnd() * 0.6); g.lineTo(x + Math.cos(b) * rr * sx, y + Math.sin(b) * rr); }
+    g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(200,230,255,.6)'; g.lineWidth = 1; g.stroke();
+  }
+  return { x:cx, y:cy, r, chunk:[cx + Math.cos((a0 + a1) / 2) * R * 1.3 * sx, cy + Math.sin((a0 + a1) / 2) * R * 1.3] };
+}
+// céu noturno azul-acinzentado, a lua partida, montes ao luar, o castelo gótico do rei-lobo e a torre da Vigília
+function paintBackdropLunar(c){
+  // o céu alto (cartaz de 6,4) guarda a mesma escala do fundo de sempre: as montanhas e o castelo não crescem
+  const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(331), hz = h * (h > 320 ? 0.88 : 0.8), band = Math.min(h, w * 0.1465) * 0.5, sx = (2048 / 30) / (300 / 3.8);
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#060a14'); sky.addColorStop(0.45, '#142036'); sky.addColorStop(0.8, '#2a3a56'); sky.addColorStop(1, '#46587a');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  for (let i = 0; i < (h > 320 ? 900 : 500); i++){ g.fillStyle = `rgba(230,240,255,${0.2 + rnd() * 0.6})`; g.fillRect(rnd() * w, rnd() * hz * 0.85, rnd() < 0.05 ? 2 : 1, 1); }
+  // a lua nasce enorme atrás das montanhas (a parte de baixo some atrás das cristas e do castelo)
+  const M = h > 320 ? paintBrokenMoon(g, w * 0.42, hz - hz * 0.3 * 0.5, hz * 0.3, sx) : paintBrokenMoon(g, w * 0.44, hz * 0.55, hz * 0.38, sx);
+  LUNA.moonPx = { x:M.x / w, y:M.y / h, r:M.r / h, cx:M.chunk[0] / w, cy:M.chunk[1] / h };
+  // nuvens finas atravessando a lua
+  for (let i = 0; i < 40; i++){ const x = rnd() * w, y = hz * (0.15 + rnd() * 0.6), rx = w * (0.03 + rnd() * 0.07), ry = h * (0.012 + rnd() * 0.03), lit = Math.max(0, 1 - Math.abs(x - M.x) / (w * 0.25));
+    g.fillStyle = `rgba(${Math.round(40 + lit * 120)},${Math.round(52 + lit * 130)},${Math.round(78 + lit * 140)},${0.12 + rnd() * 0.22})`; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, TAU); g.fill(); }
+  ridge(g, rnd, w, hz, band, '#1c2638', 0.22, 0.5);
+  // neve de luar nas cristas
+  ridge(g, rnd, w, hz, band, '#111824', 0.08, 0.26);
+  // o castelo gótico do rei-lobo num penhasco, à direita da lua (torres altas e agulhas, janelas acesas)
+  const cx = w * 0.6, base = hz - band * 0.32, ink = '#080b12';
+  g.fillStyle = ink; g.beginPath(); g.moveTo(cx - w * 0.1, hz); g.lineTo(cx - w * 0.07, base); g.lineTo(cx + w * 0.09, base - band * 0.04); g.lineTo(cx + w * 0.13, hz); g.fill();
+  const spire = (x, tw, th, tip) => {
+    g.fillStyle = ink; g.fillRect(x, base - th, tw, th);
+    g.beginPath(); g.moveTo(x - tw * 0.18, base - th); g.lineTo(x + tw / 2, base - th - tip); g.lineTo(x + tw * 1.18, base - th); g.fill();
+    for (let k = 0; k < 3; k++) if (rnd() < 0.75){ g.fillStyle = rnd() < 0.7 ? 'rgba(255,214,150,.9)' : 'rgba(150,200,255,.9)'; g.fillRect(x + tw * 0.4, base - th * (0.25 + k * 0.22), Math.max(2, tw * 0.2), Math.max(3, tw * 0.45)); }
+  };
+  g.fillStyle = ink; g.fillRect(cx - w * 0.06, base - band * 0.3, w * 0.13, band * 0.3);
+  for (let x = cx - w * 0.06; x < cx + w * 0.07; x += 8) g.fillRect(x, base - band * 0.3 - 5, 4, 5);
+  spire(cx - w * 0.065, 18, band * 0.52, band * 0.22); spire(cx - w * 0.03, 22, band * 0.7, band * 0.28); spire(cx + w * 0.005, 30, band * 0.9, band * 0.34);
+  spire(cx + w * 0.035, 20, band * 0.64, band * 0.25); spire(cx + w * 0.062, 16, band * 0.47, band * 0.2);
+  // rosácea azul no corpo central
+  g.fillStyle = 'rgba(140,190,255,.85)'; g.beginPath(); g.arc(cx + w * 0.005 + 15, base - band * 0.55, 5, 0, TAU); g.fill();
+  // a torre da Vigília da Lua Cheia, sozinha à direita, com o lobo uivando no alto
+  const vx = w * 0.86, vh = band * 0.75;
+  g.fillStyle = ink; g.fillRect(vx, base - vh, 26, vh + band * 0.32); for (let k = 0; k < 4; k++) g.fillRect(vx - 4 + k * 9, base - vh - 7, 5, 7);
+  g.fillStyle = 'rgba(150,205,255,.95)'; g.fillRect(vx + 10, base - vh * 0.6, 5, 10); g.fillRect(vx + 10, base - vh * 0.32, 5, 9);
+  g.fillStyle = ink; g.beginPath(); g.moveTo(vx + 6, base - vh - 7); g.lineTo(vx + 20, base - vh - 7); g.lineTo(vx + 19, base - vh - 15); g.lineTo(vx + 23, base - vh - 24); g.lineTo(vx + 17, base - vh - 18); g.lineTo(vx + 10, base - vh - 14); g.closePath(); g.fill();
+  // árvores mortas e a planície
+  g.strokeStyle = ink; g.lineWidth = 2;
+  for (let i = 0; i < 14; i++){ const x = rnd() * w, y = hz - rnd() * 6, th = 14 + rnd() * 26; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 6, y - th); for (let k = 0; k < 3; k++){ const by = y - th * (0.4 + k * 0.2); g.moveTo(x, by); g.lineTo(x + (rnd() - 0.5) * 18, by - 6 - rnd() * 8); } g.stroke(); }
+  const glow = g.createLinearGradient(0, hz - band * 0.4, 0, hz);
+  glow.addColorStop(0, 'rgba(120,160,230,0)'); glow.addColorStop(1, 'rgba(110,150,220,.22)');
+  g.fillStyle = glow; g.fillRect(0, hz - band * 0.4, w, band * 0.4);
+  g.fillStyle = '#0e1420'; g.fillRect(0, hz, w, h - hz);
+  bdFade(g, w, h);
+}
+// fragmentos de rocha da lua que flutuam diante do fundo, junto do pedaço arrancado (filhos do cartaz do fundo)
+function lunarFragments(){
+  LUNA.frags = [];
+  if (!backdrop || !LUNA.moonPx || RM) return;
+  const c = mkCanvas(64, 64), g = c.getContext('2d');
+  g.fillStyle = '#b8c6da'; g.beginPath(); [[8, 30], [24, 6], [50, 12], [58, 36], [40, 58], [14, 52]].forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill();
+  g.fillStyle = '#7a8aa2'; g.beginPath(); g.moveTo(24, 6); g.lineTo(50, 12); g.lineTo(58, 36); g.lineTo(36, 30); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(210,235,255,.9)'; g.lineWidth = 2; g.stroke();
+  const tex = canvasTex(c), P = LUNA.moonPx, rnd = seeded(13);
+  for (let i = 0; i < (W < 560 ? 3 : 5); i++){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map:tex, transparent:true, fog:false, depthWrite:false, toneMapped:false }));
+    const s = 0.08 + rnd() * 0.16, x = (P.cx - 0.5) * BD.w + (rnd() - 0.2) * 1.2, y = (0.5 - P.cy) * BD.h + (rnd() - 0.4) * 0.8;
+    m.scale.setScalar(s); m.position.set(x, y, 0.02); m.rotation.z = rnd() * TAU; m.renderOrder = -1;
+    backdrop.add(m);
+    LUNA.frags.push({ m, x, y, ph:rnd() * TAU, sp:0.15 + rnd() * 0.2, rs:(rnd() - 0.5) * 0.0006 });
+  }
+}
+// cogumelos azuis luminosos (caules claros, chapéus acesos), fundidos por material
+function shroomCluster(x, z, n, s, rnd, M){
+  const g = new THREE.Group();
+  for (let i = 0; i < n; i++){
+    const a = rnd() * TAU, d = i ? rnd() * 0.55 * s : 0, h = s * (0.18 + rnd() * 0.32), r = h * (0.45 + rnd() * 0.3), px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d, tilt = (rnd() - 0.5) * 0.4;
+    addMesh(g, new THREE.CylinderGeometry(r * 0.16, r * 0.24, h, 6), M.stem, px, GROUND_Y + h / 2, pz, tilt, 0, tilt * 0.5, false);
+    const cap = addMesh(g, new THREE.SphereGeometry(r, 9, 5, 0, TAU, 0, Math.PI * 0.5), M.cap, px + Math.sin(tilt * 0.5) * h * 0.4, GROUND_Y + h, pz + Math.sin(tilt) * h * 0.4, tilt, 0, tilt * 0.5, false);
+    cap.scale.y = 0.6;
+    addMesh(g, new THREE.CircleGeometry(r * 0.95, 9), M.gill, cap.position.x, cap.position.y + 0.004, cap.position.z, Math.PI / 2 + tilt, 0, tilt * 0.5, false);
+  }
+  bakeInto(g, envRoot);
+  glowSprite(envRoot, x, GROUND_Y + s * 0.3, z, s * 2.4, 0x3a9aff, 0.38);
+}
+// estandarte azul com o lobo uivando para a lua
+function wolfMoonEmblem(g){
+  g.fillStyle = '#e8eef8'; g.beginPath(); g.arc(64, 78, 30, 0, TAU); g.fill();
+  g.fillStyle = '#16305e'; g.beginPath(); g.arc(76, 72, 26, 0, TAU); g.fill();
+  g.fillStyle = '#dfe6f2';
+  g.beginPath(); g.moveTo(36, 196); g.lineTo(44, 160); g.lineTo(40, 140); g.lineTo(52, 124); g.lineTo(60, 96); g.lineTo(66, 92); g.lineTo(70, 110); g.lineTo(84, 120); g.lineTo(92, 150); g.lineTo(88, 196); g.lineTo(78, 196); g.lineTo(76, 166); g.lineTo(58, 166); g.lineTo(50, 196); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(60, 96); g.lineTo(54, 84); g.lineTo(62, 90); g.closePath(); g.fill();
+}
+function buildEnvLunar(){
+  const rnd = seeded(331);
+  themeMats({ stone:0x4a5262, dark:0x20252e, iron:0x3a4250, wood:0x231f1c });
+  groundMesh(paintGround('#151a24', ['rgba(0,0,0,.45)', 'rgba(90,120,170,.14)'], ['rgba(0,0,0,.5)', 'rgba(170,190,220,.2)']), 37, 80, 80, 0, 0.95);
+  scatterRocks(rnd, 170, (col, x, z, r) => { const l = 0.08 + r() * 0.09; return col.setRGB(l * 0.88, l * 0.95, l * 1.15); });
+  // rochedos maiores na planície
+  const crag = new THREE.MeshStandardMaterial({ color:C(0x3a4250), roughness:0.92, flatShading:true, envMapIntensity:0.5 }), rocks = new THREE.Group();
+  for (const [x, z, s] of [[-8.4, -6.2, 1.3], [9.2, -5.4, 1.1], [-9.6, 3.4, 0.9], [10.2, 2.2, 1.0], [-5.6, -8.8, 0.8], [6.4, -9.2, 1.2], [-11, -1.5, 1.4], [11.6, -2.6, 1.5]]){
+    for (let k = 0; k < 3; k++){ const o = addMesh(rocks, new THREE.DodecahedronGeometry(s * (0.5 + rnd() * 0.5), 0), crag, x + (rnd() - 0.5) * s, GROUND_Y + s * 0.25, z + (rnd() - 0.5) * s, rnd() * 3, rnd() * 3, rnd() * 3); o.scale.y = 0.55 + rnd() * 0.4; }
+  }
+  bakeInto(rocks, envRoot);
+  // cogumelos azuis
+  const M = { stem:new THREE.MeshStandardMaterial({ color:C(0xb8c4d4), roughness:0.7, emissive:C(0x1a2a40), emissiveIntensity:0.6 }),
+    cap:new THREE.MeshStandardMaterial({ color:C(0x2a6ab8), roughness:0.4, emissive:C(0x3aa8ff), emissiveIntensity:1.1 }),
+    gill:new THREE.MeshBasicMaterial({ color:C(0x9fd8ff), toneMapped:false, side:THREE.DoubleSide }) };
+  LUNA.shroom = M.cap;
+  const spots = [[-6.1, 5.4, 0.9], [6.5, 5.8, 1.0], [-7.6, -4.8, 1.1], [7.9, -3.6, 0.9], [-3.4, -6.6, 0.8], [3.8, -6.9, 1.0], [-8.7, 1.2, 0.8], [8.9, 0.8, 0.9], [0.4, -7.6, 0.9], [-5.4, 7.2, 0.7], [5.0, 7.4, 0.8], [-9.6, -2.4, 0.7], [9.8, 4.2, 0.8]];
+  for (const [x, z, s] of spots.slice(0, W < 560 ? 8 : spots.length)) shroomCluster(x, z, 4 + Math.floor(rnd() * 4), s, rnd, M);
+  // a torre da Vigília em ruínas (pedra, janelas azuis) e duas colunas góticas quebradas
+  const tw = new THREE.Group(), win = new THREE.MeshBasicMaterial({ color:C(0x8ac4ff), toneMapped:false });
+  addMesh(tw, new THREE.CylinderGeometry(0.9, 1.05, 4.6, 8), stoneMat, -8.2, GROUND_Y + 2.3, -7.4);
+  for (let k = 0; k < 8; k++){ const a = k * TAU / 8 + 0.2; addMesh(tw, new THREE.BoxGeometry(0.32, 0.36, 0.3), stoneMat, -8.2 + Math.cos(a) * 0.88, GROUND_Y + 4.75, -7.4 + Math.sin(a) * 0.88, 0, -a, 0); }
+  for (let k = 0; k < 3; k++){ const a = 0.5 + k * 0.5; addMesh(tw, new THREE.BoxGeometry(0.14, 0.5, 0.06), win, -8.2 + Math.cos(a) * 0.95, GROUND_Y + 1.4 + k * 1.1, -7.4 + Math.sin(a) * 0.95, 0, -a + Math.PI / 2, 0, false); }
+  for (const [x, z, hh] of [[7.4, -7.6, 3.2], [9.0, -6.8, 2.1]]){
+    addMesh(tw, new THREE.CylinderGeometry(0.32, 0.38, hh, 6), darkStoneMat, x, GROUND_Y + hh / 2, z);
+    addMesh(tw, new THREE.ConeGeometry(0.42, 0.9, 6), darkStoneMat, x + 0.25, GROUND_Y + 0.3, z + 0.4, 1.2, 0, 0.4);
+  }
+  bakeInto(tw, envRoot);
+  glowSprite(envRoot, -7.4, GROUND_Y + 2.5, -6.7, 1.6, 0x6aa8ff, 0.3);
+  // estandartes azuis com o lobo e a lua nos cantos
+  const tex = bannerTex({ field:'#1a3a78', dark:'#08142e', gold:'#c8d4e8', emblem:wolfMoonEmblem }), pole = new THREE.MeshStandardMaterial({ color:C(0x2a2622), roughness:0.8 });
+  const g0 = new THREE.Group(); envRoot.add(g0);
+  for (const [x, z] of [[-5.5, -5.5], [5.5, -5.5], [-5.5, 5.5], [5.5, 5.5]]){
+    const p0 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.8, 6), pole); p0.position.set(x, GROUND_Y + 1.4 + 0.6, z);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.18, 6), new THREE.MeshStandardMaterial({ color:C(0xc8d4e8), metalness:0.9, roughness:0.3 })); tip.position.set(x, GROUND_Y + 2.9 + 0.6, z);
+    const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.4, 1, 6), new THREE.MeshStandardMaterial({ map:tex, side:THREE.DoubleSide, roughness:0.85, alphaTest:0.5 }));
+    const cp = cloth.geometry.attributes.position; for (let i = 0; i < cp.count; i++) cp.setZ(i, Math.sin((cp.getY(i) / 1.4 + 0.5) * Math.PI * 1.3) * 0.05); cloth.geometry.computeVertexNormals();
+    cloth.position.set(x + 0.38, GROUND_Y + 2.05 + 0.6, z); cloth.rotation.y = Math.atan2(-x, -z);
+    g0.add(p0, tip, cloth); ENVX.spin.push({ o:cloth, ax:'y', v:0.0001 * (x > 0 ? 1 : -1) });
+  }
+  graveyard('w', rnd); graveyard('b', rnd);
+  buildBackdrop(paintBackdropLunar, { h:6.4, horizon:0.12, ch:506 });
+  // o halo da lua e os fragmentos que flutuam junto do pedaço arrancado
+  if (backdrop && LUNA.moonPx){
+    const P = LUNA.moonPx, halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0x9fc8ff), transparent:true, opacity:0.32, blending:THREE.AdditiveBlending, depthWrite:false, fog:false }));
+    halo.position.set((P.x - 0.5) * BD.w, (0.5 - P.y) * BD.h, 0.01); halo.scale.setScalar(P.r * BD.h * 4.2); halo.renderOrder = -1; backdrop.add(halo); LUNA.halo = halo;
+  }
+  lunarFragments();
+  // névoa baixa e fria
+  for (let i = 0; i < 2; i++){
+    const mm = new THREE.Mesh(new THREE.PlaneGeometry(44, 44), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x4a6a9a : 0x2a3a5a), transparent:true, opacity:i ? 0.24 : 0.36, depthWrite:false }));
+    mm.rotation.x = -Math.PI / 2; mm.position.y = GROUND_Y + 0.25 + i * 0.4; mm.renderOrder = 1;
+    envRoot.add(mm); mists.push(mm);
+  }
+  // numa captura: os cogumelos se acendem, a névoa sobe e o lobo gigante pode uivar (e se transformar)
+  ENVX.onCapture = (x, z) => {
+    LUNA.pulse = performance.now();
+    silverMist(x, 0.05, z, 10, 0.8, ['#9fc8ff', '#c8d8f0', '#6a8ac8']);
+    const D = LUNA.d, n = performance.now();
+    if (D && D.st === 'walk' && n > D.cd){ D.cd = n + 25000; D.next = n + 600; }
+  };
+  lunarWolfInit();
+}
+// o lobo gigante e o lobisomem (modelos da Meshy): só quando os dois estão prontos
+function lunarWolfInit(){
+  if (arena !== 'lunar' || !envRoot || !GLOK || LUNA.d || LUNA.loading || !THREE.SkeletonUtils) return;
+  const root = envRoot;
+  LUNA.loading = true;
+  Promise.all([chefeLoad('lobo_gigante'), chefeLoad('lobisomem')]).then(([W0, LW]) => {
+    LUNA.loading = false;
+    if (envRoot !== root || arena !== 'lunar' || !W0 || !LW || LUNA.d) return;
+    const lite = W < 560, H = lite ? 2.2 : 2.6, Hw = lite ? 3.0 : 3.5, len = W0.d * H, now = performance.now();
+    const g = new THREE.Group(); g.name = 'lobo-gigante'; root.add(g);
+    // o corpo gira pelas patas de trás (o uivo empina o lobo)
+    const pivot = new THREE.Group(); pivot.position.z = -len * 0.36; g.add(pivot);
+    const wolf = staticMesh(W0, H, { em:0x1a2434, emk:0.5, metal:0.12, rim:0x9fc8ff, rimK:0.75 });
+    wolf.position.z = len * 0.36; wolf.renderOrder = -1; wolf.castShadow = false; pivot.add(wolf);
+    const lw = chefeActor(LW, Hw, 0x9fc8ff);
+    lw.g.visible = false; lw.fade(0); root.add(lw.g);
+    lw.model.traverse(o => { if (o.isMesh) o.renderOrder = -1; });
+    if (backdrop) backdrop.material.depthWrite = false;
+    LUNA.d = { g, pivot, wolf, lw, H, Hw, len, th:Math.PI * 1.5, wd:Math.random() < 0.5 ? 1 : -1, th0:Math.PI - 0.3, th1:Math.PI * 2 + 0.3, cz:-2.6, rx:8.3, rz:6.6, zs:camera.position.z >= 0 ? 1 : -1,
+      sp:1.25, st:'walk', t0:now, next:now + 12000 + Math.random() * 6000, cd:0, ph:0, yaw:0, turn:null, step:0 };
+    lunarPath(LUNA.d);
+    LUNA.on = true;
+    glbLog.push(`lobo gigante: ${H} de altura, ${len.toFixed(1)} de comprimento; lobisomem ${Hw}`);
+  }, () => { LUNA.loading = false; });
+}
+// a trilha do lobo: pelos flancos e por trás das negras; na tela em pé (os flancos ficam fora do quadro), um arco atrás do tabuleiro
+function lunarPath(D){
+  const narrow = W / H < 0.9;
+  if (D.narrow === narrow) return;
+  D.narrow = narrow;
+  Object.assign(D, narrow ? { cz:-4.2, rx:4.9, rz:3.8, th0:Math.PI + 0.45, th1:Math.PI * 2 - 0.45 } : { cz:-2.6, rx:8.3, rz:6.6, th0:Math.PI - 0.3, th1:Math.PI * 2 + 0.3 });
+  D.th = clamp(D.th, D.th0, D.th1);
+}
+function lunarTick(now, dt){
+  const t = now / 1000;
+  // os cogumelos pulsam e se acendem nas capturas
+  if (LUNA.shroom){ const k = clamp((now - LUNA.pulse) / 1400, 0, 1), f = LUNA.pulse && k < 1 ? Math.sin(Math.PI * k) : 0; LUNA.shroom.emissiveIntensity = (RM ? 1.1 : 1.1 * (0.8 + 0.2 * Math.sin(t * 1.3))) + f * 1.6; }
+  if (!RM) for (const F of LUNA.frags){ F.m.position.set(F.x + Math.sin(t * F.sp + F.ph) * 0.12, F.y + Math.cos(t * F.sp * 0.8 + F.ph) * 0.1, 0.02); F.m.rotation.z += F.rs * dt; }
+  if (LUNA.halo) LUNA.halo.material.opacity = RM ? 0.32 : 0.28 + 0.05 * Math.sin(t * 0.7);
+  if (LUNA.on) lunarWolfTick(now, dt);
+  // os modelos chegam depois da arena: tenta de novo de tempos em tempos
+  else if (!LUNA.loading && GLOK && now > (LUNA.retry || 0)){ LUNA.retry = now + 3000; lunarWolfInit(); }
+}
+function lunarWolfTick(now, dt){
+  const D = LUNA.d;
+  if (!D) return;
+  const k = Math.min(dt, 60), s = k / 1000, P = D.g.position, u = now - D.t0;
+  const head = () => { D.g.updateMatrixWorld(true); return D.wolf.localToWorld(V3(0, 0.82, D.len / D.H * 0.42)); };
+  if (D.st === 'walk'){
+    const sx = -Math.sin(D.th) * D.rx, sz = Math.cos(D.th) * D.rz * D.zs, hv = Math.hypot(sx, sz) || 1;
+    if (D.turn){
+      const e = clamp((now - D.turn.t0) / 1800, 0, 1);
+      D.yaw = D.turn.y0 + Math.PI * easeIO(e) * D.turn.dir;
+      if (e >= 1){ D.turn = null; D.wd = -D.wd; D.zs = camera.position.z >= 0 ? 1 : -1; lunarPath(D); }
+    } else {
+      D.th += D.wd * D.sp * s / hv * (RM ? 0.6 : 1);
+      if (D.th > D.th1 || D.th < D.th0){ D.th = clamp(D.th, D.th0, D.th1); D.turn = { t0:now, y0:D.yaw, dir:D.zs * (D.th > Math.PI * 1.5 ? 1 : -1) }; }
+      D.yaw = Math.atan2(D.wd * sx, D.wd * sz);
+    }
+    P.set(Math.cos(D.th) * D.rx, GROUND_Y, D.zs * (D.cz + Math.sin(D.th) * D.rz));
+    // trote: o corpo sobe e desce, balança e as patas levantam poeira
+    D.ph += k * (RM ? 0.005 : 0.0085);
+    const b = Math.abs(Math.sin(D.ph));
+    D.pivot.position.y = b * D.H * 0.035; D.pivot.rotation.set(0.035 * Math.sin(D.ph * 2), 0, 0);
+    D.g.rotation.set(0, D.yaw, 0.02 * Math.sin(D.ph));
+    if (GLOK && !RM && b < 0.12 && now > D.step){ D.step = now + 260; dust.emit(P.x + (Math.random() - 0.5) * 0.6, GROUND_Y + 0.05, P.z + (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.3, 0.2, (Math.random() - 0.5) * 0.3, 1200, 0.3, '#3a4252', 0.35, -0.1, 0.4); }
+    if (!cine.active && now > D.next){ D.st = 'howl'; D.t0 = now; D.howled = false; D.turn = null; }
+  } else if (D.st === 'howl'){
+    // para, empina, ergue a cabeça e uiva para a lua
+    const e = easeOut(clamp(u / 700, 0, 1)) * (u > 2600 ? 1 - easeIO(clamp((u - 2600) / 500, 0, 1)) : 1);
+    D.pivot.position.y = 0; D.pivot.rotation.set(-0.3 * e + 0.015 * Math.sin(u * 0.03) * e, 0, 0);
+    if (!D.howled && u > 400){ D.howled = true; howl({ vol:0.75, dur:2.2 }); }
+    if (GLOK && u > 500 && u < 2600 && Math.random() < k * 0.02){ const h0 = head(); sparks.emit(h0.x, h0.y, h0.z, (Math.random() - 0.5) * 0.4, 1 + Math.random(), (Math.random() - 0.5) * 0.4, 1600, 0.06, LUA_BLUE[(Math.random() * 3) | 0], 1, 0.15, 0.7, 1); }
+    if (u > 3100){ D.st = D.lw ? 'shift' : 'walk'; D.t0 = now; D.flashed = false; if (!D.lw) D.next = now + 30000; }
+  } else if (D.st === 'shift' || D.st === 'back'){
+    // a transformação: clarão prateado, névoa e partículas; um modelo some e o outro aparece
+    const toW = D.st === 'shift', e = clamp(u / 900, 0, 1), L = D.lw;
+    if (!D.flashed){
+      D.flashed = true;
+      const at = V3(P.x, D.H * 0.6, P.z);
+      if (toW){ L.g.position.set(P.x, GROUND_Y, P.z); L.g.rotation.set(0, Math.atan2(-P.x, -P.z), 0); L.g.visible = true; L.play('idle'); }
+      snd('transmutacao', { vol:0.45 }); snd('nevoa', { vol:0.5 });
+      if (GLOK){ flashLight(at, 0xcfe0ff, 5, 900); sparks.burst(at, nFx(50), LUA_COLS.concat('#9fc8ff'), 3, { life:1000, size:0.09, grav:-0.5 }); silverMist(P.x, GROUND_Y + 0.2, P.z, 34, 2.2); spawnRing(P.x, P.z, 0x9fc8ff, 2.6, 900, GROUND_Y + 0.05); }
+    }
+    D.wolf.material.opacity = toW ? 1 - e : e;
+    D.wolf.visible = D.wolf.material.opacity > 0.01;
+    L.fade(toW ? e : 1 - e); L.g.scale.setScalar(toW ? 0.8 + 0.2 * e : 1 - 0.15 * e);
+    if (e >= 1){ if (toW){ D.st = 'were'; D.t0 = now; D.cue = 0; } else { L.g.visible = false; D.st = 'walk'; D.t0 = now; D.next = now + 32000 + Math.random() * 18000; D.pivot.rotation.set(0, 0, 0); } }
+  } else if (D.st === 'were'){
+    // o lobisomem ruge e dá socos no ar; depois volta a ser lobo
+    const L = D.lw;
+    if (D.cue === 0 && u > 250){ D.cue = 1; growl({ vol:0.9 }); snd('rugido_dragao', { vol:0.55, rate:1.2 }); }
+    if (D.cue === 1 && u > 1000){ D.cue = 2; D.c1 = L.play(L.acts.punch ? 'punch' : 'combo', { once:true, fade:0.25 }) || 1500; D.c1t = u; }
+    if (D.cue === 2 && u > D.c1t + D.c1 * 0.95){ D.cue = 3; D.c2 = L.acts.combo ? L.play('combo', { once:true, fade:0.25 }) : 0; D.c2t = u; }
+    if (D.cue === 3 && u > D.c2t + D.c2 * 0.95){ D.cue = 4; L.play('idle', { fade:0.4 }); D.c3t = u; growl({ vol:0.6 }); }
+    if (D.cue === 4 && u > D.c3t + 1300){ D.st = 'back'; D.t0 = now; D.flashed = false; }
+  }
+  if (D.lw && D.lw.g.visible) D.lw.tick(k);
+}
+// Xeque-mate da Lua Nova: o lobo gigante chega correndo, uiva, vira lobisomem diante do Rei e o derruba com as garras;
+// o Rei é rasgado e se desfaz em névoa prateada; o lobisomem uiva para a lua
+async function mateLobo(k, winner, A, live, fx, fanfare, place){
+  const Hw = 2.6, Hl = 1.55, spot = avatarSpot(k, winner, 1.2);
+  place(spot, Hw);
+  const yaw = Math.atan2(-spot.ux, -spot.uz);
+  const wg = new THREE.Group(), pivot = new THREE.Group(), len = A.lobo.d * Hl;
+  const wolf = staticMesh(A.lobo, Hl, { em:0x1a2434, emk:0.5, metal:0.12, rim:0x9fc8ff, rimK:0.75 });
+  pivot.position.z = -len * 0.36; wolf.position.z = len * 0.36; pivot.add(wolf); wg.add(pivot); mateProp(wg);
+  const ac = chefeActor(A.lw, Hw, 0x9fc8ff); ac.g.visible = false; mateProp(ac.g);
+  MATE.tick = dt => { if (ac.g.visible) ac.tick(dt); };
+  // 1. o lobo chega correndo de fora do tabuleiro
+  const from = V3(spot.x + spot.ux * 7, 0, spot.z + spot.uz * 7), to = V3(spot.x + spot.ux * len * 0.15, 0, spot.z + spot.uz * len * 0.15);
+  wg.position.copy(from); wg.rotation.y = yaw;
+  growl({ vol:0.8 }); snd('galope', { vol:0.5, rate:0.8 });
+  let ph = 0;
+  await tween(1500, q => {
+    const e = 1 - (1 - q) * (1 - q);
+    wg.position.set(mix(from.x, to.x, e), 0, mix(from.z, to.z, e));
+    ph += 0.5; const b = Math.abs(Math.sin(ph)) * (1 - q * 0.6);
+    pivot.position.y = b * Hl * 0.08; pivot.rotation.x = 0.06 * Math.sin(ph * 2) * (1 - q);
+    if (GLOK && Math.random() < 0.5) dust.emit(wg.position.x + (Math.random() - 0.5) * 0.5, 0.05, wg.position.z + (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.4, 0.3, (Math.random() - 0.5) * 0.4, 900, 0.2, '#5a6272', 0.4, -0.2, 0.4);
+  }, linE);
+  if (!live()) return;
+  pivot.position.y = 0; shake(0.06); dustAt(to.x, to.z, nFx(18), 1, ['#6a7080', '#3a3e48']);
+  // 2. uiva para a lua
+  howl({ vol:0.95, dur:2.2 });
+  await tween(1700, q => { const e = easeOut(Math.min(1, q * 2.5)); pivot.rotation.x = -0.32 * e * (q > 0.85 ? 1 - (q - 0.85) / 0.15 : 1); if (GLOK && Math.random() < 0.5){ wg.updateMatrixWorld(true); const h = wolf.localToWorld(V3(0, 0.82, A.lobo.d * 0.42)); sparks.emit(h.x, h.y, h.z, (Math.random() - 0.5) * 0.3, 1 + Math.random(), (Math.random() - 0.5) * 0.3, 1300, 0.05, LUA_BLUE[(Math.random() * 3) | 0], 1, 0.1, 0.7, 1); } }, linE);
+  if (!live()) return;
+  // 3. transforma-se em lobisomem: clarão prateado, névoa e partículas
+  const at = V3(to.x, Hl * 0.6, to.z);
+  snd('transmutacao', { vol:0.7 }); snd('nevoa', { vol:0.6 });
+  if (GLOK){ flashLight(at, 0xcfe0ff, 6, 1100); sparks.burst(at, nFx(60), LUA_COLS.concat('#9fc8ff'), 3, { life:1100, size:0.08, grav:-0.4 }); silverMist(to.x, 0.1, to.z, 36, 1.6); spawnRing(to.x, to.z, 0x9fc8ff, 2, 900); }
+  ac.g.position.set(spot.x, 0, spot.z); ac.g.rotation.y = yaw; ac.g.visible = true;
+  await tween(800, q => { wolf.material.opacity = 1 - q; ac.fade(q); ac.g.scale.setScalar(0.8 + 0.2 * easeOut(q)); }, linE);
+  wg.visible = false;
+  if (!live()) return;
+  growl({ vol:1 }); snd('rugido_dragao', { vol:0.8, rate:1.2 }); shake(0.08);
+  await wait(650);
+  if (!live()) return;
+  // 4. derruba o Rei com as garras
+  const name = ac.acts.combo ? 'combo' : 'punch', dur = ac.play(name, { once:true, fade:0.25 }) || 1200;
+  snd('espada', { vol:0.7, rate:1.2 });
+  await wait(dur * 0.38);
+  if (!live()) return;
+  const kc = chestOf(k, 0.55);
+  clawRake(kc, { size:1.05, rot:0.45 }); setTimeout(() => clawRake(chestOf(k, 0.45), { size:0.95, rot:-0.45 }), 180);
+  snd('espada', { vol:0.8, rate:1.6 }); snd('espada', { vol:0.7, rate:1.9, delay:0.18 }); shake(0.12);
+  if (GLOK){ sparks.burst(kc, nFx(36), LUA_COLS.concat('#ff3a34'), 2.6, { life:700, size:0.06, grav:-2 }); flashLight(kc, 0xcfe0ff, 5, 700); }
+  fanfare();
+  await tween(1700, q => {
+    fx({ dark:0.25 * q, diss:q, edge:[0.7, 0.85, 1] });
+    kingDust(k, ['#e8f0ff', '#a8b8d0', '#6a7a90'], golpeLite() ? 2 : 4);
+    if (Math.random() < 0.35) silverMist(k.dx, k.lift + 0.1, k.dz, 3, 0.5);
+  }, linE);
+  k.alpha = 0;
+  if (!live()) return;
+  // 5. o lobisomem uiva para a lua
+  if (ac.acts.idle) ac.play('idle', { fade:0.5 });
+  howl({ vol:1, rate:0.85, dur:2.6 });
+  await tween(2000, q => { ac.g.rotation.x = -0.2 * Math.sin(Math.PI * q); if (GLOK && Math.random() < 0.5){ const h = V3(ac.g.position.x, Hw * 0.95, ac.g.position.z); sparks.emit(h.x + (Math.random() - 0.5) * 0.3, h.y, h.z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, 1.2 + Math.random(), (Math.random() - 0.5) * 0.3, 1500, 0.06, LUA_BLUE[(Math.random() * 3) | 0], 1, 0.1, 0.7, 1); } }, linE);
+  if (!live()) return;
+  // some na névoa prateada
+  silverMist(ac.g.position.x, 0.1, ac.g.position.z, 30, 1.4);
+  await tween(900, q => { ac.fade(1 - q); }, linE);
+  ac.g.visible = false;
+  MATE.tick = null;
 }
 
 /* Mistério Infernal, o mundo do Ferro Negro: névoa carmesim, brasas vermelhas, estandartes carmesim rasgados, runas e luzes
@@ -9589,6 +10440,7 @@ const _bv = typeof THREE !== 'undefined' ? new THREE.Vector3() : null, _bw = _bv
 function bossReset(){
   BOSS.on = false; BOSS.g = null; BOSS.ghosts = []; BOSS.sky = []; BOSS.souls = []; BOSS.pool = [];
   GDR.on = false; GDR.d = null;
+  LUNA.on = false; LUNA.d = null; LUNA.frags = []; LUNA.halo = null; LUNA.shroom = null; LUNA.pulse = 0;
 }
 // fumaça preta (mistura normal: partículas escuras de verdade, que o brilho aditivo não faz)
 function smokeSys(){
@@ -10391,22 +11243,25 @@ function chefeLoad(key){
   if (!chefeOk()) return Promise.resolve(null);
   if (key === 'deus'){ bossModels(); return AVT.p.deus = (BOSSGLB.p || Promise.resolve()).then(() => BOSSGLB.deus || null); }
   if (key === 'dg') return Promise.resolve(GLB.dg || null);
-  const anim = key === 'arcanjo';
+  // Lua Nova: o lobo gigante (estático) e o lobisomem (com esqueleto da Meshy), os dois juntos
+  if (key === 'lua') return AVT.p.lua = Promise.all([chefeLoad('lobo_gigante'), chefeLoad('lobisomem')]).then(([a, b]) => a && b ? { lobo:a, lw:b } : null);
+  const anim = key === 'arcanjo' || key === 'lobisomem';
   return AVT.p[key] = loadGltf(GOLPES.loader, chefeUrls(key, anim ? 'animated' : 'model')).then(g => {
     if (!g) return null;
     try {
-      const A = anim ? prepChefe(g, { idle:/stance|idle/, judge:/judg|sword|slash/, cast:/spell|cast/ }, 0xffd27a, 0xffe6a0) : prepStatic(g, key);
+      const A = key === 'lobisomem' ? prepChefe(g, { idle:/idle/, punch:/both_fists|punch_forward/, combo:/combo/ }, 0x9fc8ff, 0x2a3a52)
+        : anim ? prepChefe(g, { idle:/stance|idle/, judge:/judg|sword|slash/, cast:/spell|cast/ }, 0xffd27a, 0xffe6a0) : prepStatic(g, key);
       AVT[key] = A; glbLog.push(`chefe ${key}: ${anim ? 'modelo (' + Object.keys(A.clips).filter(k => A.clips[k]).join(', ') + ')' : 'modelo estático'}`);
       return A;
     } catch (e){ glbLog.push(`chefe ${key}: falha ao preparar (${e.message})`); return null; }
   }, () => null);
 }
 // o avatar de cada reino e quanto esperar por ele quando o mate chega antes do arquivo
-const AVATAR_KEY = { ferro_negro:'deus', dragoes:'dg', aurora:'arcanjo' };
+const AVATAR_KEY = { ferro_negro:'deus', dragoes:'dg', aurora:'arcanjo', lua_nova:'lua' };
 // chamado ao entrar em jogo (kingdomApply): os avatares e os modelos do Arcano dos reinos em campo
 function avatarPreload(){
   const ids = new Set(['w', 'b'].map(kingdomOf));
-  setTimeout(() => { for (const id of ids){ const k = AVATAR_KEY[id]; if (k) chefeLoad(k); } if (cfg.arc){ if (ids.has('ferro_negro')){ chefeLoad('pesadelo'); chefeLoad('dragao_ossos'); } if (ids.has('dragoes')) chefeLoad('serpe'); } }, 2500);
+  setTimeout(() => { for (const id of ids){ const k = AVATAR_KEY[id]; if (k) chefeLoad(k); } if (cfg.arc){ if (ids.has('ferro_negro')){ chefeLoad('pesadelo'); chefeLoad('dragao_ossos'); } if (ids.has('dragoes')) chefeLoad('serpe'); if (ids.has('lua_nova')) lwFormLoad(); } if (ids.has('lua_nova')) chefeLoad('lobo_gigante'); }, 2500);
 }
 function avatarReady(id, ms){
   const k = AVATAR_KEY[id];
@@ -10600,7 +11455,7 @@ async function mateAvatar(k, winner, atk, tok){
   if (!A || !live() || !chOf(k)) return false;
   MATE.cinema = true; MATE.skip = false;
   const who = `o Rei da ${FACTION[k.side]}`;
-  const sub = id === 'ferro_negro' ? `O Deus da Morte reclama a alma d${who.slice(1)}` : id === 'dragoes' ? `O dragão gigante devora ${who}` : `O Arcanjo da Aurora julga ${who}`;
+  const sub = id === 'ferro_negro' ? `O Deus da Morte reclama a alma d${who.slice(1)}` : id === 'dragoes' ? `O dragão gigante devora ${who}` : id === 'lua_nova' ? `O Alfa da Lua Nova despedaça ${who}` : `O Arcanjo da Aurora julga ${who}`;
   const capt = { mate:true, side:winner, caption:'XEQUE-MATE', sub, voice:null };
   if (!cine.active && cineOn()) await cineBegin(k, null, capt);
   else { cineCap.querySelector('b').textContent = capt.caption; cineCap.querySelector('span').textContent = capt.sub; }
@@ -10615,6 +11470,7 @@ async function mateAvatar(k, winner, atk, tok){
   try {
     if (id === 'ferro_negro') await mateDeus(k, winner, A, live, fx, fanfare, s => { stopCam = avatarCam(k, s, 2.8, live); restore = avatarClear(s.x, s.z, 1.15, k); });
     else if (id === 'dragoes') await mateDragao(k, winner, A, live, fx, fanfare, (s, H) => { stopCam = avatarCam(k, s, H, live); restore = avatarClear(s.x, s.z, 1.6, k); });
+    else if (id === 'lua_nova') await mateLobo(k, winner, A, live, fx, fanfare, (s, H) => { stopCam = avatarCam(k, s, H, live); restore = avatarClear(s.x, s.z, 1.4, k); });
     else await mateArcanjo(k, winner, A, live, fx, fanfare, s => { stopCam = avatarCam(k, s, 2.8, live); restore = avatarClear(s.x, s.z, 1.15, k); });
   } finally { stopCam(); restore(); fanfare(); }
   return true;
@@ -11814,13 +12670,13 @@ function updateEnv(now, dt){
     while (emberAcc > 1){
       emberAcc -= 1;
       const x = gl ? -0.6 - Math.random() * 11 : (Math.random() - 0.5) * 18, z = (Math.random() - 0.5) * 14 - 1;
-      sparks.emit(x, GROUND_Y + 0.1, z, (Math.random() - 0.5) * 0.2, 0.25 + Math.random() * 0.45, (Math.random() - 0.5) * 0.2, 4500 + Math.random() * 2500, 0.035 + Math.random() * 0.035, Math.random() < 0.5 ? (dr ? '#ff8a30' : '#e3963c') : '#ff6a28', 0.9, 0.02, 0.9, 1);
+      sparks.emit(x, GROUND_Y + 0.1, z, (Math.random() - 0.5) * 0.2, 0.25 + Math.random() * 0.45, (Math.random() - 0.5) * 0.2, 4500 + Math.random() * 2500, 0.035 + Math.random() * 0.035, arena === 'lunar' ? (Math.random() < 0.5 ? '#9fd0ff' : '#5a9aff') : Math.random() < 0.5 ? (dr ? '#ff8a30' : '#e3963c') : '#ff6a28', 0.9, 0.02, 0.9, 1);
     }
     ashAcc += dt * (A.ash != null ? A.ash : dr ? 0.034 : gl ? 0.012 : 0.03);
     while (ashAcc > 1){
       ashAcc -= 1;
       const z = (Math.random() - 0.5) * 14 - 1, x = gl ? -0.6 - Math.random() * 10 : (Math.random() - 0.5) * 16;
-      const col = dr || gl ? (Math.random() < 0.5 ? '#6e625a' : '#3e3632') : Math.random() < 0.5 ? '#b9ada0' : '#8d8479';
+      const col = dr || gl ? (Math.random() < 0.5 ? '#6e625a' : '#3e3632') : arena === 'lunar' ? (Math.random() < 0.5 ? '#c8d4e6' : '#8a9ab4') : Math.random() < 0.5 ? '#b9ada0' : '#8d8479';
       dust.emit(x, 4 + Math.random() * 2, z, 0.15 + Math.random() * 0.15, -0.35 - Math.random() * 0.25, (Math.random() - 0.5) * 0.15, 9000, 0.03 + Math.random() * 0.03, col, 0.75, 0, 0.95);
     }
     if (gl){
@@ -11860,6 +12716,8 @@ function updateEnv(now, dt){
   // chefes: o Deus da Morte (Mistério Infernal) e o dragão gigante (Covil dos Dragões)
   if (BOSS.on) bossTick(now, dt);
   if (GDR.on) giantDragonTick(now, dt);
+  // Vigília da Lua Cheia: cogumelos, fragmentos da lua e o lobo gigante
+  if (arena === 'lunar') lunarTick(now, dt);
   // o dragão plana pelo céu de vez em quando
   const G1 = ENVX.glider;
   if (G1){
@@ -13778,7 +14636,7 @@ function specTake(side){
 const THUMB_PAINT = {
   fortaleza:c => paintBackdropFortress(c), medieval:c => paintBackdrop(c), dragoes:c => paintBackdropDragon(c), gelo:c => paintBackdropSplit(c),
   zodiaco:c => paintBackdropNight(c), multiverso:c => paintBackdropNight(c, MULTI_SKY), infernal:c => paintBackdropInfernal(c),
-  celestial:c => paintBackdropCelestial(c), olimpo:c => paintBackdropOlympus(c), alquimia:c => paintBackdropCitadel(c),
+  celestial:c => paintBackdropCelestial(c), olimpo:c => paintBackdropOlympus(c), alquimia:c => paintBackdropCitadel(c), lunar:c => paintBackdropLunar(c),
 };
 const THUMB_CACHE = {};
 function renderThumbs(){
@@ -14096,7 +14954,7 @@ function rankTick(){
     // Pégaso do reino (Pesadelo, Serpe): acabou o efeito, volta o Cavaleiro
     if (e && e.c.formModel && e.c.formModel !== 'do' && GLOK && !busy && !p.dead){ const q = cfg.arc && G && G.s ? G.s.board.find(x => x && x.id === p.eid) : null; if (!q || !q.fx.some(f => f.id === 'pegaso')){ const face = e.c.root.rotation.y; swapModel(p, p.dt).root.rotation.y = face; e = CH[p.id]; } }
     // Dragão das Cinzas: acabou o efeito (o lance já foi), o dragão volta a ser o Cavaleiro
-    if (e && e.c.dragonModel && GLOK && !busy && !p.dead){ const q = cfg.arc && G && G.s ? G.s.board.find(x => x && x.id === p.eid) : null; if (!q || !q.fx.some(f => f.id === 'dragao')) dragonForm(p, false); }
+    if (e && (e.c.dragonModel || e.c.werewolfModel) && GLOK && !busy && !p.dead){ const q = cfg.arc && G && G.s ? G.s.board.find(x => x && x.id === p.eid) : null; if (!q || !q.fx.some(f => f.id === 'dragao')) dragonForm(p, false); }
     if (want && !was && !p.dead && GLOK && typeof floatText === 'function' && !(cfg.mode === 'replay' && RP.busy)){
       if (e) e.c.setFlash && e.c.setFlash(0.8, [1, 0.92, 0.6]);
       setTimeout(() => { const c = chOf(p); if (c && c.setFlash) c.setFlash(0); }, 420);
@@ -14180,7 +15038,7 @@ function arcAccessories(on, now){
     if (!RM && GLOK && a.g.userData.ember && Math.random() < 0.2){ const ch = chOf(P), w = a.g.userData.ember; if (ch){ a.g.updateMatrixWorld(true); const t2 = w.localToWorld(V3(0, w.userData.tipY || 1, 0)); sparks.emit(t2.x, t2.y, t2.z, 0, 0.4, 0, 500, 0.04, FIRE_COLS[(Math.random() * 4) | 0], 1, 0.2, 0.6, 1); } }
     if (!RM && GLOK && (a.id === 'fenix' || a.id === 'dragao' || a.id === 'necro') && Math.random() < 0.12){
       const ak = kingdomOf(P.side);
-      const col = a.id === 'necro' ? (ak === 'ferro_negro' ? ['#ff3a4a', '#8a0a1a'] : ak === 'dragoes' ? FIRE_COLS : ['#cfc6b4', '#8a8478']) : ak === 'ferro_negro' && a.id === 'fenix' ? ['#ff3a4a', '#ffd0d8'] : ['#ffb040', '#ff5a18', '#ffe0a0'];
+      const col = ak === 'lua_nova' ? (a.id === 'necro' ? LUA_BLUE : a.id === 'dragao' ? LUA_RED : LUA_COLS) : a.id === 'necro' ? (ak === 'ferro_negro' ? ['#ff3a4a', '#8a0a1a'] : ak === 'dragoes' ? FIRE_COLS : ['#cfc6b4', '#8a8478']) : ak === 'ferro_negro' && a.id === 'fenix' ? ['#ff3a4a', '#ffd0d8'] : ['#ffb040', '#ff5a18', '#ffe0a0'];
       sparks.emit(P.dx + (Math.random() - 0.5) * 0.35, heightOf(P) * (0.3 + Math.random() * 0.6), P.dz + (Math.random() - 0.5) * 0.35, 0, 0.5 + Math.random() * 0.4, 0, 800, 0.05, col[Math.floor(Math.random() * col.length)], 1, 0.3, 0.6, 1);
     }
   }
@@ -14190,7 +15048,13 @@ function arcBuildAcc(id, p, H){
   const mat = (col, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color:C(col), roughness:0.6, flatShading:true }, o));
   // Pesadelo, Serpe e Dragão de Ossos já são a forma: sem asas por cima (o Pesadelo leva a crina de fogo negro)
   if (form && (id === 'pegaso' || id === 'dragao')){ g.userData.mane = form === 'ps'; return g; }
-  if (id === 'lanceiro'){ const w = polearm(K === 'dragoes' ? 'presa' : 'negra', H); g.add(w); if (K === 'dragoes') g.userData.ember = w; return g; }
+  if (chOf(p) && chOf(p).werewolfModel && id === 'dragao') return g;
+  if (id === 'lanceiro'){ const w = polearm(K === 'dragoes' ? 'presa' : K === 'lua_nova' ? 'prata' : 'negra', H); g.add(w); if (K === 'dragoes') g.userData.ember = w; return g; }
+  // Lua Nova sem a forma carregada: um halo de tempestade (Lobo da Tempestade) ou de lua de sangue (Lobisomem)
+  if (K === 'lua_nova' && (id === 'pegaso' || id === 'dragao')){
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(id === 'dragao' ? 0xff3a34 : 0x9fc8ff), transparent:true, opacity:0.55, blending:THREE.AdditiveBlending, depthWrite:false }));
+    halo.scale.setScalar(H * 1.2); halo.position.y = H * 0.55; g.add(halo); return g;
+  }
   const wing = (m, s) => { const sh = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0.55, 0.2), new THREE.Vector2(0.75, 0.05), new THREE.Vector2(0.62, -0.12), new THREE.Vector2(0.45, -0.05), new THREE.Vector2(0.3, -0.18), new THREE.Vector2(0.12, -0.1)]); const geo = new THREE.ShapeGeometry(sh); const w = new THREE.Mesh(geo, m); w.scale.setScalar(s); const piv = new THREE.Group(); piv.add(w); return piv; };
   if (id === 'pegaso' || id === 'dragao'){
     const m = id === 'pegaso' ? (K === 'ferro_negro' ? mat(0x1a1416, { emissive:C(0x5a0c10), side:THREE.DoubleSide }) : K === 'dragoes' ? mat(0x8a2a14, { emissive:C(0x5a1a06), side:THREE.DoubleSide }) : mat(0xf4f6ff, { emissive:C(0x6a7080), side:THREE.DoubleSide }))
@@ -14202,9 +15066,9 @@ function arcBuildAcc(id, p, H){
     L.rotation.y = -0.4; R.rotation.y = 0.4;
     g.add(L, R); g.userData.wings = [L, R];
   } else if (id === 'golem'){
-    const m = K === 'ferro_negro' ? mat(0xd8cfb8, { emissive:C(0x1a0a06) }) : K === 'dragoes' ? mat(0x2a1a14, { emissive:C(0xff4a10), emissiveIntensity:0.6 }) : mat(0x8a8072);
+    const m = K === 'ferro_negro' ? mat(0xd8cfb8, { emissive:C(0x1a0a06) }) : K === 'dragoes' ? mat(0x2a1a14, { emissive:C(0xff4a10), emissiveIntensity:0.6 }) : K === 'lua_nova' ? mat(0xcfe4f8, { emissive:C(0x3a6aa8), emissiveIntensity:0.55, roughness:0.15, metalness:0.1 }) : mat(0x8a8072);
     // runas douradas (Aurora), costelas (Colosso de Ossos), fendas de lava (Dragões): um anel no peito
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.018, 6, 20), K === 'ferro_negro' ? mat(0xd8cfb8) : new THREE.MeshBasicMaterial({ color:C(K === 'dragoes' ? 0xff7a1a : 0xffd36a), toneMapped:false }));
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.018, 6, 20), K === 'ferro_negro' ? mat(0xd8cfb8) : new THREE.MeshBasicMaterial({ color:C(K === 'dragoes' ? 0xff7a1a : K === 'lua_nova' ? 0x9fd0ff : 0xffd36a), toneMapped:false }));
     band.rotation.x = Math.PI / 2; band.position.y = H * 0.55; g.add(band);
     for (const sx of [-1, 1]){
       const arm = new THREE.Group();
@@ -14219,34 +15083,35 @@ function arcBuildAcc(id, p, H){
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.62), mat(0x2a1a14)); arm.rotation.x = -0.6; arm.position.set(0, H * 0.86, 0.06); g.add(arm);
       const skull = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), mat(0xd8cfb8, { emissive:C(0x5a0c0c) })); skull.position.set(0, H * 0.86 + 0.2, -0.2); g.add(skull);
       const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xff2a2a), transparent:true, opacity:0.7, blending:THREE.AdditiveBlending, depthWrite:false })); fl.scale.setScalar(0.32); fl.position.copy(skull.position); g.add(fl); g.userData.eye = fl;
-    } else if (K === 'dragoes'){
-      // balista: o arco e o virote de fogo azul
+    } else if (K === 'dragoes' || K === 'lua_nova'){
+      // balista: o arco e o virote de fogo azul (ou de prata, na Lua Nova)
       const bow = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.016, 5, 16, Math.PI), mat(0x3a2014)); bow.position.set(0, H * 0.84, 0.26); g.add(bow);
-      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.6, 5), new THREE.MeshBasicMaterial({ color:C(0x9fe3ff), toneMapped:false })); bolt.rotation.x = Math.PI / 2; bolt.position.set(0, H * 0.84, 0.2); g.add(bolt);
-      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0x5fc8ff), transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false })); fl.scale.setScalar(0.3); fl.position.set(0, H * 0.84, 0.5); g.add(fl); g.userData.eye = fl;
+      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.6, 5), new THREE.MeshBasicMaterial({ color:C(K === 'lua_nova' ? 0xe8f0ff : 0x9fe3ff), toneMapped:false })); bolt.rotation.x = Math.PI / 2; bolt.position.set(0, H * 0.84, 0.2); g.add(bolt);
+      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(K === 'lua_nova' ? 0xbfd8ff : 0x5fc8ff), transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false })); fl.scale.setScalar(0.3); fl.position.set(0, H * 0.84, 0.5); g.add(fl); g.userData.eye = fl;
     } else {
       const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.6, 10), mat(0xb07a3a, { metalness:0.8, roughness:0.35 }));
       barrel.rotation.x = Math.PI / 2 - 0.25; barrel.position.set(0, H * 0.82, 0.22);
       g.add(barrel);
     }
   } else if (id === 'centuriao'){
-    const sh = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.5, 0.05), K === 'ferro_negro' ? mat(0x2a2624, { metalness:0.7, roughness:0.4, emissive:C(0x3a0606) }) : K === 'dragoes' ? mat(0x8a2a14, { metalness:0.4, roughness:0.45, emissive:C(0x4a1004) }) : mat(0xd6a842, { metalness:0.75, roughness:0.3, emissive:C(0x4a3006) }));
+    const sh = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.5, 0.05), K === 'ferro_negro' ? mat(0x2a2624, { metalness:0.7, roughness:0.4, emissive:C(0x3a0606) }) : K === 'dragoes' ? mat(0x8a2a14, { metalness:0.4, roughness:0.45, emissive:C(0x4a1004) }) : K === 'lua_nova' ? mat(0x9aa6b8, { metalness:0.85, roughness:0.3, emissive:C(0x14243c) }) : mat(0xd6a842, { metalness:0.75, roughness:0.3, emissive:C(0x4a3006) }));
     sh.position.set(0.18, H * 0.42, 0.2);
     g.add(sh);
     // escudo de espinhos (legionário amaldiçoado) ou de escamas (guerreiro dos Dragões)
-    if (K !== 'aurora') for (let i = 0; i < 6; i++){ const s = new THREE.Mesh(K === 'ferro_negro' ? new THREE.ConeGeometry(0.022, 0.1, 4) : new THREE.SphereGeometry(0.05, 6, 4), K === 'ferro_negro' ? mat(0x5a1010, { emissive:C(0x3a0404) }) : mat(0xc04a1a, { emissive:C(0x5a1a04) })); s.position.set(0.18 + ((i % 2) - 0.5) * 0.16, H * 0.42 + (Math.floor(i / 2) - 1) * 0.15, 0.24); if (K === 'ferro_negro') s.rotation.x = Math.PI / 2; else s.scale.set(1, 0.6, 0.35); g.add(s); }
+    if (K === 'lua_nova'){ const mo = new THREE.Sprite(new THREE.SpriteMaterial({ map:moonTex('prata'), transparent:true, depthWrite:false, toneMapped:false })); mo.scale.setScalar(0.16); mo.position.set(0.18, H * 0.46, 0.25); g.add(mo); }
+    else if (K !== 'aurora') for (let i = 0; i < 6; i++){ const s = new THREE.Mesh(K === 'ferro_negro' ? new THREE.ConeGeometry(0.022, 0.1, 4) : new THREE.SphereGeometry(0.05, 6, 4), K === 'ferro_negro' ? mat(0x5a1010, { emissive:C(0x3a0404) }) : mat(0xc04a1a, { emissive:C(0x5a1a04) })); s.position.set(0.18 + ((i % 2) - 0.5) * 0.16, H * 0.42 + (Math.floor(i / 2) - 1) * 0.15, 0.24); if (K === 'ferro_negro') s.rotation.x = Math.PI / 2; else s.scale.set(1, 0.6, 0.35); g.add(s); }
   } else if (id === 'oraculo_b'){
-    const eye = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(K === 'ferro_negro' ? 0xff2a2a : K === 'dragoes' ? 0xff7a1a : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false }));
+    const eye = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(K === 'ferro_negro' ? 0xff2a2a : K === 'dragoes' ? 0xff7a1a : K === 'lua_nova' ? 0xbfd8ff : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false }));
     eye.scale.setScalar(K === 'ferro_negro' ? 0.2 : 0.35); eye.position.set(K === 'ferro_negro' ? -0.08 : 0, H + 0.18, 0);
     g.add(eye); g.userData.eye = eye;
     if (K === 'ferro_negro'){ const e2 = new THREE.Sprite(eye.material); e2.scale.setScalar(0.2); e2.position.set(0.08, H + 0.18, 0); g.add(e2); }
   } else if (id === 'andarilho'){
-    const ring = new THREE.Mesh(planeGeo(), new THREE.MeshBasicMaterial({ map:ringTex, color:C(K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    const ring = new THREE.Mesh(planeGeo(), new THREE.MeshBasicMaterial({ map:ringTex, color:C(K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : K === 'lua_nova' ? 0xbfd8ff : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
     ring.scale.set(1.1, 1, 1.1); ring.position.y = 0.03; ring.userData.sharedGeo = true;
     g.add(ring); g.userData.spin = ring;
   } else {
     // Fênix e Necromante: halo de cor (as brasas saem no quadro a quadro)
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(id === 'necro' ? (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : 0xcfc6b4) : (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff5a18 : 0xffc040)), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(id === 'necro' ? (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : K === 'lua_nova' ? 0x6aa8ff : 0xcfc6b4) : (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff5a18 : K === 'lua_nova' ? 0xdfe8ff : 0xffc040)), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
     halo.scale.setScalar(H * 1.1); halo.position.y = H * 0.5;
     g.add(halo);
   }
@@ -14456,23 +15321,24 @@ const KARC = {
   aurora:{ ring:0xa985ff, txt:'#ffd36a', glow:0xffd36a, cols:['#fff2c0', '#ffd36a', '#c9a0ff'] },
   ferro_negro:{ ring:0xc0302a, txt:'#ff8a7a', glow:0xff2a3a, cols:['#ff3a4a', '#8a0a1a', '#1a0406'] },
   dragoes:{ ring:0x5fc8ff, txt:'#9fe3ff', glow:0xff7a1a, cols:['#e8f8ff', '#5fc8ff', '#ff7a1a'] },
+  lua_nova:{ ring:0x9fc8ff, txt:'#cfe4ff', glow:0xbfd8ff, cols:['#ffffff', '#bfd8ff', '#ff3a34'] },
 };
 const karc = side => KARC[kingdomOf(side)] || KARC.aurora;
 // [título da cena, cor] por carta e reino (a Aurora sem entrada fica com o título e a cor de antes)
 const ARC_REINO = {
-  pegaso:{ ferro_negro:['PESADELO', 0xc0302a], dragoes:['SERPE', 0xff7a2a] },
-  dragao:{ ferro_negro:['DRAGÃO DE OSSOS', 0xc0302a], dragoes:['DRAGÃO GIGANTE', 0xff7a1a] },
-  canhao:{ aurora:['CANHÃO DE BRONZE', 0xd6a050], ferro_negro:['CATAPULTA DE CRÂNIOS', 0xc0302a], dragoes:['BALISTA DE FOGO AZUL', 0x5fc8ff] },
-  golem:{ aurora:['GOLEM DE PEDRA', 0xffd36a], ferro_negro:['COLOSSO DE OSSOS', 0xd8d0bc], dragoes:['GOLEM DE LAVA', 0xff5a18] },
-  centuriao:{ aurora:['CENTURIÃO DOURADO', 0xffd36a], ferro_negro:['LEGIONÁRIO AMALDIÇOADO', 0xc0302a], dragoes:['GUERREIRO DE ESCAMAS', 0xff7a2a] },
-  berserk:{ aurora:['BERSERKER', 0xffd36a], ferro_negro:['POSSUÍDO', 0xff2a2a], dragoes:['BERSERKER EM CHAMAS', 0xff5a18] },
-  fenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['FÊNIX DAS ALMAS', 0xc0302a], dragoes:['FÊNIX DRACÔNICA', 0xff5a18] },
-  andarilho:{ aurora:['ANDARILHO DA LUZ', 0xfff2c0], ferro_negro:['ANDARILHO DAS ALMAS', 0xc0302a], dragoes:['ANDARILHO DO FOGO', 0xff7a2a] },
-  necro:{ aurora:['NECROMANTE DAS CINZAS', 0xcfc6b4], ferro_negro:['NECROMANTE DAS ALMAS', 0xc0302a], dragoes:['NECROMANTE DAS BRASAS', 0xff7a1a] },
-  oraculo_b:{ aurora:['OLHO DE LUZ', 0xfff2c0], ferro_negro:['OLHOS DO DEUS DA MORTE', 0xff2a2a], dragoes:['OLHO DO DRAGÃO', 0xff7a1a] },
-  lanceiro:{ aurora:['LANÇA DE LUZ', 0xffd36a], ferro_negro:['ALABARDEIRO NEGRO', 0xc0302a], dragoes:['LANCEIRO DRACÔNICO', 0xff7a1a] },
-  summon:{ aurora:['RESSURREIÇÃO', 0xfff2c0], ferro_negro:['OS FANTASMAS TRAZEM', 0xc0302a], dragoes:['RENASCE DAS BRASAS', 0xff7a1a] },
-  phoenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['AS ALMAS DEVOLVEM', 0xc0302a], dragoes:['OVO DE DRAGÃO', 0xff5a18] },
+  pegaso:{ ferro_negro:['PESADELO', 0xc0302a], dragoes:['SERPE', 0xff7a2a], lua_nova:['LOBO DA TEMPESTADE', 0x9fc8ff] },
+  dragao:{ ferro_negro:['DRAGÃO DE OSSOS', 0xc0302a], dragoes:['DRAGÃO GIGANTE', 0xff7a1a], lua_nova:['LOBISOMEM', 0xff3a34] },
+  canhao:{ aurora:['CANHÃO DE BRONZE', 0xd6a050], ferro_negro:['CATAPULTA DE CRÂNIOS', 0xc0302a], dragoes:['BALISTA DE FOGO AZUL', 0x5fc8ff], lua_nova:['BALISTA DE PRATA', 0xcfe0ff] },
+  golem:{ aurora:['GOLEM DE PEDRA', 0xffd36a], ferro_negro:['COLOSSO DE OSSOS', 0xd8d0bc], dragoes:['GOLEM DE LAVA', 0xff5a18], lua_nova:['COLOSSO DE GELO LUNAR', 0x9fd0ff] },
+  centuriao:{ aurora:['CENTURIÃO DOURADO', 0xffd36a], ferro_negro:['LEGIONÁRIO AMALDIÇOADO', 0xc0302a], dragoes:['GUERREIRO DE ESCAMAS', 0xff7a2a], lua_nova:['GUARDA DA ALCATEIA', 0xcfe0ff] },
+  berserk:{ aurora:['BERSERKER', 0xffd36a], ferro_negro:['POSSUÍDO', 0xff2a2a], dragoes:['BERSERKER EM CHAMAS', 0xff5a18], lua_nova:['FÚRIA DA LUA DE SANGUE', 0xff2a2a] },
+  fenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['FÊNIX DAS ALMAS', 0xc0302a], dragoes:['FÊNIX DRACÔNICA', 0xff5a18], lua_nova:['FÊNIX DA LUA CHEIA', 0xdfe8ff] },
+  andarilho:{ aurora:['ANDARILHO DA LUZ', 0xfff2c0], ferro_negro:['ANDARILHO DAS ALMAS', 0xc0302a], dragoes:['ANDARILHO DO FOGO', 0xff7a2a], lua_nova:['ANDARILHO DA NÉVOA', 0xbfd8ff] },
+  necro:{ aurora:['NECROMANTE DAS CINZAS', 0xcfc6b4], ferro_negro:['NECROMANTE DAS ALMAS', 0xc0302a], dragoes:['NECROMANTE DAS BRASAS', 0xff7a1a], lua_nova:['XAMÃ DA LUA NOVA', 0x6aa8ff] },
+  oraculo_b:{ aurora:['OLHO DE LUZ', 0xfff2c0], ferro_negro:['OLHOS DO DEUS DA MORTE', 0xff2a2a], dragoes:['OLHO DO DRAGÃO', 0xff7a1a], lua_nova:['OLHO DA LUA', 0xbfd8ff] },
+  lanceiro:{ aurora:['LANÇA DE LUZ', 0xffd36a], ferro_negro:['ALABARDEIRO NEGRO', 0xc0302a], dragoes:['LANCEIRO DRACÔNICO', 0xff7a1a], lua_nova:['CAÇADOR DE PRATA', 0xcfe0ff] },
+  summon:{ aurora:['RESSURREIÇÃO', 0xfff2c0], ferro_negro:['OS FANTASMAS TRAZEM', 0xc0302a], dragoes:['RENASCE DAS BRASAS', 0xff7a1a], lua_nova:['A ALCATEIA TRAZ', 0x9fc8ff] },
+  phoenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['AS ALMAS DEVOLVEM', 0xc0302a], dragoes:['OVO DE DRAGÃO', 0xff5a18], lua_nova:['RENASCE SOB A LUA CHEIA', 0xdfe8ff] },
 };
 function arcReinoOf(id, p, base){
   const R = ARC_REINO[id], k = kingdomOf(p.side), e = R && R[k];
@@ -14541,18 +15407,23 @@ function skyEye(p, kind){
   if (!GLOK) return wait(600);
   const cv = document.createElement('canvas'); cv.width = cv.height = 128;
   const x = cv.getContext('2d');
-  if (kind === 'dragao'){
+  if (kind === 'lua'){
+    const g = x.createRadialGradient(56, 54, 4, 64, 64, 58); g.addColorStop(0, '#ffffff'); g.addColorStop(0.7, '#bfd0e8'); g.addColorStop(0.92, 'rgba(140,180,240,.8)'); g.addColorStop(1, 'rgba(90,140,230,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(64, 64, 58, 0, TAU); x.fill();
+    x.fillStyle = 'rgba(70,90,130,.35)'; for (const [a, b, r] of [[48, 50, 10], [78, 60, 7], [60, 82, 9], [84, 40, 5]]){ x.beginPath(); x.arc(a, b, r, 0, TAU); x.fill(); }
+    x.fillStyle = '#0a1830'; x.beginPath(); x.ellipse(64, 64, 6, 22, 0, 0, TAU); x.fill();
+  } else if (kind === 'dragao'){
     const g = x.createRadialGradient(64, 64, 4, 64, 64, 60); g.addColorStop(0, '#fff2a0'); g.addColorStop(0.5, '#ff9a1a'); g.addColorStop(1, 'rgba(120,20,0,0)');
     x.fillStyle = g; x.beginPath(); x.ellipse(64, 64, 60, 34, 0, 0, TAU); x.fill(); x.fillStyle = '#120404'; x.beginPath(); x.ellipse(64, 64, 7, 30, 0, 0, TAU); x.fill();
   } else { const g = x.createRadialGradient(64, 64, 2, 64, 64, 60); g.addColorStop(0, '#ffffff'); g.addColorStop(0.4, '#ff3a2a'); g.addColorStop(1, 'rgba(80,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); }
   const tex = new THREE.CanvasTexture(cv), eyes = [];
-  for (const s of kind === 'dragao' ? [0] : [-1, 1]){
+  for (const s of kind === 'dragao' || kind === 'lua' ? [0] : [-1, 1]){
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false }));
     sp.position.set(p.dx + s * 0.45, 3.4, p.dz - 0.6); sp.renderOrder = 8; world.add(sp); eyes.push(sp);
   }
   return tween(1500, q => {
     const o = q < 0.3 ? q / 0.3 : q > 0.75 ? (1 - q) / 0.25 : 1;
-    for (const sp of eyes){ sp.material.opacity = o; sp.scale.set(kind === 'dragao' ? 2.2 : 0.5, (kind === 'dragao' ? 1.2 : 0.5) * (kind === 'dragao' ? Math.min(1, q * 2.5) : 1), 1); }
+    for (const sp of eyes){ sp.material.opacity = o; if (kind === 'lua') sp.scale.setScalar(1.6); else sp.scale.set(kind === 'dragao' ? 2.2 : 0.5, (kind === 'dragao' ? 1.2 : 0.5) * (kind === 'dragao' ? Math.min(1, q * 2.5) : 1), 1); }
   }, linE).then(() => { for (const sp of eyes){ world.remove(sp); sp.material.dispose(); } tex.dispose(); });
 }
 // o dragão gigante desce no tabuleiro ao lado da peça, ruge e sopra fogo nela (Dragão das Cinzas dos Dragões)
@@ -14586,9 +15457,10 @@ async function giantVisit(p){
 // um adereço de mão: arma de haste de pé ao lado da peça (alabarda, lança de luz ou de presa)
 function polearm(kind, H){
   const g = new THREE.Group();
-  const shaftM = new THREE.MeshStandardMaterial({ color:C(kind === 'luz' ? 0xfff2c0 : kind === 'presa' ? 0x2a1a14 : 0x1a1614), roughness:0.6, metalness:kind === 'luz' ? 0.2 : 0.4, emissive:C(kind === 'luz' ? 0xffd36a : 0x000000), emissiveIntensity:kind === 'luz' ? 0.6 : 0 });
+  const shaftM = new THREE.MeshStandardMaterial({ color:C(kind === 'luz' ? 0xfff2c0 : kind === 'presa' ? 0x2a1a14 : kind === 'prata' ? 0x2a2622 : 0x1a1614), roughness:0.6, metalness:kind === 'luz' ? 0.2 : 0.4, emissive:C(kind === 'luz' ? 0xffd36a : 0x000000), emissiveIntensity:kind === 'luz' ? 0.6 : 0 });
   const headM = kind === 'luz' ? new THREE.MeshBasicMaterial({ color:C(0xfff2c0), transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, toneMapped:false })
     : kind === 'presa' ? new THREE.MeshStandardMaterial({ color:C(0xfff0d0), roughness:0.4, emissive:C(0xff5a10), emissiveIntensity:0.8 })
+    : kind === 'prata' ? new THREE.MeshStandardMaterial({ color:C(0xe8eef8), roughness:0.2, metalness:0.9, emissive:C(0x3a5a8a), emissiveIntensity:0.6 })
     : new THREE.MeshStandardMaterial({ color:C(0x3b3835), roughness:0.35, metalness:0.85, emissive:C(0x5a0c0c), emissiveIntensity:0.35 });
   const L = H * 1.25, shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, L, 6), shaftM); shaft.position.y = L / 2; g.add(shaft);
   if (kind === 'negra'){
@@ -14606,67 +15478,102 @@ const ARC_FXR = {
   pegaso:{
     ferro_negro:async p => { await formSwap(p, 'ps'); for (let i = 0; i < 10; i++){ blackFire(p.dx, heightOf(p) * 0.8, p.dz, 3, 0.3); await wait(70); } },
     dragoes:async p => { await formSwap(p, 'sp'); snd('asas', { vol:0.7 }); await tween(1000, q => { p.lift = Math.sin(Math.PI * q) * 0.9; }); p.lift = 0; },
+    lua_nova:async p => { if (await formSwap(p, 'lb')) howl({ vol:0.8, dur:1.8 }); if (GLOK){ elementBurst(chestOf(p, 0.9), 'raio', p); silverMist(p.dx, 0.05, p.dz, 14, 0.8); } await tween(900, q => { p.lift = Math.sin(Math.PI * q) * 0.6; }); p.lift = 0; },
   },
   dragao:{
     ferro_negro:async p => { await formSwap(p, 'do'); snd('rugido_dragao', { vol:0.7, rate:0.8 }); for (let i = 0; i < 12; i++){ const h = heightOf(p); sparks.emit(p.dx, h * 0.75, p.dz, (Math.random() - 0.5) * 0.8, 0.5 + Math.random(), (Math.random() - 0.5) * 0.8, 700, 0.08, ['#ff2a3a', '#c0392b', '#ff8a7a'][i % 3], 1, 0, 0.6); blackFire(p.dx, h * 0.45, p.dz, 2, 0.25); await wait(60); } },
     dragoes:async p => { await giantVisit(p); },
+    lua_nova:async p => { if (!GLOK) return; lwFormLoad(); howl({ vol:0.8, dur:1.6 }); for (let i = 0; i < 10; i++){ sparks.emit(p.dx, heightOf(p) * 0.9, p.dz, (Math.random() - 0.5) * 0.5, 0.8 + Math.random() * 0.6, (Math.random() - 0.5) * 0.5, 900, 0.06, i % 3 ? '#cfe0ff' : '#ff3a34', 1, 0.1, 0.6, 1); silverMist(p.dx, 0.05, p.dz, 3, 0.6); await wait(70); } },
   },
   canhao:{
     ferro_negro:async p => { if (!GLOK) return; for (let i = 0; i < 8; i++){ sparks.emit(p.dx, heightOf(p) * 0.95, p.dz + 0.2, (Math.random() - 0.5) * 0.3, 0.6, (Math.random() - 0.5) * 0.3, 700, 0.07, i % 2 ? '#ff3a2a' : '#ff8a3a', 1, 0.2, 0.6, 1); await wait(80); } },
     dragoes:async p => { if (!GLOK) return; elementBurst(chestOf(p, 0.9), 'fogo_azul', p); },
     aurora:async p => { if (!GLOK) return; flashLight(chestOf(p, 0.8), 0xd6a050, 3, 600); },
+    lua_nova:async p => { if (!GLOK) return; sparks.burst(chestOf(p, 0.95), nFx(24), LUA_COLS, 1.6, { life:700, size:0.05, grav:0.5, upward:true }); howl({ vol:0.5, dur:1.2, rate:1.15 }); },
   },
   golem:{
     aurora:async p => { if (!GLOK) return; spawnRing(p.dx, p.dz, 0xffd36a, 1.2, 900); sparks.burst(chestOf(p, 0.5), nFx(24), ['#ffd36a', '#fff2c0'], 1.4, { life:900, size:0.05, grav:0.6, upward:true }); },
     ferro_negro:async p => { if (!GLOK) return; dustAt(p.dx, p.dz, nFx(20), 1, ['#d8d0bc', '#8a8478']); smokeBurst(chestOf(p, 0.4), 'fumaca', 14); graspHands(p.dx, p.dz, 'bone', 4, 1300); },
     dragoes:async p => { if (!GLOK) return; for (let i = 0; i < 10; i++){ sparks.emit(p.dx + (Math.random() - 0.5) * 0.6, 0.05, p.dz + (Math.random() - 0.5) * 0.6, 0, 1 + Math.random(), 0, 800, 0.08, FIRE_COLS[i % 4], 1, 0.6, 0.6, 1); await wait(60); } snd('lava', { vol:0.6 }); },
+    lua_nova:async p => { if (!GLOK) return; iceShards(chestOf(p, 0.5), golpeLite() ? 5 : 12); spawnRing(p.dx, p.dz, 0x9fd0ff, 1.3, 900); silverMist(p.dx, 0.05, p.dz, 12, 0.8, ['#cfe8ff', '#9fd0ff', '#e8f4ff']); snd('gelo_estalo', { vol:0.6 }); },
   },
   centuriao:{
     aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(20), ['#ffd36a', '#fff2c0'], 1.6, { life:700, size:0.05, grav:1, upward:true }); },
     ferro_negro:async p => { if (GLOK){ smokeBurst(chestOf(p, 0.5), 'fumaca', 12); spawnRing(p.dx, p.dz, 0xc0302a, 1, 700); } },
     dragoes:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(24), FIRE_COLS, 1.6, { life:700, size:0.06, grav:1, upward:true }); },
+    lua_nova:async p => { if (GLOK){ sparks.burst(chestOf(p, 0.5), nFx(22), LUA_COLS, 1.6, { life:700, size:0.05, grav:1, upward:true }); growl({ vol:0.5 }); } },
   },
   fenix:{
     aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.6), nFx(30), ['#fff2c0', '#ffd36a', '#ffb040'], 2, { life:900, size:0.06, grav:1, upward:true }); },
     ferro_negro:async p => { await ghostVisit(p, ghostFrom(p.side), 1100); },
     dragoes:async p => { if (GLOK) for (let i = 0; i < 12; i++){ sparks.emit(p.dx + (Math.random() - 0.5) * 0.4, Math.random() * heightOf(p), p.dz + (Math.random() - 0.5) * 0.4, 0, 0.9, 0, 700, 0.07, FIRE_COLS[i % 4], 1, 0.4, 0.6, 1); } },
+    lua_nova:async p => { if (!GLOK) return; lunaMoonRise(p, 'prata', 1300); for (let i = 0; i < 12; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.4, Math.random() * heightOf(p), p.dz + (Math.random() - 0.5) * 0.4, 0, 0.8, 0, 800, 0.05, LUA_COLS[i % 3], 1, 0.3, 0.6, 1); },
   },
   andarilho:{
     aurora:async p => { if (GLOK){ spawnPillar(p.dx, p.dz, 0xfff2c0, 1200); } },
     ferro_negro:async p => { if (!GLOK) return; const S = smokeSys(); for (let i = 0; i < 14; i++){ const a = Math.random() * TAU; S.emit(p.dx + Math.cos(a) * 0.4, 0.05, p.dz + Math.sin(a) * 0.4, 0, 0.15, 0, 1500, 0.5, i % 2 ? '#4a3a40' : '#2a1018', 0.45, 0, 0.5); } soulsRise(p, 3); },
     dragoes:async p => { await fireBlink(p); },
+    lua_nova:async p => { await mistBlink(p); },
   },
   necro:{
     aurora:async p => { if (GLOK) dustAt(p.dx, p.dz, nFx(22), 0.9, ['#cfc6b4', '#8a8478', '#5a5650']); },
     ferro_negro:async p => { soulsRise(p, 4); graspHands(p.dx, p.dz, 'ghost', 3, 1200); },
     dragoes:async p => { if (GLOK) for (let i = 0; i < 16; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.7, 0.03, p.dz + (Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.2, 0.3 + Math.random() * 0.4, (Math.random() - 0.5) * 0.2, 1100, 0.05, FIRE_COLS[i % 4], 1, 0.1, 0.6, 1); },
+    lua_nova:async p => { if (GLOK){ silverMist(p.dx, 0.02, p.dz, 18, 0.9, ['#6aa8ff', '#3a5a9a', '#9fc8ff']); for (let i = 0; i < 12; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.7, 0.03, p.dz + (Math.random() - 0.5) * 0.7, 0, 0.3 + Math.random() * 0.4, 0, 1100, 0.05, LUA_BLUE[i % 3], 1, 0.1, 0.6, 1); } },
   },
   oraculo_b:{
     aurora:async p => { if (GLOK) flashLight(chestOf(p, 1.1), 0xfff2c0, 3, 900); },
     ferro_negro:async p => { if (BOSS.on){ BOSS.vflash = 1.4; try { bossAct('cast'); } catch (e){} } await skyEye(p, 'deus'); },
     dragoes:async p => { await skyEye(p, 'dragao'); },
+    lua_nova:async p => { await skyEye(p, 'lua'); },
   },
   lanceiro:{
     aurora:async p => { if (GLOK){ beamFx(V3(p.dx + 0.24, 4, p.dz + 0.1), V3(p.dx + 0.24, 0.6, p.dz + 0.1), 0xffe6a0, 700, 0.04); } },
     ferro_negro:async p => { if (GLOK) smokeBurst(V3(p.dx + 0.24, heightOf(p), p.dz + 0.1), 'fumaca', 14); },
     dragoes:async p => { if (GLOK) for (let i = 0; i < 12; i++){ sparks.emit(p.dx + 0.24, heightOf(p) * 1.2, p.dz + 0.1, (Math.random() - 0.5) * 0.4, 0.5, (Math.random() - 0.5) * 0.4, 700, 0.06, FIRE_COLS[i % 4], 1, 0.2, 0.6, 1); await wait(50); } },
+    lua_nova:async p => { if (GLOK){ beamFx(V3(p.dx + 0.24, 4, p.dz + 0.1), V3(p.dx + 0.24, 0.6, p.dz + 0.1), 0xcfe0ff, 700, 0.03); sparks.burst(V3(p.dx + 0.24, heightOf(p) * 1.2, p.dz + 0.1), nFx(16), LUA_COLS, 1.2, { life:600, size:0.05, grav:0 }); } },
   },
   berserk:{
     aurora:async p => { if (GLOK) spawnPillar(p.dx, p.dz, 0xffd36a, 900); },
     ferro_negro:async p => { if (GLOK) smokeBurst(chestOf(p, 0.6), 'fumaca', 18); },
     dragoes:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(30), FIRE_COLS, 1.8, { life:800, size:0.07, grav:1, upward:true }); },
+    lua_nova:async p => { if (!GLOK) return; lunaMoonRise(p, 'sangue', 1100); growl({ vol:0.9 }); sparks.burst(chestOf(p, 0.5), nFx(30), LUA_RED, 1.8, { life:800, size:0.07, grav:1, upward:true }); },
   },
   summon:{
     aurora:async p => { if (GLOK){ await beamFx(V3(p.dx, 6, p.dz), V3(p.dx, 0.1, p.dz), 0xfff2c0, 900, 0.09); spawnRing(p.dx, p.dz, 0xffd36a, 1.2, 700); } },
     ferro_negro:async p => { const a0 = p.alpha; p.alpha = 0; await Promise.all([ghostVisit(p, ghostFrom(p.side), 1300), ghostVisit(p, ghostFrom(p.side), 1450)]); if (GLOK) smokeBurst(chestOf(p, 0.4), 'fumaca', 12); await tween(400, q => { p.alpha = mix(0, a0 || 1, q); }); },
     dragoes:async p => { const a0 = p.alpha; p.alpha = 0; if (GLOK){ sparks.burst(V3(p.dx, 0.1, p.dz), nFx(40), FIRE_COLS, 1.6, { life:900, size:0.07, grav:1.4, upward:true }); spawnPillar(p.dx, p.dz, 0xff7a1a, 1000); } await wait(350); await tween(500, q => { p.alpha = mix(0, a0 || 1, q); }); },
+    lua_nova:async p => { const a0 = p.alpha; p.alpha = 0; growl({ vol:0.5 }); await wolfLeap(V3(p.dx + (p.dx > 0 ? -1.6 : 1.6), 0, p.dz - 0.8), V3(p.dx, 0.35, p.dz), 650, 0.6); if (GLOK) silverMist(p.dx, 0.05, p.dz, 16, 0.6); await tween(450, q => { p.alpha = mix(0, a0 || 1, q); }); },
   },
   phoenix:{
     aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.6), nFx(40), ['#fff2c0', '#ffd36a', '#ffb040'], 2.2, { life:1000, size:0.07, grav:1, upward:true }); },
     ferro_negro:async p => { const a0 = p.alpha; p.alpha = 0; await Promise.all([ghostVisit(p, ghostFrom(p.side), 1300), ghostVisit(p, ghostFrom(p.side), 1500), ghostVisit(p, ghostFrom(p.side), 1400)]); await tween(450, q => { p.alpha = mix(0, a0 || 1, q); }); },
     dragoes:async p => { await dragonEgg(p); },
+    lua_nova:async p => { const a0 = p.alpha; p.alpha = 0; if (GLOK){ lunaMoonRise(p, 'prata', 1500); spawnPillar(p.dx, p.dz, 0xdfe8ff, 1300); silverMist(p.dx, 0.05, p.dz, 14, 0.6); } howl({ vol:0.6, dur:1.6 }); await wait(500); await tween(500, q => { p.alpha = mix(0, a0 || 1, q); }); },
   },
 };
+// uma lua (prata ou sangue) que nasce sobre a peça, brilha e se apaga
+function lunaMoonRise(p, kind, ms = 1200){
+  if (!GLOK) return wait(ms * 0.5);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:moonTex(kind), transparent:true, opacity:0, depthWrite:false, toneMapped:false }));
+  const h = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(kind === 'sangue' ? 0xff3028 : 0xbfd8ff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false }));
+  s.renderOrder = 8; h.renderOrder = 7; world.add(h, s);
+  return tween(ms, q => {
+    const o = q < 0.25 ? q / 0.25 : q > 0.75 ? (1 - q) / 0.25 : 1, y = heightOf(p) + 0.5 + q * 0.6;
+    s.position.set(p.dx, y, p.dz); h.position.copy(s.position); s.scale.setScalar(0.5 + 0.1 * q); h.scale.setScalar(1.6);
+    s.material.opacity = o; h.material.opacity = 0.6 * o;
+  }, linE).then(() => { world.remove(s, h); s.material.dispose(); h.material.dispose(); });
+}
+// some numa névoa prateada e reaparece (Andarilho da Lua Nova)
+async function mistBlink(p){
+  if (!GLOK) return;
+  const a0 = p.alpha;
+  silverMist(p.dx, 0.05, p.dz, 18, 0.6); snd('nevoa', { vol:0.45 });
+  await tween(260, q => { p.alpha = mix(a0 || 1, 0, q); });
+  await wait(180);
+  silverMist(p.dx, 0.05, p.dz, 14, 0.6); sparks.burst(V3(p.dx, 0.3, p.dz), nFx(16), LUA_COLS, 1, { life:600, size:0.05, grav:0.5, upward:true });
+  await tween(260, q => { p.alpha = mix(0, a0 || 1, q); });
+}
 // almas subindo de uma peça (névoa de almas)
 function soulsRise(p, n){
   if (!GLOK) return;
@@ -14689,7 +15596,7 @@ async function fireBlink(p){
 }
 // troca o modelo pela forma do reino (Pesadelo, Serpe, Dragão de Ossos), se o modelo já chegou
 async function formSwap(p, t){
-  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos' }[t];
+  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos', lb:'lobo_gigante' }[t];
   const A = await Promise.race([chefeLoad(key), realWait(900).then(() => null)]);
   if (!A || !GLOK || p.dead) return false;
   const e = CH[p.id]; if (!e) return false;
@@ -14701,13 +15608,13 @@ async function formSwap(p, t){
 }
 // personagem de um modelo estático de chefe (frente +Z, pés no 0): a altura e as asas por código
 function makeFormCharacter(t, side){
-  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos' }[t], A0 = AVT[key];
+  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos', lb:'lobo_gigante' }[t], A0 = AVT[key];
   if (!A0) return null;
-  const H = t === 'do' ? 1.55 : t === 'sp' ? 1.25 : 1.3;
+  const H = t === 'do' ? 1.55 : t === 'sp' ? 1.25 : t === 'lb' ? 1.2 : 1.3;
   const mat = A0.src && A0.src.clone ? A0.src.clone() : new THREE.MeshStandardMaterial({ map:A0.map });
   if (!mat.metalnessMap) mat.metalness = 0.25;
   if (!mat.roughnessMap) mat.roughness = 0.6;
-  if (A0.map){ mat.emissiveMap = A0.map; mat.emissive = C(t === 'sp' ? 0x5a2010 : 0x3a1010); mat.emissiveIntensity = 0.5; }
+  if (A0.map){ mat.emissiveMap = A0.map; mat.emissive = C(t === 'sp' ? 0x5a2010 : t === 'lb' ? 0x1a2434 : 0x3a1010); mat.emissiveIntensity = 0.5; }
   // Serpe: as asas (|x| largo) sobem e descem no vertex shader
   let flapU = null;
   if (t === 'sp'){
@@ -14715,7 +15622,7 @@ function makeFormCharacter(t, side){
     mat.onBeforeCompile = sh => { sh.uniforms.uFlap = flapU; sh.vertexShader = 'uniform float uFlap;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  { float wx = max(0.0, abs(position.x) - 0.16); transformed.y += sin(uFlap) * wx * 0.85; transformed.x *= 1.0 - 0.06 * wx * (1.0 - cos(uFlap)); }'); };
     mat.customProgramCacheKey = () => 'serpe-flap';
   }
-  rimShader(mat, t === 'sp' ? 0xff7a2a : 0xff2a2a, 0.6);
+  rimShader(mat, t === 'sp' ? 0xff7a2a : t === 'lb' ? 0x9fc8ff : 0xff2a2a, 0.6);
   const mesh = new THREE.Mesh(A0.geo, mat); mesh.castShadow = true;
   const scene = new THREE.Group(); scene.add(mesh);
   const asset = { type:'n', rigged:false, scene, clips:{}, scale:H, off:V3(0, 0, 0), height:H, radius:Math.max(A0.w || 0.4, A0.d || 0.4) * H / 2, impact:0, frames:[], kingdom:kingdomOf(side) };
@@ -14844,12 +15751,13 @@ async function arcEvents(ev){
       const p = arcPieceAt(e.from);
       if (!p) continue;
       const bk = kingdomOf(p.side);
-      p.tint = 0.4; p.tintRgb = bk === 'aurora' ? [1.3, 1.0, 0.35] : bk === 'dragoes' ? [1.4, 0.5, 0.1] : [1, 0.15, 0.1];
+      p.tint = 0.4; p.tintRgb = bk === 'aurora' ? [1.3, 1.0, 0.35] : bk === 'dragoes' ? [1.4, 0.5, 0.1] : bk === 'lua_nova' ? [1.45, 0.2, 0.22] : [1, 0.15, 0.1];
       await arcSceneReino(p, 'berserk', ['BERSERKER', 0xff3a2a], `${nm(p)} da ${FACTION[p.side]} entra em fúria`, 600);
       // na corrida: aura dourada (Aurora), olhos vermelhos e fumaça negra (Possuído), o corpo em chamas (Dragões)
       const fury = setInterval(() => { if (!GLOK || p.dead) return; const h = heightOf(p);
         if (bk === 'ferro_negro'){ blackFire(p.dx, h * 0.5, p.dz, 2, 0.3); sparks.emit(p.dx + 0.05, h * 0.88, p.dz + 0.08, 0, 0, 0, 160, 0.06, '#ff2a2a', 1, 0, 0.5, 1); sparks.emit(p.dx - 0.05, h * 0.88, p.dz + 0.08, 0, 0, 0, 160, 0.06, '#ff2a2a', 1, 0, 0.5, 1); }
         else if (bk === 'dragoes') for (let i = 0; i < 3; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.3, Math.random() * h, p.dz + (Math.random() - 0.5) * 0.3, 0, 0.9, 0, 450, 0.07, FIRE_COLS[i], 1, 0.6, 0.6, 1);
+        else if (bk === 'lua_nova'){ for (let i = 0; i < 2; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.3, Math.random() * h, p.dz + (Math.random() - 0.5) * 0.3, 0, 0.7, 0, 500, 0.06, LUA_RED[i], 1, 0.4, 0.6, 1); sparks.emit(p.dx + 0.04, h * 0.9, p.dz + 0.08, 0, 0, 0, 160, 0.05, '#ff2a2a', 1, 0, 0.5, 1); }
         else sparks.emit(p.dx + (Math.random() - 0.5) * 0.4, Math.random() * h, p.dz + (Math.random() - 0.5) * 0.4, 0, 0.5, 0, 600, 0.05, Math.random() < 0.5 ? '#ffd36a' : '#fff2c0', 1, 0.2, 0.6, 1); }, 50);
       try {
         for (const q of e.path){
@@ -14918,13 +15826,13 @@ async function arcEvents(ev){
       // a cor e o jeito do reino de quem jogou: lava / covas com mãos de esqueleto / lava com labaredas; névoa branca / de almas /
       // geada azul; portal de runas / vórtice carmesim / portal de fogo
       const tk = kingdomOf(cardSide || (G && G.s ? G.s.turn : 'w'));
-      const TC = { lava:{ aurora:0xff5a18, ferro_negro:0x7a1c1c, dragoes:0xff7a1a }, nevoa:{ aurora:0xf4f4f4, ferro_negro:0xc0302a, dragoes:0x5fc8ff }, portal:{ aurora:0xa985ff, ferro_negro:0xc0302a, dragoes:0xff7a1a } };
+      const TC = { lava:{ aurora:0xff5a18, ferro_negro:0x7a1c1c, dragoes:0xff7a1a, lua_nova:0xff3a34 }, nevoa:{ aurora:0xf4f4f4, ferro_negro:0xc0302a, dragoes:0x5fc8ff, lua_nova:0xbfd8ff }, portal:{ aurora:0xa985ff, ferro_negro:0xc0302a, dragoes:0xff7a1a, lua_nova:0x9fc8ff } };
       for (const q of e.sqs){ const [r, c] = rcOf(q), [x, z] = tc(r, c); if (GLOK){ spawnRing(x, z, (TC[e.kind] && TC[e.kind][tk]) || 0xb8a888, 0.9, 520); if (e.kind === 'muralha') dustAt(x, z, 12, 0.7);
         if (e.kind === 'lava' && tk === 'ferro_negro'){ graspHands(x, z, 'bone', 3, 1800); smokeBurst(V3(x, 0.1, z), 'fumaca', 8); }
         if (e.kind === 'lava' && tk === 'dragoes') for (let i = 0; i < nFx(14); i++) sparks.emit(x + (Math.random() - 0.5) * 0.6, 0.05, z + (Math.random() - 0.5) * 0.6, 0, 1.6 + Math.random() * 1.4, 0, 700, 0.09, FIRE_COLS[i % 4], 1, 0.6, 0.6, 1);
         if (e.kind === 'portal' && tk === 'ferro_negro') smokeBurst(V3(x, 0.1, z), 'carmesim', 10);
         if (e.kind === 'portal' && tk === 'dragoes') sparks.burst(V3(x, 0.1, z), nFx(18), FIRE_COLS, 1.2, { life:700, size:0.06, grav:1, upward:true }); } }
-      if (e.kind === 'nevoa' && e.center && GLOK){ const [r, c] = rcOf(e.center), [x, z] = tc(r, c), col = tk === 'ferro_negro' ? ['#6a4a52', '#3a1a20'] : tk === 'dragoes' ? ['#9fd8ff', '#e8f8ff'] : ['#f4f4f4', '#dcdcdc'];
+      if (e.kind === 'nevoa' && e.center && GLOK){ const [r, c] = rcOf(e.center), [x, z] = tc(r, c), col = tk === 'ferro_negro' ? ['#6a4a52', '#3a1a20'] : tk === 'dragoes' ? ['#9fd8ff', '#e8f8ff'] : tk === 'lua_nova' ? ['#c8d4e6', '#8a9ab4'] : ['#f4f4f4', '#dcdcdc'];
         for (let i = 0; i < 40; i++) dust.emit(x + (Math.random() - 0.5) * 3, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 0.1, 0.05, (Math.random() - 0.5) * 0.1, 2200, 0.5, col[i % 2], 0.35, 0, 0.2);
         if (tk === 'ferro_negro') soulsRise({ dx:x, dz:z }, 4); else if (tk === 'dragoes'){ iceShards(V3(x, 0.3, z), golpeLite() ? 5 : 10); snd('gelo_estalo', { vol:0.5 }); } }
     } else if (e.k === 'terrainEnd'){
