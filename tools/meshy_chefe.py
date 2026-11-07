@@ -29,8 +29,11 @@ CHEFES = {
     "lobo_gigante": dict(arte="reinos/lua_nova/lobo_gigante.png", rig=False, poly=20000),
     "lobisomem":    dict(arte="reinos/lua_nova/lobisomem.png", rig=True, altura=3.5, poly=20000,
                          acoes=[0, 214, 198]),   # Idle, Punch_Forward_with_Both_Fists, Punch_Combo (o 464 saiu da biblioteca)
+    # evoluções do Arcano da Aurora (estáticas): o Pégaso (cavaleiro no cavalo alado) e o Golem de Pedra (a torre que vira colosso)
+    "pegaso":       dict(arte="evolucoes/pegaso_v1.png", rig=False, poly=20000),
+    "golem":        dict(arte="torre_golem.jpg", rig=False, poly=16000, modelo="meshy-6-lite"),   # lite: 15 créditos
 }
-CUSTO = lambda n: 30 + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
+CUSTO = lambda n: (15 if CHEFES[n].get("modelo") == "meshy-6-lite" else 30) + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
 
 
 def run(nome):
@@ -40,8 +43,9 @@ def run(nome):
     out = M.ROOT / "assets" / "meshy" / "chefes" / nome
     print(f"== {nome}", flush=True)
     if "modelo" not in s:
-        uri = "data:image/png;base64," + base64.b64encode(img.read_bytes()).decode()
-        body = {"image_url": uri, "ai_model": "latest", "should_texture": True, "enable_pbr": True,
+        mime = "image/jpeg" if img.suffix.lower() in (".jpg", ".jpeg") else "image/png"
+        uri = f"data:{mime};base64," + base64.b64encode(img.read_bytes()).decode()
+        body = {"image_url": uri, "ai_model": spec.get("modelo", "latest"), "should_texture": True, "enable_pbr": True,
                 "should_remesh": True, "topology": "triangle", "target_polycount": spec["poly"], "target_formats": ["glb"]}
         s["modelo"] = M.call("POST", "/openapi/v1/image-to-3d", body)["result"]; s.save()
     ref = M.wait(f"/openapi/v1/image-to-3d/{s['modelo']}", f"{nome} modelo")
