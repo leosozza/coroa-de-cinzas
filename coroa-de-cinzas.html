@@ -3181,6 +3181,7 @@ function buildArena(){
   ENVX.tex.length = 0; ENVX.lights.length = 0; ENVX.geysers.length = 0; ENVX.twinkle.length = 0; ENVX.spin.length = 0; ENVX.orbs.length = 0; ENVX.bob.length = 0; ENVX.floaters.length = 0; ENVX.motes.length = 0; ENVX.bubbles.length = 0;
   ENVX.repaint = null; ENVX.onCapture = null;
   ENVX.glider = null; ENVX.glide = null; ENVX.burst = null; ENVX.aurora = false; ENVX.dragons = null;
+  bossReset();
   const now = performance.now();
   ENVX.nextGlide = now + 7000; ENVX.nextBurst = now + 14000 + Math.random() * 10000;
   buildBoard();
@@ -3938,20 +3939,31 @@ function buildCourtyard(CY, rnd){
   // fundo: muro baixo com ameias, arcada de pedra, torres com flâmulas
   const B = new THREE.Group();
   const bz = -9.4, bh = 2.0;
-  for (const [a, b] of [[-8.2, 1.6], [4.4, 8.5]]){
+  // CY.breach = [x0, x1]: trecho do muro em ruínas (tocos baixos e entulho), para ver o que há além dele
+  const segs = CY.breach ? [[-8.2, CY.breach[0]], [CY.breach[1], 1.6], [4.4, 8.5]].filter(([a, b]) => b - a > 0.3) : [[-8.2, 1.6], [4.4, 8.5]];
+  for (const [a, b] of segs){
     addMesh(B, worldBox(b - a, bh, 0.9), W, (a + b) / 2, GROUND_Y + bh / 2, bz);
     for (let x = a + 0.3; x < b - 0.2; x += 0.8) addMesh(B, worldBox(0.45, 0.45, 0.9), W, x, GROUND_Y + bh + 0.22, bz);
+  }
+  if (CY.breach){
+    const [a, b] = CY.breach;
+    for (let x = a; x < b - 0.2; x += 0.55 + rnd() * 0.35){
+      if (rnd() < 0.25) continue;
+      const h = 0.15 + rnd() * 0.65 * (1 - Math.sin(Math.PI * (x - a) / (b - a)) * 0.7);
+      addMesh(B, worldBox(0.5 + rnd() * 0.3, h, 0.8), rnd() < 0.5 ? W : T, x + 0.3, GROUND_Y + h / 2, bz + (rnd() - 0.5) * 0.2, 0, (rnd() - 0.5) * 0.3, (rnd() - 0.5) * 0.2);
+    }
+    for (let i = 0; i < 16; i++) addMesh(B, worldBox(0.18 + rnd() * 0.35, 0.12 + rnd() * 0.2, 0.18 + rnd() * 0.35, 1), rnd() < 0.5 ? W : T, a + rnd() * (b - a), GROUND_Y + 0.08, bz + (rnd() - 0.5) * 2.2, rnd(), rnd(), rnd());
   }
   for (const x of [1.9, 4.1]) addMesh(B, worldBox(0.7, 3.8, 1.1), T, x, GROUND_Y + 1.9, bz);
   addMesh(B, new THREE.TorusGeometry(1.1, 0.3, 6, 14, Math.PI), T, 3.0, GROUND_Y + 3.6, bz, 0, 0, 0).scale.z = 1.8;
   addMesh(B, worldBox(3.2, 0.5, 1.2), W, 3.0, GROUND_Y + 5.0, bz);
   if (CY.towerL !== false) B.add(tower(-8.8, -10.2, 2.6, 7.8, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
-  B.add(tower(-3.4, -12.4, 2.2, 6.4, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
+  if (CY.midTower !== false) B.add(tower(-3.4, -12.4, 2.2, 6.4, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
   B.add(tower(7.2, -12.8, 2.0, 7.0, W, rnd, { trim:T, flag:CY.flag, dome:CY.dome, window:CY.window }));
   bakeInto(B, envRoot);
   // acampamento além do muro: tendas brancas e bandeirolas
   const camp = new THREE.Group(), canvasM = new THREE.MeshStandardMaterial({ color:C(CY.tent || 0xd8d0c0), roughness:0.9, flatShading:true });
-  for (let i = 0; i < 9; i++){
+  for (let i = 0; i < (CY.camp === false ? 0 : 9); i++){
     const x = -6 + i * 1.6 + (rnd() - 0.5) * 0.6, z = -11.2 - rnd() * 2.4, s = 0.7 + rnd() * 0.4;
     addMesh(camp, new THREE.CylinderGeometry(0.5 * s, 0.55 * s, 0.4 * s, 8), canvasM, x, GROUND_Y + 0.2 * s, z);
     addMesh(camp, new THREE.ConeGeometry(0.6 * s, 0.7 * s, 8), canvasM, x, GROUND_Y + 0.75 * s, z);
@@ -4787,7 +4799,7 @@ function buildEnvInfernal(){
     slab:{ seed:5, cells:14, size:30, seam:'#2a0c06', glow:'rgba(255,110,30,1)', glowFar:'rgba(200,50,10,1)', slab:['#1a1618', '#0e0c0e', '#221c1e'], vein:['rgba(120,100,110,.12)', 'rgba(255,120,60,.08)'], veins:3, ei:0.85, rough:0.35, metal:0.2 },
     groundHex:0x0a0808, frontSeal:'pentagrama', sideSeal:'pentagrama', sound:'selo_runico', flareHex:0xff5a1a,
     sealA:{ col:'rgba(255,140,50,1)' }, sealB:{ col:'rgba(255,100,40,1)', op:0.7 },
-    CY:{ wall, trim, flame:FLAME_STD, bronze:new THREE.MeshStandardMaterial({ color:C(0x7a5a3a), metalness:0.85, roughness:0.4 }), banner:bannerTex({ field:'#2a1414', dark:'#100606', gold:'#c8843a' }), flag:0x3a0a0e, tent:0x4a3a34, window:new THREE.MeshBasicMaterial({ color:C(0xff6a2a), toneMapped:false }), gateDark:0x050203, right:false },
+    CY:{ wall, trim, flame:FLAME_STD, bronze:new THREE.MeshStandardMaterial({ color:C(0x7a5a3a), metalness:0.85, roughness:0.4 }), banner:bannerTex({ field:'#2a1414', dark:'#100606', gold:'#c8843a' }), flag:0x3a0a0e, tent:0x4a3a34, window:new THREE.MeshBasicMaterial({ color:C(0xff6a2a), toneMapped:false }), gateDark:0x050203, right:false, breach:[-5.6, 1.3], camp:false, midTower:false },
     runeHex:0xa04aff, portal:['#2a0a4a', '#c07aff'], statue:darkStone, horn:new THREE.MeshStandardMaterial({ color:C(0x4a3a30), roughness:0.5 }),
     orbHex:0xb05aff, orb2Hex:0xff2a2a, globe:new THREE.MeshStandardMaterial({ color:C(0x2a2224), roughness:0.45, metalness:0.4, envMapIntensity:0.8 }), ring:new THREE.MeshStandardMaterial({ color:C(0x3a3034), metalness:0.8, roughness:0.4 }), spikes:true,
     bone:new THREE.MeshStandardMaterial({ color:C(0xb8a888), roughness:0.7, flatShading:true }),
@@ -4797,8 +4809,8 @@ function buildEnvInfernal(){
   const ch = new THREE.MeshStandardMaterial({ color:C(0x2a2a30), metalness:0.85, roughness:0.4 });
   chain(new THREE.Vector3(-8.2, GROUND_Y + 5.2, -9.0), new THREE.Vector3(-8.2, GROUND_Y + 4.6, -4.4), 0.8, ch);
   chain(new THREE.Vector3(-8.2, GROUND_Y + 4.6, 0.8), new THREE.Vector3(-8.2, GROUND_Y + 5.0, 5.4), 0.9, ch);
-  chain(new THREE.Vector3(-7.6, GROUND_Y + 6.8, -9.6), new THREE.Vector3(-3.4, GROUND_Y + 5.8, -11.3), 1.0, ch);
   buildBackdrop(paintBackdropInfernal);
+  buildDeathRealm(rnd);
 }
 function paintBackdropCelestial(c){
   const g = c.getContext('2d'), w = c.width, h = c.height, rnd = seeded(191), hz = h * 0.8, band = h * 0.5;
@@ -5412,6 +5424,7 @@ function buildEnvDragon(){
   backdrop.add(ENVX.glider.g);
   buildFlyingDragons(rnd);
   buildDragonWorld();
+  giantDragonInit();
   // numa captura, um dos dragões pode rugir (e às vezes soltar fogo)
   ENVX.onCapture = () => {
     const D = ENVX.dragons, n = performance.now();
@@ -7201,11 +7214,14 @@ async function loadModels(){
   } catch (e){ glbLog.push('carregador indisponível: ' + e.message); return; }
   // A CSP do Artifact bloqueia fetch() de blob:, que o ImageBitmapLoader usa para as texturas embutidas.
   // Carregar por <img> (img-src blob: é permitido) e só então gerar o ImageBitmap.
+  const texViaImg = () => new URLSearchParams(location.search).has('imgtex') || (/AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Android|Edg\//.test(navigator.userAgent));
   if (THREE.ImageBitmapLoader && !THREE.ImageBitmapLoader.prototype.__viaImg){
     THREE.ImageBitmapLoader.prototype.load = function(url, onLoad, onProgress, onError){
       const opts = this.options || { premultiplyAlpha:'none' }, img = new Image();
       if (this.crossOrigin) img.crossOrigin = this.crossOrigin;
-      img.onload = () => createImageBitmap(img, opts).then(b => onLoad && onLoad(b), e => onError && onError(e));
+      // Safari/iPhone (WebKit): o createImageBitmap com opções falha e a peça fica preta; lá a própria <img> vira a textura
+      // (o GLTFLoader já usa flipY = false). Em qualquer navegador, se o ImageBitmap falhar, a <img> serve de reserva.
+      img.onload = () => (texViaImg() ? Promise.reject(0) : createImageBitmap(img, opts)).then(b => onLoad && onLoad(b), () => onLoad && onLoad(img));
       img.onerror = e => onError && onError(e);
       img.src = this.path && !/^(blob|data):/.test(url) ? this.path + url : url;
     };
@@ -7255,7 +7271,7 @@ async function loadModels(){
   // Dragão das Cinzas realista: o comprimido (Draco) primeiro; precisa de webp
   { const base = 'assets/meshy/dragao/animated.opt', list = opt ? (DRACO.mod ? [base + '.c.gltf.json', base + '.c.glb'] : []).concat([base + '.gltf.json', base + '.glb']) : [];
     const dg = list.length ? await loadGltf(loader, list) : null;
-    if (dg){ try { GLB.dg = prepDragon(dg); dragonsUpgrade(); } catch (e){ delete GLB.dg; glbLog.push(`dragao: falha ao preparar (${e.message})`); } } }
+    if (dg){ try { GLB.dg = prepDragon(dg); dragonsUpgrade(); giantDragonInit(); } catch (e){ delete GLB.dg; glbLog.push(`dragao: falha ao preparar (${e.message})`); } } }
   setTimeout(kingdomApply, 0);
   if (lz){ try { GLB.pl = prepAsset('p', lz, null); GLB.pl.lanceiro = true; if (GLB.pl.rigged) GLB.pl.frames = propFrames(lz.scene, 'pl'); glbLog.push('peao_lanca: modelo do Lanceiro'); } catch (e){ glbLog.push(`peao_lanca: falha ao preparar (${e.message})`); } }
 }
@@ -9263,6 +9279,731 @@ function crimsonTick(now){
   if (CRIM.flash > 0.01 && backdrop){ backdrop.material.color.setRGB(1 + CRIM.flash * 1.4, 1 + CRIM.flash * 0.1, 1 + CRIM.flash * 0.1); CRIM.flash *= 0.9; }
 }
 
+/* ---------- Chefes das arenas: o Deus da Morte do Mistério Infernal e o dragão gigante do Covil dos Dragões ----------
+   Mistério Infernal: além do muro em ruínas do lado das negras fica o cemitério (lápides tortas, cruzes quebradas, colunas
+   caídas, esqueletos, ossos e névoa baixa) e dele se ergue o Deus da Morte gigante (assets/meshy/chefes/deus_morte, esqueleto
+   da Meshy), de frente para o tabuleiro, soltando fumaça preta, com os olhos vermelhos acesos e um vórtice carmesim girando
+   no céu atrás dele. Os discípulos (fantasmas carmesim, assets/meshy/chefes/discipulo, malha estática: o voo é todo por
+   código) rodeiam o deus e cruzam o céu; quando uma peça morre, um deles desce, agarra a alma e a leva ao pé do deus.
+   A câmera do xadrez olha de cima: além do muro só cabe uma faixa estreita no alto do quadro. Por isso o deus (10,5 de
+   altura) sobe ou afunda no chão do cemitério conforme a câmera, para os olhos ficarem logo abaixo da borda de cima; com a
+   câmera baixa (Drone, celular em pé) ele aparece inteiro, de pé. Nas cenas de combate ele fica onde estava.
+   Covil dos Dragões: um dragão gigante (o GLB.dg realista, 9,5 de comprimento) anda além do rio de lava, vira a cabeça,
+   ruge e cospe fogo para o alto; de tempos em tempos levanta voo, dá uma volta alta sobre a arena e pousa de novo.
+   Tudo é só visual: nada espera as animações nem mexe na vez de jogar. */
+const BOSSGLB = { p:null, deus:null, disc:null, kitM:null, kitP:null, soulTex:null, vortexTex:null };
+const BOSS = { on:false };
+const GDR = { on:false, d:null };
+let smokePS = null;
+const _bv = typeof THREE !== 'undefined' ? new THREE.Vector3() : null, _bw = _bv && new THREE.Vector3(), _bu = _bv && new THREE.Vector3();
+function bossReset(){
+  BOSS.on = false; BOSS.g = null; BOSS.ghosts = []; BOSS.sky = []; BOSS.souls = []; BOSS.pool = [];
+  GDR.on = false; GDR.d = null;
+}
+// fumaça preta (mistura normal: partículas escuras de verdade, que o brilho aditivo não faz)
+function smokeSys(){
+  if (!smokePS){ smokePS = makePS(W < 560 ? 280 : 600, THREE.NormalBlending); smokePS.mat.uniforms.uScale.value = sparks.mat.uniforms.uScale.value; }
+  return smokePS;
+}
+// altura do mundo, na vertical de (x, z), que aparece na altura ndc da tela (busca binária; só pontos à frente da câmera)
+function viewTopY(x, z, ndc){
+  let lo = GROUND_Y - 16, hi = 48;
+  for (let i = 0; i < 16; i++){
+    const m = (lo + hi) / 2;
+    _bv.set(x, m, z).applyMatrix4(camera.matrixWorldInverse);
+    if (_bv.z > -0.2){ hi = m; continue; }
+    _bv.applyMatrix4(camera.projectionMatrix);
+    if (_bv.y < ndc) lo = m; else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+// o ponto está à frente da câmera, mais ou menos na direção para onde ela olha?
+function inView(x, z){
+  camera.getWorldDirection(_bw);
+  const dx = x - camera.position.x, dz = z - camera.position.z, L = Math.hypot(dx, dz) || 1, h = Math.hypot(_bw.x, _bw.z) || 1;
+  return (dx * _bw.x + dz * _bw.z) / (L * h) > 0.35;
+}
+// carrega os dois modelos sob demanda (Draco primeiro, se o decodificador carregou; sem webp, ficam os procedurais)
+function bossModels(){
+  if (BOSSGLB.p || !GOLPES.loader || !GOLPES.urls) return;
+  const webp = GOLPES.urls('x', 'y').some(u => u.includes('.opt.'));
+  if (!webp){ BOSSGLB.p = Promise.resolve(); glbLog.push('chefes: sem webp, ficam os procedurais'); return; }
+  const L = GOLPES.loader, list = (dir, n) => (DRACO.mod ? [`assets/meshy/chefes/${dir}/${n}.opt.c.gltf.json`] : []).concat([`assets/meshy/chefes/${dir}/${n}.opt.gltf.json`]);
+  BOSSGLB.p = Promise.all([loadGltf(L, list('deus_morte', 'animated')), loadGltf(L, list('discipulo', 'model'))]).then(([d, s]) => {
+    try { if (d) BOSSGLB.deus = prepDeus(d); } catch (e){ glbLog.push(`deus da morte: falha ao preparar (${e.message})`); }
+    try { if (s) BOSSGLB.disc = prepDisc(s); } catch (e){ glbLog.push(`discípulo: falha ao preparar (${e.message})`); }
+    glbLog.push(`chefes: deus ${BOSSGLB.deus ? 'modelo (' + Object.keys(BOSSGLB.deus.clips).filter(k => BOSSGLB.deus.clips[k]).join(', ') + ')' : 'procedural'}, discípulos ${BOSSGLB.disc ? 'modelo' : 'procedurais'}`);
+    if (BOSS.on) try { bossUpgrade(); } catch (e){ glbLog.push(`chefes: falha ao trocar o modelo (${e.message})`); }
+  }).catch(e => glbLog.push(`chefes: falha ao carregar (${e && e.message})`));
+}
+function prepDeus(g){
+  const sc = g.scene;
+  sc.updateMatrixWorld(true);
+  // medido pelos vértices deformados pelos ossos (a malha fica sob o Armature com escala 0,01; os ossos é que dão o tamanho)
+  const box = measure(sc), size = box.getSize(new THREE.Vector3());
+  const clips = { idle:null, chop:null, cast:null };
+  for (const a of g.animations || []){
+    const n = (a.name || '').toLowerCase();
+    if (!clips.idle && /stance|idle/.test(n)) clips.idle = a;
+    else if (!clips.chop && /chop|axe|slash|attack/.test(n)) clips.chop = a;
+    else if (!clips.cast && /spell|cast/.test(n)) clips.cast = a;
+  }
+  if (!clips.idle) clips.idle = (g.animations || [])[0] || null;
+  for (const k in clips) if (clips[k]) stripRootMotion(clips[k]);
+  sc.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = false;
+    if (o.isSkinnedMesh) o.frustumCulled = false;
+    // a Meshy exporta metalness 1 sem mapa: o manto viraria espelho escuro. Tecido e osso foscos, o brilho fica no emissivo
+    // a textura é escura e a cena também: um pouco da própria textura acesa e uma borda carmesim (fresnel) recortam a silhueta
+    o.material = [].concat(o.material).map(m0 => {
+      if (!m0 || !('envMapIntensity' in m0)) return m0;
+      const m = m0.clone();
+      if (!m.metalnessMap) m.metalness = 0.12;
+      if (!m.roughnessMap) m.roughness = 0.78;
+      m.envMapIntensity = 0.7;
+      // transparente (mas sólido) para ser desenhado depois do fundo pintado
+      m.transparent = true; m.opacity = 1; m.depthWrite = true;
+      if (m.map){ m.emissiveMap = m.map; m.emissive = C(0x7a3a3a); m.emissiveIntensity = 0.5; }
+      rimShader(m, 0xff2a2a, 0.75);
+      return m;
+    });
+    if (o.material.length === 1) o.material = o.material[0];
+  });
+  return { scene:sc, h:Math.max(1e-3, size.y), cx:(box.min.x + box.max.x) / 2, cz:(box.min.z + box.max.z) / 2, y0:box.min.y, clips };
+}
+// borda iluminada (fresnel) somada ao emissivo do MeshStandardMaterial
+function rimShader(m, hex, k){
+  const col = C(hex).multiplyScalar(k);
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uRim = { value:col };
+    sh.fragmentShader = 'uniform vec3 uRim;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\n  float rimF = 1.0 - abs(dot(normal, normalize(vViewPosition)));\n  totalEmissiveRadiance += uRim * pow(rimF, 3.0);');
+  };
+  m.customProgramCacheKey = () => 'rim' + hex;
+  return m;
+}
+// discípulo: uma malha só, normalizada para altura 1 (pés no 0, centrada), tingida de carmesim translúcido
+function prepDisc(g){
+  let mesh = null;
+  g.scene.updateMatrixWorld(true);
+  g.scene.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) throw new Error('sem malha');
+  const geo = mesh.geometry.clone(); geo.applyMatrix4(mesh.matrixWorld);
+  geo.computeBoundingBox();
+  const b = geo.boundingBox, h = Math.max(1e-3, b.max.y - b.min.y);
+  geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2); geo.scale(1 / h, 1 / h, 1 / h);
+  geo.computeBoundingSphere();
+  // os olhos: a parte mais à frente do topo (a cabeça), um pouco abaixo da ponta do capuz
+  const p = geo.attributes.position;
+  let fz = -1, fy = 0.9;
+  for (let i = 0; i < p.count; i++){ const y = p.getY(i); if (y > 0.84 && p.getZ(i) > fz){ fz = p.getZ(i); fy = y; } }
+  const src = [].concat(mesh.material)[0] || {};
+  return { geo, map:src.map || null, eyeY:Math.min(0.9, fy - 0.02), eyeZ:fz - 0.035 };
+}
+function ghostKit(){
+  const M = BOSSGLB.disc;
+  if (M && BOSSGLB.kitM) return BOSSGLB.kitM;
+  if (!M && BOSSGLB.kitP) return BOSSGLB.kitP;
+  const eyeMat = new THREE.SpriteMaterial({ map:glowTex, color:C(0xff2a2a), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false });
+  const haloMat = new THREE.SpriteMaterial({ map:glowTex, color:C(0xb0101e), transparent:true, opacity:0.42, blending:THREE.AdditiveBlending, depthWrite:false });
+  if (M){
+    const mat = new THREE.MeshStandardMaterial({ map:M.map, color:C(0xff6a6a), emissive:C(0xa01020), emissiveMap:M.map, emissiveIntensity:1.6, roughness:0.9, metalness:0,
+      transparent:true, opacity:0.72, depthWrite:false, side:THREE.DoubleSide });
+    rimShader(mat, 0xff5a5a, 1.4);
+    return BOSSGLB.kitM = { parts:[[M.geo, mat]], eyes:[[-0.045, M.eyeY, M.eyeZ], [0.045, M.eyeY, M.eyeZ]], eyeS:0.11, eyeMat, haloMat, model:true };
+  }
+  // aparição procedural: capuz, manto aberto em trapos, braços estendidos e o rosto escuro
+  const cloth = new THREE.MeshStandardMaterial({ color:C(0x8a1018), emissive:C(0x5a0610), emissiveIntensity:1, roughness:0.9, transparent:true, opacity:0.62, depthWrite:false, side:THREE.DoubleSide, flatShading:true });
+  const face = new THREE.MeshBasicMaterial({ color:C(0x050102), transparent:true, opacity:0.85, depthWrite:false });
+  const robe = new THREE.ConeGeometry(0.2, 0.78, 9, 1, true); robe.translate(0, 0.48, 0);
+  const hood = new THREE.SphereGeometry(0.13, 10, 8, 0, TAU, 0, Math.PI * 0.62); hood.translate(0, 0.84, 0.02);
+  const rag = new THREE.ConeGeometry(0.06, 0.4, 4, 1, true); rag.rotateX(Math.PI);
+  const rags = [-0.12, 0, 0.12].map((x, i) => { const g = rag.clone(); g.rotateZ((i - 1) * 0.3); g.translate(x, 0.14, (i % 2) * 0.05); return g; });
+  const arm = new THREE.ConeGeometry(0.035, 0.36, 5, 1, true); arm.rotateX(-Math.PI / 2 - 0.5);
+  const arms = [-1, 1].map(s => { const g = arm.clone(); g.translate(s * 0.15, 0.66, 0.16); return g; });
+  const fc = new THREE.SphereGeometry(0.085, 8, 6); fc.scale(1, 1.15, 0.6); fc.translate(0, 0.8, 0.1);
+  return BOSSGLB.kitP = { parts:[[robe, cloth], [hood, cloth], ...rags.map(g => [g, cloth]), ...arms.map(g => [g, cloth]), [fc, face]], eyes:[[-0.04, 0.81, 0.15], [0.04, 0.81, 0.15]], eyeS:0.12, eyeMat, haloMat, model:false };
+}
+function ghostSkin(q){
+  const K = ghostKit();
+  if (q.body) q.g.remove(q.body);
+  const b = new THREE.Group();
+  for (const [geo, mat] of K.parts){ const m = new THREE.Mesh(geo, mat); m.renderOrder = 5; b.add(m); }
+  for (const e of K.eyes){ const s = new THREE.Sprite(K.eyeMat); s.scale.setScalar(K.eyeS); s.position.set(...e); s.renderOrder = 6; b.add(s); }
+  const halo = new THREE.Sprite(K.haloMat); halo.scale.setScalar(1.5); halo.position.set(0, 0.55, 0); b.add(halo);
+  q.g.add(b); q.body = b; q.kit = K;
+}
+function makeGhost(h){
+  const q = { g:new THREE.Group(), h, body:null, kit:null, ph:Math.random() * 10, yaw:0, smoke:0, px:null, py:0, pz:0 };
+  q.g.scale.setScalar(h);
+  ghostSkin(q);
+  BOSS.root.add(q.g);
+  return q;
+}
+// vira para onde voa, inclina na curva, balança e deixa um rastro de fumaça
+function ghostMove(q, x, y, z, t, dt, trail = 1){
+  const P = q.g.position;
+  if (q.px == null){ q.px = x; q.py = y; q.pz = z; }
+  const vx = x - q.px, vz = z - q.pz, hv = Math.hypot(vx, vz);
+  P.set(x, y + 0.08 * q.h * Math.sin(t * 2.1 + q.ph), z);
+  if (hv > 1e-4){
+    let yw = Math.atan2(vx, vz), d = yw - q.yaw;
+    if (d > Math.PI) d -= TAU; else if (d < -Math.PI) d += TAU;
+    q.yaw += d * (1 - Math.exp(-dt / 220));
+    q.roll = clamp(-d * 2.5, -0.5, 0.5);
+  }
+  q.g.rotation.set(0.28 + 0.06 * Math.sin(t * 1.7 + q.ph), q.yaw, (q.roll || 0) + 0.12 * Math.sin(t * 1.3 + q.ph));
+  q.px = x; q.py = y; q.pz = z;
+  if (!GLOK || !trail) return;
+  q.smoke += dt * (W < 560 ? 0.004 : 0.008) * trail * (RM ? 0.5 : 1);
+  if (q.smoke > 1){
+    q.smoke -= 1;
+    const S = smokeSys(), back = -0.25 * q.h;
+    S.emit(x + Math.sin(q.yaw) * back + (Math.random() - 0.5) * 0.2 * q.h, y + 0.1 * q.h, z + Math.cos(q.yaw) * back + (Math.random() - 0.5) * 0.2 * q.h,
+      (Math.random() - 0.5) * 0.1, 0.12 + Math.random() * 0.15, (Math.random() - 0.5) * 0.1, 1500 + Math.random() * 900, (0.32 + Math.random() * 0.3) * q.h, Math.random() < 0.5 ? '#120406' : '#2a080c', 0.42, 0, 0.7);
+  }
+}
+
+/* cemitério procedural: lápides, cruzes, covas, colunas quebradas, esqueletos e ossos, tudo fundido por material */
+function graveyardRealm(rnd){
+  const stone = new THREE.MeshStandardMaterial({ color:C(0x3a3436), roughness:0.85, flatShading:true });
+  const dark = new THREE.MeshStandardMaterial({ color:C(0x201c1e), roughness:0.9, flatShading:true });
+  const soil = new THREE.MeshStandardMaterial({ color:C(0x140e0c), roughness:1, flatShading:true });
+  const bone = new THREE.MeshStandardMaterial({ color:C(0xb0a088), roughness:0.7, flatShading:true });
+  const g = new THREE.Group();
+  // o chão do cemitério: um pouco de terra mais escura atrás do muro
+  addMesh(g, new THREE.BoxGeometry(15, 0.04, 6.4), soil, -0.6, GROUND_Y + 0.02, -13.0, 0, 0, 0, false);
+  const free = (x, z) => Math.hypot(x - BOSS.x, (z - BOSS.z) * 1.4) > 2.4 && Math.hypot(x - 7.2, z + 12.8) > 1.6 && Math.hypot(x + 8.8, z + 10.2) > 1.8;
+  const spots = [];
+  for (let i = 0; i < 160 && spots.length < (W < 560 ? 26 : 38); i++){
+    const x = -7.6 + rnd() * 14.2, z = -10.3 - rnd() * 4.6;
+    if (!free(x, z) || spots.some(([a, b]) => Math.hypot(a - x, b - z) < 0.75)) continue;
+    spots.push([x, z]);
+  }
+  spots.forEach(([x, z], i) => {
+    const t = new THREE.Group(), kind = i % 5;
+    t.position.set(x, GROUND_Y, z);
+    t.rotation.set((rnd() - 0.5) * 0.45, (rnd() - 0.5) * 0.7, (rnd() - 0.5) * 0.4);
+    const s = 0.8 + rnd() * 0.6; t.scale.setScalar(s);
+    const m = rnd() < 0.6 ? stone : dark;
+    if (kind === 0 || kind === 3){
+      addMesh(t, new THREE.BoxGeometry(0.42, 0.5, 0.1), m, 0, 0.25, 0);
+      addMesh(t, new THREE.CylinderGeometry(0.21, 0.21, 0.1, 10, 1, false, 0, Math.PI), m, 0, 0.5, 0, Math.PI / 2, 0, Math.PI / 2);
+    } else if (kind === 1){
+      // cruz, às vezes quebrada com o braço caído no chão
+      const broken = rnd() < 0.45;
+      addMesh(t, new THREE.BoxGeometry(0.09, broken ? 0.5 : 0.85, 0.09), m, 0, broken ? 0.25 : 0.42, 0);
+      if (!broken) addMesh(t, new THREE.BoxGeometry(0.42, 0.08, 0.08), m, 0, 0.62, 0);
+      else addMesh(t, new THREE.BoxGeometry(0.42, 0.08, 0.08), m, 0.25, 0.04, 0.2, 0, 0.6, 0);
+    } else if (kind === 2){
+      addMesh(t, new THREE.BoxGeometry(0.34, 0.32 + rnd() * 0.3, 0.12), m, 0, 0.2, 0, 0, 0, 0.1);
+      addMesh(t, new THREE.BoxGeometry(0.5, 0.08, 0.9), soil, 0, 0.04, 0.5, 0, 0, 0, false);
+    } else {
+      // cova aberta com a lápide rachada
+      addMesh(t, new THREE.BoxGeometry(0.55, 0.12, 1.0), soil, 0, 0.06, 0.55, 0, 0, 0, false);
+      addMesh(t, new THREE.BoxGeometry(0.4, 0.44, 0.1), m, 0, 0.22, 0, 0, 0, 0.25);
+    }
+    g.add(t);
+  });
+  // colunas em ruínas (como na referência): fustes quebrados e tambores caídos
+  for (const [x, z, h] of [[-6.6, -11.0, 3.4], [-5.0, -14.6, 2.2], [3.3, -14.4, 2.8], [5.4, -11.0, 1.6], [-7.4, -13.6, 1.2]]){
+    addMesh(g, new THREE.CylinderGeometry(0.42, 0.48, 0.3, 10), dark, x, GROUND_Y + 0.15, z);
+    addMesh(g, new THREE.CylinderGeometry(0.32, 0.36, h, 10), stone, x, GROUND_Y + 0.3 + h / 2, z, (rnd() - 0.5) * 0.08, 0, (rnd() - 0.5) * 0.08);
+    addMesh(g, new THREE.CylinderGeometry(0.33, 0.33, 0.55, 10), stone, x + 0.7, GROUND_Y + 0.33, z + 0.4, Math.PI / 2, rnd() * 3, 0);
+  }
+  // esqueletos caídos no chão: crânio, costelas, coluna e ossos longos
+  const rib = new THREE.TorusGeometry(0.11, 0.012, 3, 10, Math.PI * 1.2);
+  for (const [x, z, ry] of [[-3.2, -11.0, 0.6], [1.9, -10.6, -0.9], [-5.6, -12.3, 2.2], [4.2, -12.4, 1.2], [-1.6, -10.4, -2.4]]){
+    const k = new THREE.Group(); k.position.set(x, GROUND_Y + 0.05, z); k.rotation.y = ry; g.add(k);
+    addMesh(k, new THREE.SphereGeometry(0.1, 8, 6), bone, 0, 0.06, 0.5).scale.set(1, 0.85, 1.15);
+    addMesh(k, new THREE.CylinderGeometry(0.015, 0.015, 0.6, 4), bone, 0, 0.02, 0.15, Math.PI / 2, 0, 0);
+    for (let i = 0; i < 4; i++) addMesh(k, rib, bone, 0, 0.04, 0.3 - i * 0.07, 0, 0, Math.PI * 0.9);
+    for (const s of [-1, 1]){
+      addMesh(k, new THREE.CylinderGeometry(0.016, 0.016, 0.42, 4), bone, s * 0.1, 0.02, -0.32, Math.PI / 2, s * 0.15, 0);
+      addMesh(k, new THREE.CylinderGeometry(0.014, 0.014, 0.36, 4), bone, s * 0.22, 0.02, 0.28, Math.PI / 2, s * 0.6, 0);
+    }
+  }
+  bakeInto(g, envRoot);
+  skulls([[-2.4, -10.6, 0.4, 1.1], [0.9, -11.2, -0.6, 1], [2.8, -11.6, 1.1, 0.9], [-4.4, -11.4, -1.2, 1.2], [-0.4, -14.6, 0.2, 1.3], [-2.0, -14.4, 2, 1.1], [1.4, -14.8, -1, 1.2], [6.0, -13.8, 0.3, 1]], bone);
+  // névoa baixa e escura sobre as covas, girando devagar
+  for (let i = 0; i < (W < 560 ? 1 : 2); i++){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), new THREE.MeshBasicMaterial({ map:mistTex, color:C(i ? 0x5a1a22 : 0x3a2a30), transparent:true, opacity:i ? 0.3 : 0.45, depthWrite:false }));
+    m.rotation.x = -Math.PI / 2; m.position.set(-0.6, GROUND_Y + 0.25 + i * 0.35, -12.6); m.renderOrder = 3;
+    envRoot.add(m); ENVX.spin.push({ o:m, ax:'z', v:0.00005 * (i ? -1 : 1) });
+  }
+}
+// vórtice carmesim: espiral pintada em canvas, com faixas escuras e partículas pretas presas aos braços
+function vortexTexture(){
+  if (BOSSGLB.vortexTex) return BOSSGLB.vortexTex;
+  const S = 512, c = mkCanvas(S, S), g = c.getContext('2d'), m = S / 2, rnd = seeded(666);
+  g.translate(m, m);
+  const rg = g.createRadialGradient(0, 0, 0, 0, 0, m);
+  rg.addColorStop(0, 'rgba(255,225,230,1)'); rg.addColorStop(0.06, 'rgba(255,120,150,.95)'); rg.addColorStop(0.2, 'rgba(210,30,60,.75)');
+  rg.addColorStop(0.5, 'rgba(120,6,24,.5)'); rg.addColorStop(0.8, 'rgba(50,0,10,.25)'); rg.addColorStop(1, 'rgba(20,0,4,0)');
+  g.fillStyle = rg; g.beginPath(); g.arc(0, 0, m, 0, TAU); g.fill();
+  g.lineCap = 'round';
+  for (let arm = 0; arm < 5; arm++) for (let s = 0; s < 7; s++){
+    const a0 = arm * TAU / 5 + s * 0.09 + rnd() * 0.05, dark = s % 3 === 1;
+    g.beginPath();
+    for (let i = 0; i <= 60; i++){ const u = i / 60, r = 10 + u * (m - 14), a = a0 + u * 4.6; i ? g.lineTo(Math.cos(a) * r, Math.sin(a) * r) : g.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+    g.lineWidth = dark ? 6 + rnd() * 8 : 2 + rnd() * 5;
+    g.strokeStyle = dark ? `rgba(15,0,4,${0.45 + rnd() * 0.3})` : `rgba(255,${50 + Math.floor(rnd() * 70)},${80 + Math.floor(rnd() * 50)},${0.25 + rnd() * 0.35})`;
+    g.stroke();
+  }
+  for (let i = 0; i < 700; i++){
+    const u = Math.sqrt(rnd()), r = 18 + u * (m - 24), a = Math.floor(rnd() * 5) * TAU / 5 + u * 4.6 + (rnd() - 0.5) * 0.7, s = 1 + rnd() * 3.5;
+    g.fillStyle = `rgba(0,0,0,${0.5 + rnd() * 0.5})`; g.fillRect(Math.cos(a) * r, Math.sin(a) * r, s, s);
+  }
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.globalCompositeOperation = 'destination-in';
+  const mk = g.createRadialGradient(m, m, 0, m, m, m);
+  mk.addColorStop(0, 'rgba(0,0,0,1)'); mk.addColorStop(0.7, 'rgba(0,0,0,.9)'); mk.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = mk; g.fillRect(0, 0, S, S);
+  return BOSSGLB.vortexTex = canvasTex(c);
+}
+// a alma: um vulto claro com cauda de luz
+function soulTexture(){
+  if (BOSSGLB.soulTex) return BOSSGLB.soulTex;
+  const c = mkCanvas(64, 128), g = c.getContext('2d');
+  const body = g.createRadialGradient(32, 40, 2, 32, 48, 34);
+  body.addColorStop(0, 'rgba(255,255,255,1)'); body.addColorStop(0.35, 'rgba(220,240,255,.75)'); body.addColorStop(1, 'rgba(160,200,255,0)');
+  g.fillStyle = body; g.beginPath(); g.ellipse(32, 46, 18, 32, 0, 0, TAU); g.fill();
+  const head = g.createRadialGradient(32, 22, 0, 32, 22, 12);
+  head.addColorStop(0, 'rgba(255,255,255,1)'); head.addColorStop(1, 'rgba(220,240,255,0)');
+  g.fillStyle = head; g.beginPath(); g.arc(32, 22, 12, 0, TAU); g.fill();
+  const tail = g.createLinearGradient(0, 70, 0, 128);
+  tail.addColorStop(0, 'rgba(200,230,255,.6)'); tail.addColorStop(1, 'rgba(200,230,255,0)');
+  g.fillStyle = tail; g.beginPath(); g.moveTo(18, 70); g.quadraticCurveTo(32, 140, 46, 70); g.fill();
+  return BOSSGLB.soulTex = canvasTex(c);
+}
+// silhueta procedural do Deus da Morte (enquanto o modelo não chega, ou sem ele): manto, capuz, caveira escura e foice
+function deathGodProc(H){
+  const g = new THREE.Group();
+  const cloth = new THREE.MeshStandardMaterial({ color:C(0x161012), roughness:0.95, flatShading:true, side:THREE.DoubleSide });
+  const red = new THREE.MeshStandardMaterial({ color:C(0x4a0a10), roughness:0.9, flatShading:true, side:THREE.DoubleSide });
+  const boneM = new THREE.MeshStandardMaterial({ color:C(0x6a6258), roughness:0.8, flatShading:true });
+  const wood = new THREE.MeshStandardMaterial({ color:C(0x2a1c14), roughness:0.9 });
+  const steel = new THREE.MeshStandardMaterial({ color:C(0x6a5a58), metalness:0.7, roughness:0.45, flatShading:true });
+  addMesh(g, new THREE.ConeGeometry(0.2 * H, 0.75 * H, 10, 1, true), cloth, 0, 0.37 * H, 0, 0, 0, 0, false);
+  addMesh(g, new THREE.ConeGeometry(0.09 * H, 0.5 * H, 6, 1, true), red, 0, 0.46 * H, 0.06 * H, 0, 0, 0, false);
+  addMesh(g, new THREE.SphereGeometry(0.12 * H, 10, 8), cloth, 0, 0.75 * H, 0, 0, 0, 0, false).scale.set(1.35, 0.9, 0.85);
+  addMesh(g, new THREE.SphereGeometry(0.075 * H, 10, 8, 0, TAU, 0, Math.PI * 0.62), cloth, 0, 0.87 * H, 0.01 * H, 0.25, 0, 0, false);
+  addMesh(g, new THREE.SphereGeometry(0.05 * H, 9, 7), boneM, 0, 0.855 * H, 0.03 * H, 0, 0, 0, false).scale.set(0.9, 1.1, 0.9);
+  for (const s of [-1, 1]) addMesh(g, new THREE.CylinderGeometry(0.025 * H, 0.035 * H, 0.38 * H, 6), cloth, s * 0.16 * H, 0.6 * H, 0.04 * H, 0.35, 0, s * 0.25, false);
+  const sc = new THREE.Group(); sc.position.set(-0.2 * H, 0.45 * H, 0.1 * H); g.add(sc);
+  addMesh(sc, new THREE.CylinderGeometry(0.009 * H, 0.009 * H, 0.95 * H, 5), wood, 0, 0.1 * H, 0, 0, 0, 0.12, false);
+  const blade = addMesh(sc, new THREE.TorusGeometry(0.2 * H, 0.016 * H, 3, 16, Math.PI * 0.62), steel, 0.12 * H, 0.5 * H, 0, 0, 0, Math.PI * 0.42, false);
+  blade.scale.z = 0.25;
+  return { g, scythe:sc, eyes:[new THREE.Vector3(-0.018 * H, 0.86 * H, 0.074 * H), new THREE.Vector3(0.018 * H, 0.86 * H, 0.074 * H)] };
+}
+function buildDeathRealm(rnd){
+  bossReset();
+  if (!GLOK || !envRoot) return;
+  const small = W < 560;
+  Object.assign(BOSS, { on:true, x:-1.6, z:-12.6, H:10.5, tilt:-0.3, y:GROUND_Y, yTop:null, root:new THREE.Group(), g:new THREE.Group(), model:null, mixer:null, idle:null, act:null, actFx:null,
+    head:null, eyeOff:null, eyeW:[V3(), V3()], proc:null, nextAct:performance.now() + 9000, capCD:0, smoke:0, vflash:0, vortex:null, vortex2:null, vx:null, vy:null, ghosts:[], sky:[], souls:[], pool:[], hand:null });
+  BOSS.root.name = 'chefe-deus-da-morte'; envRoot.add(BOSS.root);
+  // a base fica no chão do cemitério, virada para o tabuleiro e um pouco inclinada para trás (a câmera olha de cima e a pose
+  // de espera é curvada: assim o rosto aparece); o corpo desce dentro dela quando afunda, girando em torno do nível do chão
+  BOSS.base = new THREE.Group(); BOSS.base.rotation.order = 'YXZ';
+  BOSS.base.position.set(BOSS.x, GROUND_Y, BOSS.z); BOSS.base.rotation.set(BOSS.tilt, Math.atan2(-BOSS.x, -BOSS.z), 0);
+  BOSS.root.add(BOSS.base); BOSS.base.add(BOSS.g);
+  graveyardRealm(rnd);
+  // olhos: dois brilhos vermelhos e um halo; uma luz pontual vermelha no rosto
+  const eyeMat = new THREE.SpriteMaterial({ map:glowTex, color:C(0xff3020), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false });
+  const haloMat = new THREE.SpriteMaterial({ map:glowTex, color:C(0xa00a10), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, fog:false });
+  BOSS.eyes = [new THREE.Sprite(eyeMat), new THREE.Sprite(eyeMat)];
+  BOSS.halo = new THREE.Sprite(haloMat);
+  for (const s of [...BOSS.eyes, BOSS.halo]){ s.renderOrder = 7; BOSS.root.add(s); }
+  BOSS.eyeMat = eyeMat; BOSS.haloMat = haloMat;
+  BOSS.light = new THREE.PointLight(C(0xff2a18), 1.6, 9, 2); BOSS.root.add(BOSS.light);
+  // o fundo pintado acompanha a câmera e às vezes passa na frente do cemitério: aqui ele não grava profundidade, e o deus
+  // e os fantasmas (transparentes, desenhados depois dele) continuam aparecendo; o que é opaco atrás dele segue coberto
+  if (backdrop) backdrop.material.depthWrite = false;
+  // vórtice no céu, preso ao fundo pintado (como o Zeus do Olimpo); duas camadas girando em sentidos opostos
+  if (backdrop){
+    const vt = vortexTexture();
+    BOSS.vortex = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map:vt, transparent:true, depthWrite:false, fog:false, toneMapped:false }));
+    BOSS.vortex2 = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map:vt, transparent:true, opacity:0.55, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false }));
+    BOSS.vortex.renderOrder = -1.6; BOSS.vortex2.renderOrder = -1.5;
+    BOSS.vortex.position.set(0, 1.6, 0.02); BOSS.vortex2.position.set(0, 1.6, 0.03);
+    BOSS.vortex.scale.setScalar(6.4); BOSS.vortex2.scale.setScalar(8.2);
+    backdrop.add(BOSS.vortex, BOSS.vortex2);
+  }
+  bossBody();
+  // discípulos: em volta do deus e pelo céu da arena (menos no celular e com movimento reduzido)
+  const nO = small || RM ? 3 : 5, nS = small || RM ? 2 : 4;
+  for (let i = 0; i < nO; i++){ const q = makeGhost(1.2 + Math.random() * 0.5); Object.assign(q, { a:i * TAU / nO, w:(0.32 + Math.random() * 0.2) * (i % 2 ? -1 : 1), r:3.2 + Math.random() * 1.6, f:Math.random() }); BOSS.ghosts.push(q); }
+  for (let i = 0; i < nS; i++){ const q = makeGhost(1.0 + Math.random() * 0.4); Object.assign(q, { a:Math.random() * TAU, w:(0.12 + Math.random() * 0.1) * (i % 2 ? -1 : 1), rx:7 + Math.random() * 3, rz:2.2 + Math.random() * 1.2, cz:-6.6 + Math.random() * 1.2, m:1 + (i % 3) }); BOSS.sky.push(q); }
+  // as almas: encadeia com o que a arena já faz na captura (os selos do santuário)
+  const prev = ENVX.onCapture;
+  ENVX.onCapture = (x, z, k) => { if (prev) try { prev(x, z, k); } catch (e){} soulReap(x, z); };
+  bossModels();
+}
+// o corpo do deus: o modelo da Meshy quando existe, senão a silhueta procedural
+function bossBody(){
+  const A = BOSSGLB.deus, H = BOSS.H;
+  for (const c of [...BOSS.g.children]) BOSS.g.remove(c);
+  BOSS.model = BOSS.mixer = BOSS.idle = BOSS.act = BOSS.head = BOSS.eyeOff = BOSS.proc = BOSS.hand = null;
+  if (A){
+    const m = THREE.SkeletonUtils.clone(A.scene), wrap = new THREE.Group(), k = H / A.h;
+    m.position.set(-A.cx, -A.y0, -A.cz);
+    wrap.scale.setScalar(k); wrap.add(m); BOSS.g.add(wrap);
+    m.traverse(o => { if (o.isMesh){ o.frustumCulled = false; o.renderOrder = -1; } });
+    BOSS.model = m; BOSS.k = k;
+    const bone = re => { let f = null; m.traverse(o => { if (!f && o.isBone && re.test(o.name)) f = o; }); return f; };
+    BOSS.head = bone(/^Head$/) || bone(/head/i);
+    const front = bone(/headfront/i), top = bone(/head_?end/i);
+    BOSS.hand = bone(/^LeftHand$/) || bone(/hand/i);
+    BOSS.rhand = bone(/^RightHand$/);
+    if (A.clips.idle){ BOSS.mixer = new THREE.AnimationMixer(m); BOSS.idle = BOSS.mixer.clipAction(A.clips.idle); BOSS.idle.play(); BOSS.mixer.update(0.01); }
+    BOSS.mixer && BOSS.mixer.addEventListener('finished', e => bossActEnd(e.action));
+    // os olhos ficam presos ao osso da cabeça: medidos uma vez na pose de espera
+    BOSS.g.updateMatrixWorld(true);
+    // a caixa inclui a foice, que puxa o centro para o lado: a cabeça é que fica sobre a base
+    if (BOSS.head){ wrap.position.x = -BOSS.base.worldToLocal(BOSS.head.getWorldPosition(V3())).x; BOSS.g.updateMatrixWorld(true); }
+    if (BOSS.head){
+      const ph = BOSS.head.getWorldPosition(V3()), pf = front ? front.getWorldPosition(V3()) : ph.clone().add(V3(0, 0, 0.06 * H).applyQuaternion(BOSS.g.quaternion));
+      const up = top ? top.getWorldPosition(V3()).sub(ph).normalize() : V3(0, 1, 0);
+      const fw = pf.clone().sub(ph); fw.addScaledVector(up, -fw.dot(up)); fw.normalize();
+      const side = V3().crossVectors(up, fw).normalize(), u = H / 3;
+      const c0 = pf.clone().addScaledVector(up, 0.035 * u).addScaledVector(fw, -0.01 * u);
+      BOSS.eyeOff = [-1, 1].map(s => BOSS.head.worldToLocal(c0.clone().addScaledVector(side, s * 0.032 * u)));
+      BOSS.headH = ph.y - BOSS.g.getWorldPosition(V3()).y;
+    }
+  } else {
+    const P = deathGodProc(H);
+    P.g.traverse(o => { if (o.isMesh){ o.material.transparent = true; o.renderOrder = -1; } });
+    BOSS.g.add(P.g); BOSS.proc = P; BOSS.headH = 0.86 * H;
+  }
+}
+function bossUpgrade(){
+  if (!BOSS.on || !BOSS.g) return;
+  if (BOSSGLB.deus && !BOSS.model) bossBody();
+  if (BOSSGLB.disc) for (const q of [...BOSS.ghosts, ...BOSS.sky, ...BOSS.pool, ...BOSS.souls.map(s => s.gh)]) if (q && q.kit && !q.kit.model) ghostSkin(q);
+}
+// golpe de foice ou invocação, voltando à espera com crossfade
+function bossAct(kind){
+  const A = BOSSGLB.deus, now = performance.now();
+  if (BOSS.act || cine.active && kind !== 'cast') return;
+  if (BOSS.proc){ BOSS.act = { kind, t0:now, dur:1800, proc:true }; if (kind === 'cast') bossCastFx(); return; }
+  const clip = A && A.clips[kind];
+  if (!clip || !BOSS.mixer) return;
+  const a = BOSS.mixer.clipAction(clip);
+  a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; a.timeScale = kind === 'chop' ? 1.2 : 1; a.play();
+  BOSS.idle.crossFadeTo(a, 0.45, false);
+  BOSS.act = { kind, t0:now, a, dur:clip.duration / a.timeScale * 1000, fx:false };
+}
+function bossActEnd(a){
+  const B = BOSS.act;
+  if (!B || B.a !== a) return;
+  BOSS.idle.reset(); BOSS.idle.play();
+  a.crossFadeTo(BOSS.idle, 0.6, false);
+  BOSS.act = null; BOSS.nextAct = performance.now() + (RM ? 30000 : 16000) + Math.random() * 12000;
+}
+function bossCastFx(){
+  BOSS.vflash = 1;
+  snd('invocacao', { vol:0.4 });
+  if (!GLOK) return;
+  const p = BOSS.rhand ? BOSS.rhand.getWorldPosition(V3()) : V3(BOSS.x, BOSS.y + BOSS.H * 0.7, BOSS.z + 1);
+  sparks.burst(p, nFx(34), ['#ff2a3a', '#ff7a8a', '#8a0a1a'], 2.4, { life:900, size:0.14, grav:-0.6, up:0.6 });
+}
+function bossChopFx(){
+  snd('sombra', { vol:0.4 });
+  if (!GLOK) return;
+  const S = smokeSys(), n = W < 560 ? 10 : 22;
+  for (let i = 0; i < n; i++){ const a = Math.random() * TAU; S.emit(BOSS.x + Math.cos(a) * 1.5, Math.max(GROUND_Y + 0.2, BOSS.y + BOSS.H * 0.25), BOSS.z + 1 + Math.sin(a) * 0.8, Math.cos(a) * 1.2, 0.3 + Math.random() * 0.4, Math.sin(a) * 0.6, 1800, 0.9 + Math.random() * 0.6, '#050203', 0.5, 0, 0.5); }
+}
+function bossTick(now, dt){
+  if (!BOSS.on || !BOSS.g) return;
+  if (!BOSSGLB.p) bossModels();
+  const t = now / 1000, k = Math.min(dt, 60);
+  // sobe ou afunda no chão do cemitério conforme a câmera (fica parado nas cenas de combate)
+  if (!cine.active && inView(BOSS.x, BOSS.z)){
+    // a cabeça fica a uns 12% da borda de cima (o capuz e a foice ainda cabem)
+    const yTop = viewTopY(BOSS.x, BOSS.z + 0.6, 0.95), yHead = viewTopY(BOSS.x, BOSS.z + 0.6, 0.8);
+    const target = clamp(yHead - (BOSS.headH || BOSS.H * 0.85), GROUND_Y - BOSS.H * 0.72, GROUND_Y);
+    const e = BOSS.yTop == null ? 1 : 1 - Math.exp(-k / 1600);
+    BOSS.y += (target - BOSS.y) * e; BOSS.yTop = BOSS.yTop == null ? yTop : BOSS.yTop + (yTop - BOSS.yTop) * e;
+  }
+  if (BOSS.yTop == null) BOSS.yTop = GROUND_Y + BOSS.H;
+  BOSS.g.position.y = (BOSS.y - GROUND_Y) / Math.cos(BOSS.tilt);
+  // de tempos em tempos (e nas capturas) golpeia com a foice ou invoca
+  if (!BOSS.act && now > BOSS.nextAct && !cine.active){ bossAct(Math.random() < 0.5 ? 'chop' : 'cast'); if (!BOSS.act) BOSS.nextAct = now + 20000; }
+  if (BOSS.act){
+    const u = now - BOSS.act.t0;
+    if (!BOSS.act.fx && u > BOSS.act.dur * (BOSS.act.kind === 'chop' ? 0.55 : 0.35)){ BOSS.act.fx = true; if (BOSS.act.kind === 'chop') bossChopFx(); else if (!BOSS.act.proc) bossCastFx(); }
+    if (BOSS.act.proc){
+      const e = Math.sin(Math.PI * clamp(u / BOSS.act.dur, 0, 1));
+      if (BOSS.proc) BOSS.proc.scythe.rotation.z = (BOSS.act.kind === 'chop' ? -1.1 : 0.3) * e;
+      if (u > BOSS.act.dur){ BOSS.act = null; BOSS.nextAct = now + (RM ? 30000 : 16000) + Math.random() * 12000; }
+    } else if (u > BOSS.act.dur + 1500) bossActEnd(BOSS.act.a);
+  }
+  if (BOSS.mixer) BOSS.mixer.update(k / 1000 * (RM ? 0.7 : 1));
+  if (BOSS.proc){ BOSS.proc.g.rotation.z = 0.02 * Math.sin(t * 0.6); BOSS.proc.g.position.y = 0.05 * BOSS.H * Math.sin(t * 0.5); }
+  BOSS.g.updateMatrixWorld(true);
+  // olhos pulsando, halo e a luz vermelha no rosto
+  const pulse = 0.75 + 0.25 * Math.sin(t * 2.3) + 0.1 * Math.sin(t * 7.1);
+  const E = BOSS.eyeW;
+  if (BOSS.head && BOSS.eyeOff){ for (let i = 0; i < 2; i++) BOSS.head.localToWorld(E[i].copy(BOSS.eyeOff[i])); }
+  else if (BOSS.proc){ for (let i = 0; i < 2; i++) BOSS.proc.g.localToWorld(E[i].copy(BOSS.proc.eyes[i])); }
+  const es = BOSS.H * 0.03;
+  for (let i = 0; i < 2; i++){ BOSS.eyes[i].position.copy(E[i]); BOSS.eyes[i].scale.setScalar(es * (0.85 + 0.35 * pulse)); }
+  _bu.addVectors(E[0], E[1]).multiplyScalar(0.5);
+  BOSS.halo.position.copy(_bu); BOSS.halo.scale.setScalar(BOSS.H * 0.11 * (0.8 + 0.3 * pulse)); BOSS.haloMat.opacity = 0.32 + 0.2 * pulse;
+  _bw.set(0, 0, 1).applyQuaternion(BOSS.base.quaternion);
+  BOSS.light.position.copy(_bu).addScaledVector(_bw, BOSS.H * 0.06); BOSS.light.intensity = 1.1 + 0.9 * pulse + BOSS.vflash * 2;
+  // o vórtice segue o deus no fundo pintado: o centro fica atrás da cabeça
+  if (BOSS.vortex && backdrop && backdrop.visible){
+    backdrop.updateMatrixWorld();
+    _bw.set(0, 0, 1).applyQuaternion(backdrop.quaternion);
+    _bv.subVectors(_bu, camera.position);
+    const den = _bv.dot(_bw);
+    if (Math.abs(den) > 1e-4){
+      const tt = _bu.copy(backdrop.position).sub(camera.position).dot(_bw) / den;
+      _bu.copy(camera.position).addScaledVector(_bv, tt);
+      backdrop.worldToLocal(_bu);
+      const tx = clamp(_bu.x, -12, 12), ty = clamp(_bu.y + 0.6, 0.6, 4);
+      if (BOSS.vx == null){ BOSS.vx = tx; BOSS.vy = ty; } else { const e = 1 - Math.exp(-k / 500); BOSS.vx += (tx - BOSS.vx) * e; BOSS.vy += (ty - BOSS.vy) * e; }
+      BOSS.vortex.position.x = BOSS.vortex2.position.x = BOSS.vx; BOSS.vortex.position.y = BOSS.vortex2.position.y = BOSS.vy;
+    }
+    const sp = RM ? 0.3 : 1;
+    BOSS.vortex.rotation.z -= k * 0.00009 * sp; BOSS.vortex2.rotation.z += k * 0.00005 * sp;
+    BOSS.vortex2.material.opacity = 0.42 + 0.12 * Math.sin(t * 0.8) + BOSS.vflash * 0.5;
+  }
+  BOSS.vflash *= Math.pow(0.97, k / 16.7);
+  // fumaça preta subindo do manto e da base, onde ele sai do chão
+  if (GLOK){
+    const S = smokeSys(), H = BOSS.H, yb = Math.max(GROUND_Y + 0.05, BOSS.y);
+    BOSS.smoke += k * (RM ? 0.006 : W < 560 ? 0.012 : 0.03);
+    while (BOSS.smoke > 1){
+      BOSS.smoke -= 1;
+      const base = Math.random() < 0.45, a = Math.random() * TAU;
+      const yy = base ? yb + Math.random() * 0.3 : yb + Math.random() * Math.max(0.3, BOSS.y + H * 0.55 - yb);
+      const r = base ? H * (0.12 + Math.random() * 0.12) : H * 0.1 * (1.2 - (yy - BOSS.y) / H);
+      S.emit(BOSS.x + Math.cos(a) * r, yy, BOSS.z + Math.sin(a) * r * 0.7 + 0.2, (Math.random() - 0.5) * 0.25, 0.35 + Math.random() * 0.55, (Math.random() - 0.5) * 0.2,
+        2600 + Math.random() * 2200, (base ? 1.1 : 0.7) + Math.random() * 0.8, Math.random() < 0.6 ? '#030102' : '#140608', base ? 0.45 : 0.3, -0.02, 0.85);
+    }
+  }
+  // discípulos em volta do deus (na faixa em que ele aparece) e pelo céu da arena
+  const lo0 = Math.max(GROUND_Y + 0.7, BOSS.y + BOSS.H * 0.3), hi0 = BOSS.yTop - 0.9;
+  for (const q of BOSS.ghosts){
+    q.a += q.w * k / 1000 * (RM ? 0.5 : 1);
+    const lo = Math.min(lo0, hi0 - 0.4);
+    ghostMove(q, BOSS.x + Math.cos(q.a) * q.r, mix(lo, hi0, q.f) + 0.35 * Math.sin(t * 0.7 + q.ph), BOSS.z + 0.6 + Math.sin(q.a) * q.r * 0.6, t, k);
+  }
+  for (const q of BOSS.sky){
+    q.a += q.w * k / 1000 * (RM ? 0.5 : 1);
+    const x = Math.cos(q.a) * q.rx, z = q.cz + Math.sin(q.a * q.m) * q.rz;
+    const yt = inView(x, z) ? viewTopY(x, z, 0.9) : 7;
+    q.yb = q.yb == null ? yt : q.yb + (yt - q.yb) * (1 - Math.exp(-k / 700));
+    ghostMove(q, x, clamp(q.yb - q.h * 0.9, 2.4, 9) + 0.3 * Math.sin(t * 0.5 + q.ph), z, t, k);
+  }
+  soulsTick(now, k);
+}
+
+/* almas: sobem do corpo da vítima, um discípulo desce, agarra e leva ao pé do deus, onde somem numa névoa */
+function soulReap(x, z){
+  if (!BOSS.on || !GLOK || !BOSS.root) return;
+  const now = performance.now();
+  if (BOSS.souls.length >= (W < 560 ? 3 : 6)) return;
+  // o deus responde às capturas (com intervalo)
+  if (!BOSS.act && now > BOSS.capCD && !RM && Math.random() < 0.6){ BOSS.capCD = now + 9000; setTimeout(() => BOSS.on && bossAct(Math.random() < 0.6 ? 'cast' : 'chop'), 700); }
+  let gh = BOSS.pool.pop();
+  if (!gh) gh = makeGhost(1.45);
+  gh.g.visible = true; gh.g.scale.setScalar(gh.h); gh.px = null;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:soulTexture(), color:C(0xdff2ff), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false }));
+  sp.scale.set(0.55, 1.1, 1); sp.position.set(x, 0.7, z); sp.renderOrder = 7; BOSS.root.add(sp);
+  // o fantasma vem do alto, do lado do cemitério
+  const from = V3(BOSS.x + (Math.random() - 0.5) * 6, Math.max(4, (BOSS.yTop || 5) + 1.5), BOSS.z + 3);
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const to = V3(BOSS.x + side * (1.2 + Math.random() * 1.4), GROUND_Y + 0.9, BOSS.z + 1.8 + Math.random() * 0.8);
+  BOSS.souls.push({ t0:now, x, z, sp, gh, from, to, grab:null, ph:Math.random() * 6, done:false, sound:false });
+}
+function soulsTick(now, k){
+  const t = now / 1000;
+  for (let i = BOSS.souls.length - 1; i >= 0; i--){
+    const s = BOSS.souls[i], u = now - s.t0, gh = s.gh, sp = s.sp;
+    const sy = 0.7 + 1.3 * easeOut(clamp(u / 1100, 0, 1)), sx = s.x + 0.08 * Math.sin(t * 3 + s.ph), sz = s.z;
+    if (u < 1150){
+      // a alma sobe; o fantasma mergulha até ela
+      sp.position.set(sx, sy, sz); sp.material.opacity = clamp(u / 500, 0, 1) * 0.95;
+      const e = easeIO(clamp(u / 1150, 0, 1));
+      _bv.lerpVectors(s.from, _bw.set(sx, sy + 0.25, sz + 0.35), e); _bv.y += Math.sin(Math.PI * e) * 1.2;
+      ghostMove(gh, _bv.x, _bv.y, _bv.z, t, k, 0.6);
+      if (Math.random() < 0.3) sparks.emit(sx, sy, sz, (Math.random() - 0.5) * 0.3, 0.4, (Math.random() - 0.5) * 0.3, 700, 0.04, '#dff2ff', 0.8, 0, 0.6);
+    } else if (u < 4100){
+      if (!s.grab){
+        s.grab = { a:V3(sx, sy + 0.25, sz + 0.35) };
+        const mid = V3().lerpVectors(s.grab.a, s.to, 0.5);
+        mid.y = Math.min(Math.max(s.grab.a.y, s.to.y) + 3, inView(mid.x, mid.z) ? viewTopY(mid.x, mid.z, 0.85) : 6);
+        s.grab.c = mid;
+        snd('sombra', { vol:0.28 });
+        sparks.burst(s.grab.a, nFx(12), ['#dff2ff', '#ff4a5a'], 1.2, { life:500, size:0.05, grav:0 });
+      }
+      // leva a alma numa curva por cima do muro até o pé do deus
+      const e = easeIO((u - 1150) / 2950), a = s.grab.a, c = s.grab.c, b = s.to, w0 = (1 - e) * (1 - e), w1 = 2 * e * (1 - e), w2 = e * e;
+      ghostMove(gh, a.x * w0 + c.x * w1 + b.x * w2, a.y * w0 + c.y * w1 + b.y * w2, a.z * w0 + c.z * w1 + b.z * w2, t, k, 1);
+      _bw.set(0, -0.12 * gh.h, 0.3 * gh.h).applyAxisAngle(UP, gh.yaw);
+      sp.position.copy(gh.g.position).add(_bw); sp.material.opacity = 0.95;
+    } else if (u < 5000){
+      // chegou: a alma some numa névoa e o fantasma sobe e se desfaz
+      if (!s.sound){
+        s.sound = true; snd('nevoa', { vol:0.3 });
+        const S = smokeSys();
+        for (let j = 0; j < (W < 560 ? 8 : 16); j++) S.emit(s.to.x + (Math.random() - 0.5) * 0.6, s.to.y + (Math.random() - 0.5) * 0.4, s.to.z + (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.5, 0.2 + Math.random() * 0.3, (Math.random() - 0.5) * 0.5, 1600, 0.5 + Math.random() * 0.4, Math.random() < 0.5 ? '#6a4a52' : '#3a1a20', 0.45, 0, 0.6);
+        sparks.burst(s.to, nFx(14), ['#dff2ff', '#ff3a4a', '#8a0a1a'], 0.9, { life:700, size:0.06, grav:-0.2, up:0.3 });
+      }
+      const e = (u - 4100) / 900;
+      sp.material.opacity = 0.95 * (1 - e); sp.scale.set(0.55 * (1 - e * 0.6), 1.1 * (1 - e * 0.6), 1);
+      ghostMove(gh, s.to.x, s.to.y + e * 2.5, s.to.z - e * 1.2, t, k, 0.5);
+      gh.g.scale.setScalar(gh.h * (1 - e * 0.95));
+    } else {
+      BOSS.root.remove(sp); sp.material.dispose();
+      gh.g.visible = false; BOSS.pool.push(gh);
+      BOSS.souls.splice(i, 1);
+    }
+  }
+}
+
+/* o dragão gigante do Covil: anda além do rio de lava (elipse achatada), vira a cabeça, ruge, cospe fogo para o alto e voa */
+function giantDragonInit(){
+  if (arena !== 'dragoes' || !envRoot || !GLOK || !GLB.dg || GDR.d || !THREE.SkeletonUtils) return;
+  const A = GLB.dg, model = THREE.SkeletonUtils.clone(A.scene);
+  applySideTint(model, 'b');
+  const own = new Map();
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = false; o.frustumCulled = false; o.renderOrder = -1;
+    o.material = [].concat(o.material).map(m => { if (!own.has(m)){ const c = m.clone(); c.transparent = true; c.depthWrite = true; if ('envMapIntensity' in c) rimShader(c, 0xff6a20, 0.8); own.set(m, c); } return own.get(m); });
+    if (o.material.length === 1) o.material = o.material[0];
+  });
+  if (backdrop) backdrop.material.depthWrite = false;
+  const B = dragonBonesOf(model), L = W < 560 ? 8 : 9.5, k = L / Math.max(0.2, A.len);
+  const g = new THREE.Group(), holder = new THREE.Group();
+  g.name = 'dragao-gigante';
+  holder.scale.setScalar(k);
+  holder.position.set(A.off.x / A.scale * k, A.off.y / A.scale * k, A.off.z / A.scale * k);
+  holder.add(model); g.add(holder); envRoot.add(g);
+  let mixer = null, walk = null;
+  if (A.clips.walk){ mixer = new THREE.AnimationMixer(model); walk = mixer.clipAction(A.clips.walk); walk.play(); walk.timeScale = 0.55; }
+  const now = performance.now(), anim = new Set((A.clips.walk ? A.clips.walk.tracks : []).map(tr => tr.name.split('.')[0]));
+  // a trilha é um arco em volta da metade das negras: atrás do rio de lava e descendo pelos flancos até perto do meio do
+  // tabuleiro (a câmera do Covil olha quase de cima: além do rio quase nada cabe no quadro, nos flancos o dragão aparece
+  // inteiro, visto de cima); ele vai até uma ponta, dá meia-volta e volta. Nunca passa sobre o tabuleiro.
+  GDR.d = { g, model, B, mixer, walk, anim, L, H:A.height / A.scale * k, th:Math.PI * 1.5, wd:1, th0:Math.PI - 0.35, th1:Math.PI * 2 + 0.35, cx:0, cz:-4.4, rx:9.3, rz:6.4, sp:L * 0.085, turn:null,
+    st:'walk', t0:now, nextRoar:now + 9000 + Math.random() * 5000, nextFly:now + 40000 + Math.random() * 20000, hd:0, hdT:0, nextLook:now + 2000, yaw:0, fly:null, roared:false, fp:0 };
+  GDR.on = true;
+  glbLog.push(`dragão gigante: ${L} de comprimento, ${GDR.d.H.toFixed(1)} de altura`);
+}
+function giantDragonTick(now, dt){
+  const D = GDR.d;
+  if (!D || !GDR.on) return;
+  const k = Math.min(dt, 60), s = k / 1000, t = now / 1000, P = D.g.position;
+  const pathAt = th => [D.cx + Math.cos(th) * D.rx, D.cz + Math.sin(th) * D.rz];
+  const busyCam = cine.active;
+  if (D.st === 'walk'){
+    const sx = -Math.sin(D.th) * D.rx, sz = Math.cos(D.th) * D.rz, hv = Math.hypot(sx, sz) || 1;
+    if (D.turn){
+      // meia-volta na ponta da trilha, andando no lugar
+      const e = clamp((now - D.turn.t0) / 2600, 0, 1);
+      D.yaw = D.turn.y0 + Math.PI * easeIO(e);
+      if (e >= 1){ D.turn = null; D.wd = -D.wd; }
+    } else {
+      D.th += D.wd * D.sp * s / hv * (RM ? 0.6 : 1);
+      if (D.th > D.th1 || D.th < D.th0){ D.th = clamp(D.th, D.th0, D.th1); D.turn = { t0:now, y0:D.yaw }; }
+      D.yaw = Math.atan2(D.wd * sx, D.wd * sz);
+    }
+    const [x, z] = pathAt(D.th);
+    P.set(x, GROUND_Y, z);
+    D.g.rotation.set(0, D.yaw, 0);
+    if (D.mixer){ D.walk.setEffectiveWeight(1); D.mixer.update(s * (RM ? 0.6 : 1)); }
+    if (!busyCam && now > D.nextRoar){ D.st = 'roar'; D.t0 = now; D.roared = false; }
+    else if (!busyCam && !RM && now > D.nextFly){
+      const [x0, z0] = [P.x, P.z];
+      D.st = 'fly'; D.t0 = now; D.turn = null; D.fly = { from:V3(x0, GROUND_Y, z0), a0:Math.atan2((z0 + 4.5) / 7, x0 / 7.6), dir:Math.random() < 0.5 ? 1 : -1, y:null };
+    }
+  } else if (D.st === 'roar'){
+    // para, ergue a cabeça, abre a mandíbula, ruge e solta fogo para o alto
+    const u = now - D.t0, e = Math.sin(Math.PI * clamp(u / 3400, 0, 1));
+    if (D.mixer) D.mixer.update(0);
+    gdBase(D);
+    for (const b of D.B.head) dgAdd(b, -0.35 * e, 0, 0);
+    if (D.B.jaw) dgAdd(D.B.jaw, 0.55 * e, 0, 0);
+    if (!D.roared && u > 900){
+      D.roared = true;
+      snd('rugido_dragao', { vol:0.85 });
+      D.fire = !RM && !!D.B.tip && Math.random() < 0.8;
+      if (D.fire){
+        D.g.updateMatrixWorld(true);
+        const a = D.B.tip.getWorldPosition(V3()), f = V3(Math.sin(D.yaw), 0, Math.cos(D.yaw));
+        fireStream(a, a.clone().addScaledVector(f, 2.6).add(V3(0, 6.5, 0)), 1100);
+      }
+    }
+    // labareda grossa, do tamanho do bicho, por cima do jorro fino do fireStream
+    if (D.fire && u > 950 && u < 2300 && GLOK && D.B.tip){
+      D.B.tip.getWorldPosition(_bv);
+      const n = Math.max(1, Math.round(k * (golpeLite() ? 0.15 : 0.35)));
+      for (let i = 0; i < n; i++){
+        const sp = 7 + Math.random() * 4;
+        sparks.emit(_bv.x, _bv.y, _bv.z, Math.sin(D.yaw) * 2.2 + (Math.random() - 0.5) * 1.6, sp, Math.cos(D.yaw) * 2.2 + (Math.random() - 0.5) * 1.6,
+          700 + Math.random() * 500, 0.35 + Math.random() * 0.4, FIRE_COLS[(Math.random() * 4) | 0], 0.95, -1.5, 0.6);
+      }
+    }
+    if (u > 3400){ D.st = 'walk'; D.nextRoar = now + 14000 + Math.random() * 10000; }
+  } else if (D.st === 'fly') giantDragonFly(D, now, k);
+  // a cabeça olha em volta enquanto anda
+  if (D.st === 'walk'){
+    if (now > D.nextLook){ D.hdT = (Math.random() - 0.5) * 1.1; D.nextLook = now + 2500 + Math.random() * 3500; }
+    D.hd += (D.hdT - D.hd) * (1 - Math.exp(-k / 700));
+    gdBase(D);
+    for (const b of D.B.head) dgAdd(b, 0, D.hd * 0.5, 0);
+  }
+}
+function gdBase(D){ for (const b of [...D.B.head, D.B.jaw]) if (b && !D.anim.has(b.name)) b.quaternion.copy(D.B.rest.get(b)); }
+// voo: decola batendo as asas, dá uma volta alta (logo abaixo da borda de cima da tela) e pousa de volta na trilha
+function giantDragonFly(D, now, k){
+  const F = D.fly, u = now - D.t0, t = now / 1000, B = D.B, P = D.g.position, TO = 2600, LOOP = 13000, LAND = 3200;
+  for (const b of B.all) b.quaternion.copy(B.rest.get(b));
+  D.fp += k / 1000 * TAU * (u < TO ? 1.3 : 0.75);
+  const wz = 0.12 + 0.55 * Math.sin(D.fp);
+  if (B.wings[0]) dgAdd(B.wings[0], 0, 0, wz * 2.2);
+  if (B.wings[1]) dgAdd(B.wings[1], 0, 0, -wz * 2.2);
+  B.tail.forEach((b, i) => dgAdd(b, 0.05 * Math.sin(t + i), 0.14 * Math.sin(t * 1.2 - i * 0.7), 0));
+  // a volta: elipse em torno de um ponto além do tabuleiro, na altura da faixa de cima da tela
+  const loopAt = a => {
+    const x = Math.cos(a) * 7.6, z = -4.5 + Math.sin(a) * 7, vis = inView(x, z);
+    if (Math.abs(x) < 5.8 && Math.abs(z) < 6) return [x, z, vis ? Math.max(5, viewTopY(x, z, 1.02) + D.H * 0.6) : 9];
+    return [x, z, clamp((vis ? viewTopY(x, z, 0.84) : 9) - D.H * 0.3, 3.2, 13)];
+  };
+  let x, y, z;
+  if (u < TO + LOOP){
+    const a = F.a0 + F.dir * TAU * clamp((u - TO * 0.4) / (LOOP + TO * 0.6), 0, 1);
+    const [lx, lz, ly] = loopAt(a);
+    F.y = F.y == null ? ly : F.y + (ly - F.y) * (1 - Math.exp(-k / 600));
+    if (u < TO){ const e = easeIO(u / TO); x = mix(F.from.x, lx, e); z = mix(F.from.z, lz, e); y = mix(GROUND_Y, F.y, e); }
+    else { x = lx; z = lz; y = F.y; }
+  } else if (u < TO + LOOP + LAND){
+    if (!F.land){ let th = Math.atan2((P.z - D.cz) / D.rz, (P.x - D.cx) / D.rx); if (th < D.th0 - 0.6) th += TAU; th = clamp(th, D.th0, D.th1); F.land = { a:P.clone(), th }; D.th = th; }
+    const e = easeIO((u - TO - LOOP) / LAND), [tx, tz] = [D.cx + Math.cos(F.land.th) * D.rx, D.cz + Math.sin(F.land.th) * D.rz];
+    x = mix(F.land.a.x, tx, e); z = mix(F.land.a.z, tz, e); y = mix(F.land.a.y, GROUND_Y, e);
+  } else {
+    D.st = 'walk'; D.fly = null; D.nextFly = now + 45000 + Math.random() * 30000; D.nextRoar = now + 5000;
+    for (const b of B.all) b.quaternion.copy(B.rest.get(b));
+    P.y = GROUND_Y; D.g.rotation.set(0, D.yaw, 0);
+    return;
+  }
+  const vx = x - P.x, vy = y - P.y, vz = z - P.z, hv = Math.hypot(vx, vz);
+  P.set(x, y, z);
+  if (hv > 1e-4){
+    const yw = Math.atan2(vx, vz); let d = yw - D.yaw; if (d > Math.PI) d -= TAU; else if (d < -Math.PI) d += TAU;
+    D.yaw += d * (1 - Math.exp(-k / 300));
+    D.g.rotation.set(clamp(Math.atan2(-vy, hv) * 0.6, -0.4, 0.4), D.yaw, clamp(-d * 6, -0.45, 0.45));
+  }
+  if (u < 400 && !F.sound){ F.sound = true; snd('asas', { vol:0.7 }); snd('rugido_dragao', { vol:0.6, delay:0.8 }); }
+}
+
 /* Covil dos Dragões, o mundo dos Dragões: aurora verde-azulada no céu e um dragão realista que pousa na borda, anda, ruge e volta a voar */
 function buildDragonWorld(){
   if (!GLOK || !envRoot || RM) return;
@@ -10314,6 +11055,9 @@ function updateEnv(now, dt){
     else if (k > 0) fb = (k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88) * (0.85 + 0.15 * Math.sin(now * 0.05));
   }
   if (ENVX.dragons){ updateDragons(now, dt); dragonLandTick(now, dt); }
+  // chefes: o Deus da Morte (Mistério Infernal) e o dragão gigante (Covil dos Dragões)
+  if (BOSS.on) bossTick(now, dt);
+  if (GDR.on) giantDragonTick(now, dt);
   // o dragão plana pelo céu de vez em quando
   const G1 = ENVX.glider;
   if (G1){
@@ -12879,6 +13623,7 @@ async function arcEvents(ev){
       snd('aura', { vol:0.8 });
       if (GLOK){ spawnRing(b.dx, b.dz, 0xffd36a, 1.2, 600); sparks.burst(chestOf(b, 0.6), 30, ['#ffe6a0', '#ffffff'], 2, { life:700, size:0.07, grav:1, upward:true }); }
       floatText(b, (ARC_FX[e.aura] || [e.aura])[0], '#ffe6a0', 0.3, 12, 0.2);
+      soulReap(a.dx, a.dz);
       toGrave(a); a.flash = 0; a.lift = 0;
       await wait(450);
       if (on){ cineRelease(); await cineFinish(); }
@@ -12899,6 +13644,7 @@ async function arcEvents(ev){
       if (GLOK){ spawnRing(p.dx, p.dz, 0x401010, 1.4, 700); dust.emit && dustAt(p.dx, p.dz, 16, 0.9); }
       p.dead = true;
       await tween(500, k => { p.alpha = 1 - k; p.sink = k * 0.5; });
+      soulReap(p.dx, p.dz);
       toGrave(p); p.tint = 0;
     } else if (e.k === 'remove'){
       // remoção já animada pela cena (sacrifício, berserker) ou feita pelo reconciliador

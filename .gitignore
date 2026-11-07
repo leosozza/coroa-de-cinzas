@@ -23,3 +23,10 @@ assets/meshy/reinos/**/tripo_rig/
 assets/meshy/reinos/**/meshy_*.glb
 assets/meshy/reinos/**/modelo_z.glb
 assets/meshy/reinos/**/meshy_rig.json
+
+# chefões: só os .opt e .gltf.json vão para o git
+assets/meshy/chefes/*/model.glb
+assets/meshy/chefes/*/rigged.glb
+assets/meshy/chefes/*/animated.glb
+assets/meshy/chefes/*/animated_fix.glb
+assets/meshy/chefes/*/meshy_animated.glb
