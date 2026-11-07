@@ -914,11 +914,11 @@
       "grupo": "especial"
     },
     "e_mate_brancas": {
-      "texto": "Xeque-mate! O rei negro é capturado e levado para o campo das brancas!",
+      "texto": "Xeque-mate! O rei negro cai diante do poder das brancas!",
       "grupo": "especial"
     },
     "e_mate_negras": {
-      "texto": "Xeque-mate! O rei branco é capturado e levado para o campo das negras!",
+      "texto": "Xeque-mate! O rei branco cai diante do poder das negras!",
       "grupo": "especial"
     }
   }

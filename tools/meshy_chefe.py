@@ -25,6 +25,10 @@ CHEFES = {
     "pesadelo":     dict(arte="evolucoes/pesadelo_v2.png", rig=False, poly=20000),
     "dragao_ossos": dict(arte="evolucoes/dragao_ossos_v1.png", rig=False, poly=20000),
     "serpe":        dict(arte="evolucoes/serpe_v1.png", rig=False, poly=20000),
+    # mascote do reino Alpha da Lua Nova: o lobo gigante (estático, anda por código) que vira o lobisomem
+    "lobo_gigante": dict(arte="reinos/lua_nova/lobo_gigante.png", rig=False, poly=20000),
+    "lobisomem":    dict(arte="reinos/lua_nova/lobisomem.png", rig=True, altura=3.5, poly=20000,
+                         acoes=[0, 214, 198]),   # Idle, Punch_Forward_with_Both_Fists, Punch_Combo (o 464 saiu da biblioteca)
 }
 CUSTO = lambda n: 30 + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
 

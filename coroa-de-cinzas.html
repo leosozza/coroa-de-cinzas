@@ -121,8 +121,8 @@ canvas{display:block; width:100%}
 .icon-btn{display:inline-grid; place-items:center; min-width:44px; min-height:44px; padding:0 10px}
 .icon-btn svg, .fs-scene svg, .rail-ic svg, .rail-toggle svg{width:20px; height:20px; display:block}
 .fs-btn .i-out, .fs-scene .i-out{display:none}
-body.imm .fs-btn .i-in, body.imm .fs-scene .i-in{display:none}
-body.imm .fs-btn .i-out, body.imm .fs-scene .i-out{display:block}
+body.fsx .fs-btn .i-in, body.fsx .fs-scene .i-in{display:none}
+body.fsx .fs-btn .i-out, body.fsx .fs-scene .i-out{display:block}
 .fs-scene{position:absolute; right:10px; bottom:10px; z-index:3; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid rgba(227,165,72,.45); border-radius:6px; background:var(--hud); color:var(--ember); cursor:pointer}
 .fs-scene:hover, .fs-scene:focus-visible{border-color:var(--ember)}
 .stage{transition:grid-template-columns .25s ease}
@@ -645,6 +645,94 @@ body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-t
   .arc-who{font-size:.8rem}
   body.imm .arc{bottom:calc(60px + env(safe-area-inset-bottom, 0px)); max-width:calc(100vw - 340px); right:auto}
 }
+/* Modo cinema (largura < 900, altura < 500 ou tela cheia): o tabuleiro ocupa a tela; os controles ficam numa barra fina e
+   translúcida que some depois de 3 s sem toque e volta com um toque no tabuleiro (que não escolhe peça) ou no botão do canto.
+   Em pé: sistema em cima à esquerda, aviso de vez à direita, câmeras/mapa/painel/espectador embaixo. Deitado: duas colunas nas
+   bordas (o meio do tabuleiro fica livre). Tela cheia larga: tudo numa faixa em cima. */
+.cin-r, .cin-wake, .turn-short{display:none}
+body.cin{--cb:44px; --cg:6px; --ct:max(6px, env(safe-area-inset-top, 0px)); --cbm:max(6px, env(safe-area-inset-bottom, 0px)); --cl:max(6px, env(safe-area-inset-left, 0px)); --crt:max(6px, env(safe-area-inset-right, 0px));
+  --cbar:calc(var(--cb) + 8px); --ctopw:calc(4 * var(--cb) + 3 * var(--cg) + 8px)}
+body.cin .top, body.cin .cin-r{position:fixed; z-index:21; padding:3px; border:1px solid rgba(255,236,200,.08); border-radius:10px; background:rgba(12,10,9,.46); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px)}
+body.cin .top{top:var(--ct); left:var(--cl); gap:var(--cg)}
+body.cin .top .controls{gap:var(--cg); flex-wrap:nowrap}
+body.cin .cin-r{display:flex; gap:var(--cg); align-items:center; left:50%; bottom:var(--cbm); transform:translateX(-50%)}
+body.cin .top button, body.cin .cin-r button{min-height:var(--cb); height:var(--cb); min-width:var(--cb); padding:0; background:rgba(20,16,14,.5); border-color:rgba(227,165,72,.26); box-shadow:none}
+body.cin .top #menu-btn, body.cin .top #quit-btn, body.cin .top #audio-btn{width:var(--cb); font-size:0; letter-spacing:0; display:inline-grid; place-items:center}
+body.cin .top #menu-btn::before, body.cin .top #quit-btn::before, body.cin .top #audio-btn::before{content:''; width:20px; height:20px; background:currentColor; -webkit-mask:var(--ic) center / contain no-repeat; mask:var(--ic) center / contain no-repeat}
+body.cin .top #menu-btn{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/svg%3E")}
+body.cin .top #quit-btn{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 4H5v16h5M14 8l4 4-4 4M18 12H9'/%3E%3C/svg%3E"); color:#ffb3a8}
+body.cin .top #audio-btn{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9v6h4l5 4V5L8 9H4ZM16.5 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11'/%3E%3C/svg%3E")}
+body.cin .top #audio-btn[aria-pressed="false"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9v6h4l5 4V5L8 9H4ZM17 9l5 6M22 9l-5 6'/%3E%3C/svg%3E")}
+body.cin .cin-r button{display:grid; place-items:center; width:var(--cb); color:var(--ember)}
+body.cin .cin-r button svg{width:20px; height:20px; display:block}
+body.cin .cin-r button[aria-expanded="true"], body.cin .cin-r button[aria-pressed="true"]{border-color:var(--ember); background:rgba(60,40,18,.7)}
+body.cin .mm-fab, body.cin .fs-scene, body.cin .view-hint{display:none !important}
+/* aviso de vez: uma linha curta (o texto longo e o número do lance ficam fora) */
+body.cin .turn-short{display:inline; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+body.cin .turn-who{min-width:0; flex:1 1 auto; gap:8px}
+body.cin .turn-who > span:not(.sigil):not(.turn-short), body.cin .turn-no{display:none}
+body.cin .turn{top:var(--ct); left:auto; right:var(--crt); transform:none; max-width:calc(100vw - var(--cl) - var(--crt) - var(--ctopw) - 8px); height:var(--cbar); padding:0 12px; flex-wrap:nowrap; gap:8px;
+  border-radius:10px; border-color:rgba(255,236,200,.08); background:rgba(12,10,9,.46); font-size:.8rem; letter-spacing:.03em}
+body.cin .turn-right{flex-wrap:nowrap; gap:6px}
+body.cin .turn .tag{padding:2px 6px; font-size:.68rem}
+/* espectador (⋯) e câmeras: menus compactos que abrem sobre a barra */
+body.cin .specbar, body.cin .views{display:none}
+body.cin .specbar, body.cin .views{position:fixed; z-index:22; left:50%; top:auto; bottom:calc(var(--cbm) + var(--cbar) + 8px); transform:translateX(-50%); width:auto; max-width:calc(100vw - var(--cl) - var(--crt) - 8px); margin:0;
+  padding:8px; border:1px solid rgba(227,165,72,.35); border-radius:10px; background:rgba(14,11,10,.9); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); box-shadow:0 14px 34px rgba(0,0,0,.6)}
+body.cin.cin-spec .specbar:not([hidden]){display:grid; grid-template-columns:1fr 1fr; gap:6px; width:min(320px, calc(100vw - 24px))}
+body.cin .specbar .score{grid-column:1 / -1; order:0; margin:0 2px 2px; font-size:.74rem; color:var(--ash); text-align:center}
+body.cin .specbar .spec-speed{grid-column:1 / -1; order:3; display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:var(--f-ui); font-size:.82rem}
+body.cin .specbar button{min-height:44px; font-size:.8rem; padding:0 8px}
+body.cin #spec-pause{order:1} body.cin #spec-back{order:2} body.cin #spec-take-w{order:4} body.cin #spec-take-b{order:5}
+body.cin.cin-views .views{display:flex; flex-direction:column; align-items:stretch; gap:6px; overflow:visible}
+body.cin .views .seg{display:flex; flex-wrap:wrap; justify-content:center}
+/* gaveta e painel: fechados por completo (sem a borda do puxador); abrem pelo botão Painel */
+body.cin .stage .panel:not(.open){transform:translateY(calc(100% + 4px)); box-shadow:none; pointer-events:none}
+body.cin .stage.pcol .panel{display:none}
+body.cin .mm{top:calc(var(--ct) + var(--cbar) + 8px); right:var(--crt)}
+body.cin .arc{bottom:calc(var(--cbm) + var(--cbar) + 8px); right:max(8px, env(safe-area-inset-right, 0px))}
+body.cin .onbar, body.cin .lesson{top:calc(var(--ct) + var(--cbar) + 8px)}
+body.cin .mate-skip{top:calc(var(--ct) + var(--cbar) + 8px); left:var(--cl)}
+body.cin .narr-cap{bottom:calc(var(--cbm) + var(--cbar) + 12px)}
+body.cin .arc-banner:not(.mini){top:calc(var(--ct) + var(--cbar) + 8px)}
+/* some sozinho: a barra, os menus e, assistindo, também o aviso de vez, a faixa de cartas e a barra do replay */
+body.cin .top, body.cin .cin-r, body.cin.cin-watch .turn, body.cin.cin-watch .arc, body.cin.cin-watch .onbar{transition:opacity .35s ease, visibility .35s}
+body.cin.cin-idle .top, body.cin.cin-idle .cin-r, body.cin.cin-idle.cin-watch .turn, body.cin.cin-idle.cin-watch .arc, body.cin.cin-idle.cin-watch .onbar{opacity:0; visibility:hidden; pointer-events:none}
+body.cin.cin-idle .turn{opacity:.78}
+body.cin.cin-idle .cin-wake{display:grid; place-items:center; position:fixed; z-index:22; top:var(--ct); left:var(--cl); width:44px; height:44px; min-height:44px; padding:0; border:0; background:none; color:var(--bone); opacity:.55; cursor:pointer}
+body.cin .cin-wake i{display:block; width:26px; height:26px; border:1px solid rgba(255,236,200,.4); border-radius:50%; background:rgba(12,10,9,.5) center / 14px no-repeat}
+body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%; background:var(--bone); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 10l5-5 5 5M7 17l5-5 5 5'/%3E%3C/svg%3E") center / 14px no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 10l5-5 5 5M7 17l5-5 5 5'/%3E%3C/svg%3E") center / 14px no-repeat}
+@media (prefers-reduced-motion: reduce){ body.cin .top, body.cin .cin-r, body.cin.cin-watch .turn, body.cin.cin-watch .arc, body.cin.cin-watch .onbar{transition:none} }
+/* deitado (celular): colunas nas bordas; o aviso de vez é uma pílula curta em cima, no meio */
+@media (orientation:landscape) and (max-height:500px){
+  body.cin{--cb:42px; --cg:5px}
+  body.cin .top{top:50%; transform:translateY(-50%)}
+  body.cin .top .controls{flex-direction:column}
+  body.cin .top .audio-panel{top:0; left:calc(100% + 10px); max-height:calc(100dvh - 20px); overflow-y:auto}
+  body.cin .cin-r{flex-direction:column; left:auto; right:var(--crt); bottom:auto; top:50%; transform:translateY(-50%)}
+  body.cin .turn{left:50%; right:auto; transform:translateX(-50%); height:30px; max-width:calc(100vw - 2 * (var(--cbar) + 24px)); font-size:.74rem; padding:0 10px}
+  body.cin .specbar, body.cin .views{left:auto; right:calc(var(--crt) + var(--cbar) + 8px); top:50%; bottom:auto; transform:translateY(-50%); max-height:calc(100dvh - 16px); overflow-y:auto}
+  body.cin .stage .panel:not(.open){transform:translateX(calc(100% + 4px))}
+  body.cin .mm{top:calc(var(--ct) + 38px); right:calc(var(--crt) + var(--cbar) + 8px)}
+  body.cin .arc{left:calc(var(--cl) + var(--cbar) + 8px); right:calc(var(--crt) + var(--cbar) + 8px); bottom:var(--cbm); max-width:none; padding:4px 8px; gap:2px}
+  body.cin .arc-top{gap:8px; flex-wrap:nowrap; min-height:0} body.cin .arc-top .btn-main{min-height:32px; height:32px; padding:0 10px; font-size:.78rem}
+  body.cin .arc-hand{padding-top:4px} body.cin .acard, body.cin.imm .acard{width:54px; height:70px}
+  body.cin .acard .nm{padding:10px 3px 3px; font-size:.54rem}
+  body.cin .onbar, body.cin .lesson{top:calc(var(--ct) + 38px); width:min(620px, calc(100vw - 2 * (var(--cbar) + 24px)))}
+  body.cin .narr-cap{bottom:var(--cbm); max-width:calc(100% - 2 * (var(--cbar) + 24px))}
+  body.cin .mate-skip{top:var(--ct); left:calc(var(--cl) + var(--cbar) + 8px)}
+  body.cin.cin-idle .cin-wake{top:50%; transform:translateY(-50%)}
+}
+/* tela cheia larga: uma faixa só, em cima */
+@media (min-width:900px) and (min-height:501px){
+  body.cin .turn{left:50%; right:auto; transform:translateX(-50%); max-width:min(560px, calc(100vw - 2 * var(--ctopw) - 40px))}
+  body.cin .cin-r{left:auto; right:var(--crt); top:var(--ct); bottom:auto; transform:none}
+  body.cin .specbar, body.cin .views{left:auto; right:var(--crt); top:calc(var(--ct) + var(--cbar) + 8px); bottom:auto; transform:none}
+  body.cin .mm{right:var(--crt)}
+  body.cin .arc{bottom:calc(var(--cbm) + 8px)}
+  body.cin .narr-cap{bottom:max(14px, 7%)}
+  body.imm.cin .panel{top:calc(var(--ct) + var(--cbar) + 10px)}
+}
 </style>
 
 <div class="app">
@@ -826,6 +914,7 @@ body.imm .onbar{position:fixed; z-index:6; top:calc(62px + env(safe-area-inset-t
   </div>
 </div>
 
+<div class="cin-r" id="cin-r" role="toolbar" aria-label="Controles da partida"><button type="button" id="cin-more" aria-expanded="false" aria-controls="specbar" aria-label="Controles do espectador" title="Pausar, velocidade, voltar, assumir" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg></button><button type="button" id="cin-cam" aria-expanded="false" aria-controls="views" aria-label="Câmeras" title="Câmeras (V troca a vista)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h3l2-3h8l2 3h3v11H3ZM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" id="cin-map" aria-pressed="false" aria-label="Mapa" title="Mapa (atalho: M)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button type="button" id="cin-pan" aria-expanded="false" aria-controls="panel" aria-label="Painel da partida" title="Painel: forças, ficha, lances e crônica"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4ZM14 5v14M16.5 9h1.5M16.5 12h1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><button type="button" class="cin-wake" id="cin-wake" aria-label="Mostrar os controles"><i aria-hidden="true"></i></button>
   <main class="stage" id="stage">
     <section class="board-col">
       <div class="turn" id="turn" aria-live="polite"></div>
@@ -6846,7 +6935,8 @@ function prepDragon(g){
 }
 // o Cavaleiro vira dragão (ou volta): pilar de fogo, brasas e o rugido
 function dragonForm(p, on){
-  if (!GLOK || !GLB.dg) return;
+  const bone = on && kingdomOf(p.side) === 'ferro_negro' && AVT.dragao_ossos;
+  if (!GLOK || (!GLB.dg && !bone && on)) return;
   const e = CH[p.id];
   if (!e || !!e.c.dragonModel === on || p.dead) return;
   const face = e.c.root.rotation.y;
@@ -6854,7 +6944,7 @@ function dragonForm(p, on){
   sparks.burst(chestOf(p, 0.5), nFx(50), FIRE_COLS, 2.6, { life:800, size:0.08, grav:-1 });
   flashLight(chestOf(p, 0.5), 0xff7a2a, 4, 600);
   if (on) snd('rugido_dragao');
-  swapModel(p, on ? 'dg' : p.dt).root.rotation.y = face;
+  swapModel(p, on ? (bone ? 'do' : 'dg') : p.dt).root.rotation.y = face;
 }
 // o sopro de fogo do dragão até a vítima
 function fireStream(a, b, dur = 560){
@@ -7575,7 +7665,7 @@ function makeGlbCharacter(type, side, A){
       dustAt(root.position.x, root.position.z, 6, 0.4);
     }
   }
-  let desatU = null;
+  let desatU = null, mfxU = null;
   // dragão: ossos procedurais (respiração, cabeça, cauda, asas, mandíbula e o fogo no ataque) por cima do clipe de andar
   const DGB = A.dragon ? dragonBonesOf(model) : null, dgPh = Math.random() * 10;
   function dragonTick(now){
@@ -7767,6 +7857,21 @@ function makeGlbCharacter(type, side, A){
       }
       desatU.value = v;
     },
+    // xeque-mate pelo avatar do vencedor: { dark, bone, gold, crack, diss (0–1), edge:[r, g, b] } (shader por cima, encadeado)
+    setMateFx(o = {}){
+      if (!mfxU){
+        mfxU = { uDark:{ value:0 }, uBone:{ value:0 }, uGold:{ value:0 }, uCrack:{ value:0 }, uDiss:{ value:0 }, uEdge:{ value:new THREE.Color(1, 0.8, 0.4) }, uOrg:{ value:new THREE.Vector3() }, uHt:{ value:A.height } };
+        for (const m of ownMats()){
+          const prev = m.onBeforeCompile, key0 = m.customProgramCacheKey ? m.customProgramCacheKey() : '';
+          m.onBeforeCompile = (sh, r) => { if (prev) prev.call(m, sh, r); mfxInject(sh, mfxU); };
+          m.customProgramCacheKey = () => key0 + '+mfx';
+          m.needsUpdate = true;
+        }
+      }
+      mfxU.uDark.value = o.dark || 0; mfxU.uBone.value = o.bone || 0; mfxU.uGold.value = o.gold || 0; mfxU.uCrack.value = o.crack || 0; mfxU.uDiss.value = o.diss || 0;
+      if (o.edge) mfxU.uEdge.value.setRGB(o.edge[0], o.edge[1], o.edge[2]);
+      root.updateMatrixWorld(); mfxU.uOrg.value.setFromMatrixPosition(root.matrixWorld); mfxU.uHt.value = A.height * (root.scale.y || 1);
+    },
     update(dt, now){
       const t = now / 1000, amp = RM ? 0.35 : 1;
       S0.tick(dt, now);
@@ -7889,6 +7994,7 @@ function makeGlbCharacter(type, side, A){
   return api;
 }
 function makeCharacter(type, side){
+  if (type === 'ps' || type === 'sp' || type === 'do'){ let c = null; try { c = makeFormCharacter(type, side); } catch (e){ glbLog.push(`forma ${type}: falha ao instanciar (${e.message})`); } return c || makeCharacter(type === 'do' ? 'dg' : 'n', side); }
   { const KA = typeof kingdomAsset === 'function' ? kingdomAsset(type, side) : null;
     if (KA){ try { const c = makeGlbCharacter(type, side, KA); c.kingdom = KA.kingdom; return c; } catch (e){ glbLog.push(`reino: falha ao instanciar ${type} (${e.message})`); } } }
   if (type === 'dg'){
@@ -8402,13 +8508,19 @@ function debris(x, z, n, up = 3, side = null){
 }
 const spikeGeo = () => spikeGeo.g || (spikeGeo.g = (() => { const g = new THREE.ConeGeometry(0.06, 0.5, 5); g.translate(0, 0.25, 0); return g; })());
 const iceFxMat = () => iceFxMat.m || (iceFxMat.m = new THREE.MeshStandardMaterial({ color:C(0xbfe8ff), roughness:0.15, metalness:0.05, emissive:C(0x0c4a66), envMapIntensity:1.6, flatShading:true }));
-function earthSpikes(x, z, side = 'w'){
+const SPIKE_MAT = {};
+function spikeMat(kind){
+  if (!SPIKE_MAT[kind]) SPIKE_MAT[kind] = kind === 'osso' ? new THREE.MeshStandardMaterial({ color:C(0xd8cfb8), roughness:0.7, emissive:C(0x1a1008), flatShading:true })
+    : new THREE.MeshStandardMaterial({ color:C(0x0a0608), roughness:0.15, metalness:0.35, emissive:C(0x6a1a06), emissiveIntensity:0.8, flatShading:true });
+  return SPIKE_MAT[kind];
+}
+function earthSpikes(x, z, side = 'w', kind = null){
   if (!GLOK) return Promise.resolve();
   const X = FXC[side];
   const sp = [];
   for (let i = 0; i < 8; i++){
     const a = i * TAU / 8 + Math.random() * 0.4, r = i ? 0.12 + Math.random() * 0.22 : 0;
-    const m = new THREE.Mesh(spikeGeo(), X.shards ? iceFxMat() : i % 3 ? darkStoneMat : stoneMat);
+    const m = new THREE.Mesh(spikeGeo(), kind ? spikeMat(kind) : X.shards ? iceFxMat() : i % 3 ? darkStoneMat : stoneMat);
     m.position.set(x + Math.cos(a) * r, 0, z + Math.sin(a) * r);
     m.rotation.set(Math.sin(a) * 0.5 * (r > 0 ? 1 : 0), 0, -Math.cos(a) * 0.5 * (r > 0 ? 1 : 0));
     const h = 0.7 + Math.random() * 0.6 + (i ? 0 : 0.5);
@@ -8601,10 +8713,11 @@ function animMove(p, r, c){
   const [tx, tz] = tc(r, c);
   if (arena === 'gelo' && p.side === 'w') snd('gelo_estalo', { vol:0.5 });
   switch (p.t){
-    case 'n': return gallopLeap(p, tx, tz);
+    case 'n': if (kingdomOf(p.side) === 'ferro_negro' && GLOK){ const stop = fireTrail(p); return gallopLeap(p, tx, tz).finally(stop); } return gallopLeap(p, tx, tz);
     case 'r': return earthMove(p, tx, tz);
     case 'q': return lightningDash(p, tx, tz);
-    case 'b': return arcaneBlink(p, tx, tz);
+    case 'b': if (cfg.arc && GLOK && p.eid != null && G && G.s){ const ek = kingdomOf(p.side), en = arcEngPiece(p.eid); if (en && en.fx.some(f => f.id === 'andarilho') && ek !== 'aurora') return ek === 'dragoes' ? fireBlink(p).then(() => arcaneBlink(p, tx, tz)).then(() => fireBlink(p)) : (() => { const stop = setInterval(() => { soulsRise(p, 1); const S2 = smokeSys(); S2.emit(p.dx, 0.05, p.dz, 0, 0.1, 0, 1300, 0.45, '#3a1a20', 0.4, 0, 0.5); }, 120); return arcaneBlink(p, tx, tz).finally(() => clearInterval(stop)); })(); }
+      return arcaneBlink(p, tx, tz);
     default: return walkTo(p, tx, tz);
   }
 }
@@ -8950,6 +9063,9 @@ async function queenBlade(p, v, tx, tz, g){
 }
 // escolhe a coreografia do golpe pelo atacante e pelo tipo
 async function golpeCapture(p, v, tx, tz, g){
+  // a coreografia do reino (luz sagrada, arranca-alma, fogo-gelo); o cavaleiro do Ferro Negro deixa fogo negro
+  { const fx = golpeReinoFx(p, g); if (fx) return fx(p, v, tx, tz, g); }
+  if (p.t === 'n' && g.reino === 'ferro_negro' && !g.carta){ const stop = fireTrail(p); try { if (g.tipo === 'investida' || g.tipo === 'lamina') return await lanceCharge(p, v, tx, tz, g); await rangedStrike(p, v, g); await moveIn(p, tx, tz); return; } finally { stop(); } }
   if (p.t === 'n' && (g.tipo === 'investida' || g.tipo === 'lamina')) return lanceCharge(p, v, tx, tz, g);
   if (g.tipo === 'lamina' && (p.t === 'p' || p.t === 'k')) return meleeCapture(p, v, tx, tz, g);
   if (p.t === 'r') return towerVolley(p, v, tx, tz, g);
@@ -9111,6 +9227,7 @@ function kingdomApply(){
   for (const s of ['w', 'b']) kingdomLoad(kingdomOf(s));
   kingdomNames();
   KPEND = true;
+  avatarPreload();
 }
 // nome do lado nos textos ("Sua vez · Hoste dos Dragões"); Aurora fica com os nomes de sempre
 const FACTION_BASE = { w:'Ordem da Aurora', b:'Legião Cinzenta' };
@@ -9179,26 +9296,29 @@ Object.assign(GOLPE_EL, {
   luz_fumaca:{ c:['#ffe6a0', '#d6a842', '#2a2226'], hex:0xd6a842, rgb:[1.3, 1.1, 0.7], cap:'LUZ DA CRUZ NEGRA', smoke:true },
   fogo_azul:{ c:['#e8f8ff', '#5fc8ff', '#2a7aff'], hex:0x5fc8ff, rgb:[0.7, 1.0, 1.55], cap:'VIROTE DE FOGO AZUL' },
 });
-const REINO_CAP = { ferro_negro:{ k:'MARTELO NEGRO', n:'INVESTIDA SOMBRIA' }, dragoes:{ n:'SOPRO DO DRAGÃO', k:'VÓRTICE DE CHAMAS', q:'ONDA DE CHAMAS', b:'BOLA DE FOGO' } };
+const REINO_CAP = { ferro_negro:{ k:'MARTELO NEGRO', n:'FOGO NEGRO', q:'ARRANCA-ALMA' }, dragoes:{ n:'SOPRO DO DRAGÃO', k:'VÓRTICE DE CHAMAS', q:'FOGO-GELO', b:'BOLA DE FOGO' },
+  aurora:{ b:'RAIO DE LUZ', q:'LÂMINAS DE LUZ', k:'JULGAMENTO DOURADO' } };
 function golpeReino(g, a){
   const id = kingdomOf(a.side);
   g.reino = id;
-  if (id === 'ferro_negro'){
-    if (g.carta) return g;
-    g.el = a.t === 'b' ? 'luz_fumaca' : a.t === 'q' ? 'carmesim' : 'fumaca';
-  } else if (id === 'dragoes'){
-    if (g.carta) return g;
-    g.el = a.t === 'r' ? 'fogo_azul' : 'fogo';
-  } else return g;
-  g.cap = (REINO_CAP[id] && REINO_CAP[id][a.t]) || GOLPE_EL[g.el].cap;
-  // o texto acompanha a aparência na magia e nos tiros da torre (o resto da matriz fica como está)
-  const T = REINO_TXT[id], tpl = a.t === 'r' ? T.r : g.tipo === 'magia' ? T[g.el] : null;
+  if (g.carta) return g;
+  if (id === 'ferro_negro') g.el = a.t === 'b' ? 'luz_fumaca' : a.t === 'q' ? 'alma' : 'fumaca';
+  else if (id === 'dragoes') g.el = a.t === 'r' ? 'fogo_azul' : a.t === 'q' ? 'fogo_gelo' : 'fogo';
+  else {
+    // Aurora, luz sagrada: o bispo, a dama e o rei mudam; o resto fica como na matriz
+    if (!'bqk'.includes(a.t)) return g;
+    if (a.t !== 'k') g.el = 'luz';
+  }
+  g.cap = (REINO_CAP[id] && REINO_CAP[id][a.t]) || (GOLPE_EL[g.el] || {}).cap || g.cap;
+  // o texto acompanha a aparência (dama e bispo do reino, a magia e os tiros da torre; o resto da matriz fica como está)
+  const T = REINO_TXT[id] || {}, tpl = T[a.t] || (a.t === 'r' ? T.r : g.tipo === 'magia' ? T[g.el] : null);
   if (tpl && g.v){ g.tpl = tpl; g.texto = `${gName(a)} ${golpeFrase(tpl, g.v)}`; g.html = (wa, wv) => `${wa} ${golpeFrase(tpl, g.v, wv)}`; }
   return g;
 }
 const REINO_TXT = {
-  ferro_negro:{ r:'crava flechas negras fumegantes {no}', fumaca:'envolve em fumaça negra {o}', carmesim:'envolve em névoa carmesim {o}', luz_fumaca:'fere com a luz da cruz negra {o}' },
-  dragoes:{ r:'crava um virote de fogo azul {no}', fogo:'lança uma onda de chamas {no}', fogo_azul:'crava um virote de fogo azul {no}' },
+  aurora:{ b:'fere com um raio de luz sagrada {o}', q:'faz cair lâminas de luz sobre {o}' },
+  ferro_negro:{ q:'arranca a alma d{o}', r:'crava flechas negras fumegantes {no}', fumaca:'envolve em fumaça negra {o}', carmesim:'envolve em névoa carmesim {o}', luz_fumaca:'fere com a luz da cruz negra {o}' },
+  dragoes:{ q:'congela e estilhaça em brasa {o}', r:'crava um virote de fogo azul {no}', fogo:'lança uma onda de chamas {no}', fogo_azul:'crava um virote de fogo azul {no}' },
 };
 // fumaça negra (com brasas carmesim) num ponto
 function smokeBurst(at, el = 'fumaca', n = 16){
@@ -9208,22 +9328,29 @@ function smokeBurst(at, el = 'fumaca', n = 16){
   sparks.burst(at, nFx(Math.round(n * 0.8)), ['#c0392b', '#ff6a3a', '#7a1c1c'], 1.6, { life:900, size:0.05, grav:0.8, upward:true });
 }
 // rastro entre o atacante e a vítima (lâmina e investida): fumaça no Ferro Negro, brasa nos Dragões
-function reinoTrail(g, a, b){
+function reinoTrail(g, a, b, knight){
   if (!GLOK || !g || g.reino === 'aurora') return;
   const fire = g.reino === 'dragoes', n = nFx(14);
   for (let i = 0; i < n; i++){
     const k = i / n, x = mix(a.x, b.x, k), y = mix(a.y, b.y, k), z = mix(a.z, b.z, k);
+    if (knight && !fire){ blackFire(x, Math.max(0.02, y - 0.4), z, 2, 0.2); continue; }
     if (fire) sparks.emit(x, y, z, (Math.random() - 0.5) * 0.4, 0.3 + Math.random() * 0.5, (Math.random() - 0.5) * 0.4, 600, 0.07, FIRE_COLS[i % 4], 1, 0.8, 0.6);
     else dust.emit(x, y, z, (Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.3, (Math.random() - 0.5) * 0.2, 900 + Math.random() * 600, 0.16 + Math.random() * 0.12, i % 3 ? '#1c1618' : '#5a1414', 0.6, 0.1, 0.6);
   }
 }
 // o toque do reino no impacto: fumaça e brasas carmesim; ou chamas
 function reinoImpact(g, p, v){
-  if (!GLOK || !g || g.reino === 'aurora') return;
+  if (!GLOK || !g) return;
   const at = chestOf(v, 0.55);
-  reinoTrail(g, chestOf(p, 0.6), at);
+  if (g.reino === 'aurora'){
+    // o julgamento dourado do rei: um pilar de luz sobre a vítima
+    if (p.t === 'k' && !g.carta){ spawnPillar(v.dx, v.dz, 0xffe6a0, 1300); spawnRing(v.dx, v.dz, 0xffd36a, 1.5, 700); flashLight(at, 0xffd36a, 4, 700); sparks.burst(at, nFx(30), GOLPE_EL.luz.c, 2, { life:900, size:0.06, grav:1, upward:true }); snd('selo_celestial', { vol:0.5 }); }
+    return;
+  }
+  reinoTrail(g, chestOf(p, 0.6), at, p.t === 'n');
   if (g.reino === 'ferro_negro'){
-    smokeBurst(at, g.el);
+    if (g.el !== 'alma') smokeBurst(at, g.el);
+    if (p.t === 'n') for (let i = 0; i < (golpeLite() ? 3 : 6); i++) blackFire(v.dx + (Math.random() - 0.5) * 0.5, 0.02, v.dz + (Math.random() - 0.5) * 0.5, 3, 0.25);
     // o martelo do rei: onda de choque com fumaça negra
     if (p.t === 'k'){ spawnRing(v.dx, v.dz, 0x7a1c1c, 1.4, 520); dustAt(v.dx, v.dz, nFx(20), 1.1, ['#1a1416', '#3a2e30']); shake(0.12); }
     snd('sombra', { vol:0.6 });
@@ -9236,8 +9363,13 @@ function reinoImpact(g, p, v){
 }
 // a vítima conforme o reino de quem a abateu: cinzas e fumaça negra, ou fogo e brasas
 function reinoDeath(g, v){
-  if (!GLOK || !g || g.reino === 'aurora') return;
+  if (!GLOK || !g) return;
   const at = chestOf(v, 0.45);
+  if (g.reino === 'aurora'){
+    // quem a Aurora abate se desfaz em pó dourado
+    for (let i = 0; i < nFx(30); i++) sparks.emit(v.dx + (Math.random() - 0.5) * 0.45, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.45, (Math.random() - 0.5) * 0.25, 0.3 + Math.random() * 0.6, (Math.random() - 0.5) * 0.25, 1300 + Math.random() * 900, 0.035 + Math.random() * 0.035, ['#fff2c0', '#ffd36a', '#e0a040'][i % 3], 1, -0.15, 0.55, 1);
+    return;
+  }
   if (g.reino === 'ferro_negro'){
     for (let i = 0; i < nFx(22); i++) dust.emit(v.dx + (Math.random() - 0.5) * 0.5, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.3, 0.35 + Math.random() * 0.5, (Math.random() - 0.5) * 0.3, 1500 + Math.random() * 900, 0.18 + Math.random() * 0.18, i % 4 ? '#6a6460' : '#1a1416', 0.65, 0.15, 0.6);
     smokeBurst(at, 'fumaca', 10);
@@ -9245,6 +9377,164 @@ function reinoDeath(g, v){
     sparks.burst(at, nFx(36), FIRE_COLS, 1.4, { life:1100, size:0.07, grav:1.4, upward:true });
     flashLight(at, 0xff7a2a, 3, 700);
   }
+}
+
+/* golpes por reino, parte 2 (só visual; regras e o tipo do golpe ficam):
+   Aurora, luz sagrada: o bispo dispara um raio de luz; a dama faz lâminas de luz caírem do céu na vítima; o rei abre o
+   julgamento dourado (pilar de luz); quem a Aurora abate se desfaz em pó dourado.
+   Ferro Negro: a dama arranca a alma da vítima (um fio carmesim do peito dela até a mão da dama); no Mistério Infernal a
+   alma segue com os fantasmas até o cemitério. O cavaleiro deixa rastro de fogo negro (chamas escuras e brasas carmesim).
+   Dragões: a dama usa fogo-gelo (a vítima congela, com cristais, e estilhaça em brasa); o bispo segue com a bola de fogo. */
+Object.assign(GOLPE_EL, {
+  luz:{ c:['#ffffff', '#fff2c0', '#ffd36a'], hex:0xffe6a0, rgb:[1.45, 1.25, 0.8], cap:'LUZ SAGRADA' },
+  fogo_gelo:{ c:['#e8f8ff', '#8fd8ff', '#ff9a3a'], hex:0x8fd8ff, rgb:[0.65, 1.05, 1.6], cap:'FOGO-GELO' },
+  alma:{ c:['#ffd0d8', '#ff3a4a', '#8a0a1a'], hex:0xff3a4a, rgb:[1.3, 0.3, 0.35], cap:'ARRANCA-ALMA' },
+});
+// chamas negras subindo de um ponto (fumaça escura de vida curta e brasas carmesim)
+function blackFire(x, y, z, n = 3, spread = 0.18){
+  if (!GLOK) return;
+  const S = smokeSys();
+  for (let i = 0; i < n; i++){
+    S.emit(x + (Math.random() - 0.5) * spread, y + Math.random() * 0.08, z + (Math.random() - 0.5) * spread, (Math.random() - 0.5) * 0.12, 0.55 + Math.random() * 0.7, (Math.random() - 0.5) * 0.12, 420 + Math.random() * 380, 0.16 + Math.random() * 0.14, Math.random() < 0.55 ? '#050203' : '#1c0a0c', 0.7, 0.4, 0.5);
+    if (Math.random() < 0.55) sparks.emit(x + (Math.random() - 0.5) * spread, y + 0.05 + Math.random() * 0.2, z + (Math.random() - 0.5) * spread, (Math.random() - 0.5) * 0.3, 0.5 + Math.random() * 0.8, (Math.random() - 0.5) * 0.3, 500 + Math.random() * 400, 0.04 + Math.random() * 0.03, Math.random() < 0.5 ? '#c0392b' : '#ff4a2a', 1, -0.2, 0.55, 1);
+  }
+}
+// o cavaleiro do Ferro Negro, enquanto anda: chamas negras nos cascos que ficam um pouco no chão; devolve o "parar"
+function fireTrail(p){
+  if (!GLOK) return () => {};
+  let on = true, lx = p.dx, lz = p.dz;
+  const marks = [];
+  const step = () => {
+    if (!on && !marks.length) return;
+    const now = performance.now();
+    if (on && Math.hypot(p.dx - lx, p.dz - lz) > (golpeLite() ? 0.2 : 0.12)){ lx = p.dx; lz = p.dz; marks.push({ x:lx, z:lz, t:now + (RM ? 500 : 1100) }); blackFire(lx, 0.02, lz, golpeLite() ? 2 : 4, 0.3); }
+    for (let i = marks.length - 1; i >= 0; i--){ const m = marks[i]; if (now > m.t) marks.splice(i, 1); else if (Math.random() < (golpeLite() ? 0.12 : 0.3)) blackFire(m.x, 0.02, m.z, 1, 0.26); }
+    requestAnimationFrame(step);
+  };
+  step();
+  return () => { on = false; };
+}
+// Aurora: o bispo ergue o cajado e dispara um raio de luz sagrada; a vítima é tomada pela luz
+async function holyBeam(p, v, tx, tz, g){
+  const ch = charOf(p);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  const circ = runeCircle(p, p.side, 1.35);
+  snd('selo_celestial', { vol:0.6 });
+  await Promise.race([ch.play('cast'), wait(420)]);
+  const from = ch.anchor('tip'), to = chestOf(v, 0.55);
+  snd('raio_golpe', { vol:0.55 });
+  await beamFx(from, to, 0xffe6a0, 760, 0.06);
+  if (GLOK){ flashLight(to, 0xffe6a0, 4, 520); spawnRing(v.dx, v.dz, 0xffd36a, 1.0, 460); sparks.burst(to, nFx(26), GOLPE_EL.luz.c, 2.2, { life:600, size:0.06, grav:-1 }); }
+  ch.play('idle');
+  circ.done();
+  await slay(v, 'arcane', p.side, golpeKnock(g, p, v), g, p);
+  await arcaneBlink(p, tx, tz);
+}
+// lâmina de luz (um losango alongado, aditivo) que cai do céu sobre um ponto
+function lightBlade(at, delay, tilt){
+  if (!GLOK) return wait(delay + 300);
+  const geo = new THREE.OctahedronGeometry(1, 0); geo.scale(0.05, 0.6, 0.012);
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:C(0xfff2c0), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xffd36a), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false }));
+  glow.scale.set(0.5, 1.4, 1); m.renderOrder = glow.renderOrder = 6; world.add(m, glow);
+  const top = V3(at.x + Math.sin(tilt) * 1.4, 5.2, at.z + Math.cos(tilt) * 0.6), d = V3().subVectors(at, top);
+  m.quaternion.setFromUnitVectors(UP, d.clone().normalize().negate());
+  return wait(delay).then(() => tween(300, q => {
+    m.position.copy(top).addScaledVector(d, q); glow.position.copy(m.position);
+    m.material.opacity = Math.min(1, q * 3); glow.material.opacity = 0.7 * Math.min(1, q * 3);
+    if (Math.random() < 0.7) sparks.emit(m.position.x, m.position.y + 0.3, m.position.z, 0, 0.3, 0, 300, 0.05, '#fff2c0', 1, 0, 0.4, 1);
+  }, k => k * k)).then(() => {
+    sparks.burst(at, nFx(12), ['#ffffff', '#fff2c0', '#ffd36a'], 2.0, { life:420, size:0.05, grav:-3 });
+    return tween(260, q => { m.material.opacity = 1 - q; glow.material.opacity = 0.7 * (1 - q); });
+  }).then(() => { world.remove(m, glow); geo.dispose(); m.material.dispose(); glow.material.dispose(); });
+}
+// Aurora: a dama ergue a mão e lâminas de luz caem do céu sobre a vítima
+async function lightBlades(p, v, tx, tz, g){
+  const ch = charOf(p);
+  ch.faceTowards(v.dx, v.dz, 2200);
+  snd('selo_celestial', { vol:0.55 });
+  await Promise.race([ch.play('cast'), wait(380)]);
+  const at = chestOf(v, 0.5), n = golpeLite() ? 3 : 5, jobs = [];
+  if (GLOK) spawnRing(v.dx, v.dz, 0xffd36a, 1.2, 900);
+  for (let i = 0; i < n; i++) jobs.push(lightBlade(V3(at.x + (Math.random() - 0.5) * 0.25, at.y + (Math.random() - 0.5) * 0.3, at.z + (Math.random() - 0.5) * 0.25), i * 110, (i / n - 0.5) * 1.6));
+  setTimeout(() => snd('espada', { vol:0.6, rate:1.3 }), 330);
+  await Promise.all(jobs.slice(0, 2));
+  shake(0.08);
+  if (GLOK) flashLight(at, 0xffe6a0, 4.5, 520);
+  const dead = slay(v, 'bolt', p.side, golpeKnock(g, p, v), g, p);
+  await Promise.all(jobs);
+  ch.play('idle');
+  await dead;
+  await moveIn(p, tx, tz);
+}
+// Ferro Negro: a dama arranca a alma — um fio carmesim sai do peito da vítima até a mão dela e a alma vem junto
+async function soulRip(p, v, tx, tz, g){
+  const ch = charOf(p), vc = chOf(v);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  snd('sombra', { vol:0.7 });
+  await Promise.race([ch.play('cast'), wait(380)]);
+  const hand = handOf(p), chest = chestOf(v, 0.6);
+  if (vc && vc.setFlash) vc.setFlash(0.9, [1.3, 0.25, 0.3]);
+  let thread = null, glow = null, soul = null;
+  if (GLOK){
+    const geo = new THREE.CylinderGeometry(1, 1, 1, 6, 1, true);
+    thread = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:C(0xff3a4a), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    glow = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:C(0x8a0a1a), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    soul = new THREE.Sprite(new THREE.SpriteMaterial({ map:soulTexture(), color:C(0xffd0d8), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    soul.scale.set(0.3, 0.6, 1); thread.renderOrder = glow.renderOrder = soul.renderOrder = 7; world.add(thread, glow, soul);
+  }
+  // 1. o fio nasce no peito e alcança a mão
+  const tip = V3();
+  await tween(360, q => { if (!GLOK) return; tip.lerpVectors(chest, hand, q); placeSeg(thread, chest, tip, 0.012); placeSeg(glow, chest, tip, 0.045); }, easeOut);
+  // 2. a alma é puxada pelo fio, ondulando
+  snd('nevoa', { vol:0.5 });
+  await tween(golpeLite() ? 620 : 820, q => {
+    if (!GLOK) return;
+    const w = Math.sin(q * 14) * 0.03 * (1 - q);
+    soul.position.lerpVectors(chest, hand, easeIO(q)); soul.position.y += Math.sin(Math.PI * q) * 0.12 + w;
+    soul.material.opacity = Math.min(1, q * 4) * (q > 0.85 ? (1 - q) / 0.15 : 1);
+    thread.material.opacity = 0.75 + 0.25 * Math.sin(q * 30); placeSeg(thread, chest, hand, 0.01 + 0.006 * Math.sin(q * 30)); placeSeg(glow, chest, hand, 0.045);
+    if (Math.random() < 0.6) sparks.emit(soul.position.x, soul.position.y, soul.position.z, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, 420, 0.04, Math.random() < 0.5 ? '#ff3a4a' : '#ffd0d8', 1, 0, 0.5, 1);
+  }, linE);
+  if (GLOK){ sparks.burst(hand, nFx(14), ['#ff3a4a', '#ffd0d8', '#8a0a1a'], 1.2, { life:500, size:0.05, grav:0 }); flashLight(hand, 0xff2a3a, 2.5, 420); }
+  // 3. a vítima cai sem alma; no Mistério Infernal, a alma segue da mão da dama com os fantasmas até o cemitério
+  BOSS.noReap = performance.now() + 2500;
+  const dead = slay(v, 'arcane', p.side, golpeKnock(g, p, v), g, p);
+  tween(300, q => { if (!GLOK) return; thread.material.opacity = 1 - q; glow.material.opacity = 0.5 * (1 - q); }).then(() => { if (!GLOK) return; world.remove(thread, glow, soul); thread.geometry.dispose(); thread.material.dispose(); glow.material.dispose(); soul.material.dispose(); });
+  ch.play('idle');
+  await dead;
+  BOSS.noReap = 0;
+  if (BOSS.on) soulReap(p.dx, p.dz);
+  await moveIn(p, tx, tz);
+}
+// Dragões: fogo-gelo — a vítima congela (azul, cristais) e depois estilhaça em brasa
+async function frostFire(p, v, tx, tz, g){
+  const ch = charOf(p), vc = chOf(v);
+  ch.faceTowards(v.dx, v.dz, 3000);
+  snd('gelo_estalo', { vol:0.6 });
+  await Promise.race([ch.play('cast'), wait(380)]);
+  const from = handOf(p), to = chestOf(v, 0.55);
+  await missileFx(from, to, 0x8fd8ff, 300 + from.distanceTo(to) * 70, 0.06);
+  // congela: azul, cristais em volta e um anel de geada
+  snd('gelo_golpe', { vol:0.8 });
+  if (vc && vc.setFlash) vc.setFlash(1, [0.55, 1.0, 1.7]);
+  if (GLOK){ iceShards(to, golpeLite() ? 5 : 11); spawnRing(v.dx, v.dz, 0x8fd8ff, 1.1, 600); flashLight(to, 0x8fd8ff, 4, 600); for (let i = 0; i < nFx(16); i++) sparks.emit(v.dx + (Math.random() - 0.5) * 0.5, Math.random() * heightOf(v), v.dz + (Math.random() - 0.5) * 0.5, 0, 0.05, 0, 900, 0.05, i % 2 ? '#e8f8ff' : '#8fd8ff', 1, 0, 0.3); }
+  await wait(golpeLite() ? 360 : 520);
+  // estilhaça em brasa
+  snd('gelo_estalo', { vol:0.9, rate:0.8 }); snd('sopro_fogo', { vol:0.45 });
+  shake(0.08);
+  if (GLOK){ iceShards(to, golpeLite() ? 6 : 14); sparks.burst(to, nFx(40), FIRE_COLS.concat('#8fd8ff'), 2.6, { life:900, size:0.07, grav:1.2, upward:true }); flashLight(to, 0xff7a2a, 4, 600); }
+  ch.play('idle');
+  await slay(v, 'arcane', p.side, golpeKnock(g, p, v), g, p);
+  await moveIn(p, tx, tz);
+}
+// qual coreografia do reino vale para este golpe (null: a de sempre)
+function golpeReinoFx(p, g){
+  if (!g || g.carta) return null;
+  if (g.reino === 'aurora'){ if (p.t === 'b') return holyBeam; if (p.t === 'q') return lightBlades; }
+  if (g.reino === 'ferro_negro' && p.t === 'q') return soulRip;
+  if (g.reino === 'dragoes' && p.t === 'q') return frostFire;
+  return null;
 }
 
 /* Mistério Infernal, o mundo do Ferro Negro: névoa carmesim, brasas vermelhas, estandartes carmesim rasgados, runas e luzes
@@ -9806,6 +10096,8 @@ function bossTick(now, dt){
 /* almas: sobem do corpo da vítima, um discípulo desce, agarra e leva ao pé do deus, onde somem numa névoa */
 function soulReap(x, z){
   if (!BOSS.on || !GLOK || !BOSS.root) return;
+  // a alma arrancada pela dama do Ferro Negro sai da mão dela (soulRip), não do corpo
+  if (BOSS.noReap && performance.now() < BOSS.noReap) return;
   const now = performance.now();
   if (BOSS.souls.length >= (W < 560 ? 3 : 6)) return;
   // o deus responde às capturas (com intervalo)
@@ -10044,6 +10336,510 @@ function dragonLandTick(now, dt){
   if (d.mixer && d.walk){ d.walkAct.setEffectiveWeight(1); d.mixer.update(dt / 1000); }
 }
 
+// shader do xeque-mate por cima do material da peça: escurecer (negro), osso (marfim com costelas em faixas no tronco),
+// ouro metálico, rachaduras acesas (linhas de um ruído) e o pó (descarta de baixo para cima com ruído, borda acesa)
+const MFX_HEAD = `uniform float uDark, uBone, uGold, uCrack, uDiss, uHt; uniform vec3 uEdge, uOrg; varying vec3 vMfx;
+float mfxH(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+float mfxN(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(mfxH(i), mfxH(i + vec3(1, 0, 0)), f.x), mix(mfxH(i + vec3(0, 1, 0)), mfxH(i + vec3(1, 1, 0)), f.x), f.y),
+    mix(mix(mfxH(i + vec3(0, 0, 1)), mfxH(i + vec3(1, 0, 1)), f.x), mix(mfxH(i + vec3(0, 1, 1)), mfxH(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
+float mfxDiss(){ return mfxN(vMfx * 16.0) * 0.4 + (vMfx.y - uOrg.y) / max(0.01, uHt) * 0.6; }
+`;
+const MFX_COL = `  {
+    float hy = (vMfx.y - uOrg.y) / max(0.01, uHt), L = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+    if (uDiss > 0.0 && mfxDiss() < uDiss * 1.15 - 0.08) discard;
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 0.05, uDark);
+    float rib = smoothstep(0.55, 0.95, abs(fract(hy * 20.0) - 0.5) * 2.0) * step(0.4, hy) * step(hy, 0.74);
+    float spine = 1.0 - smoothstep(0.02, 0.05, abs(fract(hy * 9.0 + mfxN(vMfx * 6.0)) - 0.5));
+    vec3 bone = vec3(0.62, 0.57, 0.46) * (0.55 + 0.6 * L) * (1.0 - 0.85 * rib) * (1.0 - 0.35 * spine * (1.0 - step(0.74, hy)));
+    diffuseColor.rgb = mix(diffuseColor.rgb, bone, uBone);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 0.74, 0.28) * (0.55 + 0.7 * L), uGold);
+  }
+`;
+const MFX_EM = `  {
+    float c = abs(mfxN(vMfx * 9.0) - 0.5) + abs(mfxN(vMfx * 25.0 + 7.0) - 0.5) * 0.45;
+    float crack = (1.0 - smoothstep(0.012, 0.045, c)) * uCrack;
+    totalEmissiveRadiance *= (1.0 - 0.9 * uDark) * (1.0 - 0.6 * uGold);
+    totalEmissiveRadiance += vec3(0.9, 0.85, 0.72) * 0.06 * uBone + vec3(1.0, 0.72, 0.28) * 0.18 * uGold + vec3(1.0, 0.86, 0.45) * crack * 3.5;
+    if (uDiss > 0.0) totalEmissiveRadiance += uEdge * (1.0 - smoothstep(0.0, 0.07, mfxDiss() - (uDiss * 1.15 - 0.08))) * 2.5;
+  }
+`;
+function mfxInject(sh, U){
+  Object.assign(sh.uniforms, U);
+  sh.vertexShader = 'varying vec3 vMfx;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vMfx = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+  sh.fragmentShader = MFX_HEAD + sh.fragmentShader
+    .replace('#include <alphamap_fragment>', MFX_COL + '#include <alphamap_fragment>')
+    .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.3, uGold);')
+    .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n  metalnessFactor = mix(metalnessFactor, 1.0, uGold);')
+    .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + MFX_EM);
+}
+/* ---------- Xeque-mate pelo avatar do reino vencedor ----------
+   Depois do golpe que põe o Rei de joelhos, quem fecha a partida é o avatar do reino de quem venceu, em qualquer arena:
+   Ferro Negro: o Deus da Morte surge numa coluna de fumaça preta diante do Rei, encosta a ponta da foice na testa dele;
+   o Rei escurece, vira esqueleto e se desfaz em pó que sobe com a fumaça.
+   Dragões: o dragão gigante desce do céu batendo as asas, pousa diante do Rei, ruge (mandíbula, fogo) e o engole.
+   Aurora: o Arcanjo da Aurora desce num pilar de luz dourada, faz o julgamento com a espada apontando o Rei; o Rei vira
+   estátua de ouro, racha e se parte em pó dourado.
+   Os modelos (assets/meshy/chefes/...) carregam sob demanda quando o reino está em jogo; sem o modelo, fica a cena de antes
+   (correntes, captores e o estandarte). Igual em todos os modos; Pular acelera tudo (as esperas seguem o relógio do jogo). */
+const AVT = { arcanjo:null, p:{} };
+// o modelo de chefe pedido (Draco primeiro); null se os modelos otimizados não servem aqui
+function chefeUrls(dir, n){ return (DRACO.mod ? [`assets/meshy/chefes/${dir}/${n}.opt.c.gltf.json`] : []).concat([`assets/meshy/chefes/${dir}/${n}.opt.gltf.json`]); }
+const chefeOk = () => !!(GOLPES.loader && GOLPES.urls && GOLPES.urls('x', 'y').some(u => u.includes('.opt.')));
+function chefeLoad(key){
+  if (AVT.p[key]) return AVT.p[key];
+  if (!chefeOk()) return Promise.resolve(null);
+  if (key === 'deus'){ bossModels(); return AVT.p.deus = (BOSSGLB.p || Promise.resolve()).then(() => BOSSGLB.deus || null); }
+  if (key === 'dg') return Promise.resolve(GLB.dg || null);
+  const anim = key === 'arcanjo';
+  return AVT.p[key] = loadGltf(GOLPES.loader, chefeUrls(key, anim ? 'animated' : 'model')).then(g => {
+    if (!g) return null;
+    try {
+      const A = anim ? prepChefe(g, { idle:/stance|idle/, judge:/judg|sword|slash/, cast:/spell|cast/ }, 0xffd27a, 0xffe6a0) : prepStatic(g, key);
+      AVT[key] = A; glbLog.push(`chefe ${key}: ${anim ? 'modelo (' + Object.keys(A.clips).filter(k => A.clips[k]).join(', ') + ')' : 'modelo estático'}`);
+      return A;
+    } catch (e){ glbLog.push(`chefe ${key}: falha ao preparar (${e.message})`); return null; }
+  }, () => null);
+}
+// o avatar de cada reino e quanto esperar por ele quando o mate chega antes do arquivo
+const AVATAR_KEY = { ferro_negro:'deus', dragoes:'dg', aurora:'arcanjo' };
+// chamado ao entrar em jogo (kingdomApply): os avatares e os modelos do Arcano dos reinos em campo
+function avatarPreload(){
+  const ids = new Set(['w', 'b'].map(kingdomOf));
+  setTimeout(() => { for (const id of ids){ const k = AVATAR_KEY[id]; if (k) chefeLoad(k); } if (cfg.arc){ if (ids.has('ferro_negro')){ chefeLoad('pesadelo'); chefeLoad('dragao_ossos'); } if (ids.has('dragoes')) chefeLoad('serpe'); } }, 2500);
+}
+function avatarReady(id, ms){
+  const k = AVATAR_KEY[id];
+  if (!k) return Promise.resolve(null);
+  return Promise.race([chefeLoad(k), realWait(ms).then(() => null)]);
+}
+// chefe com esqueleto da Meshy (Deus da Morte, Arcanjo): caixa pelos vértices deformados, tecido fosco, borda acesa
+function prepChefe(g, re, rimHex, emHex){
+  const sc = g.scene;
+  sc.updateMatrixWorld(true);
+  const box = measure(sc), size = box.getSize(new THREE.Vector3());
+  const clips = {};
+  for (const k in re) clips[k] = null;
+  for (const a of g.animations || []){ const n = (a.name || '').toLowerCase(); for (const k in re) if (!clips[k] && re[k].test(n)){ clips[k] = a; break; } }
+  if (!clips.idle) clips.idle = (g.animations || [])[0] || null;
+  for (const k in clips) if (clips[k]) stripRootMotion(clips[k]);
+  sc.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = false;
+    if (o.isSkinnedMesh) o.frustumCulled = false;
+    o.material = [].concat(o.material).map(m0 => {
+      if (!m0 || !('envMapIntensity' in m0)) return m0;
+      const m = m0.clone();
+      if (!m.metalnessMap) m.metalness = 0.35;
+      if (!m.roughnessMap) m.roughness = 0.55;
+      m.envMapIntensity = 1;
+      if (m.map){ m.emissiveMap = m.map; m.emissive = C(emHex); m.emissiveIntensity = 0.32; }
+      return m;
+    });
+    if (o.material.length === 1) o.material = o.material[0];
+  });
+  return { scene:sc, h:Math.max(1e-3, size.y), cx:(box.min.x + box.max.x) / 2, cz:(box.min.z + box.max.z) / 2, y0:box.min.y, clips, rim:rimHex };
+}
+// modelo estático (Pesadelo, Serpe, Dragão de Ossos): uma malha, pés no 0, centrada, frente para +Z, altura 1.
+// O Dragão de Ossos vem sobre uma base de pedra: os triângulos abaixo do corte (14% de baixo) saem e o corte vira o chão.
+function prepStatic(g, key){
+  let mesh = null;
+  g.scene.updateMatrixWorld(true);
+  g.scene.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) throw new Error('sem malha');
+  const geo = mesh.geometry.clone(); geo.applyMatrix4(mesh.matrixWorld);
+  const P = geo.attributes.position;
+  if (!geo.index){ const all = new Uint32Array(P.count); for (let i = 0; i < P.count; i++) all[i] = i; geo.setIndex(new THREE.BufferAttribute(all, 1)); }
+  geo.computeBoundingBox();
+  const b0 = geo.boundingBox;
+  if (key === 'dragao_ossos'){
+    const cut = b0.min.y + (b0.max.y - b0.min.y) * 0.14, I = geo.index.array, keep = [];
+    for (let i = 0; i < I.length; i += 3) if (Math.max(P.getY(I[i]), P.getY(I[i + 1]), P.getY(I[i + 2])) > cut) keep.push(I[i], I[i + 1], I[i + 2]);
+    geo.setIndex(keep);
+  }
+  // caixa só dos vértices que ficaram (o corte vira o chão do modelo)
+  const I = geo.index.array, bx = new THREE.Box3(), v = new THREE.Vector3();
+  for (let i = 0; i < I.length; i++) bx.expandByPoint(v.fromBufferAttribute(P, I[i]));
+  if (key === 'dragao_ossos') bx.min.y = Math.max(bx.min.y, b0.min.y + (b0.max.y - b0.min.y) * 0.12);
+  const h = Math.max(1e-3, bx.max.y - bx.min.y);
+  geo.translate(-(bx.min.x + bx.max.x) / 2, -bx.min.y, -(bx.min.z + bx.max.z) / 2); geo.scale(1 / h, 1 / h, 1 / h);
+  geo.computeBoundingSphere();
+  const src = [].concat(mesh.material)[0] || {};
+  return { geo, map:src.map || null, src, len:Math.max(bx.max.x - bx.min.x, bx.max.z - bx.min.z) / h, w:(bx.max.x - bx.min.x) / h, d:(bx.max.z - bx.min.z) / h, key };
+}
+// malha do modelo estático com o material próprio (cópia, para tingir e apagar sem mexer nas outras)
+function staticMesh(A, H, opt = {}){
+  const s = A.src && A.src.clone ? A.src.clone() : new THREE.MeshStandardMaterial({ map:A.map });
+  if (!s.metalnessMap) s.metalness = opt.metal != null ? opt.metal : 0.3;
+  if (!s.roughnessMap) s.roughness = 0.6;
+  if (A.map){ s.emissiveMap = A.map; s.emissive = C(opt.em || 0x302020); s.emissiveIntensity = opt.emk != null ? opt.emk : 0.6; }
+  s.transparent = true; s.depthWrite = true;
+  if (opt.rim) rimShader(s, opt.rim, opt.rimK || 0.9);
+  const m = new THREE.Mesh(A.geo, s);
+  m.scale.setScalar(H); m.userData.sharedGeo = true; m.userData.keepMat = true; m.frustumCulled = false;
+  return m;
+}
+// ator com esqueleto (cópia do modelo, materiais próprios para o fade) e o mixer
+function chefeActor(A, H, rimHex){
+  const m = THREE.SkeletonUtils.clone(A.scene), wrap = new THREE.Group(), g = new THREE.Group(), k = H / A.h;
+  m.position.set(-A.cx, -A.y0, -A.cz);
+  wrap.scale.setScalar(k); wrap.add(m); g.add(wrap);
+  const mats = [];
+  m.traverse(o => {
+    if (!o.isMesh) return;
+    o.frustumCulled = false; o.castShadow = false; o.userData.sharedGeo = true; o.userData.keepMat = true; o.renderOrder = 2;
+    o.material = [].concat(o.material).map(x => { const c = x.clone(); c.transparent = true; c.opacity = 0; c.depthWrite = true; if (rimHex != null && 'envMapIntensity' in c) rimShader(c, rimHex, 0.85); mats.push(c); return c; });
+    if (o.material.length === 1) o.material = o.material[0];
+  });
+  const mixer = A.clips.idle || A.clips.chop || A.clips.judge ? new THREE.AnimationMixer(m) : null, acts = {};
+  if (mixer) for (const n in A.clips) if (A.clips[n]) acts[n] = mixer.clipAction(A.clips[n]);
+  if (acts.idle){ acts.idle.play(); mixer.update(0.01); }
+  const bone = re => { let f = null; m.traverse(o => { if (!f && o.isBone && re.test(o.name)) f = o; }); return f; };
+  const actor = { g, model:m, mats, mixer, acts, H, A, bone, cur:'idle',
+    fade(a){ for (const x of mats) x.opacity = a; },
+    // muda de clipe com crossfade; once: toca uma vez e para no fim (ou em freeze, fração do clipe)
+    play(name, o = {}){
+      const a = acts[name]; if (!a) return 0;
+      a.reset(); a.timeScale = o.ts || 1;
+      if (o.once){ a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; }
+      a.play();
+      const prev = acts[actor.cur]; if (prev && prev !== a) prev.crossFadeTo(a, o.fade != null ? o.fade : 0.35, false);
+      actor.cur = name;
+      return A.clips[name].duration / a.timeScale * 1000;
+    },
+    tick(dt){ if (mixer) mixer.update(dt / 1000 * (RM ? 0.8 : 1)); },
+  };
+  return actor;
+}
+// ponto mais à frente (+Z do ator) da malha num quadro do clipe: a ponta da foice ou da espada, no espaço do ator
+const _tv = typeof THREE !== 'undefined' ? new THREE.Vector3() : null, _tm = typeof THREE !== 'undefined' ? new THREE.Matrix4() : null;
+function chefeTip(actor, name, frac){
+  const a = actor.acts[name]; if (!a) return null;
+  a.reset(); a.play(); a.paused = false;
+  for (const k in actor.acts) if (actor.acts[k] !== a) actor.acts[k].stop();
+  a.time = actor.A.clips[name].duration * frac; a.weight = 1; a.setEffectiveWeight(1);
+  actor.mixer.update(0);
+  actor.g.updateMatrixWorld(true);
+  _tm.copy(actor.g.matrixWorld).invert();
+  let best = null;
+  actor.model.traverse(o => {
+    if (!o.isSkinnedMesh || !o.boneTransform) return;
+    o.skeleton.update();
+    const P = o.geometry.attributes.position, step = Math.max(1, Math.floor(P.count / 1400));
+    for (let i = 0; i < P.count; i += step){
+      o.boneTransform(i, _tv); _tv.applyMatrix4(o.matrixWorld).applyMatrix4(_tm);
+      if (!best || _tv.z > best.z) best = _tv.clone();
+    }
+  });
+  return best;
+}
+// o quadro do clipe em que a ponta da arma passa mais perto da altura pedida (procura de 0,3 a 0,85 do clipe)
+function chefeTouch(actor, name, yWant){
+  let best = null;
+  for (let i = 0; i <= 10; i++){
+    const f = 0.3 + 0.055 * i, t = chefeTip(actor, name, f);
+    if (!t) continue;
+    const sc = Math.abs(t.y - yWant) - t.z * 0.15;
+    if (!best || sc < best.sc) best = { f, tip:t, sc };
+  }
+  return best;
+}
+// lugar do avatar diante do Rei: na direção do campo do vencedor, ou a que tiver menos peças no caminho (sempre no tabuleiro)
+function avatarSpot(k, winner, dist){
+  const fwd = winner === 'w' ? 1 : -1;   // o campo da Aurora fica em +z (fileiras 1-2 perto da câmera branca)
+  let best = null;
+  for (let i = 0; i < 8; i++){
+    const a = i / 8 * TAU, ux = Math.sin(a), uz = Math.cos(a), x = k.dx + ux * dist, z = k.dz + uz * dist;
+    const off = Math.max(0, Math.abs(x) - 3.6) + Math.max(0, Math.abs(z) - 3.6);
+    let n = 0; for (const p of S.pieces) if (p !== k && !p.dead && !p.removed && !p.grave && Math.hypot(p.dx - x, p.dz - z) < 0.95) n++;
+    const sc = off * 6 + n * 1.2 - uz * fwd * 0.8;
+    if (!best || sc < best.sc) best = { sc, x, z, ux, uz };
+  }
+  return best;
+}
+// as peças em volta do avatar ficam translúcidas durante a cena (e voltam no fim)
+function avatarClear(x, z, r, k){
+  const L = [];
+  for (const p of S.pieces) if (p !== k && !p.dead && !p.removed && !p.grave && Math.hypot(p.dx - x, p.dz - z) < r){ L.push([p, p.alpha]); }
+  tween(400, q => { for (const [p, a] of L) p.alpha = mix(a, 0.18, q); });
+  return () => { for (const [p, a] of L) if (!p.dead) p.alpha = a; };
+}
+// câmera de transmissão da cena: de lado, enquadrando o Rei e o avatar (o lado da câmera atual)
+function avatarCam(k, spot, ah, live){
+  if (!cine.active) return () => {};
+  let on = true;
+  const px = -spot.uz, pz = spot.ux, cd = V3().subVectors(camera.position, V3(k.dx, 0, k.dz));
+  const s = px * cd.x + pz * cd.z >= 0 ? 1 : -1, R = clamp(1.25 / (W / H), 1, 2.1) * (2.4 + ah * 0.9);
+  cine.kT = 1; cine.victim = null; cine.fighters = [k]; cine.pos = V3(); cine.look = V3(); cine.occ.clear();
+  const seg = new THREE.Line3(), q3 = V3(), cp3 = V3(), kv = V3();
+  const step = () => {
+    if (!on || !live() || !cine.active) return;
+    const mx = mix(k.dx, spot.x, 0.45), mz = mix(k.dz, spot.z, 0.45);
+    cine.look.set(mx, ah * 0.38, mz);
+    cine.pos.set(mx + px * s * R - spot.ux * 0.6, 0.9 + ah * 0.45, mz + pz * s * R - spot.uz * 0.6);
+    // o que ficar entre a câmera e a cena fica translúcido
+    // (no plano do chão: as peças são altas e a câmera olha de cima)
+    seg.set(q3.set(cine.pos.x, 0.55, cine.pos.z).clone(), kv.set(mx, 0.55, mz)); cine.occ.clear();
+    for (const p of S.pieces){ if (p === k || p.dead || p.removed || p.grave) continue; seg.closestPointToPoint(q3.set(p.dx, 0.55, p.dz), true, cp3); if (cp3.distanceTo(q3) < 0.6) cine.occ.add(p); }
+    requestAnimationFrame(step);
+  };
+  step();
+  return () => { on = false; };
+}
+// partículas de pó subindo do corpo do Rei (cor do reino) enquanto ele some
+function kingDust(k, cols, n, up = 1){
+  if (!GLOK) return;
+  const h = heightOf(k);
+  for (let i = 0; i < n; i++) sparks.emit(k.dx + (Math.random() - 0.5) * 0.42, k.lift + Math.random() * h, k.dz + (Math.random() - 0.5) * 0.42, (Math.random() - 0.5) * 0.35, (0.4 + Math.random() * 0.9) * up, (Math.random() - 0.5) * 0.35, 1300 + Math.random() * 900, 0.04 + Math.random() * 0.05, cols[i % cols.length], 1, -0.1, 0.55);
+}
+async function mateAvatar(k, winner, atk, tok){
+  const id = kingdomOf(winner), ch = chOf(k);
+  if (!ch || !GLOK || !THREE.SkeletonUtils) return false;
+  const A = await avatarReady(id, 1600);
+  const live = () => tok === MATE.tok;
+  if (!A || !live() || !chOf(k)) return false;
+  MATE.cinema = true; MATE.skip = false;
+  const who = `o Rei da ${FACTION[k.side]}`;
+  const sub = id === 'ferro_negro' ? `O Deus da Morte reclama a alma d${who.slice(1)}` : id === 'dragoes' ? `O dragão gigante devora ${who}` : `O Arcanjo da Aurora julga ${who}`;
+  const capt = { mate:true, side:winner, caption:'XEQUE-MATE', sub, voice:null };
+  if (!cine.active && cineOn()) await cineBegin(k, null, capt);
+  else { cineCap.querySelector('b').textContent = capt.caption; cineCap.querySelector('span').textContent = capt.sub; }
+  scene.classList.add('cine-on'); cineCap.classList.add('show');
+  if (cineLive) cineLive.textContent = `Xeque-mate. ${capt.sub}.`;
+  if (mateSkipBtn) mateSkipBtn.hidden = false;
+  // o shader da peça (GLB); na figura procedural, só o brilho da cor e o sumiço
+  const fx = o => { const c = chOf(k); if (c && c.setMateFx) c.setMateFx(o); else if (c && c.setFlash){ c.setFlash(Math.max(o.gold || 0, o.bone || 0) * 0.8, o.gold ? [1.2, 0.9, 0.35] : [0.9, 0.85, 0.7]); if (o.diss) k.alpha = 1 - o.diss; } };
+  // a fanfarra e o narrador (como na cena de antes)
+  const fanfare = () => { if (MATE.sounded) return; snd('vitoria', { delay:0.05 }); if (!(APR.on && APR.scripted)) snd(cfg.mode === 'ai' && winner !== cfg.human ? 'v_derrota' : 'v_vitoria', { delay:0.7 }); MATE.sounded = true; };
+  let stopCam = () => {}, restore = () => {}, last = performance.now();
+  try {
+    if (id === 'ferro_negro') await mateDeus(k, winner, A, live, fx, fanfare, s => { stopCam = avatarCam(k, s, 2.8, live); restore = avatarClear(s.x, s.z, 1.15, k); });
+    else if (id === 'dragoes') await mateDragao(k, winner, A, live, fx, fanfare, (s, H) => { stopCam = avatarCam(k, s, H, live); restore = avatarClear(s.x, s.z, 1.6, k); });
+    else await mateArcanjo(k, winner, A, live, fx, fanfare, s => { stopCam = avatarCam(k, s, 2.8, live); restore = avatarClear(s.x, s.z, 1.15, k); });
+  } finally { stopCam(); restore(); fanfare(); }
+  return true;
+}
+// coluna de fumaça preta (mistura normal) num ponto, por ms milissegundos
+function smokeColumn(x, z, H, ms, dens = 1){
+  if (!GLOK) return wait(ms);
+  const S = smokeSys(), lite = golpeLite();
+  return tween(ms, q => {
+    const n = Math.max(1, Math.round((lite ? 2 : 4) * dens));
+    for (let i = 0; i < n; i++){
+      const a = Math.random() * TAU, r = 0.25 + Math.random() * 0.45;
+      S.emit(x + Math.cos(a) * r, Math.random() * H * 0.5, z + Math.sin(a) * r, (Math.random() - 0.5) * 0.25, 0.7 + Math.random() * 0.9, (Math.random() - 0.5) * 0.25, 1500 + Math.random() * 1100, 0.45 + Math.random() * 0.5, Math.random() < 0.6 ? '#050203' : '#1a080a', 0.5, -0.05, 0.75);
+    }
+    if (Math.random() < 0.5) sparks.emit(x + (Math.random() - 0.5) * 0.6, Math.random() * H * 0.6, z + (Math.random() - 0.5) * 0.6, 0, 0.6 + Math.random() * 0.6, 0, 900, 0.05, Math.random() < 0.5 ? '#ff3a2a' : '#c0392b', 0.9, 0.1, 0.6, 1);
+  }, linE);
+}
+// Ferro Negro: o Deus da Morte
+async function mateDeus(k, winner, A, live, fx, fanfare, place){
+  const H = 2.8, spot = avatarSpot(k, winner, 1.25);
+  place(spot);
+  const ac = chefeActor(A, H, 0xff2a2a);
+  const yaw = Math.atan2(-spot.ux, -spot.uz);     // de frente para o Rei
+  ac.g.position.set(spot.x, -H, spot.z); ac.g.rotation.y = yaw;
+  mateProp(ac.g);
+  MATE.tick = dt => ac.tick(dt);
+  const eye = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xff2a2a), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  eye.scale.setScalar(0.5); eye.userData.keepMat = true; mateProp(eye);
+  const head = ac.bone(/^Head$/) || ac.bone(/head/i);
+  // 1. a coluna de fumaça e o deus subindo dela
+  snd('sombra', { vol:0.8 }); snd('nevoa', { vol:0.5, delay:0.2 });
+  const col = smokeColumn(spot.x, spot.z, H, 2600, 1.2);
+  spawnRing(spot.x, spot.z, 0x7a1c1c, 1.6, 900);
+  await tween(1300, q => { ac.g.position.y = -H * (1 - easeOut(q)); ac.fade(Math.min(1, q * 1.6)); }, linE);
+  if (!live()) return;
+  // 2. a foice: o golpe para com a ponta na testa do Rei
+  const forehead = V3(k.dx, k.lift + heightOf(k) * 0.82, k.dz);
+  let touch = ac.acts.chop ? chefeTouch(ac, 'chop', forehead.y) : null;
+  // volta à pose de espera antes de tocar o golpe de verdade
+  for (const n in ac.acts) ac.acts[n].stop();
+  if (ac.acts.idle){ ac.acts.idle.reset().play(); ac.cur = 'idle'; ac.mixer.update(0); }
+  if (touch){
+    // o deus se ajeita para a ponta medida cair na testa (no espaço do ator a ponta está em +Z)
+    const want = V3(forehead.x - Math.sin(yaw) * touch.tip.z, 0, forehead.z - Math.cos(yaw) * touch.tip.z);
+    const side = V3(Math.cos(yaw), 0, -Math.sin(yaw));
+    want.addScaledVector(side, -touch.tip.x);
+    const from = ac.g.position.clone(), lift = clamp(forehead.y - touch.tip.y, -0.6, 0.4);
+    tween(700, q => { ac.g.position.set(mix(from.x, want.x, q), mix(0, lift, q), mix(from.z, want.z, q)); });
+    const dur = ac.play('chop', { once:true, ts:0.9, fade:0.3 });
+    snd('espada', { vol:0.8, rate:0.6 });
+    await wait(dur * touch.f);
+    if (ac.acts.chop) ac.acts.chop.paused = true;
+  } else {
+    ac.play('cast', { once:true });
+    await wait(900);
+  }
+  if (!live()) return;
+  snd('sombra', { vol:0.9 }); shake(0.06);
+  if (GLOK){ sparks.burst(forehead, nFx(26), ['#ff2a3a', '#8a0a1a', '#1a0406'], 1.4, { life:800, size:0.06, grav:-0.4 }); flashLight(forehead, 0xff2a2a, 3, 900); }
+  if (head) { const t0 = performance.now(); MATE.tick = dt => { ac.tick(dt); head.getWorldPosition(eye.position); eye.position.y += 0.05; eye.material.opacity = 0.6 + 0.3 * Math.sin((performance.now() - t0) / 120); }; }
+  // 3. o Rei escurece, vira esqueleto e se desfaz em pó que sobe com a fumaça
+  await tween(700, q => fx({ dark:q }));
+  if (!live()) return;
+  snd('cemiterio', { vol:0.5 });
+  await tween(900, q => fx({ dark:1, bone:q }));
+  if (!live()) return;
+  fanfare();
+  const col2 = smokeColumn(k.dx, k.dz, 1.6, 1900, 0.8);
+  await tween(1700, q => { fx({ dark:1, bone:1, diss:q, edge:[0.9, 0.85, 0.75] }); if (Math.random() < 0.9) kingDust(k, ['#d8d0bc', '#8a8478', '#3a3436'], golpeLite() ? 2 : 4); }, linE);
+  k.alpha = 0;
+  if (ac.acts.chop) ac.acts.chop.paused = false;
+  if (ac.acts.idle && ac.cur !== 'idle') ac.play('idle', { fade:0.5 });
+  await Promise.all([col, col2]);
+  if (!live()) return;
+  // o deus volta à fumaça
+  smokeColumn(ac.g.position.x, ac.g.position.z, H, 1400, 1);
+  await tween(1200, q => { ac.g.position.y = -H * easeIO(q) * 0.9; ac.fade(1 - q); eye.material.opacity *= 0.9; }, linE);
+  ac.g.visible = false; eye.visible = false;
+  MATE.tick = null;
+}
+// Dragões: o dragão gigante desce, ruge e engole o Rei
+async function mateDragao(k, winner, A, live, fx, fanfare, place){
+  const model = THREE.SkeletonUtils.clone(A.scene);
+  model.traverse(o => { if (!o.isMesh) return; o.castShadow = false; o.frustumCulled = false; o.userData.sharedGeo = true; o.userData.keepMat = true;
+    o.material = [].concat(o.material).map(m => { const c = m.clone(); if ('envMapIntensity' in c) rimShader(c, 0xff6a20, 0.8); return c; }); if (o.material.length === 1) o.material = o.material[0]; });
+  applySideTint(model, winner);
+  const B = dragonBonesOf(model), L = W < 560 ? 3.6 : 4.2, kk = L / Math.max(0.2, A.len);
+  const g = new THREE.Group(), holder = new THREE.Group();
+  holder.scale.setScalar(kk); holder.position.set(A.off.x / A.scale * kk, A.off.y / A.scale * kk, A.off.z / A.scale * kk);
+  holder.add(model); g.add(holder); mateProp(g);
+  const Hd = A.height / A.scale * kk;
+  const spot = avatarSpot(k, winner, L * 0.42 + 0.35);
+  place(spot, Hd);
+  const yaw = Math.atan2(-spot.ux, -spot.uz);
+  // pousa com a cabeça diante do Rei: o corpo fica atrás, na direção de onde ele veio
+  const land = V3(spot.x, 0, spot.z), sky = V3(spot.x + spot.ux * 7, 7.5, spot.z + spot.uz * 7);
+  g.position.copy(sky); g.rotation.set(0.35, yaw, 0);
+  const t0 = performance.now(); let jaw = 0, headUp = 0, flap = 1, fp = 0;
+  MATE.tick = dt => {
+    const t = (performance.now() - t0) / 1000;
+    for (const b of B.all) b.quaternion.copy(B.rest.get(b));
+    fp += dt / 1000 * TAU * (0.6 + 0.9 * flap);
+    const wz = (0.12 + 0.55 * Math.sin(fp)) * flap + (1 - flap) * 0.05 * Math.sin(t * 1.3);
+    if (B.wings[0]) dgAdd(B.wings[0], 0, 0, wz * 2.2);
+    if (B.wings[1]) dgAdd(B.wings[1], 0, 0, -wz * 2.2);
+    B.tail.forEach((b, i) => dgAdd(b, 0.04 * Math.sin(t + i), 0.12 * Math.sin(t * 1.2 - i * 0.7), 0));
+    B.spine.forEach(b => dgAdd(b, Math.sin(t * 1.7) * 0.02, 0, 0));
+    for (const b of B.head) dgAdd(b, -0.35 * headUp, 0, 0);
+    if (B.jaw) dgAdd(B.jaw, 0.6 * jaw, 0, 0);
+  };
+  // 1. desce do céu batendo as asas
+  snd('asas', { vol:0.85 }); snd('rugido_dragao', { vol:0.5, delay:0.4 });
+  await tween(2200, q => {
+    const e = easeIO(q);
+    g.position.set(mix(sky.x, land.x, e), mix(sky.y, 0, easeOut(q)), mix(sky.z, land.z, e));
+    g.rotation.set(0.35 * (1 - e), yaw, 0.12 * Math.sin(q * 5) * (1 - e));
+  }, linE);
+  if (!live()) return;
+  flap = 0; g.rotation.set(0, yaw, 0); g.position.copy(land);
+  shake(0.1); dustAt(land.x, land.z, nFx(26), 1.2);
+  // 2. ruge: ergue a cabeça, abre a mandíbula e solta fogo para o alto
+  await tween(500, q => { headUp = q; jaw = q; });
+  snd('rugido_dragao', { vol:0.95 });
+  g.updateMatrixWorld(true);
+  const tip = () => (B.tip ? B.tip.getWorldPosition(V3()) : V3(land.x - spot.ux * L * 0.4, Hd, land.z - spot.uz * L * 0.4));
+  if (GLOK && !RM){ const a = tip(); fireStream(a, a.clone().add(V3(-spot.ux * 1.2, 4.5, -spot.uz * 1.2)), 900); flashLight(a, 0xff7a2a, 4, 1000); }
+  await wait(1100);
+  if (!live()) return;
+  fanfare();
+  // 3. baixa a cabeça; o Rei é erguido até a boca, encolhe e some; a mandíbula fecha
+  await tween(500, q => { headUp = 1 - q * 1.6; jaw = 1; }, easeIO);
+  g.updateMatrixWorld(true);
+  const m0 = tip(), kx = k.dx, kz = k.dz, kc = chOf(k);
+  snd('sopro_fogo', { vol:0.4 });
+  await tween(1100, q => {
+    const e = easeIO(q);
+    k.dx = mix(kx, m0.x, e); k.dz = mix(kz, m0.z, e); k.lift = mix(0, m0.y - heightOf(k) * 0.35, e) + Math.sin(Math.PI * q) * 0.3;
+    if (kc) kc.root.scale.setScalar(1 - 0.85 * e);
+    if (Math.random() < 0.5) sparks.emit(k.dx, k.lift + 0.2, k.dz, (Math.random() - 0.5) * 0.4, 0.4, (Math.random() - 0.5) * 0.4, 600, 0.05, FIRE_COLS[(Math.random() * 4) | 0], 1, 0.2, 0.6);
+  });
+  k.alpha = 0; if (kc) kc.root.visible = false;
+  await tween(260, q => { jaw = 1 - q; headUp = -0.6 * (1 - q); });
+  snd('queda', { rate:0.6, vol:0.7 }); shake(0.05);
+  if (GLOK){ const a = tip(); sparks.burst(a, nFx(20), FIRE_COLS, 1.2, { life:700, size:0.07, grav:-0.5, up:0.4 }); }
+  await wait(700);
+  if (!live()) return;
+  // de novo de cabeça erguida, satisfeito
+  await tween(600, q => { headUp = 0.6 * q; });
+  snd('rugido_dragao', { vol:0.55 });
+  await wait(600);
+}
+// Aurora: o Arcanjo
+async function mateArcanjo(k, winner, A, live, fx, fanfare, place){
+  const H = 2.8, spot = avatarSpot(k, winner, 1.25);
+  place(spot);
+  const ac = chefeActor(A, H, 0xffd27a);
+  const yaw = Math.atan2(-spot.ux, -spot.uz);
+  ac.g.position.set(spot.x, 6.5, spot.z); ac.g.rotation.y = yaw;
+  mateProp(ac.g);
+  MATE.tick = dt => ac.tick(dt);
+  // 1. o pilar de luz dourada e a descida
+  snd('selo_celestial', { vol:0.8 }); snd('aura', { vol:0.6, delay:0.3 });
+  spawnPillar(spot.x, spot.z, 0xffd36a, 3600);
+  if (GLOK) flashLight(V3(spot.x, 2, spot.z), 0xffd36a, 4, 1800);
+  const fall = tween(1700, q => { ac.g.position.y = 6.5 * (1 - easeOut(q)); ac.fade(Math.min(1, q * 2)); if (Math.random() < 0.6) sparks.emit(spot.x + (Math.random() - 0.5) * 0.8, ac.g.position.y + Math.random() * H, spot.z + (Math.random() - 0.5) * 0.8, 0, -0.6, 0, 900, 0.05, Math.random() < 0.5 ? '#fff2c0' : '#ffd36a', 1, 0.1, 0.6, 1); }, linE);
+  await fall;
+  if (!live()) return;
+  spawnRing(spot.x, spot.z, 0xffd36a, 1.8, 800);
+  // 2. o julgamento com a espada: o golpe aponta o Rei (para no quadro de maior alcance)
+  const forehead = V3(k.dx, k.lift + heightOf(k) * 0.75, k.dz);
+  const touch = ac.acts.judge ? chefeTouch(ac, 'judge', forehead.y) : null;
+  for (const n in ac.acts) ac.acts[n].stop();
+  if (ac.acts.idle){ ac.acts.idle.reset().play(); ac.cur = 'idle'; ac.mixer.update(0); }
+  if (touch){
+    // perto o bastante para a ponta da espada ficar a um palmo do Rei
+    const reach = Math.max(0.6, touch.tip.z + 0.25);
+    const want = V3(forehead.x - Math.sin(yaw) * reach, 0, forehead.z - Math.cos(yaw) * reach), from = ac.g.position.clone();
+    tween(600, q => { ac.g.position.set(mix(from.x, want.x, q), 0, mix(from.z, want.z, q)); });
+    const dur = ac.play('judge', { once:true, ts:0.85, fade:0.3 });
+    snd('espada', { vol:0.7 });
+    await wait(dur * touch.f);
+    if (ac.acts.judge) ac.acts.judge.paused = true;
+  } else { ac.play('cast', { once:true }); await wait(1000); }
+  if (!live()) return;
+  snd('raio_golpe', { vol:0.6 }); shake(0.07);
+  const hand = ac.bone(/^RightHand$/) || ac.bone(/hand/i);
+  if (GLOK && hand){ const a = hand.getWorldPosition(V3()); beamFx(a, chestOf(k, 0.6), 0xffe6a0, 700, 0.05); }
+  spawnPillar(k.dx, k.dz, 0xffe6a0, 2200);
+  // 3. o Rei vira estátua de ouro, racha e se parte em pó dourado
+  await tween(800, q => fx({ gold:q }));
+  if (!live()) return;
+  snd('gelo_estalo', { vol:0.7, rate:0.7 }); snd('terra_afunda', { vol:0.35 });
+  await tween(800, q => fx({ gold:1, crack:q }));
+  if (!live()) return;
+  fanfare();
+  if (ac.acts.judge) ac.acts.judge.paused = false;
+  if (ac.acts.idle) ac.play('idle', { fade:0.6 });
+  if (GLOK){ sparks.burst(chestOf(k, 0.5), nFx(50), ['#fff2c0', '#ffd36a', '#c98a2a'], 2.2, { life:1300, size:0.06, grav:1.4, upward:true }); flashLight(chestOf(k, 0.6), 0xffd36a, 4, 900); }
+  shake(0.08);
+  await tween(1300, q => { fx({ gold:1, crack:1, diss:q, edge:[1, 0.85, 0.4] }); kingDust(k, ['#fff2c0', '#ffd36a', '#e0a040'], golpeLite() ? 3 : 6); }, linE);
+  k.alpha = 0;
+  await wait(500);
+  if (!live()) return;
+  // o Arcanjo sobe de volta para a luz
+  spawnPillar(ac.g.position.x, ac.g.position.z, 0xffd36a, 1800);
+  await tween(1400, q => { ac.g.position.y = 7 * easeIO(q); ac.fade(1 - q * q); }, linE);
+  ac.g.visible = false;
+  MATE.tick = null;
+}
+// raio de luz (cilindro aditivo que nasce na mão e alcança o alvo, depois some); devolve quando chega
+function beamFx(a, b, hex, ms = 600, r = 0.05){
+  if (!GLOK) return wait(ms * 0.4);
+  const core = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 8, 1, true), new THREE.MeshBasicMaterial({ color:C(0xffffff), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  const glow = new THREE.Mesh(core.geometry, new THREE.MeshBasicMaterial({ color:C(hex), transparent:true, opacity:0.55, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+  core.renderOrder = glow.renderOrder = 6; world.add(core, glow);
+  const tip = V3(), col = '#' + C(hex).getHexString();
+  const grow = tween(ms * 0.35, q => { tip.lerpVectors(a, b, q); placeSeg(core, a, tip, r * 0.5); placeSeg(glow, a, tip, r * 1.8); }, easeOut);
+  tween(ms, q => {
+    const f = q < 0.35 ? 1 : 1 - (q - 0.35) / 0.65;
+    core.material.opacity = f; glow.material.opacity = 0.55 * f;
+    if (q > 0.3 && Math.random() < 0.8) sparks.emit(b.x, b.y, b.z, (Math.random() - 0.5) * 1.6, Math.random() * 1.4, (Math.random() - 0.5) * 1.6, 500, 0.05, Math.random() < 0.5 ? '#ffffff' : col, 1, -1, 0.5);
+  }, linE).then(() => { world.remove(core, glow); core.geometry.dispose(); core.material.dispose(); glow.material.dispose(); });
+  return grow;
+}
+
 /* capturas por tipo */
 async function meleeCapture(p, v, tx, tz, g){
   const ch = charOf(p);
@@ -10175,7 +10971,7 @@ function mateCleanup(){
   MATE.target = null; MATE.sounded = false; MATE.tok++;
   if (MATE.ring){ dropDecal(MATE.ring); MATE.ring = null; }
   if (MATE.props){ for (const o of MATE.props) golpeDispose(o); MATE.props = []; }
-  MATE.follow = MATE.wave = null; MATE.cinema = false; MATE.skip = false;
+  MATE.follow = MATE.wave = MATE.tick = null; MATE.cinema = false; MATE.skip = false;
   const msb = document.getElementById('mate-skip'); if (msb) msb.hidden = true;
 }
 // peças do vencedor que atacam a casa do Rei (o mate pode ser descoberto)
@@ -10236,8 +11032,8 @@ async function animMate(k, mover){
     await mateKneel(k, winner, null);
   }
   if (tok !== MATE.tok) return;
-  // 2. o cinema: a coroa cai, correntes, dois captores levam o Rei ao campo do vencedor e o estandarte sobe
-  try { await mateCinema(k, winner, atk, tok); }
+  // 2. o avatar do reino vencedor fecha a partida; sem o modelo, o cinema de antes (coroa, correntes, captores e estandarte)
+  try { if (!(await mateAvatar(k, winner, atk, tok)) && tok === MATE.tok) await mateCinema(k, winner, atk, tok); }
   finally {
     MATE.cinema = false;
     if (mateSkipBtn) mateSkipBtn.hidden = true;
@@ -10573,7 +11369,8 @@ function cineCamera(rdt){
     _cineCam.position.copy(cine.pos); _cineCam.lookAt(cine.look);
     camera.position.lerp(cine.pos, k);
     camera.quaternion.copy(cam.baseQ).slerp(_cineCam.quaternion, k);
-    camera.fov = mix(cam.fov, 44, k);
+    // em pé (campo vertical aberto) o close não fecha abaixo de 0,9 do campo da tela: o horizontal não some
+    camera.fov = mix(cam.fov, Math.max(44, cam.fov * 0.9), k);
     camera.setViewOffset(W, H, 0, cam.offY * (1 - k), W, H);
     camera.updateProjectionMatrix();
     cam.cineDirty = true;
@@ -10612,32 +11409,34 @@ function placeRig(r){
 }
 // em telas largas o enquadramento também inclui a metade interna dos cemitérios
 const FITP_WIDE = [[-5.85, GROUND_Y, -0.3], [-5.85, GROUND_Y, 2.4], [5.85, GROUND_Y, 0.3], [5.85, GROUND_Y, -3.0]];
-function extent(){
+function extent(tight){
   let x = 0, y0 = 1e9, y1 = -1e9;
-  const pts = W / H > 1.15 ? FITP.concat(FITP_WIDE) : FITP;
+  const pts = W / H > 1.15 && !tight ? FITP.concat(FITP_WIDE) : FITP;
   for (const q of pts){ _p.set(q[0], q[1], q[2]).project(camera); x = Math.max(x, Math.abs(_p.x)); y0 = Math.min(y0, _p.y); y1 = Math.max(y1, _p.y); }
   return [x, y0, y1];
 }
 function fitFor(yaw, pitch, aerial){
-  const key = `${arena}:${W}x${H}:${yaw.toFixed(3)}:${pitch}`;
+  // modo cinema em pé: o tabuleiro fica no meio, entre a barra de cima e a de baixo (o resto: encostado no topo reservado)
+  const cinP = CIN.on && W / H < 0.9, cinA = CIN.on && !cinP && cfg.arc && H < 500 ? Math.min(0.4, 118 / H) : 0;
+  const key = `${arena}:${W}x${H}:${yaw.toFixed(3)}:${pitch}:${cinP ? 1 : 0}:${cinA}`;
   if (fitCache.has(key)) return fitCache.get(key);
   camera.clearViewOffset(); camera.fov = cam.fov; camera.updateProjectionMatrix();
-  const top = aerial ? 0.075 : W < 560 ? 0.11 : 0.15, ytop = 1 - 2 * top, ybot = -0.97, xm = 0.97;
+  const top = cinP ? 64 / H : aerial ? 0.075 : W < 560 ? 0.11 : 0.15, ytop = 1 - 2 * top, ybot = cinP ? -1 + 2 * 66 / H : cinA ? -1 + 2 * cinA : -0.97, xm = 0.97;
   const r = { yaw, pitch, D:16, tx:0, tz:0 };
   let lo = 4, hi = 90;
   for (let i = 0; i < 26; i++){
     r.D = (lo + hi) / 2;
     placeRig(r);
-    const [x, y0, y1] = extent();
+    const [x, y0, y1] = extent(!!cinA);
     if (x <= xm && y1 - y0 <= ytop - ybot) hi = r.D; else lo = r.D;
   }
   // algumas arenas pedem mais cenário em volta (só em telas largas: no celular o tabuleiro continua cheio)
-  const cA = AR().cam, wide = !aerial && cA && W >= 560;
+  const cA = AR().cam, wide = !aerial && !cinA && cA && W >= 560;
   r.D = wide ? hi * cA.pad : hi; placeRig(r);
-  const [, y0, y1] = extent();
+  const [, y0, y1] = extent(!!cinA);
   // Padrão encosta no topo reservado; Aérea fica centrada; nas arenas largas, o tabuleiro desce um pouco
   const free = ytop - ybot - (y1 - y0);
-  const res = { D:r.D, offY:aerial ? (ytop - y1 - free / 2) * H / 2 : wide ? (ytop - y1 - free * cA.drop) * H / 2 : (ytop - y1) * H / 2, ytop:wide ? cA.hz - 0.07 : ytop };
+  const res = { D:r.D, offY:aerial || cinP || cinA ? (ytop - y1 - free / 2) * H / 2 : wide ? (ytop - y1 - free * cA.drop) * H / 2 : (ytop - y1) * H / 2, ytop:wide ? cA.hz - 0.07 : ytop };
   if (fitCache.size > 200) fitCache.clear();
   fitCache.set(key, res);
   projDirty = true;
@@ -10775,6 +11574,9 @@ function focusAfter(res){
 }
 function fitCamera(){
   if (!GLOK || !W) return;
+  // tela em pé e alta (modo cinema no celular): abre o campo vertical para o horizontal continuar o de uma tela quadrada;
+  // com 34° fixos a câmera teria de recuar até dentro da névoa
+  cam.fov = W / H < 0.8 ? Math.min(60, 2 * Math.atan(0.2904 / (W / H)) * 180 / Math.PI) : 34;
   camera.aspect = W / H; camera.fov = cam.fov;
   fitCache.clear();
   const d = desiredRig();
@@ -11127,6 +11929,7 @@ function frame(now){
     updateEnv(now, dt);
     for (const ps of PSYS) ps.update(dt);
     syncHighlights(now);
+    if (MATE.tick) MATE.tick(dt, now);
     renderer.render(world, camera);
     drawOverlay();
     updateHud();
@@ -11260,7 +12063,7 @@ function audioTick(){
   AUD.bus.ambDuck.gain.setTargetAtTime(want, t, want < 1 ? 0.12 : 0.5);
 }
 // falas da narração (data/narracao.json: id → texto)
-const NARR_F = {"s_p_avanca": "O peão avança para", "s_p_captura": "O peão captura", "s_p_usa": "O peão usa", "o_p": "o peão", "s_n_avanca": "O cavaleiro avança para", "s_n_captura": "O cavaleiro captura", "s_n_usa": "O cavaleiro usa", "o_n": "o cavaleiro", "s_b_avanca": "O bispo avança para", "s_b_captura": "O bispo captura", "s_b_usa": "O bispo usa", "o_b": "o bispo", "s_r_avanca": "A torre avança para", "s_r_captura": "A torre captura", "s_r_usa": "A torre usa", "o_r": "a torre", "s_q_avanca": "A dama avança para", "s_q_captura": "A dama captura", "s_q_usa": "A dama usa", "o_q": "a dama", "s_k_avanca": "O rei avança para", "s_k_captura": "O rei captura", "s_k_usa": "O rei usa", "s_L_avanca": "O Lanceiro avança para", "s_L_captura": "O Lanceiro captura", "s_L_usa": "O Lanceiro usa", "o_L": "o lanceiro", "casa_a1": "á um.", "em_a1": "em á um!", "casa_a2": "á dois.", "em_a2": "em á dois!", "casa_a3": "á três.", "em_a3": "em á três!", "casa_a4": "á quatro.", "em_a4": "em á quatro!", "casa_a5": "á cinco.", "em_a5": "em á cinco!", "casa_a6": "á seis.", "em_a6": "em á seis!", "casa_a7": "á sete.", "em_a7": "em á sete!", "casa_a8": "á oito.", "em_a8": "em á oito!", "casa_b1": "bê um.", "em_b1": "em bê um!", "casa_b2": "bê dois.", "em_b2": "em bê dois!", "casa_b3": "bê três.", "em_b3": "em bê três!", "casa_b4": "bê quatro.", "em_b4": "em bê quatro!", "casa_b5": "bê cinco.", "em_b5": "em bê cinco!", "casa_b6": "bê seis.", "em_b6": "em bê seis!", "casa_b7": "bê sete.", "em_b7": "em bê sete!", "casa_b8": "bê oito.", "em_b8": "em bê oito!", "casa_c1": "cê um.", "em_c1": "em cê um!", "casa_c2": "cê dois.", "em_c2": "em cê dois!", "casa_c3": "cê três.", "em_c3": "em cê três!", "casa_c4": "cê quatro.", "em_c4": "em cê quatro!", "casa_c5": "cê cinco.", "em_c5": "em cê cinco!", "casa_c6": "cê seis.", "em_c6": "em cê seis!", "casa_c7": "cê sete.", "em_c7": "em cê sete!", "casa_c8": "cê oito.", "em_c8": "em cê oito!", "casa_d1": "dê um.", "em_d1": "em dê um!", "casa_d2": "dê dois.", "em_d2": "em dê dois!", "casa_d3": "dê três.", "em_d3": "em dê três!", "casa_d4": "dê quatro.", "em_d4": "em dê quatro!", "casa_d5": "dê cinco.", "em_d5": "em dê cinco!", "casa_d6": "dê seis.", "em_d6": "em dê seis!", "casa_d7": "dê sete.", "em_d7": "em dê sete!", "casa_d8": "dê oito.", "em_d8": "em dê oito!", "casa_e1": "é um.", "em_e1": "em é um!", "casa_e2": "é dois.", "em_e2": "em é dois!", "casa_e3": "é três.", "em_e3": "em é três!", "casa_e4": "é quatro.", "em_e4": "em é quatro!", "casa_e5": "é cinco.", "em_e5": "em é cinco!", "casa_e6": "é seis.", "em_e6": "em é seis!", "casa_e7": "é sete.", "em_e7": "em é sete!", "casa_e8": "é oito.", "em_e8": "em é oito!", "casa_f1": "éfe um.", "em_f1": "em éfe um!", "casa_f2": "éfe dois.", "em_f2": "em éfe dois!", "casa_f3": "éfe três.", "em_f3": "em éfe três!", "casa_f4": "éfe quatro.", "em_f4": "em éfe quatro!", "casa_f5": "éfe cinco.", "em_f5": "em éfe cinco!", "casa_f6": "éfe seis.", "em_f6": "em éfe seis!", "casa_f7": "éfe sete.", "em_f7": "em éfe sete!", "casa_f8": "éfe oito.", "em_f8": "em éfe oito!", "casa_g1": "gê um.", "em_g1": "em gê um!", "casa_g2": "gê dois.", "em_g2": "em gê dois!", "casa_g3": "gê três.", "em_g3": "em gê três!", "casa_g4": "gê quatro.", "em_g4": "em gê quatro!", "casa_g5": "gê cinco.", "em_g5": "em gê cinco!", "casa_g6": "gê seis.", "em_g6": "em gê seis!", "casa_g7": "gê sete.", "em_g7": "em gê sete!", "casa_g8": "gê oito.", "em_g8": "em gê oito!", "casa_h1": "agá um.", "em_h1": "em agá um!", "casa_h2": "agá dois.", "em_h2": "em agá dois!", "casa_h3": "agá três.", "em_h3": "em agá três!", "casa_h4": "agá quatro.", "em_h4": "em agá quatro!", "casa_h5": "agá cinco.", "em_h5": "em agá cinco!", "casa_h6": "agá seis.", "em_h6": "em agá seis!", "casa_h7": "agá sete.", "em_h7": "em agá sete!", "casa_h8": "agá oito.", "em_h8": "em agá oito!", "e_elimina": "e elimina", "lado_w": "As brancas", "lado_b": "As negras", "jogam_carta": "jogam a carta", "k_passo-relampago": "Passo do Relâmpago", "k_espelho-posicao": "Espelho de Posição", "k_olho-bispo": "Olho do Bispo", "k_dominio-diagonal": "Domínio Diagonal", "k_aura-cavaleiro": "Aura do Cavaleiro", "k_ponto-ancoragem": "Ponto de Ancoragem", "k_empuxo-gravitacional": "Empuxo Gravitacional", "k_visao-oraculo": "Visão do Oráculo", "k_veu-sombras": "Véu de Sombras", "k_rito-sacrificio": "Rito do Sacrifício", "k_heranca-cavaleiro": "Herança do Cavaleiro", "k_coroa-emprestada": "Coroa Emprestada", "k_escudo-arcano": "Escudo Arcano", "k_alcance-torre": "Alcance da Torre", "k_vinganca-isca": "Vingança da Isca", "k_bispo-oraculo": "Bispo Oráculo", "k_pegaso": "Ascensão do Pegaso", "k_dragao-cinzas": "Dragão das Cinzas", "k_canhao-cerco": "Canhão de Cerco", "k_golem-pedra": "Golem de Pedra", "k_andarilho-arcano": "Andarilho Arcano", "k_necromante-cinzas": "Necromante das Cinzas", "k_centuriao": "Centurião", "k_berserker": "Berserker", "k_fenix": "Fênix", "k_ressurreicao-cinzas": "Ressurreição das Cinzas", "k_recruta-cemiterio": "Recruta do Cemitério", "k_armadilha-espinhos": "Armadilha de Espinhos", "k_contrafeitico": "Contrafeitiço", "k_troca-sombra": "Troca de Sombra", "k_duplo-corpo": "Duplo de Corpo", "k_profecia-selada": "Profecia Selada", "k_fosso-lava": "Fosso de Lava", "k_nevoa-fria": "Névoa Fria", "k_repercussao-impacto": "Repercussão de Impacto", "k_portal-runa": "Portal de Runa", "k_lanca-fiel": "Lança Fiel", "k_ferradura-salto": "Ferradura do Salto", "k_grimorio-arcano": "Grimório Arcano", "k_pedra-terra": "Pedra da Terra", "k_coroa-raio": "Coroa do Raio", "e_roque_pequeno": "Roque pequeno! O rei se protege.", "e_roque_grande": "Roque grande! O rei se protege.", "e_promo_q": "Promoção! O peão se torna dama!", "e_promo_r": "Promoção! O peão se torna torre!", "e_promo_b": "Promoção! O peão se torna bispo!", "e_promo_n": "Promoção! O peão se torna cavaleiro!", "e_lanceiro": "O peão evolui para Lanceiro! Agora alcança duas casas!", "e_en_passant": "Captura en passant!", "e_xeque": "Xeque no rei!", "e_rei_perigo": "O rei está em perigo!", "e_armadilha": "Uma armadilha é revelada!", "e_bloqueado": "O golpe é bloqueado!", "e_contrafeitico": "Contrafeitiço! A magia é anulada!", "e_ressurge": "Uma peça retorna do cemitério!", "e_sacrificio": "Um sacrifício ousado!", "e_que_lance": "Que lance!", "e_vez_brancas": "Vez das brancas.", "e_vez_negras": "Vez das negras.", "e_tempo": "O tempo está acabando!", "e_mate_brancas": "Xeque-mate! O rei negro é capturado e levado para o campo das brancas!", "e_mate_negras": "Xeque-mate! O rei branco é capturado e levado para o campo das negras!"};
+const NARR_F = {"s_p_avanca": "O peão avança para", "s_p_captura": "O peão captura", "s_p_usa": "O peão usa", "o_p": "o peão", "s_n_avanca": "O cavaleiro avança para", "s_n_captura": "O cavaleiro captura", "s_n_usa": "O cavaleiro usa", "o_n": "o cavaleiro", "s_b_avanca": "O bispo avança para", "s_b_captura": "O bispo captura", "s_b_usa": "O bispo usa", "o_b": "o bispo", "s_r_avanca": "A torre avança para", "s_r_captura": "A torre captura", "s_r_usa": "A torre usa", "o_r": "a torre", "s_q_avanca": "A dama avança para", "s_q_captura": "A dama captura", "s_q_usa": "A dama usa", "o_q": "a dama", "s_k_avanca": "O rei avança para", "s_k_captura": "O rei captura", "s_k_usa": "O rei usa", "s_L_avanca": "O Lanceiro avança para", "s_L_captura": "O Lanceiro captura", "s_L_usa": "O Lanceiro usa", "o_L": "o lanceiro", "casa_a1": "á um.", "em_a1": "em á um!", "casa_a2": "á dois.", "em_a2": "em á dois!", "casa_a3": "á três.", "em_a3": "em á três!", "casa_a4": "á quatro.", "em_a4": "em á quatro!", "casa_a5": "á cinco.", "em_a5": "em á cinco!", "casa_a6": "á seis.", "em_a6": "em á seis!", "casa_a7": "á sete.", "em_a7": "em á sete!", "casa_a8": "á oito.", "em_a8": "em á oito!", "casa_b1": "bê um.", "em_b1": "em bê um!", "casa_b2": "bê dois.", "em_b2": "em bê dois!", "casa_b3": "bê três.", "em_b3": "em bê três!", "casa_b4": "bê quatro.", "em_b4": "em bê quatro!", "casa_b5": "bê cinco.", "em_b5": "em bê cinco!", "casa_b6": "bê seis.", "em_b6": "em bê seis!", "casa_b7": "bê sete.", "em_b7": "em bê sete!", "casa_b8": "bê oito.", "em_b8": "em bê oito!", "casa_c1": "cê um.", "em_c1": "em cê um!", "casa_c2": "cê dois.", "em_c2": "em cê dois!", "casa_c3": "cê três.", "em_c3": "em cê três!", "casa_c4": "cê quatro.", "em_c4": "em cê quatro!", "casa_c5": "cê cinco.", "em_c5": "em cê cinco!", "casa_c6": "cê seis.", "em_c6": "em cê seis!", "casa_c7": "cê sete.", "em_c7": "em cê sete!", "casa_c8": "cê oito.", "em_c8": "em cê oito!", "casa_d1": "dê um.", "em_d1": "em dê um!", "casa_d2": "dê dois.", "em_d2": "em dê dois!", "casa_d3": "dê três.", "em_d3": "em dê três!", "casa_d4": "dê quatro.", "em_d4": "em dê quatro!", "casa_d5": "dê cinco.", "em_d5": "em dê cinco!", "casa_d6": "dê seis.", "em_d6": "em dê seis!", "casa_d7": "dê sete.", "em_d7": "em dê sete!", "casa_d8": "dê oito.", "em_d8": "em dê oito!", "casa_e1": "é um.", "em_e1": "em é um!", "casa_e2": "é dois.", "em_e2": "em é dois!", "casa_e3": "é três.", "em_e3": "em é três!", "casa_e4": "é quatro.", "em_e4": "em é quatro!", "casa_e5": "é cinco.", "em_e5": "em é cinco!", "casa_e6": "é seis.", "em_e6": "em é seis!", "casa_e7": "é sete.", "em_e7": "em é sete!", "casa_e8": "é oito.", "em_e8": "em é oito!", "casa_f1": "éfe um.", "em_f1": "em éfe um!", "casa_f2": "éfe dois.", "em_f2": "em éfe dois!", "casa_f3": "éfe três.", "em_f3": "em éfe três!", "casa_f4": "éfe quatro.", "em_f4": "em éfe quatro!", "casa_f5": "éfe cinco.", "em_f5": "em éfe cinco!", "casa_f6": "éfe seis.", "em_f6": "em éfe seis!", "casa_f7": "éfe sete.", "em_f7": "em éfe sete!", "casa_f8": "éfe oito.", "em_f8": "em éfe oito!", "casa_g1": "gê um.", "em_g1": "em gê um!", "casa_g2": "gê dois.", "em_g2": "em gê dois!", "casa_g3": "gê três.", "em_g3": "em gê três!", "casa_g4": "gê quatro.", "em_g4": "em gê quatro!", "casa_g5": "gê cinco.", "em_g5": "em gê cinco!", "casa_g6": "gê seis.", "em_g6": "em gê seis!", "casa_g7": "gê sete.", "em_g7": "em gê sete!", "casa_g8": "gê oito.", "em_g8": "em gê oito!", "casa_h1": "agá um.", "em_h1": "em agá um!", "casa_h2": "agá dois.", "em_h2": "em agá dois!", "casa_h3": "agá três.", "em_h3": "em agá três!", "casa_h4": "agá quatro.", "em_h4": "em agá quatro!", "casa_h5": "agá cinco.", "em_h5": "em agá cinco!", "casa_h6": "agá seis.", "em_h6": "em agá seis!", "casa_h7": "agá sete.", "em_h7": "em agá sete!", "casa_h8": "agá oito.", "em_h8": "em agá oito!", "e_elimina": "e elimina", "lado_w": "As brancas", "lado_b": "As negras", "jogam_carta": "jogam a carta", "k_passo-relampago": "Passo do Relâmpago", "k_espelho-posicao": "Espelho de Posição", "k_olho-bispo": "Olho do Bispo", "k_dominio-diagonal": "Domínio Diagonal", "k_aura-cavaleiro": "Aura do Cavaleiro", "k_ponto-ancoragem": "Ponto de Ancoragem", "k_empuxo-gravitacional": "Empuxo Gravitacional", "k_visao-oraculo": "Visão do Oráculo", "k_veu-sombras": "Véu de Sombras", "k_rito-sacrificio": "Rito do Sacrifício", "k_heranca-cavaleiro": "Herança do Cavaleiro", "k_coroa-emprestada": "Coroa Emprestada", "k_escudo-arcano": "Escudo Arcano", "k_alcance-torre": "Alcance da Torre", "k_vinganca-isca": "Vingança da Isca", "k_bispo-oraculo": "Bispo Oráculo", "k_pegaso": "Ascensão do Pegaso", "k_dragao-cinzas": "Dragão das Cinzas", "k_canhao-cerco": "Canhão de Cerco", "k_golem-pedra": "Golem de Pedra", "k_andarilho-arcano": "Andarilho Arcano", "k_necromante-cinzas": "Necromante das Cinzas", "k_centuriao": "Centurião", "k_berserker": "Berserker", "k_fenix": "Fênix", "k_ressurreicao-cinzas": "Ressurreição das Cinzas", "k_recruta-cemiterio": "Recruta do Cemitério", "k_armadilha-espinhos": "Armadilha de Espinhos", "k_contrafeitico": "Contrafeitiço", "k_troca-sombra": "Troca de Sombra", "k_duplo-corpo": "Duplo de Corpo", "k_profecia-selada": "Profecia Selada", "k_fosso-lava": "Fosso de Lava", "k_nevoa-fria": "Névoa Fria", "k_repercussao-impacto": "Repercussão de Impacto", "k_portal-runa": "Portal de Runa", "k_lanca-fiel": "Lança Fiel", "k_ferradura-salto": "Ferradura do Salto", "k_grimorio-arcano": "Grimório Arcano", "k_pedra-terra": "Pedra da Terra", "k_coroa-raio": "Coroa do Raio", "e_roque_pequeno": "Roque pequeno! O rei se protege.", "e_roque_grande": "Roque grande! O rei se protege.", "e_promo_q": "Promoção! O peão se torna dama!", "e_promo_r": "Promoção! O peão se torna torre!", "e_promo_b": "Promoção! O peão se torna bispo!", "e_promo_n": "Promoção! O peão se torna cavaleiro!", "e_lanceiro": "O peão evolui para Lanceiro! Agora alcança duas casas!", "e_en_passant": "Captura en passant!", "e_xeque": "Xeque no rei!", "e_rei_perigo": "O rei está em perigo!", "e_armadilha": "Uma armadilha é revelada!", "e_bloqueado": "O golpe é bloqueado!", "e_contrafeitico": "Contrafeitiço! A magia é anulada!", "e_ressurge": "Uma peça retorna do cemitério!", "e_sacrificio": "Um sacrifício ousado!", "e_que_lance": "Que lance!", "e_vez_brancas": "Vez das brancas.", "e_vez_negras": "Vez das negras.", "e_tempo": "O tempo está acabando!", "e_mate_brancas": "Xeque-mate! O rei negro cai diante do poder das brancas!", "e_mate_negras": "Xeque-mate! O rei branco cai diante do poder das negras!"};
 /* ---------- Narração lance a lance, no estilo de transmissão (voz "Paulo", a mesma do narrador) ----------
    A frase sai de pedaços (data/narracao.json, embutido em NARR_F; áudio em assets/audio/narr/<id>.mp3) tocados em sequência
    pelo barramento de voz (a música abaixa), com o silêncio das pontas aparado. Opção "Narrar": tudo, só as ações importantes
@@ -11492,6 +12295,8 @@ let G = null, S = null, LOG = [], busy = false, aiToken = 0;
 const cfg = { mode:'ai', diff:2, human:'w', clock:'none', undoLeft:Infinity, diffW:2, diffB:2, speed:'normal', series:1, paused:false };
 const LEVEL = { 1:'Easy · Recruta', 2:'Medium · Veterano', 3:'Expert · Mestre' };
 const TITLE = { open:false };
+// modo cinema (estado; o resto fica junto do painel e da tela cheia)
+const CIN = { on:false, idle:false, t:0, watch:false, eat:null };
 const CLK = { on:false, ms:{ w:0, b:0 }, inc:0, last:0, thinking:false };
 const SERIES = { n:1, w:0, b:0, d:0, t:0, cine:null, view:null };
 const ui = { sel:null, acts:[], hover:null, inspect:null, hoverId:null, cursor:{ r:6, c:4 }, kb:false };
@@ -11571,15 +12376,27 @@ function renderTurn(){
   const sideCls = S.over ? (S.over.winner || 'w') : side;
   const chk = !S.over && S.inCheck && !busy ? '<span class="tag check">Xeque</span>' : '';
   el.className = 'turn' + (thinking ? ' thinking' : '');
-  el.innerHTML = `<span class="turn-who side-${sideCls}"><span class="sigil"></span><span>${txt}</span></span>
+  const shortTxt = cinShort(side);
+  el.innerHTML = `<span class="turn-who side-${sideCls}"><span class="sigil"></span><span>${txt}</span><span class="turn-short">${shortTxt}</span></span>
     <span class="turn-right">${chk}${clockHtml()}<span class="turn-no">Lance ${moveNo()}</span></span>`;
   $('hint').textContent = S.over ? 'A partida terminou. Comece outra ou desfaça a última jogada.'
     : cfg.mode === 'replay' ? 'Replay: use Avançar, Voltar, Início e Fim na barra acima do tabuleiro. Toque nas peças para ver a ficha.'
     : cfg.mode === 'spec' ? 'Modo Espectador: as duas IAs jogam. Pause para voltar um lance ou assuma um dos lados.'
     : !human(side) ? `A ${FACTION[side]} está pensando. Enquanto isso, passe o mouse ou toque nas peças para conhecê-las.`
     : 'Escolha uma peça sua. Casas âmbar mostram para onde ela pode ir; casas vermelhas são capturas. Arraste para os lados para girar a câmera.';
+  if (typeof cinSync === 'function') cinSync();
   if (APR.on && !S.over) $('hint').textContent = APR.guided ? 'Partida guiada: anéis vermelhos marcam peças suas atacadas e sem proteção. Peça uma Dica (atalho H) quando quiser.'
     : 'Modo Aprendiz: siga a instrução acima do tabuleiro. Casas douradas são o alvo; use Dica (atalho H) se travar.';
+}
+// a linha curta do aviso de vez (modo cinema): os dois lados no espectador, de quem é a vez no resto
+function cinShort(side){
+  const a = sideCurto('w'), b = sideCurto('b'), n = sideCurto(side);
+  if (S.over) return S.over.kind === 'mate' ? `${sideCurto(S.over.winner)} vence · xeque-mate` : S.over.winner ? `${sideCurto(S.over.winner)} vence` : S.over.kind === 'abortada' ? 'Partida cancelada' : 'Empate';
+  if (cfg.mode === 'spec') return `${a}${SERIES.n > 1 ? ' ' + SERIES.w + '×' + SERIES.b + ' ' : ' × '}${b} · ${cfg.paused ? 'pausada' : 'vez: ' + n}`;
+  if (cfg.mode === 'replay') return `Replay · vez: ${n}`;
+  if (cfg.mode === 'online') return !cfg.human ? `${a} × ${b} · vez: ${n}` : side === cfg.human ? `Sua vez · ${n}` : `Vez de ${onlineOppName()}`;
+  if (cfg.mode === 'ai') return side === cfg.human ? `Sua vez · ${n}` : `${n} pensa…`;
+  return `Vez: ${n}`;
 }
 function renderForces(){
   const hist = G.history({ verbose:true });
@@ -11741,7 +12558,7 @@ function updateUndo(){
   if (spec){
     $('spec-pause').textContent = cfg.paused ? 'Continuar' : 'Pausar';
     $('spec-back').disabled = !cfg.paused || busy || !G.history().length;
-    $('spec-score').textContent = SERIES.n > 1 ? `Aurora ${SERIES.w} × ${SERIES.b} Legião · melhor de ${SERIES.n}` : `Aurora (${LEVEL[cfg.diffW]}) × Legião (${LEVEL[cfg.diffB]})`;
+    $('spec-score').textContent = SERIES.n > 1 ? `${sideCurto('w')} ${SERIES.w} × ${SERIES.b} ${sideCurto('b')} · melhor de ${SERIES.n}` : `${sideCurto('w')} (${LEVEL[cfg.diffW]}) × ${sideCurto('b')} (${LEVEL[cfg.diffB]})`;
   }
 }
 function renderAll(){ renderTurn(); renderForces(); renderCard(); renderMoves(); updateUndo(); }
@@ -12009,7 +12826,7 @@ function handleTile(r, c){
   if (promoResolve) return;
   // celular: a Ficha abre na gaveta ao conhecer uma peça; no Arcano, também ao escolher a sua peça quando há carta que serve nela
   if (panelMobile()) setTimeout(() => {
-    if (ui.sel == null && ui.inspect != null && S.pieces[ui.inspect] && !S.pieces[ui.inspect].dead) panelShow('card');
+    if (ui.sel == null && ui.inspect != null && S.pieces[ui.inspect] && !S.pieces[ui.inspect].dead){ if (!CIN.on) panelShow('card'); }
     else if (cfg.arc && ui.sel != null && S.pieces[ui.sel] && arcFichaCards(S.pieces[ui.sel]) && (G.s.arc.hand[S.pieces[ui.sel].side] || []).some(c => arcCardFor(S.pieces[ui.sel], c).ok)) panelShow('card');
   }, 0);
   if (aprTap(r, c)) return;
@@ -12245,6 +13062,7 @@ function panelSave(){ try { localStorage.setItem(PANEL_KEY, JSON.stringify({ col
 function panelPaused(){ return (panelMobile() ? !PANEL.drawer : panelCollapsed()) || !PANEL.open.card; }
 function panelApply(){
   panelTlDefault();
+  if (CIN.on) setTimeout(cinSync, 0);
   const mob = panelMobile(), col = panelCollapsed();
   $('stage').classList.toggle('pcol', !mob && col);
   $('panel').classList.toggle('open', mob && PANEL.drawer);
@@ -12280,6 +13098,7 @@ for (const sec of document.querySelectorAll('.acc')) sec.querySelector('.acc-h')
 // no celular, tocar no puxador (fora dos botões) também abre e fecha a gaveta
 $('panel-rail').addEventListener('click', e => { if (panelMobile() && e.target === e.currentTarget){ PANEL.drawer = !PANEL.drawer; panelApply(); } });
 function fsSync(){
+  document.body.classList.toggle('fsx', IMM.on);
   for (const id of ['fs-btn', 'fs-scene']){
     const b = $(id); if (!b) continue;
     b.setAttribute('aria-label', IMM.on ? 'Sair da tela cheia' : 'Tela cheia');
@@ -12294,7 +13113,7 @@ async function immEnter(){
   IMM.native = false;
   const el = document.documentElement;
   try { if (el.requestFullscreen && !document.fullscreenElement){ await el.requestFullscreen({ navigationUI:'hide' }); IMM.native = !!document.fullscreenElement; } } catch (e){ IMM.native = false; }
-  fsSync(); panelApply();
+  fsSync(); panelApply(); cinApply();
   requestAnimationFrame(() => { layout(); mmLayout(); });
 }
 function immExit(){
@@ -12303,7 +13122,7 @@ function immExit(){
   document.body.classList.remove('imm');
   if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
   IMM.native = false;
-  fsSync(); panelApply();
+  fsSync(); panelApply(); cinApply();
   requestAnimationFrame(() => { layout(); mmLayout(); });
 }
 const immToggle = () => IMM.on ? immExit() : immEnter();
@@ -12318,6 +13137,80 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape' && IMM.on && !IMM.native && !cine.active && !promoResolve && $('end').hidden && !TITLE.open){ e.preventDefault(); e.stopImmediatePropagation(); immExit(); }
 }, true);
 panelApply(); fsSync();
+/* ---------- Modo cinema ----------
+   Em telas pequenas (largura < 900 ou altura < 500) e na tela cheia, durante a partida: o corpo ganha imm (a cena ocupa a
+   tela) e cin (a barra fina). Depois de 3 s sem toque a barra some (cin-idle); o primeiro toque no tabuleiro só a traz de
+   volta (não escolhe peça nem pula cena), assim como o botão do canto, o mouse ou o teclado. Menus abertos, a gaveta, a
+   promoção e o foco do teclado na barra seguram a barra na tela. */
+const cinSmall = () => window.innerWidth < 900 || window.innerHeight < 500;
+function cinApply(){
+  const want = !TITLE.open && (IMM.on || cinSmall()), b = document.body;
+  if (want !== CIN.on){
+    CIN.on = want;
+    b.classList.toggle('cin', want);
+    if (!IMM.on) b.classList.toggle('imm', want);
+    // o mapa começa recolhido no botão (sem mexer na preferência guardada, que volta ao sair do modo cinema)
+    const mk = mmNarrow() ? 'openM' : 'open';
+    if (want){ PANEL.drawer = false; if (!panelMobile()) PANEL.immCol = true; CIN.mm = { k:mk, v:MM[mk] }; MM[mk] = false; mmSyncUI(); }
+    else { b.classList.remove('cin-idle', 'cin-spec', 'cin-views', 'cin-watch'); clearTimeout(CIN.t); CIN.idle = false; if (CIN.mm){ MM[CIN.mm.k] = CIN.mm.v; CIN.mm = null; mmSyncUI(); } }
+    panelApply(); fitCache.clear(); projDirty = true;
+    requestAnimationFrame(() => { layout(); mmLayout(); fitCamera(); });
+  } else if (!IMM.on && want && !b.classList.contains('imm')) b.classList.add('imm');
+  cinSync();
+  if (want) cinWake();
+}
+// estado dos botões da barra e da classe de quem só assiste
+function cinSync(){
+  if (!CIN.on) return;
+  CIN.watch = cfg.mode === 'spec' || cfg.mode === 'replay' || (cfg.mode === 'online' && !cfg.human);
+  const b = document.body;
+  b.classList.toggle('cin-watch', CIN.watch);
+  const more = $('cin-more'); more.hidden = cfg.mode !== 'spec';
+  if (more.hidden) b.classList.remove('cin-spec');
+  more.setAttribute('aria-expanded', String(b.classList.contains('cin-spec')));
+  $('cin-cam').setAttribute('aria-expanded', String(b.classList.contains('cin-views')));
+  $('cin-map').setAttribute('aria-pressed', String(mmIsOpen()));
+  const po = panelMobile() ? PANEL.drawer : !PANEL.immCol;
+  $('cin-pan').setAttribute('aria-expanded', String(po));
+}
+function cinWake(){
+  if (!CIN.on) return;
+  if (CIN.idle){ CIN.idle = false; document.body.classList.remove('cin-idle'); }
+  clearTimeout(CIN.t);
+  CIN.t = setTimeout(cinSleep, 3000);
+}
+function cinSleep(){
+  if (!CIN.on) return;
+  const b = document.body, a = document.activeElement;
+  let kb = false; try { kb = !!(a && a.matches(':focus-visible') && a.closest('.top, .cin-r, .specbar, .views, .panel')); } catch (e){}
+  const hold = kb || b.classList.contains('cin-spec') || b.classList.contains('cin-views') || !$('audio-panel').hidden
+    || (panelMobile() ? PANEL.drawer : !PANEL.immCol) || !$('promo').hidden || !$('quit-dlg').hidden;
+  if (hold){ CIN.t = setTimeout(cinSleep, 3000); return; }
+  CIN.idle = true; b.classList.add('cin-idle');
+}
+function cinPop(k){
+  const b = document.body, c = 'cin-' + k, on = !b.classList.contains(c);
+  b.classList.remove('cin-spec', 'cin-views');
+  b.classList.toggle(c, on);
+  cinSync(); cinWake();
+}
+const cinPopsClose = () => { const b = document.body; if (!b.classList.contains('cin-spec') && !b.classList.contains('cin-views')) return false; b.classList.remove('cin-spec', 'cin-views'); cinSync(); return true; };
+// toque no tabuleiro com a barra escondida: só traz a barra (o toque não chega à cena); com um menu aberto: fecha o menu
+window.addEventListener('pointerdown', e => {
+  if (!CIN.on) return;
+  const onBoard = e.target === cv;
+  if (onBoard && (CIN.idle || cinPopsClose())){ e.stopPropagation(); e.preventDefault(); CIN.eat = e.pointerId; cinWake(); return; }
+  if (!onBoard && e.target.closest && !e.target.closest('.specbar, .views, #cin-more, #cin-cam')) cinPopsClose();
+  cinWake();
+}, true);
+window.addEventListener('pointerup', e => { if (CIN.eat != null && CIN.eat === e.pointerId){ CIN.eat = null; e.stopPropagation(); } }, true);
+window.addEventListener('pointermove', e => { if (CIN.on && e.pointerType === 'mouse' && Math.abs(e.movementX) + Math.abs(e.movementY) > 3) cinWake(); }, { passive:true });
+window.addEventListener('keydown', e => { if (!CIN.on) return; if (e.key === 'Escape' && cinPopsClose()){ e.stopImmediatePropagation(); return; } cinWake(); }, true);
+$('cin-wake').addEventListener('click', () => { audio(); cinWake(); const f = $('menu-btn'); if (f) f.focus({ preventScroll:true }); });
+$('cin-more').addEventListener('click', () => { audio(); cinPop('spec'); });
+$('cin-cam').addEventListener('click', () => { audio(); cinPop('views'); });
+$('cin-map').addEventListener('click', () => { audio(); cinPopsClose(); mmSetOpen(!mmIsOpen()); cinSync(); });
+$('cin-pan').addEventListener('click', () => { audio(); cinPopsClose(); panelToggle(); cinSync(); });
 /* ---------- Minimapa ----------
    Diagrama 2D clássico, sempre em dia com a partida (lido direto das regras, então desfazer, roque, en passant e promoção
    aparecem na hora, inclusive durante a câmera de combate). Também é um tabuleiro jogável: clicar numa casa equivale a
@@ -12339,7 +13232,8 @@ const mmIsOpen = () => mmNarrow() ? MM.openM : MM.open;
 function mmSave(){ try { localStorage.setItem(MM_KEY, JSON.stringify({ open:MM.open, openM:MM.openM, big:MM.big, pos:MM.pos, posM:MM.posM, w:MM.w, wM:MM.wM })); } catch (e){} }
 function mmSetOpen(v){
   if (mmNarrow()) MM.openM = !!v; else MM.open = !!v;
-  mmSave(); mmSyncUI();
+  if (!CIN.on) mmSave();
+  mmSyncUI();
   (v ? $('mm-hide') : mmFab).focus({ preventScroll:true });
 }
 function mmSyncUI(){
@@ -12773,6 +13667,7 @@ function openTitle(){
   renderThumbs();
   $('apr-count').textContent = `${aprCount()}/7 insígnias`;
   fitCache.clear(); projDirty = true;
+  cinApply();
   setTimeout(() => { const b = t.querySelector('.mode-card'); if (b) b.focus(); }, 30);
 }
 function closeTitle(){
@@ -12783,6 +13678,7 @@ function closeTitle(){
   $('title').hidden = true;
   fitCache.clear(); projDirty = true;
   if (S && !S.over) maybeAI();
+  cinApply();
   renderAll();
 }
 function showSetup(id){
@@ -13192,11 +14088,13 @@ function rankTick(){
     const want = !!(p.rank && p.t === 'p');
     let e = CH[p.id];
     // o Lanceiro ganha o modelo próprio (fora das animações); a peça promovida ou a partida nova voltam ao normal
-    if (e && GLOK && !busy && !p.removed && GLB.pl && want !== !!e.c.lanceiroModel && (want || e.c.lanceiroModel)){
+    if (e && GLOK && !busy && !p.removed && GLB.pl && (kingdomOf(p.side) === 'aurora' || e.c.lanceiroModel) && want !== !!e.c.lanceiroModel && (want || e.c.lanceiroModel)){
       const face = e.c.root.rotation.y, ghost = p.grave || p.dead;
       if (!ghost){ swapModel(p, want ? 'pl' : p.dt).root.rotation.y = face; e = CH[p.id]; }
     }
     if (e && e.c.setRank) e.c.setRank(want);
+    // Pégaso do reino (Pesadelo, Serpe): acabou o efeito, volta o Cavaleiro
+    if (e && e.c.formModel && e.c.formModel !== 'do' && GLOK && !busy && !p.dead){ const q = cfg.arc && G && G.s ? G.s.board.find(x => x && x.id === p.eid) : null; if (!q || !q.fx.some(f => f.id === 'pegaso')){ const face = e.c.root.rotation.y; swapModel(p, p.dt).root.rotation.y = face; e = CH[p.id]; } }
     // Dragão das Cinzas: acabou o efeito (o lance já foi), o dragão volta a ser o Cavaleiro
     if (e && e.c.dragonModel && GLOK && !busy && !p.dead){ const q = cfg.arc && G && G.s ? G.s.board.find(x => x && x.id === p.eid) : null; if (!q || !q.fx.some(f => f.id === 'dragao')) dragonForm(p, false); }
     if (want && !was && !p.dead && GLOK && typeof floatText === 'function' && !(cfg.mode === 'replay' && RP.busy)){
@@ -13221,11 +14119,13 @@ function arcWorldTick(now){
       const put = (q, mesh, kind) => { const [r, c] = rcOf(q), [x, z] = tc(r, c); mesh.position.x += x; mesh.position.z += z; mesh.userData.own = true; ARCW.g.add(mesh); ARCW.items.push({ mesh, kind, ph:Math.random() * 6 }); };
       const deco = (tex, col, size, y, add) => { const m = new THREE.Mesh(planeGeo(), new THREE.MeshBasicMaterial({ map:tex, color:C(col), transparent:true, depthWrite:false, toneMapped:false, blending:add ? THREE.AdditiveBlending : THREE.NormalBlending, polygonOffset:true, polygonOffsetFactor:-3, polygonOffsetUnits:-3 })); m.scale.set(size, 1, size); m.position.y = y; m.renderOrder = 4; m.userData.sharedGeo = true; return m; };
       for (const [q, b] of Object.entries(G.s.arc.blocked)){
-        if (b.kind === 'lava'){ put(q, deco(softTex, 0xff5a18, 1.05, 0.016, true), 'lava'); put(q, deco(glowTex, 0xffa040, 1.3, 0.02, true), 'lava'); }
+        const bk = kingdomOf(b.side || 'w');
+        if (b.kind === 'lava' && bk === 'ferro_negro'){ put(q, deco(softTex, 0x050203, 1.0, 0.016, false), 'pit'); put(q, deco(glowTex, 0x9a1010, 1.2, 0.02, true), 'lava'); }
+        else if (b.kind === 'lava'){ put(q, deco(softTex, bk === 'dragoes' ? 0xff7a1a : 0xff5a18, 1.05, 0.016, true), 'lava'); put(q, deco(glowTex, bk === 'dragoes' ? 0xffc040 : 0xffa040, 1.3, 0.02, true), 'lava'); }
         else { const m = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.55, 0.86), stoneMat || new THREE.MeshStandardMaterial({ color:0x6a625a })); m.position.y = 0.27; m.castShadow = true; m.userData.keepMat = true; put(q, m, 'wall'); m.material = stoneMat || m.material; }
       }
-      for (const pt of G.s.arc.portals) for (const q of pt.sqs) put(q, deco(ringTex, pt.side === 'w' ? 0xffc46a : 0xc06aff, 1.0, 0.018, true), 'portal');
-      for (const tr of G.s.arc.trails) put(tr.sq, deco(softTex, 0x4dff8a, 0.7, 0.015, true), 'trail');
+      for (const pt of G.s.arc.portals){ const pk = kingdomOf(pt.side); for (const q of pt.sqs) put(q, deco(ringTex, pk === 'ferro_negro' ? 0xc0302a : pk === 'dragoes' ? 0xff7a1a : pt.side === 'w' ? 0xffc46a : 0xc06aff, 1.0, 0.018, true), 'portal'); }
+      for (const tr of G.s.arc.trails){ const tk = kingdomOf(tr.side); put(tr.sq, deco(softTex, tk === 'ferro_negro' ? 0xff3a4a : tk === 'dragoes' ? 0xff7a1a : 0xb8b0a0, 0.7, 0.015, true), 'trail'); }
       for (const an of G.s.arc.anchors) put(an.sq, deco(ringTex, 0xffd36a, 0.85, 0.017, true), 'anchor');
       if (!ARCUI.hidden && act){
         for (const t of G.s.arc.traps.filter(t => t.side === act && t.sq)){ const m = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.58), new THREE.MeshStandardMaterial({ color:0x3a2a5a, emissive:C(0x2a1a4a), roughness:0.6 })); m.rotation.x = -Math.PI / 2; m.rotation.z = 0.3; m.position.y = 0.022; put(t.sq, m, 'trapOwn'); }
@@ -13240,7 +14140,7 @@ function arcWorldTick(now){
     else if (it.kind === 'trapGlow') m.material.opacity = RM ? 0.5 : 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(now / 520 + it.ph));
     else if (it.kind === 'anchor') m.rotation.y = -now / 1400;
   }
-  if (on && !RM && Math.random() < 0.06){ for (const [q, b] of Object.entries(G.s.arc.blocked)) if (b.kind === 'lava'){ const [r, c] = rcOf(q), [x, z] = tc(r, c); sparks.emit(x + (Math.random() - 0.5) * 0.6, 0.05, z + (Math.random() - 0.5) * 0.6, 0, 0.7 + Math.random() * 0.5, 0, 900, 0.05, Math.random() < 0.5 ? '#ffb040' : '#ff5a18', 1, 0.4, 0.6, 1); } }
+  if (on && !RM && Math.random() < 0.06){ for (const [q, b] of Object.entries(G.s.arc.blocked)) if (b.kind === 'lava'){ const [r, c] = rcOf(q), [x, z] = tc(r, c), bk = kingdomOf(b.side || 'w'); if (bk === 'ferro_negro'){ blackFire(x, 0.02, z, 1, 0.5); continue; } for (let i = 0; i < (bk === 'dragoes' ? 3 : 1); i++) sparks.emit(x + (Math.random() - 0.5) * 0.6, 0.05, z + (Math.random() - 0.5) * 0.6, 0, (bk === 'dragoes' ? 1.4 : 0.7) + Math.random() * 0.5, 0, 900, bk === 'dragoes' ? 0.08 : 0.05, Math.random() < 0.5 ? '#ffb040' : '#ff5a18', 1, 0.4, 0.6, 1); } }
   arcAccessories(on, now);
 }
 // versões procedurais das transmutações sobre o modelo atual: asas, braços de pedra, canhão, escudo, olho, chamas
@@ -13254,6 +14154,8 @@ function arcAccessories(on, now){
     for (const f of e.fx){
       if (ARC_TINT[f.id]){ const [rgb, v] = ARC_TINT[f.id]; if (v > (p.tint || 0)){ p.tint = v; p.tintRgb = rgb; } }
       if (['pegaso', 'dragao', 'golem', 'canhao', 'centuriao', 'oraculo_b', 'andarilho', 'necro', 'fenix'].includes(f.id)) want.set(p.id + ':' + f.id, { p, id:f.id });
+      // Lanceiro dos outros reinos: o Peão do reino com a arma de haste
+      if (f.id === 'lanceiro' && p.t === 'p' && kingdomOf(p.side) !== 'aurora') want.set(p.id + ':lanceiro', { p, id:'lanceiro' });
     }
   }
   for (const [k, a] of ARCW.acc){
@@ -13273,18 +14175,26 @@ function arcAccessories(on, now){
     if (a.g.userData.wings){ const [L, R] = a.g.userData.wings, f = RM ? 0.15 : 0.25 + 0.35 * Math.sin(t * (a.id === 'dragao' ? 4.5 : 3.2)); L.rotation.z = f; R.rotation.z = -f; }
     if (a.g.userData.spin) a.g.userData.spin.rotation.y = t * 0.8;
     if (a.g.userData.eye) a.g.userData.eye.material.opacity = RM ? 0.8 : 0.6 + 0.4 * Math.sin(t * 3);
+    // a crina de fogo negro do Pesadelo; as brasas da lança de presa
+    if (!RM && GLOK && a.g.userData.mane && Math.random() < 0.5){ const h = heightOf(P), fy = chOf(P) ? chOf(P).root.rotation.y : 0; blackFire(P.dx + Math.sin(fy) * 0.28, h * 0.78, P.dz + Math.cos(fy) * 0.28, 1, 0.12); }
+    if (!RM && GLOK && a.g.userData.ember && Math.random() < 0.2){ const ch = chOf(P), w = a.g.userData.ember; if (ch){ a.g.updateMatrixWorld(true); const t2 = w.localToWorld(V3(0, w.userData.tipY || 1, 0)); sparks.emit(t2.x, t2.y, t2.z, 0, 0.4, 0, 500, 0.04, FIRE_COLS[(Math.random() * 4) | 0], 1, 0.2, 0.6, 1); } }
     if (!RM && GLOK && (a.id === 'fenix' || a.id === 'dragao' || a.id === 'necro') && Math.random() < 0.12){
-      const col = a.id === 'necro' ? ['#7dffa8', '#2a8a4a'] : ['#ffb040', '#ff5a18', '#ffe0a0'];
+      const ak = kingdomOf(P.side);
+      const col = a.id === 'necro' ? (ak === 'ferro_negro' ? ['#ff3a4a', '#8a0a1a'] : ak === 'dragoes' ? FIRE_COLS : ['#cfc6b4', '#8a8478']) : ak === 'ferro_negro' && a.id === 'fenix' ? ['#ff3a4a', '#ffd0d8'] : ['#ffb040', '#ff5a18', '#ffe0a0'];
       sparks.emit(P.dx + (Math.random() - 0.5) * 0.35, heightOf(P) * (0.3 + Math.random() * 0.6), P.dz + (Math.random() - 0.5) * 0.35, 0, 0.5 + Math.random() * 0.4, 0, 800, 0.05, col[Math.floor(Math.random() * col.length)], 1, 0.3, 0.6, 1);
     }
   }
 }
 function arcBuildAcc(id, p, H){
-  const g = new THREE.Group(), side = p.side;
+  const g = new THREE.Group(), side = p.side, K = kingdomOf(side), form = chOf(p) && chOf(p).formModel;
   const mat = (col, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color:C(col), roughness:0.6, flatShading:true }, o));
+  // Pesadelo, Serpe e Dragão de Ossos já são a forma: sem asas por cima (o Pesadelo leva a crina de fogo negro)
+  if (form && (id === 'pegaso' || id === 'dragao')){ g.userData.mane = form === 'ps'; return g; }
+  if (id === 'lanceiro'){ const w = polearm(K === 'dragoes' ? 'presa' : 'negra', H); g.add(w); if (K === 'dragoes') g.userData.ember = w; return g; }
   const wing = (m, s) => { const sh = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0.55, 0.2), new THREE.Vector2(0.75, 0.05), new THREE.Vector2(0.62, -0.12), new THREE.Vector2(0.45, -0.05), new THREE.Vector2(0.3, -0.18), new THREE.Vector2(0.12, -0.1)]); const geo = new THREE.ShapeGeometry(sh); const w = new THREE.Mesh(geo, m); w.scale.setScalar(s); const piv = new THREE.Group(); piv.add(w); return piv; };
   if (id === 'pegaso' || id === 'dragao'){
-    const m = id === 'pegaso' ? mat(0xf4f6ff, { emissive:C(0x6a7080), side:THREE.DoubleSide }) : mat(0x6a1a12, { emissive:C(0x300806), side:THREE.DoubleSide });
+    const m = id === 'pegaso' ? (K === 'ferro_negro' ? mat(0x1a1416, { emissive:C(0x5a0c10), side:THREE.DoubleSide }) : K === 'dragoes' ? mat(0x8a2a14, { emissive:C(0x5a1a06), side:THREE.DoubleSide }) : mat(0xf4f6ff, { emissive:C(0x6a7080), side:THREE.DoubleSide }))
+      : K === 'ferro_negro' ? mat(0xd8cfb8, { emissive:C(0x3a0a0a), side:THREE.DoubleSide }) : mat(0x6a1a12, { emissive:C(0x300806), side:THREE.DoubleSide });
     const s = H * (id === 'dragao' ? 0.8 : 0.7);
     const L = wing(m, s), R = wing(m, s);
     R.scale.x = -1; R.children[0].material = m;
@@ -13292,7 +14202,10 @@ function arcBuildAcc(id, p, H){
     L.rotation.y = -0.4; R.rotation.y = 0.4;
     g.add(L, R); g.userData.wings = [L, R];
   } else if (id === 'golem'){
-    const m = mat(0x8a8072);
+    const m = K === 'ferro_negro' ? mat(0xd8cfb8, { emissive:C(0x1a0a06) }) : K === 'dragoes' ? mat(0x2a1a14, { emissive:C(0xff4a10), emissiveIntensity:0.6 }) : mat(0x8a8072);
+    // runas douradas (Aurora), costelas (Colosso de Ossos), fendas de lava (Dragões): um anel no peito
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.018, 6, 20), K === 'ferro_negro' ? mat(0xd8cfb8) : new THREE.MeshBasicMaterial({ color:C(K === 'dragoes' ? 0xff7a1a : 0xffd36a), toneMapped:false }));
+    band.rotation.x = Math.PI / 2; band.position.y = H * 0.55; g.add(band);
     for (const sx of [-1, 1]){
       const arm = new THREE.Group();
       const up = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.42, 0.18), m); up.position.y = -0.18; arm.add(up);
@@ -13301,24 +14214,39 @@ function arcBuildAcc(id, p, H){
       g.add(arm);
     }
   } else if (id === 'canhao'){
-    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.6, 10), mat(0x2a2624, { metalness:0.6, roughness:0.4 }));
-    barrel.rotation.x = Math.PI / 2 - 0.25; barrel.position.set(0, H * 0.82, 0.22);
-    g.add(barrel);
+    if (K === 'ferro_negro'){
+      // catapulta de crânios: o braço e o crânio em chamas carmesim
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.62), mat(0x2a1a14)); arm.rotation.x = -0.6; arm.position.set(0, H * 0.86, 0.06); g.add(arm);
+      const skull = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), mat(0xd8cfb8, { emissive:C(0x5a0c0c) })); skull.position.set(0, H * 0.86 + 0.2, -0.2); g.add(skull);
+      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xff2a2a), transparent:true, opacity:0.7, blending:THREE.AdditiveBlending, depthWrite:false })); fl.scale.setScalar(0.32); fl.position.copy(skull.position); g.add(fl); g.userData.eye = fl;
+    } else if (K === 'dragoes'){
+      // balista: o arco e o virote de fogo azul
+      const bow = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.016, 5, 16, Math.PI), mat(0x3a2014)); bow.position.set(0, H * 0.84, 0.26); g.add(bow);
+      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.6, 5), new THREE.MeshBasicMaterial({ color:C(0x9fe3ff), toneMapped:false })); bolt.rotation.x = Math.PI / 2; bolt.position.set(0, H * 0.84, 0.2); g.add(bolt);
+      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0x5fc8ff), transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false })); fl.scale.setScalar(0.3); fl.position.set(0, H * 0.84, 0.5); g.add(fl); g.userData.eye = fl;
+    } else {
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.6, 10), mat(0xb07a3a, { metalness:0.8, roughness:0.35 }));
+      barrel.rotation.x = Math.PI / 2 - 0.25; barrel.position.set(0, H * 0.82, 0.22);
+      g.add(barrel);
+    }
   } else if (id === 'centuriao'){
-    const sh = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.5, 0.05), mat(0xb08a3a, { metalness:0.5, roughness:0.4, emissive:C(0x2a1a06) }));
+    const sh = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.5, 0.05), K === 'ferro_negro' ? mat(0x2a2624, { metalness:0.7, roughness:0.4, emissive:C(0x3a0606) }) : K === 'dragoes' ? mat(0x8a2a14, { metalness:0.4, roughness:0.45, emissive:C(0x4a1004) }) : mat(0xd6a842, { metalness:0.75, roughness:0.3, emissive:C(0x4a3006) }));
     sh.position.set(0.18, H * 0.42, 0.2);
     g.add(sh);
+    // escudo de espinhos (legionário amaldiçoado) ou de escamas (guerreiro dos Dragões)
+    if (K !== 'aurora') for (let i = 0; i < 6; i++){ const s = new THREE.Mesh(K === 'ferro_negro' ? new THREE.ConeGeometry(0.022, 0.1, 4) : new THREE.SphereGeometry(0.05, 6, 4), K === 'ferro_negro' ? mat(0x5a1010, { emissive:C(0x3a0404) }) : mat(0xc04a1a, { emissive:C(0x5a1a04) })); s.position.set(0.18 + ((i % 2) - 0.5) * 0.16, H * 0.42 + (Math.floor(i / 2) - 1) * 0.15, 0.24); if (K === 'ferro_negro') s.rotation.x = Math.PI / 2; else s.scale.set(1, 0.6, 0.35); g.add(s); }
   } else if (id === 'oraculo_b'){
-    const eye = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(0xe6e0ff), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false }));
-    eye.scale.setScalar(0.35); eye.position.set(0, H + 0.18, 0);
+    const eye = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(K === 'ferro_negro' ? 0xff2a2a : K === 'dragoes' ? 0xff7a1a : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false }));
+    eye.scale.setScalar(K === 'ferro_negro' ? 0.2 : 0.35); eye.position.set(K === 'ferro_negro' ? -0.08 : 0, H + 0.18, 0);
     g.add(eye); g.userData.eye = eye;
+    if (K === 'ferro_negro'){ const e2 = new THREE.Sprite(eye.material); e2.scale.setScalar(0.2); e2.position.set(0.08, H + 0.18, 0); g.add(e2); }
   } else if (id === 'andarilho'){
-    const ring = new THREE.Mesh(planeGeo(), new THREE.MeshBasicMaterial({ map:ringTex, color:C(0xa985ff), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    const ring = new THREE.Mesh(planeGeo(), new THREE.MeshBasicMaterial({ map:ringTex, color:C(K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : 0xfff2c0), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
     ring.scale.set(1.1, 1, 1.1); ring.position.y = 0.03; ring.userData.sharedGeo = true;
     g.add(ring); g.userData.spin = ring;
   } else {
     // Fênix e Necromante: halo de cor (as brasas saem no quadro a quadro)
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(id === 'necro' ? 0x4dff8a : 0xff8a30), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:C(id === 'necro' ? (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff7a1a : 0xcfc6b4) : (K === 'ferro_negro' ? 0xc0302a : K === 'dragoes' ? 0xff5a18 : 0xffc040)), transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
     halo.scale.setScalar(H * 1.1); halo.position.y = H * 0.5;
     g.add(halo);
   }
@@ -13519,13 +14447,292 @@ async function arcSync(hints = {}){
   for (const p of S.pieces) if (!p.dead && !p.removed) S.board[p.r * 8 + p.c] = p;
   renderAll();
 }
-// cena curta para as cartas grandes: close na peça, legenda com o nome da carta
-async function arcScene(p, caption, sub, col, ms = 900){
+/* ---------- Arcano com a cara de cada reino (cartas e regras iguais) ----------
+   O nome da carta fica; a cena, a cor e o título da legenda seguem o reino da peça. Aurora: o visual de antes, com luz
+   dourada; Ferro Negro: carmesim e negro, fumaça, almas, ossos e os fantasmas; Dragões: fogo e fogo-gelo azul.
+   Os modelos novos (Pesadelo, Serpe, Dragão de Ossos) vêm de assets/meshy/chefes/ sob demanda; sem eles, a peça fica com o
+   modelo de sempre e os adereços procedurais na cor do reino. */
+const KARC = {
+  aurora:{ ring:0xa985ff, txt:'#ffd36a', glow:0xffd36a, cols:['#fff2c0', '#ffd36a', '#c9a0ff'] },
+  ferro_negro:{ ring:0xc0302a, txt:'#ff8a7a', glow:0xff2a3a, cols:['#ff3a4a', '#8a0a1a', '#1a0406'] },
+  dragoes:{ ring:0x5fc8ff, txt:'#9fe3ff', glow:0xff7a1a, cols:['#e8f8ff', '#5fc8ff', '#ff7a1a'] },
+};
+const karc = side => KARC[kingdomOf(side)] || KARC.aurora;
+// [título da cena, cor] por carta e reino (a Aurora sem entrada fica com o título e a cor de antes)
+const ARC_REINO = {
+  pegaso:{ ferro_negro:['PESADELO', 0xc0302a], dragoes:['SERPE', 0xff7a2a] },
+  dragao:{ ferro_negro:['DRAGÃO DE OSSOS', 0xc0302a], dragoes:['DRAGÃO GIGANTE', 0xff7a1a] },
+  canhao:{ aurora:['CANHÃO DE BRONZE', 0xd6a050], ferro_negro:['CATAPULTA DE CRÂNIOS', 0xc0302a], dragoes:['BALISTA DE FOGO AZUL', 0x5fc8ff] },
+  golem:{ aurora:['GOLEM DE PEDRA', 0xffd36a], ferro_negro:['COLOSSO DE OSSOS', 0xd8d0bc], dragoes:['GOLEM DE LAVA', 0xff5a18] },
+  centuriao:{ aurora:['CENTURIÃO DOURADO', 0xffd36a], ferro_negro:['LEGIONÁRIO AMALDIÇOADO', 0xc0302a], dragoes:['GUERREIRO DE ESCAMAS', 0xff7a2a] },
+  berserk:{ aurora:['BERSERKER', 0xffd36a], ferro_negro:['POSSUÍDO', 0xff2a2a], dragoes:['BERSERKER EM CHAMAS', 0xff5a18] },
+  fenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['FÊNIX DAS ALMAS', 0xc0302a], dragoes:['FÊNIX DRACÔNICA', 0xff5a18] },
+  andarilho:{ aurora:['ANDARILHO DA LUZ', 0xfff2c0], ferro_negro:['ANDARILHO DAS ALMAS', 0xc0302a], dragoes:['ANDARILHO DO FOGO', 0xff7a2a] },
+  necro:{ aurora:['NECROMANTE DAS CINZAS', 0xcfc6b4], ferro_negro:['NECROMANTE DAS ALMAS', 0xc0302a], dragoes:['NECROMANTE DAS BRASAS', 0xff7a1a] },
+  oraculo_b:{ aurora:['OLHO DE LUZ', 0xfff2c0], ferro_negro:['OLHOS DO DEUS DA MORTE', 0xff2a2a], dragoes:['OLHO DO DRAGÃO', 0xff7a1a] },
+  lanceiro:{ aurora:['LANÇA DE LUZ', 0xffd36a], ferro_negro:['ALABARDEIRO NEGRO', 0xc0302a], dragoes:['LANCEIRO DRACÔNICO', 0xff7a1a] },
+  summon:{ aurora:['RESSURREIÇÃO', 0xfff2c0], ferro_negro:['OS FANTASMAS TRAZEM', 0xc0302a], dragoes:['RENASCE DAS BRASAS', 0xff7a1a] },
+  phoenix:{ aurora:['FÊNIX DOURADA', 0xffc040], ferro_negro:['AS ALMAS DEVOLVEM', 0xc0302a], dragoes:['OVO DE DRAGÃO', 0xff5a18] },
+};
+function arcReinoOf(id, p, base){
+  const R = ARC_REINO[id], k = kingdomOf(p.side), e = R && R[k];
+  return { k, title:e ? e[0] : base[0], col:e ? e[1] : base[1] };
+}
+// a cena de carta grande do reino: o título e a cor do reino, e o efeito próprio dele junto da câmera
+async function arcSceneReino(p, id, base, sub, ms = 900){
+  const r = arcReinoOf(id, p, base), fx = ARC_FXR[id] && ARC_FXR[id][r.k];
+  await arcScene(p, r.title, sub, r.col, ms, fx ? () => fx(p, r) : null);
+  return r;
+}
+// mãos que saem do chão e agarram (fantasma carmesim no rastro de almas; osso nas covas do Ferro Negro)
+function graspHands(x, z, kind = 'bone', n = 3, ms = 1600){
+  if (!GLOK) return Promise.resolve();
+  const ghost = kind === 'ghost';
+  const mat = ghost ? new THREE.MeshBasicMaterial({ color:C(0xff6a7a), transparent:true, opacity:0.6, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false })
+    : new THREE.MeshStandardMaterial({ color:C(0xd8cfb8), roughness:0.7, emissive:C(0x2a1a14) });
+  const g = new THREE.Group(), bone = new THREE.CylinderGeometry(0.012, 0.01, 1, 5);
+  const hands = [];
+  for (let i = 0; i < (golpeLite() ? Math.min(2, n) : n); i++){
+    const h = new THREE.Group(), a = i / n * TAU + Math.random() * 0.6, r = 0.12 + Math.random() * 0.2;
+    const arm = new THREE.Mesh(bone, mat); arm.scale.set(1.6, 0.22, 1.6); arm.position.y = -0.11; h.add(arm);
+    const palm = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 0.022), mat); palm.position.y = 0.02; h.add(palm);
+    for (let f = 0; f < 4; f++){ const fi = new THREE.Mesh(bone, mat); fi.scale.set(0.8, 0.07, 0.8); fi.position.set(-0.022 + f * 0.015, 0.075, 0); fi.rotation.x = 0.35; h.add(fi); }
+    const th = new THREE.Mesh(bone, mat); th.scale.set(0.9, 0.05, 0.9); th.position.set(0.036, 0.035, 0); th.rotation.z = -0.8; h.add(th);
+    h.position.set(x + Math.cos(a) * r, -0.25, z + Math.sin(a) * r); h.rotation.set(0, -a, (Math.random() - 0.5) * 0.5);
+    g.add(h); hands.push(h);
+  }
+  world.add(g);
+  if (!ghost) dustAt(x, z, nFx(10), 0.6, ['#3a3030', '#1a1414']);
+  return tween(ms, q => {
+    const up = q < 0.3 ? easeOut(q / 0.3) : q > 0.75 ? 1 - easeIO((q - 0.75) / 0.25) : 1;
+    hands.forEach((h, i) => { h.position.y = -0.25 + 0.3 * up; h.children.slice(2, 6).forEach(f => { f.rotation.x = 0.35 + 0.9 * Math.max(0, Math.sin(q * 9 + i)) * up; }); });
+    if (ghost) mat.opacity = 0.6 * up;
+  }, linE).then(() => { world.remove(g); bone.dispose(); g.traverse(o => { if (o.isMesh && o.geometry !== bone) o.geometry.dispose(); }); mat.dispose(); });
+}
+// fantasma de passagem (fora do Mistério Infernal também): voa de "from" até a peça e some
+function ghostVisit(p, from, ms = 1300){
+  if (!GLOK) return wait(ms * 0.5);
+  const q = { g:new THREE.Group(), h:0.9, body:null, kit:null, ph:Math.random() * 10, yaw:0, smoke:0, px:null, py:0, pz:0 };
+  q.g.scale.setScalar(q.h); ghostSkin(q); world.add(q.g);
+  const to = V3(p.dx, 0.4, p.dz), t0 = performance.now();
+  return tween(ms, k => {
+    const e = easeIO(k);
+    ghostMove(q, mix(from.x, to.x, e), mix(from.y, to.y, e) + Math.sin(Math.PI * k) * 1.2, mix(from.z, to.z, e), (performance.now() - t0) / 1000, 16, 0.8);
+    q.g.scale.setScalar(q.h * (k > 0.8 ? 1 - (k - 0.8) / 0.2 : 1));
+  }, linE).then(() => { world.remove(q.g); });
+}
+// de onde vêm os fantasmas: o deus no Mistério Infernal, senão o cemitério do lado (além da borda)
+const ghostFrom = side => BOSS.on && BOSS.x != null ? V3(BOSS.x + (Math.random() - 0.5) * 3, Math.max(3, (BOSS.yTop || 5) - 1), BOSS.z + 2) : V3((Math.random() - 0.5) * 4, 3.5, side === 'w' ? 6 : -6);
+// ovo de dragão em chamas que racha e se abre (Fênix dos Dragões)
+async function dragonEgg(p){
+  if (!GLOK) return;
+  const egg = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshStandardMaterial({ color:C(0x3a1008), roughness:0.5, metalness:0.2, emissive:C(0xff4a10), emissiveIntensity:0.4, transparent:true }));
+  egg.scale.set(0.2, 0.28, 0.2); egg.position.set(p.dx, 0.28, p.dz); world.add(egg);
+  const a0 = p.alpha; p.alpha = 0;
+  snd('lava', { vol:0.5 });
+  await tween(900, q => { egg.material.emissiveIntensity = 0.4 + 2.2 * q * (0.6 + 0.4 * Math.sin(q * 40)); egg.rotation.z = Math.sin(q * 30) * 0.08 * q; if (Math.random() < 0.6) sparks.emit(p.dx + (Math.random() - 0.5) * 0.3, 0.1 + Math.random() * 0.5, p.dz + (Math.random() - 0.5) * 0.3, 0, 0.6, 0, 600, 0.05, FIRE_COLS[(Math.random() * 4) | 0], 1, 0.4, 0.6, 1); }, linE);
+  snd('fenix'); shake(0.08);
+  sparks.burst(V3(p.dx, 0.35, p.dz), nFx(50), FIRE_COLS, 2.6, { life:900, size:0.08, grav:1, upward:true }); flashLight(V3(p.dx, 0.5, p.dz), 0xff7a2a, 4, 700);
+  world.remove(egg); egg.geometry.dispose(); egg.material.dispose();
+  await tween(500, q => { p.alpha = mix(0, a0 || 1, q); });
+}
+// um grande olho no céu, acima da peça: abre devagar e se apaga (Oráculo dos Dragões); olhos vermelhos (Ferro Negro)
+function skyEye(p, kind){
+  if (!GLOK) return wait(600);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+  const x = cv.getContext('2d');
+  if (kind === 'dragao'){
+    const g = x.createRadialGradient(64, 64, 4, 64, 64, 60); g.addColorStop(0, '#fff2a0'); g.addColorStop(0.5, '#ff9a1a'); g.addColorStop(1, 'rgba(120,20,0,0)');
+    x.fillStyle = g; x.beginPath(); x.ellipse(64, 64, 60, 34, 0, 0, TAU); x.fill(); x.fillStyle = '#120404'; x.beginPath(); x.ellipse(64, 64, 7, 30, 0, 0, TAU); x.fill();
+  } else { const g = x.createRadialGradient(64, 64, 2, 64, 64, 60); g.addColorStop(0, '#ffffff'); g.addColorStop(0.4, '#ff3a2a'); g.addColorStop(1, 'rgba(80,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); }
+  const tex = new THREE.CanvasTexture(cv), eyes = [];
+  for (const s of kind === 'dragao' ? [0] : [-1, 1]){
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false }));
+    sp.position.set(p.dx + s * 0.45, 3.4, p.dz - 0.6); sp.renderOrder = 8; world.add(sp); eyes.push(sp);
+  }
+  return tween(1500, q => {
+    const o = q < 0.3 ? q / 0.3 : q > 0.75 ? (1 - q) / 0.25 : 1;
+    for (const sp of eyes){ sp.material.opacity = o; sp.scale.set(kind === 'dragao' ? 2.2 : 0.5, (kind === 'dragao' ? 1.2 : 0.5) * (kind === 'dragao' ? Math.min(1, q * 2.5) : 1), 1); }
+  }, linE).then(() => { for (const sp of eyes){ world.remove(sp); sp.material.dispose(); } tex.dispose(); });
+}
+// o dragão gigante desce no tabuleiro ao lado da peça, ruge e sopra fogo nela (Dragão das Cinzas dos Dragões)
+async function giantVisit(p){
+  const A = GLB.dg;
+  if (!GLOK || !A || !THREE.SkeletonUtils) return;
+  const model = THREE.SkeletonUtils.clone(A.scene);
+  model.traverse(o => { if (o.isMesh){ o.castShadow = false; o.frustumCulled = false; } });
+  applySideTint(model, p.side);
+  const B = dragonBonesOf(model), L = 3.4, kk = L / Math.max(0.2, A.len), g = new THREE.Group(), holder = new THREE.Group();
+  holder.scale.setScalar(kk); holder.position.set(A.off.x / A.scale * kk, A.off.y / A.scale * kk, A.off.z / A.scale * kk);
+  holder.add(model); g.add(holder); world.add(g);
+  const sx = p.dx > 0 ? -1 : 1, land = V3(clamp(p.dx + sx * 1.8, -3.2, 3.2), 0, p.dz), sky = V3(land.x + sx * 6, 7, land.z - 3);
+  const yaw = Math.atan2(p.dx - land.x, p.dz - land.z);
+  let fp = 0, jaw = 0, flap = 1;
+  const tick = () => { for (const b of B.all) b.quaternion.copy(B.rest.get(b)); fp += 0.25; const w = (0.12 + 0.55 * Math.sin(fp)) * flap; if (B.wings[0]) dgAdd(B.wings[0], 0, 0, w * 2.2); if (B.wings[1]) dgAdd(B.wings[1], 0, 0, -w * 2.2); if (B.jaw) dgAdd(B.jaw, 0.6 * jaw, 0, 0); for (const b of B.head) dgAdd(b, -0.3 * jaw, 0, 0); };
+  snd('asas', { vol:0.8 });
+  await tween(1400, q => { const e = easeIO(q); g.position.set(mix(sky.x, land.x, e), mix(sky.y, 0, easeOut(q)), mix(sky.z, land.z, e)); g.rotation.set(0.3 * (1 - e), yaw, 0); tick(); }, linE);
+  flap = 0.15; shake(0.08); dustAt(land.x, land.z, nFx(18), 1);
+  await tween(350, q => { jaw = q; tick(); });
+  snd('rugido_dragao', { vol:0.9 });
+  g.updateMatrixWorld(true);
+  const a = B.tip ? B.tip.getWorldPosition(V3()) : V3(land.x, 1.2, land.z);
+  await Promise.all([fireStream(a, chestOf(p, 0.5), 700), tween(700, () => tick())]);
+  await tween(300, q => { jaw = 1 - q; tick(); });
+  // levanta voo de novo
+  flap = 1; snd('asas', { vol:0.6 });
+  await tween(1300, q => { const e = easeIO(q); g.position.set(mix(land.x, sky.x, e), mix(0, sky.y, e * e), mix(land.z, sky.z, e)); g.rotation.set(-0.3 * e, yaw + Math.PI * e, 0); tick(); }, linE);
+  world.remove(g);
+}
+// um adereço de mão: arma de haste de pé ao lado da peça (alabarda, lança de luz ou de presa)
+function polearm(kind, H){
+  const g = new THREE.Group();
+  const shaftM = new THREE.MeshStandardMaterial({ color:C(kind === 'luz' ? 0xfff2c0 : kind === 'presa' ? 0x2a1a14 : 0x1a1614), roughness:0.6, metalness:kind === 'luz' ? 0.2 : 0.4, emissive:C(kind === 'luz' ? 0xffd36a : 0x000000), emissiveIntensity:kind === 'luz' ? 0.6 : 0 });
+  const headM = kind === 'luz' ? new THREE.MeshBasicMaterial({ color:C(0xfff2c0), transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, toneMapped:false })
+    : kind === 'presa' ? new THREE.MeshStandardMaterial({ color:C(0xfff0d0), roughness:0.4, emissive:C(0xff5a10), emissiveIntensity:0.8 })
+    : new THREE.MeshStandardMaterial({ color:C(0x3b3835), roughness:0.35, metalness:0.85, emissive:C(0x5a0c0c), emissiveIntensity:0.35 });
+  const L = H * 1.25, shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, L, 6), shaftM); shaft.position.y = L / 2; g.add(shaft);
+  if (kind === 'negra'){
+    const blade = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.012, 10, 1, false, 0, Math.PI), headM); blade.rotation.z = Math.PI / 2; blade.position.set(0.05, L - 0.12, 0); g.add(blade);
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.18, 5), headM); spike.position.y = L + 0.06; g.add(spike);
+  } else {
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(kind === 'presa' ? 0.035 : 0.03, kind === 'presa' ? 0.26 : 0.22, 6), headM); tip.position.y = L + 0.1; if (kind === 'presa') tip.rotation.z = 0.18; g.add(tip);
+  }
+  g.position.set(0.24, 0, 0.1); g.rotation.z = -0.08;
+  g.userData.tipY = L + 0.15; g.userData.kind = kind;
+  return g;
+}
+// os efeitos próprios das cenas (correm junto da câmera da carta)
+const ARC_FXR = {
+  pegaso:{
+    ferro_negro:async p => { await formSwap(p, 'ps'); for (let i = 0; i < 10; i++){ blackFire(p.dx, heightOf(p) * 0.8, p.dz, 3, 0.3); await wait(70); } },
+    dragoes:async p => { await formSwap(p, 'sp'); snd('asas', { vol:0.7 }); await tween(1000, q => { p.lift = Math.sin(Math.PI * q) * 0.9; }); p.lift = 0; },
+  },
+  dragao:{
+    ferro_negro:async p => { await formSwap(p, 'do'); snd('rugido_dragao', { vol:0.7, rate:0.8 }); for (let i = 0; i < 12; i++){ const h = heightOf(p); sparks.emit(p.dx, h * 0.75, p.dz, (Math.random() - 0.5) * 0.8, 0.5 + Math.random(), (Math.random() - 0.5) * 0.8, 700, 0.08, ['#ff2a3a', '#c0392b', '#ff8a7a'][i % 3], 1, 0, 0.6); blackFire(p.dx, h * 0.45, p.dz, 2, 0.25); await wait(60); } },
+    dragoes:async p => { await giantVisit(p); },
+  },
+  canhao:{
+    ferro_negro:async p => { if (!GLOK) return; for (let i = 0; i < 8; i++){ sparks.emit(p.dx, heightOf(p) * 0.95, p.dz + 0.2, (Math.random() - 0.5) * 0.3, 0.6, (Math.random() - 0.5) * 0.3, 700, 0.07, i % 2 ? '#ff3a2a' : '#ff8a3a', 1, 0.2, 0.6, 1); await wait(80); } },
+    dragoes:async p => { if (!GLOK) return; elementBurst(chestOf(p, 0.9), 'fogo_azul', p); },
+    aurora:async p => { if (!GLOK) return; flashLight(chestOf(p, 0.8), 0xd6a050, 3, 600); },
+  },
+  golem:{
+    aurora:async p => { if (!GLOK) return; spawnRing(p.dx, p.dz, 0xffd36a, 1.2, 900); sparks.burst(chestOf(p, 0.5), nFx(24), ['#ffd36a', '#fff2c0'], 1.4, { life:900, size:0.05, grav:0.6, upward:true }); },
+    ferro_negro:async p => { if (!GLOK) return; dustAt(p.dx, p.dz, nFx(20), 1, ['#d8d0bc', '#8a8478']); smokeBurst(chestOf(p, 0.4), 'fumaca', 14); graspHands(p.dx, p.dz, 'bone', 4, 1300); },
+    dragoes:async p => { if (!GLOK) return; for (let i = 0; i < 10; i++){ sparks.emit(p.dx + (Math.random() - 0.5) * 0.6, 0.05, p.dz + (Math.random() - 0.5) * 0.6, 0, 1 + Math.random(), 0, 800, 0.08, FIRE_COLS[i % 4], 1, 0.6, 0.6, 1); await wait(60); } snd('lava', { vol:0.6 }); },
+  },
+  centuriao:{
+    aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(20), ['#ffd36a', '#fff2c0'], 1.6, { life:700, size:0.05, grav:1, upward:true }); },
+    ferro_negro:async p => { if (GLOK){ smokeBurst(chestOf(p, 0.5), 'fumaca', 12); spawnRing(p.dx, p.dz, 0xc0302a, 1, 700); } },
+    dragoes:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(24), FIRE_COLS, 1.6, { life:700, size:0.06, grav:1, upward:true }); },
+  },
+  fenix:{
+    aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.6), nFx(30), ['#fff2c0', '#ffd36a', '#ffb040'], 2, { life:900, size:0.06, grav:1, upward:true }); },
+    ferro_negro:async p => { await ghostVisit(p, ghostFrom(p.side), 1100); },
+    dragoes:async p => { if (GLOK) for (let i = 0; i < 12; i++){ sparks.emit(p.dx + (Math.random() - 0.5) * 0.4, Math.random() * heightOf(p), p.dz + (Math.random() - 0.5) * 0.4, 0, 0.9, 0, 700, 0.07, FIRE_COLS[i % 4], 1, 0.4, 0.6, 1); } },
+  },
+  andarilho:{
+    aurora:async p => { if (GLOK){ spawnPillar(p.dx, p.dz, 0xfff2c0, 1200); } },
+    ferro_negro:async p => { if (!GLOK) return; const S = smokeSys(); for (let i = 0; i < 14; i++){ const a = Math.random() * TAU; S.emit(p.dx + Math.cos(a) * 0.4, 0.05, p.dz + Math.sin(a) * 0.4, 0, 0.15, 0, 1500, 0.5, i % 2 ? '#4a3a40' : '#2a1018', 0.45, 0, 0.5); } soulsRise(p, 3); },
+    dragoes:async p => { await fireBlink(p); },
+  },
+  necro:{
+    aurora:async p => { if (GLOK) dustAt(p.dx, p.dz, nFx(22), 0.9, ['#cfc6b4', '#8a8478', '#5a5650']); },
+    ferro_negro:async p => { soulsRise(p, 4); graspHands(p.dx, p.dz, 'ghost', 3, 1200); },
+    dragoes:async p => { if (GLOK) for (let i = 0; i < 16; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.7, 0.03, p.dz + (Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.2, 0.3 + Math.random() * 0.4, (Math.random() - 0.5) * 0.2, 1100, 0.05, FIRE_COLS[i % 4], 1, 0.1, 0.6, 1); },
+  },
+  oraculo_b:{
+    aurora:async p => { if (GLOK) flashLight(chestOf(p, 1.1), 0xfff2c0, 3, 900); },
+    ferro_negro:async p => { if (BOSS.on){ BOSS.vflash = 1.4; try { bossAct('cast'); } catch (e){} } await skyEye(p, 'deus'); },
+    dragoes:async p => { await skyEye(p, 'dragao'); },
+  },
+  lanceiro:{
+    aurora:async p => { if (GLOK){ beamFx(V3(p.dx + 0.24, 4, p.dz + 0.1), V3(p.dx + 0.24, 0.6, p.dz + 0.1), 0xffe6a0, 700, 0.04); } },
+    ferro_negro:async p => { if (GLOK) smokeBurst(V3(p.dx + 0.24, heightOf(p), p.dz + 0.1), 'fumaca', 14); },
+    dragoes:async p => { if (GLOK) for (let i = 0; i < 12; i++){ sparks.emit(p.dx + 0.24, heightOf(p) * 1.2, p.dz + 0.1, (Math.random() - 0.5) * 0.4, 0.5, (Math.random() - 0.5) * 0.4, 700, 0.06, FIRE_COLS[i % 4], 1, 0.2, 0.6, 1); await wait(50); } },
+  },
+  berserk:{
+    aurora:async p => { if (GLOK) spawnPillar(p.dx, p.dz, 0xffd36a, 900); },
+    ferro_negro:async p => { if (GLOK) smokeBurst(chestOf(p, 0.6), 'fumaca', 18); },
+    dragoes:async p => { if (GLOK) sparks.burst(chestOf(p, 0.5), nFx(30), FIRE_COLS, 1.8, { life:800, size:0.07, grav:1, upward:true }); },
+  },
+  summon:{
+    aurora:async p => { if (GLOK){ await beamFx(V3(p.dx, 6, p.dz), V3(p.dx, 0.1, p.dz), 0xfff2c0, 900, 0.09); spawnRing(p.dx, p.dz, 0xffd36a, 1.2, 700); } },
+    ferro_negro:async p => { const a0 = p.alpha; p.alpha = 0; await Promise.all([ghostVisit(p, ghostFrom(p.side), 1300), ghostVisit(p, ghostFrom(p.side), 1450)]); if (GLOK) smokeBurst(chestOf(p, 0.4), 'fumaca', 12); await tween(400, q => { p.alpha = mix(0, a0 || 1, q); }); },
+    dragoes:async p => { const a0 = p.alpha; p.alpha = 0; if (GLOK){ sparks.burst(V3(p.dx, 0.1, p.dz), nFx(40), FIRE_COLS, 1.6, { life:900, size:0.07, grav:1.4, upward:true }); spawnPillar(p.dx, p.dz, 0xff7a1a, 1000); } await wait(350); await tween(500, q => { p.alpha = mix(0, a0 || 1, q); }); },
+  },
+  phoenix:{
+    aurora:async p => { if (GLOK) sparks.burst(chestOf(p, 0.6), nFx(40), ['#fff2c0', '#ffd36a', '#ffb040'], 2.2, { life:1000, size:0.07, grav:1, upward:true }); },
+    ferro_negro:async p => { const a0 = p.alpha; p.alpha = 0; await Promise.all([ghostVisit(p, ghostFrom(p.side), 1300), ghostVisit(p, ghostFrom(p.side), 1500), ghostVisit(p, ghostFrom(p.side), 1400)]); await tween(450, q => { p.alpha = mix(0, a0 || 1, q); }); },
+    dragoes:async p => { await dragonEgg(p); },
+  },
+};
+// almas subindo de uma peça (névoa de almas)
+function soulsRise(p, n){
+  if (!GLOK) return;
+  for (let i = 0; i < (golpeLite() ? 2 : n); i++){
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:soulTexture(), color:C(0xffd0d8), transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false }));
+    const a = Math.random() * TAU, x = p.dx + Math.cos(a) * 0.35, z = p.dz + Math.sin(a) * 0.35;
+    s.scale.set(0.22, 0.44, 1); world.add(s);
+    tween(1300 + i * 120, q => { s.position.set(x + Math.sin(q * 6 + i) * 0.06, 0.2 + q * 1.4, z); s.material.opacity = Math.sin(Math.PI * q) * 0.85; }, linE).then(() => { world.remove(s); s.material.dispose(); });
+  }
+}
+// some num jato de fogo e reaparece (Andarilho dos Dragões)
+async function fireBlink(p){
+  if (!GLOK) return;
+  const a0 = p.alpha;
+  sparks.burst(V3(p.dx, 0.2, p.dz), nFx(30), FIRE_COLS, 1.2, { life:700, size:0.07, grav:-2, up:3 }); snd('sopro_fogo', { vol:0.5 });
+  await tween(260, q => { p.alpha = mix(a0 || 1, 0, q); });
+  await wait(180);
+  sparks.burst(V3(p.dx, 0.2, p.dz), nFx(30), FIRE_COLS, 1.4, { life:700, size:0.07, grav:1, upward:true });
+  await tween(260, q => { p.alpha = mix(0, a0 || 1, q); });
+}
+// troca o modelo pela forma do reino (Pesadelo, Serpe, Dragão de Ossos), se o modelo já chegou
+async function formSwap(p, t){
+  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos' }[t];
+  const A = await Promise.race([chefeLoad(key), realWait(900).then(() => null)]);
+  if (!A || !GLOK || p.dead) return false;
+  const e = CH[p.id]; if (!e) return false;
+  const face = e.c.root.rotation.y;
+  spawnPillar(p.dx, p.dz, karc(p.side).glow, 900);
+  sparks.burst(chestOf(p, 0.5), nFx(40), karc(p.side).cols, 2.2, { life:800, size:0.07, grav:-1 });
+  swapModel(p, t).root.rotation.y = face;
+  return true;
+}
+// personagem de um modelo estático de chefe (frente +Z, pés no 0): a altura e as asas por código
+function makeFormCharacter(t, side){
+  const key = { ps:'pesadelo', sp:'serpe', do:'dragao_ossos' }[t], A0 = AVT[key];
+  if (!A0) return null;
+  const H = t === 'do' ? 1.55 : t === 'sp' ? 1.25 : 1.3;
+  const mat = A0.src && A0.src.clone ? A0.src.clone() : new THREE.MeshStandardMaterial({ map:A0.map });
+  if (!mat.metalnessMap) mat.metalness = 0.25;
+  if (!mat.roughnessMap) mat.roughness = 0.6;
+  if (A0.map){ mat.emissiveMap = A0.map; mat.emissive = C(t === 'sp' ? 0x5a2010 : 0x3a1010); mat.emissiveIntensity = 0.5; }
+  // Serpe: as asas (|x| largo) sobem e descem no vertex shader
+  let flapU = null;
+  if (t === 'sp'){
+    flapU = { value:0 };
+    mat.onBeforeCompile = sh => { sh.uniforms.uFlap = flapU; sh.vertexShader = 'uniform float uFlap;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  { float wx = max(0.0, abs(position.x) - 0.16); transformed.y += sin(uFlap) * wx * 0.85; transformed.x *= 1.0 - 0.06 * wx * (1.0 - cos(uFlap)); }'); };
+    mat.customProgramCacheKey = () => 'serpe-flap';
+  }
+  rimShader(mat, t === 'sp' ? 0xff7a2a : 0xff2a2a, 0.6);
+  const mesh = new THREE.Mesh(A0.geo, mat); mesh.castShadow = true;
+  const scene = new THREE.Group(); scene.add(mesh);
+  const asset = { type:'n', rigged:false, scene, clips:{}, scale:H, off:V3(0, 0, 0), height:H, radius:Math.max(A0.w || 0.4, A0.d || 0.4) * H / 2, impact:0, frames:[], kingdom:kingdomOf(side) };
+  const c = makeGlbCharacter('n', side, asset);
+  c.formModel = t;
+  if (t === 'do') c.dragonModel = true;
+  if (flapU){ const up = c.update; c.update = (dt, now) => { flapU.value = now / (RM ? 420 : 160); return up.call(c, dt, now); }; }
+  return c;
+}
+
+// cena curta para as cartas grandes: close na peça, legenda com o nome da carta (extra: o efeito do reino, junto)
+async function arcScene(p, caption, sub, col, ms = 900, extra = null){
   if (!p) return;
   const on = await cineBegin(p, null, { caption, sub, voice:null, side:p.side });
   if (on){ cine.victim = p; cineImpact(p); }
   if (GLOK){ spawnPillar(p.dx, p.dz, col, ms + 300); flashLight(chestOf(p, 0.6), col, 3, ms); sparks.burst(chestOf(p, 0.6), 34, ['#ffffff', '#' + new THREE.Color(col).getHexString()], 2.2, { life:800, size:0.07, grav:-1, upward:true }); }
-  await wait(ms);
+  await Promise.all([wait(ms), extra ? Promise.resolve().then(extra).catch(e => glbLog.push('cena do reino: ' + e.message)) : null]);
   if (on){ cineRelease(); await cineFinish(); }
 }
 // fluxo de aura (sacrifício): faíscas viajando de uma peça para outra
@@ -13565,7 +14772,7 @@ const ARC_SIDE = c => sideCurto(c);
 // os efeitos que o motor devolve viram animação, texto e som
 async function arcEvents(ev){
   const hints = {};
-  let sceneAfter = null;
+  let sceneAfter = null, cardSide = null;
   for (const e of ev){
     if (e.k === 'card'){
       const d = e.card.id === '?' ? { nome:'Armadilha escondida', tipo:'armadilha', custo:0, efeito:'' } : arcCard(e.card.id);
@@ -13581,8 +14788,9 @@ async function arcEvents(ev){
       if (!secret) narrCard(e, at && at.side === e.side ? at : null);
       const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side === e.side);
       const tgt = at || k;
-      if (tgt) floatText(tgt, d.nome.toUpperCase(), '#cbb8ff', 0.3, 12, 0.3);
-      if (GLOK && tgt) spawnRing(tgt.dx, tgt.dz, 0xa985ff, 1.1, 620);
+      cardSide = e.side;
+      if (tgt) floatText(tgt, d.nome.toUpperCase(), karc(e.side).txt, 0.3, 12, 0.3);
+      if (GLOK && tgt) spawnRing(tgt.dx, tgt.dz, karc(e.side).ring, 1.1, 620);
       await wait(320);
     } else if (e.k === 'cardMove'){
       const id = arcEidAt(e.to);
@@ -13595,13 +14803,16 @@ async function arcEvents(ev){
       if (!p) continue;
       if (e.k === 'trans'){
         sceneAfter = null;
-        await arcScene(p, d[0].toUpperCase(), `${nm(p)} da ${FACTION[p.side]} se transforma`, ({ pegaso:0xf2f6ff, dragao:0xff4a20, golem:0xb8a888, fenix:0xff8a30, necro:0x5dff9a, oraculo_b:0xe6e0ff, canhao:0xffa040, centuriao:0xffd36a, andarilho:0xa985ff })[e.id] || 0xa985ff);
+        await arcSceneReino(p, e.id, [d[0].toUpperCase(), ({ pegaso:0xf2f6ff, dragao:0xff4a20, golem:0xb8a888, fenix:0xff8a30, necro:0x5dff9a, oraculo_b:0xe6e0ff, canhao:0xffa040, centuriao:0xffd36a, andarilho:0xa985ff })[e.id] || 0xa985ff], `${nm(p)} da ${FACTION[p.side]} se transforma`);
         if (e.id === 'dragao'){ snd('sopro_fogo', { vol:0.6 }); dragonForm(p, true); }
         if (e.id === 'pegaso' || e.id === 'dragao') snd('asas', { vol:0.7, delay:0.2 });
         if (e.id === 'golem') snd('golem', { vol:0.8 });
+      } else if (e.id === 'lanceiro'){
+        // Lança Fiel: a cena curta com o nome do reino (lança de luz, alabarda negra, lança de presa em brasa)
+        await arcSceneReino(p, 'lanceiro', ['LANÇA FIEL', 0xffd36a], `${nm(p)} da ${FACTION[p.side]} recebe a Lança Fiel`, 650);
       } else {
-        if (GLOK){ spawnRing(p.dx, p.dz, 0xffd36a, 0.9, 520); sparks.burst(chestOf(p, 0.7), 18, ['#ffe6a0', '#ffffff', '#cbb8ff'], 1.4, { life:600, size:0.05, grav:1, upward:true }); }
-        floatText(p, d[0], '#ffe6a0', 0.24, 11, 0.12);
+        if (GLOK){ spawnRing(p.dx, p.dz, karc(p.side).glow, 0.9, 520); sparks.burst(chestOf(p, 0.7), 18, karc(p.side).cols.concat('#ffffff'), 1.4, { life:600, size:0.05, grav:1, upward:true }); }
+        floatText(p, d[0], karc(p.side).txt, 0.24, 11, 0.12);
         await wait(260);
       }
     } else if (e.k === 'fxEnd'){
@@ -13632,14 +14843,22 @@ async function arcEvents(ev){
       // Berserker: o Peão corre até 3 casas derrubando quem estiver no caminho e se desfaz em sombra
       const p = arcPieceAt(e.from);
       if (!p) continue;
-      p.tint = 0.4; p.tintRgb = [1, 0.15, 0.1];
-      await arcScene(p, 'BERSERKER', `${nm(p)} da ${FACTION[p.side]} entra em fúria`, 0xff3a2a, 600);
-      for (const q of e.path){
-        const v = arcPieceAt(q), [r, c] = rcOf(q);
-        if (v && v !== p){ v.dead = true; slay(v, 'melee', p.side); }
-        await arcSlide(p, r, c, 260);
-        p.r = r; p.c = c;
-      }
+      const bk = kingdomOf(p.side);
+      p.tint = 0.4; p.tintRgb = bk === 'aurora' ? [1.3, 1.0, 0.35] : bk === 'dragoes' ? [1.4, 0.5, 0.1] : [1, 0.15, 0.1];
+      await arcSceneReino(p, 'berserk', ['BERSERKER', 0xff3a2a], `${nm(p)} da ${FACTION[p.side]} entra em fúria`, 600);
+      // na corrida: aura dourada (Aurora), olhos vermelhos e fumaça negra (Possuído), o corpo em chamas (Dragões)
+      const fury = setInterval(() => { if (!GLOK || p.dead) return; const h = heightOf(p);
+        if (bk === 'ferro_negro'){ blackFire(p.dx, h * 0.5, p.dz, 2, 0.3); sparks.emit(p.dx + 0.05, h * 0.88, p.dz + 0.08, 0, 0, 0, 160, 0.06, '#ff2a2a', 1, 0, 0.5, 1); sparks.emit(p.dx - 0.05, h * 0.88, p.dz + 0.08, 0, 0, 0, 160, 0.06, '#ff2a2a', 1, 0, 0.5, 1); }
+        else if (bk === 'dragoes') for (let i = 0; i < 3; i++) sparks.emit(p.dx + (Math.random() - 0.5) * 0.3, Math.random() * h, p.dz + (Math.random() - 0.5) * 0.3, 0, 0.9, 0, 450, 0.07, FIRE_COLS[i], 1, 0.6, 0.6, 1);
+        else sparks.emit(p.dx + (Math.random() - 0.5) * 0.4, Math.random() * h, p.dz + (Math.random() - 0.5) * 0.4, 0, 0.5, 0, 600, 0.05, Math.random() < 0.5 ? '#ffd36a' : '#fff2c0', 1, 0.2, 0.6, 1); }, 50);
+      try {
+        for (const q of e.path){
+          const v = arcPieceAt(q), [r, c] = rcOf(q);
+          if (v && v !== p){ v.dead = true; slay(v, 'melee', p.side); }
+          await arcSlide(p, r, c, 260);
+          p.r = r; p.c = c;
+        }
+      } finally { clearInterval(fury); }
       snd('queda');
       if (GLOK){ spawnRing(p.dx, p.dz, 0x401010, 1.4, 700); dust.emit && dustAt(p.dx, p.dz, 16, 0.9); }
       p.dead = true;
@@ -13673,7 +14892,7 @@ async function arcEvents(ev){
       { const td = arcCard(e.id); arcBanner({ side:e.side, card:{ id:e.id }, picks:[e.sq, e.to].filter(Boolean) }, td, 'trap'); tlTrap(e); narrTrap(e); }
       const name = arcCard(e.id).nome;
       snd(e.id === 'contrafeitico' ? 'contrafeitico' : e.id === 'troca-sombra' ? 'sombra' : e.id === 'profecia-selada' ? 'profecia' : 'armadilha_disparar');
-      if (e.id === 'armadilha-espinhos'){ const [r, c] = rcOf(e.sq), [x, z] = tc(r, c); if (GLOK){ earthSpikes(x, z, e.side); } const id = arcEidAt(e.to); if (id != null) hints[id] = 'slide'; }
+      if (e.id === 'armadilha-espinhos'){ const [r, c] = rcOf(e.sq), [x, z] = tc(r, c); if (GLOK){ earthSpikes(x, z, e.side, ({ ferro_negro:'osso', dragoes:'obsidiana' })[kingdomOf(e.side)]); } const id = arcEidAt(e.to); if (id != null) hints[id] = 'slide'; }
       if (e.id === 'troca-sombra' || e.id === 'duplo-corpo'){ const id = arcEidAt(e.to); if (id != null) hints[id] = 'blink'; }
       if (e.id === 'contrafeitico'){ arcMsg(`Contrafeitiço! ${arcCard(e.card).nome} é anulada.`); const k = S.pieces.find(p => !p.dead && p.t === 'k' && p.side !== e.side); if (k && GLOK) spawnRing(k.dx, k.dz, 0xff5a8a, 1.3, 600); }
       pushLog(`A armadilha <b>${name}</b> da <b class="${e.side}">${ARC_SIDE(e.side)}</b> dispara!`);
@@ -13686,7 +14905,9 @@ async function arcEvents(ev){
       if (p) floatText(p, e.id === 'golem' ? 'GOLEM!' : 'BLOQUEADO!', '#9fe3ff', 0.3, 12, 0.2);
     } else if (e.k === 'stun'){
       const p = arcPieceAt(e.sq); snd('paralisia', { vol:0.8 });
-      if (p){ floatText(p, 'PRESO', '#ff8a7a', 0.26, 11, 0.12); if (GLOK) spawnRing(p.dx, p.dz, 0xff3a3a, 0.8, 520); }
+      if (p){ floatText(p, 'PRESO', '#ff8a7a', 0.26, 11, 0.12); if (GLOK) spawnRing(p.dx, p.dz, 0xff3a3a, 0.8, 520);
+        // o rastro do Necromante: mãos de fantasma (Ferro Negro), brasas (Dragões) ou cinzas (Aurora) prendem quem passa
+        if (e.why === 'rastro' && GLOK){ const tk = kingdomOf(other(p.side)); if (tk === 'ferro_negro') graspHands(p.dx, p.dz, 'ghost', 3, 1300); else if (tk === 'dragoes') sparks.burst(V3(p.dx, 0.1, p.dz), nFx(24), FIRE_COLS, 1.2, { life:800, size:0.06, grav:1, upward:true }); else dustAt(p.dx, p.dz, nFx(18), 0.8, ['#cfc6b4', '#8a8478']); } }
     } else if (e.k === 'push'){
       const id = arcEidAt(e.to); if (id != null) hints[id] = 'slide';
     } else if (e.k === 'impact'){
@@ -13694,8 +14915,18 @@ async function arcEvents(ev){
     } else if (e.k === 'impactReady'){
       pushLog(`<b class="${e.side}">${ARC_SIDE(e.side)}</b> prepara a Repercussão de Impacto para a próxima captura.`);
     } else if (e.k === 'terrain'){
-      for (const q of e.sqs){ const [r, c] = rcOf(q), [x, z] = tc(r, c); if (GLOK){ spawnRing(x, z, e.kind === 'lava' ? 0xff5a18 : e.kind === 'nevoa' ? 0x9fd8ff : e.kind === 'portal' ? 0xa985ff : 0xb8a888, 0.9, 520); if (e.kind === 'muralha') dustAt(x, z, 12, 0.7); } }
-      if (e.kind === 'nevoa' && e.center && GLOK){ const [r, c] = rcOf(e.center), [x, z] = tc(r, c); for (let i = 0; i < 40; i++) dust.emit(x + (Math.random() - 0.5) * 3, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 0.1, 0.05, (Math.random() - 0.5) * 0.1, 2200, 0.5, '#cfe8ff', 0.35, 0, 0.2); }
+      // a cor e o jeito do reino de quem jogou: lava / covas com mãos de esqueleto / lava com labaredas; névoa branca / de almas /
+      // geada azul; portal de runas / vórtice carmesim / portal de fogo
+      const tk = kingdomOf(cardSide || (G && G.s ? G.s.turn : 'w'));
+      const TC = { lava:{ aurora:0xff5a18, ferro_negro:0x7a1c1c, dragoes:0xff7a1a }, nevoa:{ aurora:0xf4f4f4, ferro_negro:0xc0302a, dragoes:0x5fc8ff }, portal:{ aurora:0xa985ff, ferro_negro:0xc0302a, dragoes:0xff7a1a } };
+      for (const q of e.sqs){ const [r, c] = rcOf(q), [x, z] = tc(r, c); if (GLOK){ spawnRing(x, z, (TC[e.kind] && TC[e.kind][tk]) || 0xb8a888, 0.9, 520); if (e.kind === 'muralha') dustAt(x, z, 12, 0.7);
+        if (e.kind === 'lava' && tk === 'ferro_negro'){ graspHands(x, z, 'bone', 3, 1800); smokeBurst(V3(x, 0.1, z), 'fumaca', 8); }
+        if (e.kind === 'lava' && tk === 'dragoes') for (let i = 0; i < nFx(14); i++) sparks.emit(x + (Math.random() - 0.5) * 0.6, 0.05, z + (Math.random() - 0.5) * 0.6, 0, 1.6 + Math.random() * 1.4, 0, 700, 0.09, FIRE_COLS[i % 4], 1, 0.6, 0.6, 1);
+        if (e.kind === 'portal' && tk === 'ferro_negro') smokeBurst(V3(x, 0.1, z), 'carmesim', 10);
+        if (e.kind === 'portal' && tk === 'dragoes') sparks.burst(V3(x, 0.1, z), nFx(18), FIRE_COLS, 1.2, { life:700, size:0.06, grav:1, upward:true }); } }
+      if (e.kind === 'nevoa' && e.center && GLOK){ const [r, c] = rcOf(e.center), [x, z] = tc(r, c), col = tk === 'ferro_negro' ? ['#6a4a52', '#3a1a20'] : tk === 'dragoes' ? ['#9fd8ff', '#e8f8ff'] : ['#f4f4f4', '#dcdcdc'];
+        for (let i = 0; i < 40; i++) dust.emit(x + (Math.random() - 0.5) * 3, 0.2 + Math.random() * 0.4, z + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 0.1, 0.05, (Math.random() - 0.5) * 0.1, 2200, 0.5, col[i % 2], 0.35, 0, 0.2);
+        if (tk === 'ferro_negro') soulsRise({ dx:x, dz:z }, 4); else if (tk === 'dragoes'){ iceShards(V3(x, 0.3, z), golpeLite() ? 5 : 10); snd('gelo_estalo', { vol:0.5 }); } }
     } else if (e.k === 'terrainEnd'){
       pushLog(`${e.kind === 'lava' ? 'A lava esfria' : e.kind === 'portal' ? 'O portal se fecha' : 'A muralha desmorona'} em ${e.sqs.join(', ')}.`);
     } else if (e.k === 'draw'){
@@ -13723,7 +14954,7 @@ async function arcEvents(ev){
   await arcSync(hints);
   if (sceneAfter){
     const p = S.pieces.find(q => q.eid === sceneAfter.eid && !q.dead);
-    if (p) await arcScene(p, sceneAfter.kind === 'phoenix' ? 'FÊNIX' : 'INVOCAÇÃO', sceneAfter.kind === 'phoenix' ? 'A Dama renasce das chamas' : `${nm(p)} volta do cemitério`, sceneAfter.kind === 'phoenix' ? 0xff8a30 : 0xbfe8ff, 800);
+    if (p) await arcSceneReino(p, sceneAfter.kind === 'phoenix' ? 'phoenix' : 'summon', sceneAfter.kind === 'phoenix' ? ['FÊNIX', 0xff8a30] : ['INVOCAÇÃO', 0xbfe8ff], sceneAfter.kind === 'phoenix' ? 'A Dama renasce das chamas' : `${nm(p)} volta do cemitério`, 800);
     if (sceneAfter.kind === 'phoenix') snd('fenix');
   }
   renderAll();
@@ -15011,7 +16242,7 @@ if (hot && typeof hot.ready === 'function') hot.ready(d => { start(d); openTitle
 window.addEventListener('hashchange', onlineHash);
 
 new ResizeObserver(() => layout()).observe(scene);
-window.addEventListener('resize', () => requestAnimationFrame(() => { layout(); panelApply(); }));
+window.addEventListener('resize', () => requestAnimationFrame(() => { cinApply(); layout(); panelApply(); }));
 window.addEventListener('orientationchange', () => setTimeout(() => { layout(); panelApply(); }, 120));
 if (window.visualViewport) visualViewport.addEventListener('resize', () => requestAnimationFrame(layout));
 layout();

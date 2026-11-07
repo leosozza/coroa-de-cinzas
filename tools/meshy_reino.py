@@ -24,6 +24,10 @@ PECAS = {
     "cavaleiro": dict(rig=False, poly=20000),
     "torre":     dict(rig=False, poly=15000),
 }
+# golpe próprio de cada reino (o resto do PECAS vale para todos)
+GOLPE_REINO = {
+    "lua_nova": {"peao": 198, "bispo": 125, "dama": 126, "rei": 240},   # garras (Punch_Combo), invoca os lobos, lança a lua, garra no peito
+}
 CUSTO = lambda p: 30 + (5 + 9 if PECAS[p]["rig"] else 0)
 
 
@@ -51,7 +55,8 @@ def run(reino, slug):
     walk = basic.get("walking_armature_glb_url") or basic.get("walking_glb_url")
     if walk: M.download(walk, out / "walk.glb")
     if "anim" not in s:
-        s["anim"] = M.call("POST", "/openapi/v1/animations", {"rig_task_id": s["rig"], "action_ids": [IDLE, spec["golpe"], MORTE]})["result"]; s.save()
+        golpe = GOLPE_REINO.get(reino, {}).get(slug, spec["golpe"])
+        s["anim"] = M.call("POST", "/openapi/v1/animations", {"rig_task_id": s["rig"], "action_ids": [IDLE, golpe, MORTE]})["result"]; s.save()
     an = M.wait(f"/openapi/v1/animations/{s['anim']}", f"{slug} animações")
     M.download(an["result"]["animation_glb_url"], out / "animated.glb")
     s["done"] = True; s.save()

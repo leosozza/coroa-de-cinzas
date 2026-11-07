@@ -74,8 +74,8 @@ def lista():
         "e_vez_brancas": "Vez das brancas.",
         "e_vez_negras": "Vez das negras.",
         "e_tempo": "O tempo está acabando!",
-        "e_mate_brancas": "Xeque-mate! O rei negro é capturado e levado para o campo das brancas!",
-        "e_mate_negras": "Xeque-mate! O rei branco é capturado e levado para o campo das negras!",
+        "e_mate_brancas": "Xeque-mate! O rei negro cai diante do poder das brancas!",
+        "e_mate_negras": "Xeque-mate! O rei branco cai diante do poder das negras!",
     }
     for i, t in esp.items():
         add(i, t, "especial", voz=FORTE)

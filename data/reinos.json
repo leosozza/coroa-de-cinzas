@@ -6,8 +6,13 @@
       "descricao": "o visual atual: marfim, ouro e vermelho",
       "pecas": "assets/meshy/<peça>/ (atual)",
       "golpes": {
-        "tema": "aço, luz dourada e arcano",
-        "base": "matriz de data/plano-golpes.md (lâmina, arremesso, explosão, magia, veneno, investida, flecha)"
+        "tema": "luz sagrada: aço, ouro e luz dourada",
+        "base": "matriz de data/plano-golpes.md (lâmina, arremesso, explosão, magia, veneno, investida, flecha)",
+        "b": "o bispo ergue o cajado e dispara um raio de luz sagrada que atravessa a vítima",
+        "q": "lâminas de luz caem do céu sobre a vítima (a dama só ergue a mão)",
+        "k": "o julgamento dourado: o golpe da espada abre um pilar de luz sobre a vítima",
+        "morte_vitima": "a vítima se desfaz em pó dourado",
+        "xeque_mate": "o Arcanjo da Aurora desce num pilar de luz dourada, aponta a espada para o Rei, que vira estátua de ouro, racha e se parte em pó dourado"
       },
       "mundo": {
         "arenas": "as arenas atuais (Medieval, Celestial, Olimpo, Zodíaco, Multiverso, Pedra Filosofal...)"
@@ -90,12 +95,13 @@
       "golpes": {
         "tema": "fumaça negra, brasas carmesim e aço escurecido",
         "p": "lâmina com rastro de fumaça negra; granada de fumaça negra contra a torre",
-        "n": "investida com rastro de fumaça negra saindo da barda; a lança deixa um corte de sombra",
+        "n": "a investida deixa um rastro de fogo negro (chamas escuras com brasas carmesim) nos cascos e na vítima",
         "b": "a cruz-cajado solta uma onda de luz dourada envolta em fumaça negra",
-        "q": "fumaça carmesim que sobe da mão esquerda e envolve a vítima (veneno de sombra); golpe da espada dentada",
+        "q": "a dama arranca a alma da vítima: um fio carmesim sai do peito dela até a mão da dama; no Mistério Infernal a alma segue com os fantasmas até o cemitério",
         "k": "martelo dourado em chamas: impacto no chão com onda de choque e fumaça negra",
         "r": "flechas negras fumegantes do arqueiro de chifres",
-        "morte_vitima": "a vítima se desfaz em cinzas e fumaça negra antes do corpo cair"
+        "morte_vitima": "a vítima se desfaz em cinzas e fumaça negra antes do corpo cair",
+        "xeque_mate": "o Deus da Morte surge numa coluna de fumaça preta diante do Rei e encosta a ponta da foice na testa dele; o Rei escurece, vira esqueleto e se desfaz em pó que sobe com a fumaça"
       },
       "mundo": {
         "arena": "infernal",
@@ -204,11 +210,12 @@
         "tema": "fogo de dragão, brasas e runas de fogo-gelo",
         "p": "lâmina com rastro de brasa; contra a torre, frasco de fogo",
         "n": "o cavalo de cabeça de dragão CUSPE FOGO na vítima (rajada de chamas do focinho) e o cavaleiro completa com a lança",
-        "b": "o cajado de dragão dispara uma bola de fogo do orbe de brasa",
-        "q": "poder elemental de FOGO, como o bispo: a lâmina se incendeia e ela lança uma onda de chamas (as runas azuis viram fogo-gelo)",
+        "b": "o cajado de dragão dispara uma bola de fogo do orbe de brasa (como antes)",
+        "q": "fogo-gelo: a vítima congela (azul, cristais de gelo) e depois estilhaça em brasa",
         "k": "o escudo de redemoinho de fogo dispara um vórtice de chamas e a espada longa corta",
         "r": "besta com virote de fogo azul e o pequeno dragão no alto cospe fogo",
-        "morte_vitima": "a vítima pega fogo e vira brasa e cinza"
+        "morte_vitima": "a vítima pega fogo e vira brasa e cinza",
+        "xeque_mate": "o dragão gigante desce do céu batendo as asas, pousa diante do Rei, ruge (mandíbula aberta e fogo) e o engole"
       },
       "mundo": {
         "arena": "dragoes",
