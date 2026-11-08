@@ -16387,14 +16387,33 @@ document.addEventListener('visibilitychange', () => {
   try { if (AC.state !== 'running') AC.resume(); if (UNLOCK.tag && UNLOCK.ok){ const p = UNLOCK.tag.play(); if (p && p.catch) p.catch(() => {}); } } catch (e){}
 });
 function decode(ab){ return new Promise((res, rej) => { try { const p = AC.decodeAudioData(ab, res, rej); if (p && p.catch) p.catch(rej); } catch (e){ rej(e); } }); }
+/* Pacotes de áudio: uma pasta inteira num JSON (nome → mp3 em base64) em assets/audio/<pasta>/pack.json. Servem para o
+   Artifact (limite de arquivos por versão) e poupam dezenas de pedidos; sem o pacote, cada mp3 vem como antes. */
+const AUD_PACK_DIRS = ['narr'].concat([...REINO_AUD].map(r => 'reinos/' + r));
+const AUD_PACKS = {};
+function audioPack(dir){
+  if (!AUD_PACKS[dir]) AUD_PACKS[dir] = fetch(`assets/audio/${dir}/pack.json`).then(r => r.ok ? r.json() : null).catch(() => null);
+  return AUD_PACKS[dir];
+}
+async function audioBytes(rel){
+  const i = rel.lastIndexOf('/');
+  if (i > 0){
+    const dir = rel.slice(0, i), base = rel.slice(i + 1);
+    if (AUD_PACK_DIRS.includes(dir)){
+      const pk = await audioPack(dir);
+      if (pk && pk[base]){ const s = atob(pk[base]), u = new Uint8Array(s.length); for (let k = 0; k < s.length; k++) u[k] = s.charCodeAt(k); return u.buffer; }
+    }
+  }
+  const r = await fetch(`assets/audio/${rel}.mp3`);
+  if (!r.ok) throw new Error(r.status);
+  return r.arrayBuffer();
+}
 function loadOne(name){
   // uma carga por arquivo, mesmo se pedida duas vezes (troca de arena durante o download)
   if (AUD.loading[name]) return AUD.loading[name];
   return (AUD.loading[name] = (async () => {
     try {
-      const r = await fetch(`assets/audio/${name}.mp3`);
-      if (!r.ok) throw new Error(r.status);
-      const b = await decode(await r.arrayBuffer());
+      const b = await decode(await audioBytes(name));
       AUD.buf[name] = name.startsWith('reinos/') ? reinoNorm(b) : b;
     } catch (e){ AUD.failed.add(name); }
     const w = AUD.waiting[name];
@@ -16489,7 +16508,7 @@ function narrLoad(id){
   if (NARR.buf[id] || NARR.failed.has(id)) return Promise.resolve(NARR.buf[id] || null);
   if (NARR.loading[id]) return NARR.loading[id];
   return (NARR.loading[id] = (async () => {
-    try { const r = await fetch('assets/audio/narr/' + id + '.mp3'); if (!r.ok) throw new Error(r.status); NARR.buf[id] = narrTrim(await decode(await r.arrayBuffer())); }
+    try { NARR.buf[id] = narrTrim(await decode(await audioBytes('narr/' + id))); }
     catch (e){ NARR.failed.add(id); }
     return NARR.buf[id] || null;
   })());

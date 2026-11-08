@@ -9,9 +9,9 @@ SNAP="$1"; W="$2/cf-site"; BRANCH="${3:-main}"  # 3º argumento opcional: ramo d
 node "$ROOT/tools/engine-sync-check.js" "$SNAP" "$ROOT/engine/arcano-rules.js"
 rm -rf "$W"; mkdir -p "$W/assets/audio"
 cp "$ROOT"/assets/audio/*.mp3 "$W/assets/audio/"
-[ -d "$ROOT/assets/audio/narr" ] && mkdir -p "$W/assets/audio/narr" && cp "$ROOT"/assets/audio/narr/*.mp3 "$W/assets/audio/narr/"
+[ -d "$ROOT/assets/audio/narr" ] && mkdir -p "$W/assets/audio/narr" && cp "$ROOT"/assets/audio/narr/*.mp3 "$ROOT"/assets/audio/narr/pack.json "$W/assets/audio/narr/"
 # pacote de som por reino (passos, golpes, morte, mascote, vinheta): assets/audio/reinos/<reino>/*.mp3 (sem o state.json)
-for d in "$ROOT"/assets/audio/reinos/*/; do [ -d "$d" ] || continue; r="$(basename "$d")"; mkdir -p "$W/assets/audio/reinos/$r"; cp "$d"*.mp3 "$W/assets/audio/reinos/$r/"; done
+for d in "$ROOT"/assets/audio/reinos/*/; do [ -d "$d" ] || continue; r="$(basename "$d")"; mkdir -p "$W/assets/audio/reinos/$r"; cp "$d"*.mp3 "$d"pack.json "$W/assets/audio/reinos/$r/"; done
 mkdir -p "$W/assets/cards/web" && cp "$ROOT"/assets/cards/web/*.jpg "$W/assets/cards/web/"
 mkdir -p "$W/assets/meshy" && cp "$ROOT/assets/meshy/manifest.json" "$W/assets/meshy/manifest.json"
 (cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*" -not -path "*/meshy_original/*" -not -path "*/tripo_original/*" -not -path "*/tripo_rig/*" -not -path "*/v1_sem_arma/*" -not -path "*/dama_v*/*" -not -path "./peao_meshy/*" -not -path "./peao_v1/*") | while read -r f; do
