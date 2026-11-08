@@ -28,7 +28,9 @@ PECAS = {
 GOLPE_REINO = {
     "lua_nova": {"peao": 198, "bispo": 125, "dama": 126, "rei": 240},   # garras (Punch_Combo), invoca os lobos, lança a lua, garra no peito
     "primatas": {"peao": 240, "bispo": 125, "dama": 237, "rei": 214},   # bastonada (Thrust_Slash), magia da selva, bastão que esmaga (Charged_Axe_Chop), socos no chão (Punch_Forward_with_Both_Fists)
-    "abismo":   {"peao": 240, "bispo": 125, "dama": 242, "rei": 125},   # ferrão (Thrust_Slash), onda psíquica, lâmina da cauda (Charged_Slash), rugido ácido (braços erguidos)
+    "abismo":   {"peao": 240, "bispo": 125, "dama": 242, "rei": 125},
+    "mar":      {"peao": 240, "bispo": 125, "dama": 242, "rei": 237},   # tridente (Thrust_Slash), tinta do abismo, lâminas de barbatana (Charged_Slash), tridente no chão (Charged_Axe_Chop)
+    "deserto":  {"peao": 242, "bispo": 125, "dama": 126, "rei": 240},   # adagas (Charged_Slash), verme da areia, tempestade (Charged_Spell_Cast_1), ferroada (Thrust_Slash)   # ferrão (Thrust_Slash), onda psíquica, lâmina da cauda (Charged_Slash), rugido ácido (braços erguidos)
 }
 CUSTO = lambda p: 30 + (5 + 9 if PECAS[p]["rig"] else 0)
 

@@ -37,6 +37,14 @@ CHEFES = {
                          acoes=[0, 214, 198]),   # Idle, Punch_Forward_with_Both_Fists (soco no chão), Punch_Combo (bate no peito/golpeia)
     # mascote do Abismo Estelar: a Rainha-Mãe colossal (estática: quatro patas e cauda, o jogo anima por código)
     "rainha_mae":   dict(arte="reinos/abismo/rainha_mae.png", rig=False, poly=24000),
+    # mascotes do Clã do Mar Profundo (Kraken) e do Império do Deserto Subterrâneo (Verme-Colosso): estáticos, animados por código
+    "kraken":       dict(arte="reinos/mar/kraken.png", rig=False, poly=24000),
+    "verme":        dict(arte="reinos/deserto/verme.png", rig=False, poly=20000),
+    # evolução "Pégaso" do Cavaleiro em cada equipe nova (o cavaleiro já vem montado na criatura alada; estáticos)
+    "macaco_alado":    dict(arte="evolucoes/macaco_alado_v1.png", rig=False, poly=20000),
+    "zangao_alado":    dict(arte="evolucoes/zangao_alado_v1.png", rig=False, poly=20000),
+    "hipocampo_alado": dict(arte="evolucoes/hipocampo_alado_v1.png", rig=False, poly=20000),
+    "vespa_dunas":     dict(arte="evolucoes/vespa_dunas_v1.png", rig=False, poly=20000),
 }
 CUSTO = lambda n: (15 if CHEFES[n].get("modelo") == "meshy-6-lite" else 30) + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
 

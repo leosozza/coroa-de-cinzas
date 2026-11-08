@@ -16,6 +16,21 @@
       },
       "mundo": {
         "arenas": "as arenas atuais (Medieval, Celestial, Olimpo, Zodíaco, Multiverso, Pedra Filosofal...)"
+      },
+      "arcano": {
+        "pegaso": "ASCENSÃO DO PÉGASO",
+        "dragao": "DRAGÃO DAS CINZAS",
+        "canhao": "CANHÃO DE BRONZE",
+        "golem": "GOLEM DE PEDRA",
+        "centuriao": "CENTURIÃO DOURADO",
+        "berserk": "BERSERKER",
+        "fenix": "FÊNIX DOURADA",
+        "andarilho": "ANDARILHO DA LUZ",
+        "necro": "NECROMANTE DAS CINZAS",
+        "oraculo_b": "OLHO DE LUZ",
+        "lanceiro": "LANÇA FIEL (Lanceiro · ESTOCADA)",
+        "summon": "RESSURREIÇÃO",
+        "phoenix": "FÊNIX DOURADA"
       }
     },
     {
@@ -107,6 +122,21 @@
         "arena": "infernal",
         "nome_arena": "Mistério Infernal",
         "toque": "elementos carmesim: névoa e fumaça carmesim, brasas vermelhas, estandartes rasgados carmesim, runas e luzes vermelho-sangue, céu de tempestade com clarões vermelhos"
+      },
+      "arcano": {
+        "pegaso": "PESADELO",
+        "dragao": "DRAGÃO DE OSSOS",
+        "canhao": "CATAPULTA DE CRÂNIOS",
+        "golem": "COLOSSO DE OSSOS",
+        "centuriao": "LEGIONÁRIO AMALDIÇOADO",
+        "berserk": "POSSUÍDO",
+        "fenix": "FÊNIX DAS ALMAS",
+        "andarilho": "ANDARILHO DAS ALMAS",
+        "necro": "NECROMANTE DAS ALMAS",
+        "oraculo_b": "OLHOS DO DEUS DA MORTE",
+        "lanceiro": "ALABARDA NEGRA (Alabardeiro Negro · GOLPE DE ALABARDA)",
+        "summon": "OS FANTASMAS TRAZEM",
+        "phoenix": "AS ALMAS DEVOLVEM"
       }
     },
     {
@@ -223,7 +253,22 @@
         "toque": "o Dragão das Cinzas realista anda, ruge e voa; aurora verde-azulada no céu, castelo de janelas azuis, dragões ao longe"
       },
       "origem": "modelos da Tripo (v3.1) com esqueleto e animações do Meshy (24 ossos, mesmo padrão das outras peças)",
-      "esqueleto": "Meshy, 24 ossos (Hips, Spine02, LeftHand, RightHand...): usa os golpes.glb da Aurora como as outras peças; asas, cabelo e armas presos no Blender"
+      "esqueleto": "Meshy, 24 ossos (Hips, Spine02, LeftHand, RightHand...): usa os golpes.glb da Aurora como as outras peças; asas, cabelo e armas presos no Blender",
+      "arcano": {
+        "pegaso": "SERPE",
+        "dragao": "DRAGÃO GIGANTE",
+        "canhao": "BALISTA DE FOGO AZUL",
+        "golem": "GOLEM DE LAVA",
+        "centuriao": "GUERREIRO DE ESCAMAS",
+        "berserk": "BERSERKER EM CHAMAS",
+        "fenix": "FÊNIX DRACÔNICA",
+        "andarilho": "ANDARILHO DO FOGO",
+        "necro": "NECROMANTE DAS BRASAS",
+        "oraculo_b": "OLHO DO DRAGÃO",
+        "lanceiro": "LANÇA DE PRESA (Lanceiro Dracônico · LANÇA DE PRESA)",
+        "summon": "RENASCE DAS BRASAS",
+        "phoenix": "OVO DE DRAGÃO"
+      }
     },
     {
       "id": "lua_nova",
@@ -329,18 +374,19 @@
         "lobisomem": "assets/meshy/chefes/lobisomem/animated.opt.gltf.json (Idle, Punch_Forward_with_Both_Fists, Punch_Combo)"
       },
       "arcano": {
-        "pegaso": "LOBO DA TEMPESTADE (o Cavaleiro vira o lobo gigante)",
-        "dragao": "LOBISOMEM (o Cavaleiro vira lobisomem no lance)",
-        "golem": "COLOSSO DE GELO LUNAR",
-        "berserk": "FÚRIA DA LUA DE SANGUE",
-        "fenix": "FÊNIX DA LUA CHEIA / RENASCE SOB A LUA CHEIA",
-        "lanceiro": "CAÇADOR DE PRATA",
+        "pegaso": "LOBO DA TEMPESTADE",
+        "dragao": "LOBISOMEM",
         "canhao": "BALISTA DE PRATA",
+        "golem": "COLOSSO DE GELO LUNAR",
         "centuriao": "GUARDA DA ALCATEIA",
+        "berserk": "FÚRIA DA LUA DE SANGUE",
+        "fenix": "FÊNIX DA LUA CHEIA",
         "andarilho": "ANDARILHO DA NÉVOA",
         "necro": "XAMÃ DA LUA NOVA",
         "oraculo_b": "OLHO DA LUA",
-        "summon": "A ALCATEIA TRAZ"
+        "lanceiro": "LANÇA DE PRATA (Caçador de Prata · LANÇA DE PRATA)",
+        "summon": "A ALCATEIA TRAZ",
+        "phoenix": "RENASCE SOB A LUA CHEIA"
       },
       "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
     },
@@ -355,7 +401,10 @@
         "brilho": "#3fa36a",
         "runa": "#7fe0a0"
       },
-      "aneis": { "ring": "#5fd08a", "ring2": "#ffb347" },
+      "aneis": {
+        "ring": "#5fd08a",
+        "ring2": "#ffb347"
+      },
       "pecas": {
         "p": {
           "modelo": "assets/meshy/reinos/primatas/peao/animated.opt.glb",
@@ -448,18 +497,19 @@
         "idolo": "assets/meshy/chefes/idolo/animated.opt.gltf.json (Idle, Punch_Forward_with_Both_Fists, Punch_Combo): dorme no templo; nas capturas e de tempos em tempos acorda, bate no peito, ruge e volta a dormir"
       },
       "arcano": {
-        "pegaso": "MACACO ALADO (asas de folhas de jade)",
+        "pegaso": "MACACO ALADO",
         "dragao": "COLOSSO DA SELVA",
         "canhao": "CATAPULTA DE TRONCOS",
-        "golem": "ÍDOLO DE PEDRA (o golem com tinta de musgo e jade)",
+        "golem": "ÍDOLO DE PEDRA",
         "centuriao": "GUERREIRO DA TRIBO",
         "berserk": "FÚRIA PRIMAL",
-        "fenix": "AVE DO TROVÃO / RENASCE DA SELVA",
+        "fenix": "AVE DO TROVÃO",
         "andarilho": "ANDARILHO DOS CIPÓS",
         "necro": "XAMÃ DOS ANCESTRAIS",
         "oraculo_b": "OLHO DA SELVA",
-        "lanceiro": "CAÇADOR DA ZARABATANA",
-        "summon": "A TRIBO TRAZ"
+        "lanceiro": "ZARABATANA (Caçador da Zarabatana · DARDO DA ZARABATANA)",
+        "summon": "A TRIBO TRAZ",
+        "phoenix": "RENASCE DA SELVA"
       },
       "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
     },
@@ -474,7 +524,10 @@
         "brilho": "#3fe0ff",
         "runa": "#7fe8ff"
       },
-      "aneis": { "ring": "#9dff3a", "ring2": "#3fe0ff" },
+      "aneis": {
+        "ring": "#9dff3a",
+        "ring2": "#3fe0ff"
+      },
       "pecas": {
         "p": {
           "modelo": "assets/meshy/reinos/abismo/peao/animated.opt.glb",
@@ -567,18 +620,265 @@
         "rainha_mae": "assets/meshy/chefes/rainha_mae/model.opt.gltf.json (estático, animado por código): presa à parede da câmara de ovos; nas capturas e de tempos em tempos desce, sibila, balança e volta"
       },
       "arcano": {
-        "pegaso": "ZANGÃO ALADO (asas de membrana negras com veias ciano)",
+        "pegaso": "ZANGÃO ALADO",
         "dragao": "COLOSSO DA COLMEIA",
         "canhao": "CUSPIDOR DE ÁCIDO",
-        "golem": "CARAPAÇA VIVA (o golem tingido negro-violáceo com veias ciano e ácido)",
+        "golem": "CARAPAÇA VIVA",
         "centuriao": "GUARDA DA COLMEIA",
         "berserk": "FÚRIA ÁCIDA",
         "fenix": "RENASCE DO CASULO",
         "andarilho": "RASTEJADOR DAS SOMBRAS",
         "necro": "PARASITA ANCESTRAL",
         "oraculo_b": "MENTE DA COLMEIA",
-        "lanceiro": "FERRÃO",
-        "summon": "A COLMEIA GERA"
+        "lanceiro": "FERRÃO LONGO (Ferrão · FERRÃO LONGO)",
+        "summon": "A COLMEIA GERA",
+        "phoenix": "RENASCE DO CASULO"
+      },
+      "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
+    },
+    {
+      "id": "mar",
+      "nome": "Clã do Mar Profundo",
+      "descricao": "Reino abissal de tritões: escamas, conchas, coral, ouro afundado e luz turquesa. Água e correnteza.",
+      "paleta": {
+        "principal": "#0b2233",
+        "metal": "#1f6b7a",
+        "acento": "#ff6f5e",
+        "brilho": "#4fe3d0",
+        "runa": "#e8f4f8"
+      },
+      "aneis": {
+        "ring": "#4fe3d0",
+        "ring2": "#ff6f5e"
+      },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/mar/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/mar/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/peao.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/mar/peao/walk.gltf.json"
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/mar/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/mar/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/bispo.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/mar/bispo/walk.gltf.json"
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/mar/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/mar/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/dama.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/mar/dama/walk.gltf.json"
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/mar/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/mar/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/rei.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/mar/rei/walk.gltf.json"
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/mar/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/mar/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/mar/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/mar/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/mar/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/mar/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/mar/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/mar/torre.png",
+          "rig": false
+        }
+      },
+      "clipes": {
+        "p": "Idle, Thrust_Slash (a estocada do tridente), dying_backwards",
+        "b": "Idle, Charged_Spell_Cast, dying_backwards",
+        "q": "Idle, Charged_Slash, dying_backwards",
+        "k": "Idle, Charged_Axe_Chop (crava o tridente), dying_backwards",
+        "n": "estático: o tritão montado no cavalo-marinho (cai inteiro, como o lobo da Lua Nova)",
+        "r": "estático: a torre de coral com a sereia arqueira no topo"
+      },
+      "artes": "assets/concepts/reinos/mar/<peça>.png",
+      "referencia": "assets/concepts/reinos/mar/referencia.jpg (feita de rei.png)",
+      "golpes": {
+        "tema": "água e correnteza, espuma turquesa, tinta do abismo e coral; sons de névoa/água e relâmpago genéricos",
+        "p": "TRIDENTE DA MARÉ: estocada com jato de água; à distância (arremesso, granada, frasco, veneno) TRIDENTE ARREMESSADO",
+        "r": "FLECHAS DE CORAL: a sereia arqueira dispara flechas de coral enquanto a correnteza sobe em volta da vítima",
+        "b": "TINTA DO ABISMO: nuvem de tinta engole a vítima e tentáculos a puxam para baixo",
+        "n": "INVESTIDA DA CORRENTEZA: o cavalo-marinho avança numa onda e o tritão crava a lança",
+        "q": "CANTO DA SEREIA: a vítima flutua hipnotizada (anéis turquesa) e é esmagada por uma onda",
+        "k": "FÚRIA DE NETUNO: crava o tridente no chão; coluna de água com relâmpago sobe sob a vítima",
+        "morte_vitima": "a água envolve a peça, que se desfaz em bolhas e espuma",
+        "xeque_mate": "a água se agita e a arena escurece; os tentáculos do Kraken sobem em volta do tabuleiro; um tentáculo envolve o Rei em câmera lenta (clarão turquesa); o Rei é erguido acima do tabuleiro com água escorrendo; é puxado para a água entre bolhas e espuma e some; a superfície se acalma e o Kraken afunda"
+      },
+      "mundo": {
+        "arena": "afundada",
+        "nome_arena": "Cidade Afundada",
+        "toque": "ruínas submersas num domo de água: céu de água com raios de luz filtrados e cáusticas no chão, colunas quebradas, estátuas de tritões, algas que balançam, cardumes, uma baleia passando ao fundo, bolhas subindo, corais luminosos; tabuleiro de mármore afundado com algas nas juntas e moldura de ouro afundado",
+        "musica": "musica_celestial (placeholder)",
+        "ambiente": "ambiente_celestial (placeholder)"
+      },
+      "mascote": {
+        "kraken": "assets/meshy/chefes/kraken/model.opt.gltf.json (estático, animado por código): meio submerso na poça atrás das negras; nas capturas e de tempos em tempos sobe, balança os tentáculos e volta"
+      },
+      "arcano": {
+        "pegaso": "HIPOCAMPO ALADO",
+        "dragao": "KRAKEN",
+        "canhao": "ARPÃO DAS PROFUNDEZAS",
+        "golem": "COLOSSO DE CORAL",
+        "centuriao": "GUARDA DO RECIFE",
+        "berserk": "FÚRIA DA MARÉ",
+        "fenix": "RENASCE DA ESPUMA",
+        "andarilho": "ANDARILHO DA CORRENTEZA",
+        "necro": "INVOCADOR DOS AFOGADOS",
+        "oraculo_b": "OLHO DO ABISSAL",
+        "lanceiro": "ARPÃO (Arpoador · ARPÃO)",
+        "summon": "A MARÉ TRAZ",
+        "phoenix": "A MARÉ DEVOLVE"
+      },
+      "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
+    },
+    {
+      "id": "deserto",
+      "nome": "Império do Deserto Subterrâneo",
+      "descricao": "Reino sob as dunas: arenito, bronze e turquesa; escorpiões, vermes e tempestades de areia.",
+      "paleta": {
+        "principal": "#8a5a2b",
+        "metal": "#b87333",
+        "acento": "#1a1410",
+        "brilho": "#2fb8a8",
+        "runa": "#d9b36a"
+      },
+      "aneis": {
+        "ring": "#b87333",
+        "ring2": "#2fb8a8"
+      },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/deserto/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/peao.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/deserto/peao/walk.gltf.json"
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/deserto/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/bispo.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/deserto/bispo/walk.gltf.json"
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/deserto/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/dama.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/deserto/dama/walk.gltf.json"
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/deserto/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/rei.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/deserto/rei/walk.gltf.json"
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/deserto/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/deserto/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/deserto/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/deserto/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/deserto/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/deserto/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/deserto/torre.png",
+          "rig": false
+        }
+      },
+      "clipes": {
+        "p": "Idle, Charged_Slash (as adagas), dying_backwards",
+        "b": "Idle, Charged_Spell_Cast, dying_backwards",
+        "q": "Idle, Charged_Spell_Cast_1, dying_backwards",
+        "k": "Idle, Thrust_Slash (a ferroada), dying_backwards",
+        "n": "estático: o guerreiro montado no besouro de carga (cai inteiro, como o lobo da Lua Nova)",
+        "r": "estático: o Oásis Oculto, a torre-fonte rúnica de arenito"
+      },
+      "artes": "assets/concepts/reinos/deserto/<peça>.png",
+      "referencia": "assets/concepts/reinos/deserto/referencia.jpg (feita de rei.png)",
+      "golpes": {
+        "tema": "areia, bronze, obsidiana e veneno turquesa; sons de terra/vento e espinhos genéricos",
+        "p": "ADAGAS DAS DUNAS: some num redemoinho de areia e reaparece atrás da vítima com as duas adagas; à distância (arremesso, granada, frasco, veneno) DARDO DE OBSIDIANA",
+        "r": "MIRAGEM: a fonte rúnica do Oásis brilha; a areia em volta da vítima vira redemoinho e a engole",
+        "b": "VERME DA AREIA: o verme irrompe do chão sob a vítima e abocanha",
+        "n": "INVESTIDA BLINDADA: o besouro de carga arremete e o chifre lança a vítima ao ar",
+        "q": "TEMPESTADE DE AREIA: vórtice de poeira que cega e lixa a vítima",
+        "k": "FERROADA REAL: a cauda do rei escorpião crava o veneno turquesa",
+        "morte_vitima": "a peça vira areia que escorre e o vento leva (grãos de bronze)",
+        "xeque_mate": "a areia treme (braseiros apagam, areia escorre); o Verme-Colosso irrompe atrás do Rei numa erupção de areia; close na boca aberta em câmera lenta; a boca desce sobre o Rei, que some em areia; o verme afunda e a duna se fecha; plano final silencioso com o vento"
+      },
+      "mundo": {
+        "arena": "necropole",
+        "nome_arena": "Necrópole sob as Dunas",
+        "toque": "caverna imensa: pilares de arenito com anéis turquesa (fora da linha de visão ou com fade), fios de areia caindo do teto longe das câmeras, estátuas de escorpião em bronze e obsidiana, braseiros de bronze com brasas, fenda no teto com luz dourada, dunas ao fundo; tabuleiro de lajes de arenito com runas turquesa nas lajes escuras e moldura de bronze",
+        "musica": "musica_olimpo (placeholder)",
+        "ambiente": "ambiente_olimpo (placeholder)"
+      },
+      "mascote": {
+        "verme": "assets/meshy/chefes/verme/model.opt.gltf.json (estático, animado por código): dorme sob a areia atrás das negras; nas capturas e de tempos em tempos irrompe com erupção de areia e tremor, balança e afunda"
+      },
+      "arcano": {
+        "pegaso": "VESPA DAS DUNAS",
+        "dragao": "VERME DAS AREIAS",
+        "canhao": "BALISTA DE BRONZE",
+        "golem": "COLOSSO DE ARENITO",
+        "centuriao": "GUARDA DAS DUNAS",
+        "berserk": "FÚRIA DO SIMUM",
+        "fenix": "FÊNIX DO SOL",
+        "andarilho": "ANDARILHO DA MIRAGEM",
+        "necro": "NECROMANTE DOS FARAÓS",
+        "oraculo_b": "OLHO DO ESCARAVELHO",
+        "lanceiro": "LANÇA DAS DUNAS (Lanceiro das Dunas · LANÇA DAS DUNAS)",
+        "summon": "AS AREIAS DEVOLVEM",
+        "phoenix": "RENASCE DAS AREIAS"
       },
       "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
     }

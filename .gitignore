@@ -35,3 +35,5 @@ assets/meshy/reinos/lua_nova/*/meshy_animated.glb
 
 # andar bruto (o jogo usa walk.gltf.json)
 assets/meshy/reinos/**/walk.glb
+
+assets/audio/reinos/state.json
