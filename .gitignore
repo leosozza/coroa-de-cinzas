@@ -32,3 +32,6 @@ assets/meshy/chefes/*/animated_fix.glb
 assets/meshy/chefes/*/meshy_animated.glb
 assets/meshy/chefes/*/a1.glb
 assets/meshy/reinos/lua_nova/*/meshy_animated.glb
+
+# andar bruto (o jogo usa walk.gltf.json)
+assets/meshy/reinos/**/walk.glb

@@ -84,18 +84,19 @@ const arcanoRules = (catalog = []) => {
   const has = (p, id) => !!fxOf(p, id);
   // casas bloqueadas por muralhas e lava: ninguém entra nem atravessa
   const blocked = (s, i) => !!(s.arc && s.arc.blocked && s.arc.blocked[toS(i)]);
-  // lances extras de relíquias, auras e transmutações: MOVE_MODS[id](s, i, p, add) — add(f, t, fl, pr, mod)
+  // lances extras de relíquias, auras e transmutações: MOVE_MODS[id](s, i, p, add) — add(f, t, fl, pr, mod, over)
+  // "over" marca a casa alcançada por cima de outra peça (salto do Dragão e da Aura, voo do Pégaso): esse alcance nunca dá xeque
   const slideAdd = (s, i, p, dirs, add, mod, slide, jumps = 0) => {
     for (const d of dirs){
       let t = i + d, jumped = 0;
       while (onB(t) && !blocked(s, t)){
         const q = s.board[t];
         if (q){
-          if (q.c !== p.c) add(i, t, 'c', null, mod);
+          if (q.c !== p.c) add(i, t, 'c', null, mod, jumped > 0);
           if (jumped < jumps){ jumped++; t += d; if (!slide) break; continue; }
           break;
         }
-        add(i, t, 'n', null, mod);
+        add(i, t, 'n', null, mod, jumped > 0);
         if (!slide) break;
         t += d;
       }
@@ -113,8 +114,8 @@ const arcanoRules = (catalog = []) => {
     dragao:(s, i, p, add) => slideAdd(s, i, p, DK, add, 'dragao', true, 1),
     // Aura do Cavaleiro: as linhas da própria peça atravessam uma peça no caminho
     salto:(s, i, p, add) => { const dirs = p.t === 'b' ? DB : p.t === 'r' ? DR : p.t === 'q' ? DK : null; if (dirs) slideAdd(s, i, p, dirs, add, 'salto', true, 1); },
-    // Pégaso: o L se estende (até 6 casas no total)
-    pegaso:(s, i, p, add) => { for (let L = 3; L <= 5; L++) for (const [a, b] of [[L, 1], [1, L]]) for (const [sa, sb] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]){ const t = i + sa * a * 16 + sb * b; if (onB(t) && !blocked(s, t)){ const q = s.board[t]; if (!q) add(i, t, 'n', null, 'pegaso'); else if (q.c !== p.c) add(i, t, 'c', null, 'pegaso'); } } },
+    // Pégaso: o L se estende (até 6 casas no total); é voo, então o alcance estendido não ataca o Rei (sem xeque-mate em 1 de longe)
+    pegaso:(s, i, p, add) => { for (let L = 3; L <= 5; L++) for (const [a, b] of [[L, 1], [1, L]]) for (const [sa, sb] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]){ const t = i + sa * a * 16 + sb * b; if (onB(t) && !blocked(s, t)){ const q = s.board[t]; if (!q) add(i, t, 'n', null, 'pegaso', true); else if (q.c !== p.c) add(i, t, 'c', null, 'pegaso', true); } } },
     // Canhão de Cerco: captura por cima de exatamente uma peça na linha ou coluna
     canhao:(s, i, p, add) => { for (const d of DR){ let t = i + d, screen = false; while (onB(t) && !blocked(s, t)){ const q = s.board[t]; if (q){ if (!screen) screen = true; else { if (q.c !== p.c) add(i, t, 'c', null, 'canhao'); break; } } t += d; } } },
     // Andarilho Arcano: até 2 casas em linha reta, sem capturar
@@ -140,13 +141,13 @@ const arcanoRules = (catalog = []) => {
     for (const d of DK){ const a = i + d; if (onB(a) && B[a] && B[a].c === by && B[a].t === 'k') return true; }
     for (const d of DB){ let a = i + d; while (onB(a) && !blocked(s, a)){ const p = B[a]; if (p){ if (p.c === by && (p.t === 'b' || p.t === 'q')) return true; break; } a += d; } }
     for (const d of DR){ let a = i + d; while (onB(a) && !blocked(s, a)){ const p = B[a]; if (p){ if (p.c === by && (p.t === 'r' || p.t === 'q')) return true; break; } a += d; } }
-    // capturas que vêm das cartas (só conta casas ocupadas por peça do outro lado, como a do Rei)
+    // capturas que vêm das cartas (só conta casas ocupadas por peça do outro lado, como a do Rei); o alcance por cima de outra peça não ataca
     if (B[i] && B[i].c !== by){
       let hit = false;
       for (const a of ALL){
         const p = B[a];
         if (!p || p.c !== by || !p.fx || !p.fx.length || has(p, 'paralisado')) continue;
-        for (const fx of p.fx) if (CAP_MODS.includes(fx.id) && MOVE_MODS[fx.id]){ MOVE_MODS[fx.id](s, a, p, (f, t, fl) => { if (t === i && fl === 'c') hit = true; }); if (hit) return true; }
+        for (const fx of p.fx) if (CAP_MODS.includes(fx.id) && MOVE_MODS[fx.id]){ MOVE_MODS[fx.id](s, a, p, (f, t, fl, pr, mod, over) => { if (t === i && fl === 'c' && !over) hit = true; }); if (hit) return true; }
       }
     }
     return false;
@@ -154,7 +155,7 @@ const arcanoRules = (catalog = []) => {
   const inCheck = (s, c) => { const k = kingSq(s, c); return k >= 0 && attacked(s, k, other(c)); };
   function pseudo(s, c){
     const out = [], B = s.board, op = other(c);
-    const add = (f, t, fl, pr, mod) => out.push(mod ? { f, t, fl, pr, mod } : { f, t, fl, pr });
+    const add = (f, t, fl, pr, mod, over) => out.push(mod ? (over ? { f, t, fl, pr, mod, over:true } : { f, t, fl, pr, mod }) : { f, t, fl, pr });
     for (const i of ALL){
       const p = B[i];
       if (!p || p.c !== c || has(p, 'paralisado')) continue;
@@ -214,7 +215,11 @@ const arcanoRules = (catalog = []) => {
         if (m.t === A && !B[Bq] && !blocked(s, Bq)) extra.push({ f:m.f, t:Bq, fl:'n', portal:true, via:A });
         else if (m.t === Bq && !B[A] && !blocked(s, A)) extra.push({ f:m.f, t:A, fl:'n', portal:true, via:Bq });
       }
-      for (const m of extra) if (!out.some(o => o.f === m.f && o.t === m.t)) out.push(m);
+      for (const m of extra){
+        // Peão que sai do portal na última fileira é promovido
+        if (B[m.f].t === 'p' && (m.t >> 4) === (c === 'w' ? 0 : 7)){ m.pr = 'q'; m.fl = 'np'; }
+        if (!out.some(o => o.f === m.f && o.t === m.t)) out.push(m);
+      }
     }
     // sem lances repetidos (mods podem coincidir com o normal) e o Rei nunca é capturado
     const seen = new Set();
@@ -397,10 +402,15 @@ const arcanoRules = (catalog = []) => {
     return out;
   }
   const AURA = { p:['martir', 3], n:['salto_herdado', 3], b:['visao_arcana', 2], r:['muralha_viva', 3], q:['coroa_herdada', 3] };
-  // previsão dos lances do rival (Oráculo, Bispo Oráculo): captura valiosa, xeque, promoção, centro
+  // previsão dos lances do rival (Oráculo, Bispo Oráculo): captura valiosa, xeque, promoção, centro.
+  // Sob o Véu de Sombras do lado previsto, as setas são falsas: lances legais numa ordem embaralhada (determinística, sem gastar o RNG da partida)
   function predict(s, side, n = 3, salt = 0){
     const t = s.turn; s.turn = side;
     const ms = legalRaw(s, side);
+    if (s.arc && s.arc.sideFx && s.arc.sideFx.some(f => f.id === 'veu' && f.side === side)){
+      s.turn = t;
+      return ms.map((m, k) => ({ m, h:(Math.imul(m.f * 131 + m.t * 17 + salt * 7 + k, 2654435761) >>> 0) })).sort((a, b) => a.h - b.h).slice(0, n).map(x => ({ from:toS(x.m.f), to:toS(x.m.t) }));
+    }
     const sc = ms.map(m => {
       const cap = s.board[m.t], u = makeBoard(s, m), chk = inCheck(s, other(side)); unmakeBoard(s, u);
       const r = m.t >> 4, f = m.t & 7, center = 3.5 - Math.max(Math.abs(r - 3.5), Math.abs(f - 3.5));
@@ -538,7 +548,8 @@ const arcanoRules = (catalog = []) => {
       targets(s, c, p){
         const full = trapsFull(s, c); if (full) return full;
         if (!p.length) return step('Escolha a peça protegida (não o Rei).', ownPieces(s, c, q => !trapOn(s, q)));
-        if (p.length === 1) return step('Escolha a casa de fuga (vazia).', emptySqs(s, i => toS(i) !== p[0]));
+        // um Peão não foge para a primeira nem para a última fileira
+        if (p.length === 1) return step('Escolha a casa de fuga (vazia).', emptySqs(s, i => toS(i) !== p[0] && !(s.board[fromS(p[0])].t === 'p' && lastRank(c, i))));
         return { ready:true };
       },
       apply(s, c, p, ev){ const q = s.board[fromS(p[0])]; s.arc.traps.push({ id:'troca-sombra', side:c, pid:q.id, escape:p[1] }); ev.push({ k:'trap', side:c, sq:p[0], escape:p[1] }); },
@@ -599,17 +610,71 @@ const arcanoRules = (catalog = []) => {
     s.half = 0;
     ev.push({ k:'summon', side:c, t, sq:toS(i), id:s.board[i].id });
   }
+  // ataque (lance ou Berserker) a uma peça protegida: Troca de Sombra (ela foge para a casa de fuga), Escudo, Mártir ou Golem
+  // (o escudo quebra; o Golem ainda empurra as vizinhas). Devolve o que absorveu o ataque ou null (a captura segue normal)
+  function absorb(s, c, capSq, from, ev){
+    const victim = s.board[capSq], o = other(c);
+    const tr = trapOn(s, victim, 'troca-sombra'), esc = tr ? fromS(tr.escape) : -1;
+    if (tr && !s.board[esc] && !blocked(s, esc) && kingSafeAfter(s, c, () => { s.board[esc] = s.board[capSq]; s.board[capSq] = null; })){
+      s.arc.traps = s.arc.traps.filter(x => x !== tr);
+      relocate(s, capSq, esc);
+      ev.push({ k:'trapFire', id:'troca-sombra', side:o, sq:toS(capSq), to:tr.escape, attacker:toS(from) });
+      return 'troca-sombra';
+    }
+    if (has(victim, 'escudo') || has(victim, 'martir') || has(victim, 'golem')){
+      const which = has(victim, 'escudo') ? 'escudo' : has(victim, 'martir') ? 'martir' : 'golem';
+      removeFx(victim, which);
+      if (which === 'golem') shove(s, o, capSq, ev, false);
+      ev.push({ k:'shield', sq:toS(capSq), id:which, attacker:toS(from) });
+      return which;
+    }
+    return null;
+  }
+  // Duplo de Corpo: casa livre da primeira fileira do dono mais perto da coluna da captura (ou -1)
+  function dubSpot(s, c, victim, capSq){
+    const row = victim.c === 'w' ? 7 : 0, col = capSq & 7;
+    const spots = [0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7].map(d => row * 16 + col + d).filter(i => onB(i) && (i >> 4) === row && !s.board[i] && !blocked(s, i) && kingSafeAfter(s, c, () => { s.board[i] = victim; }));
+    return spots.length ? spots[0] : -1;
+  }
+  // Fênix: a Dama capturada (já no cemitério) renasce na casa inicial ou na casa vazia mais perto dela na primeira fileira
+  function phoenix(s, c, victim, ev){
+    if (!has(victim, 'fenix')) return;
+    const o = victim.c, home = victim.home != null ? victim.home : (o === 'w' ? 115 : 3), row = home >> 4;
+    const spots = [0, 1, -1, 2, -2, 3, -3, 4, -4].map(d => home + d).filter(i => onB(i) && (i >> 4) === row && !s.board[i] && !blocked(s, i) && kingSafeAfter(s, c, () => { s.board[i] = { t:'q', c:o, id:-1, fx:[] }; }));
+    if (!spots.length) return;
+    const q = { t:'q', c:o, id:s.nextId++, fx:[], home };
+    s.board[spots[0]] = q;
+    s.arc.grave[o].pop();
+    ev.push({ k:'phoenix', side:o, sq:toS(spots[0]), id:q.id });
+  }
+  // Berserker: avança até 3 casas tomando as peças inimigas no caminho. O Rei, a Muralha Viva e uma peça protegida (Escudo, Mártir,
+  // Golem ou Troca de Sombra) detêm a investida (o escudo quebra / a peça foge); o Duplo de Corpo é ilusão (sem espólio) e a Fênix renasce.
+  // Sem "ev" é só o ensaio no tabuleiro (para conferir o Rei): nada de armadilhas, efeitos ou cemitério.
   function berserkRun(s, c, i, ev){
-    const fw = c === 'w' ? -16 : 16;
+    const fw = c === 'w' ? -16 : 16, o = other(c);
     let at = i;
     const path = [];
     for (let k = 0; k < 3; k++){
       const t = at + fw;
       if (!onB(t) || blocked(s, t)) break;
       const q = s.board[t];
-      if (q && (q.c === c || q.t === 'k')) break;
-      if (q){ if (ev){ const cp = bury(s, t, 'berserker', ev, c); if (cp) loot(s, c, cp.t, ev); s.half = 0; } else s.board[t] = null; }
+      if (q && (q.c === c || q.t === 'k' || has(q, 'muralha_viva'))) break;
+      if (q && guarded(s, t)){ if (ev && !absorb(s, c, t, at, ev)) { /* proteção que falhou: a captura segue */ } else break; }
+      let reborn = null;
+      if (q){
+        const dub = ev ? trapOn(s, q, 'duplo-corpo') : null;
+        if (dub){
+          s.arc.traps = s.arc.traps.filter(x => x !== dub);
+          s.board[t] = null;
+          const spot = dubSpot(s, c, q, t);
+          if (spot >= 0){ s.board[spot] = q; ev.push({ k:'trapFire', id:'duplo-corpo', side:o, sq:toS(t), to:toS(spot) }); }
+          else { s.arc.grave[o].push(q.promo ? 'p' : q.t); ev.push({ k:'remove', sq:toS(t), side:o, t:q.t, id:q.id, why:'berserker', by:c }); loot(s, c, q.t, ev); }
+          s.half = 0;
+        } else if (ev){ const cp = bury(s, t, 'berserker', ev, c); if (cp){ loot(s, c, cp.t, ev); reborn = cp; } s.half = 0; }
+        else s.board[t] = null;
+      }
       s.board[t] = s.board[at]; s.board[at] = null; path.push(toS(t)); at = t;
+      if (reborn) phoenix(s, c, reborn, ev);
     }
     if (ev){ ev.push({ k:'berserk', from:toS(i), path }); bury(s, at, 'sacrificio', ev); }
     else s.board[at] = null;
@@ -679,30 +744,20 @@ const arcanoRules = (catalog = []) => {
       else ev.push({ k:'trapMiss', id:'profecia-selada', side:o });
     }
     if (result === 'normal' && victim && safeNow){
-      const tr = trapOn(s, victim, 'troca-sombra'), esc = tr ? fromS(tr.escape) : -1;
-      if (tr && !s.board[esc] && !blocked(s, esc) && kingSafeAfter(s, c, () => { s.board[esc] = s.board[capSq]; s.board[capSq] = null; })){
-        s.arc.traps = s.arc.traps.filter(x => x !== tr);
-        relocate(s, capSq, esc);
-        addFx(s, mover, { id:'paralisado', kind:'mark' }, 1);
-        result = 'bloqueado'; ev.push({ k:'trapFire', id:'troca-sombra', side:o, sq:toS(capSq), to:tr.escape, attacker:v.from });
-      } else if (has(victim, 'escudo') || has(victim, 'martir') || has(victim, 'golem')){
-        const which = has(victim, 'escudo') ? 'escudo' : has(victim, 'martir') ? 'martir' : 'golem';
-        removeFx(victim, which);
-        if (which === 'golem'){ shove(s, o, capSq, ev, false); }
-        result = 'bloqueado'; ev.push({ k:'shield', sq:toS(capSq), id:which, attacker:v.from });
-      }
+      // peça protegida: o ataque é absorvido, o atacante fica na origem (e, na Troca de Sombra, paralisado 1 turno)
+      const ab = absorb(s, c, capSq, m.f, ev);
+      if (ab){ if (ab === 'troca-sombra') addFx(s, mover, { id:'paralisado', kind:'mark' }, 1); result = 'bloqueado'; }
     }
     let captured = null;
     if (result === 'normal'){
-      // Duplo de Corpo: o atacante toma um Peão ilusório; a peça verdadeira reaparece na primeira fileira do dono
+      // Duplo de Corpo: o atacante toma uma ilusão (sem espólio); a peça verdadeira reaparece na primeira fileira do dono
       const dub = victim && trapOn(s, victim, 'duplo-corpo');
       makeBoard(s, m);
       if (dub){
         s.arc.traps = s.arc.traps.filter(x => x !== dub);
-        const row = o === 'w' ? 7 : 0, col = capSq & 7;
-        const spots = [0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6, -7, 7].map(d => row * 16 + col + d).filter(i => onB(i) && (i >> 4) === row && !s.board[i] && !blocked(s, i) && kingSafeAfter(s, c, () => { s.board[i] = victim; }));
-        if (spots.length){ s.board[spots[0]] = victim; ev.push({ k:'trapFire', id:'duplo-corpo', side:o, sq:toS(capSq), to:toS(spots[0]) }); }
-        else { s.arc.grave[o].push(victim.t); ev.push({ k:'remove', sq:toS(capSq), side:o, t:victim.t, id:victim.id, why:'captura', by:c }); captured = victim; loot(s, c, victim.t, ev); }
+        const spot = dubSpot(s, c, victim, capSq);
+        if (spot >= 0){ s.board[spot] = victim; ev.push({ k:'trapFire', id:'duplo-corpo', side:o, sq:toS(capSq), to:toS(spot) }); }
+        else { s.arc.grave[o].push(victim.promo ? 'p' : victim.t); ev.push({ k:'remove', sq:toS(capSq), side:o, t:victim.t, id:victim.id, why:'captura', by:c }); captured = victim; loot(s, c, victim.t, ev); }
       } else if (victim){
         captured = victim;
         s.arc.traps = s.arc.traps.filter(x => x.pid !== victim.id);
@@ -710,17 +765,7 @@ const arcanoRules = (catalog = []) => {
         loot(s, c, victim.t, ev);
         // Vingança da Isca: o atacante fica paralisado 2 turnos
         if (has(victim, 'vinganca')){ addFx(s, s.board[m.t], { id:'paralisado', kind:'mark' }, 2); ev.push({ k:'stun', sq:toS(m.t), why:'vinganca' }); }
-        // Fênix: a Dama renasce na casa inicial (ou na casa vazia mais perto dela na primeira fileira)
-        if (has(victim, 'fenix')){
-          const home = victim.home != null ? victim.home : (o === 'w' ? 115 : 3), row = home >> 4;
-          const spots = [0, 1, -1, 2, -2, 3, -3, 4, -4].map(d => home + d).filter(i => onB(i) && (i >> 4) === row && !s.board[i] && !blocked(s, i) && kingSafeAfter(s, c, () => { s.board[i] = { t:'q', c:o, id:-1, fx:[] }; }));
-          if (spots.length){
-            const q = { t:'q', c:o, id:s.nextId++, fx:[], home };
-            s.board[spots[0]] = q;
-            s.arc.grave[o].pop();
-            ev.push({ k:'phoenix', side:o, sq:toS(spots[0]), id:q.id });
-          }
-        }
+        phoenix(s, c, victim, ev);
       }
       const piece = s.board[m.t];
       if (m.mod){ const fx = fxOf(piece, m.mod); if (fx && fx.uses){ removeFx(piece, m.mod); ev.push({ k:'fxUsed', sq:toS(m.t), id:m.mod }); } }
@@ -854,8 +899,6 @@ const arcanoRules = (catalog = []) => {
     s.arc.portals = s.arc.portals.filter(x => x.ttl > 0);
     for (const tr of s.arc.trails) tr.ttl--;
     s.arc.trails = s.arc.trails.filter(x => x.ttl > 0);
-    for (const f of s.arc.sideFx) f.ttl--;
-    s.arc.sideFx = s.arc.sideFx.filter(x => x.ttl > 0);
     // Ponto de Ancoragem: no fim do turno do rival, a peça volta à casa marcada (se estiver livre e o Rei ficar a salvo)
     for (const an of s.arc.anchors) an.ttl--;
     for (const an of s.arc.anchors.filter(x => x.ttl <= 0)){
@@ -865,15 +908,17 @@ const arcanoRules = (catalog = []) => {
       } else ev.push({ k:'anchorFail', sq:an.sq });
     }
     s.arc.anchors = s.arc.anchors.filter(x => x.ttl > 0);
-    // Visão do Oráculo jogada neste turno: prevê os lances do rival na posição depois do seu lance
+    // Visão do Oráculo jogada neste turno: prevê os lances do rival na posição depois do seu lance (sob o Véu dele, setas falsas e
+    // sem garantia). Resolve antes de descontar o Véu, para "2 turnos" cobrirem os 2 próximos turnos do rival
     if (s.arc.oracleReq && s.arc.oracleReq.by === c){
       const o = other(c), veiled = s.arc.sideFx.some(f => f.id === 'veu' && f.side === o);
-      let moves = predict(s, o, 3);
-      if (veiled){ const all = legalRaw(s, o); moves = shuffle(s, all.slice()).slice(0, 3).map(m => ({ from:toS(m.f), to:toS(m.t) })); }
+      const moves = predict(s, o, 3, s.hist.length);
       s.arc.oracle = { by:c, side:o, moves, guaranteed:s.arc.opts.oracle === 'garantido' && !veiled, veiled };
       ev.push({ k:'oracle', side:c, moves });
     }
     s.arc.oracleReq = null;
+    for (const f of s.arc.sideFx) f.ttl--;
+    s.arc.sideFx = s.arc.sideFx.filter(x => x.ttl > 0);
     s.arc.phase = 'move'; s.arc.cardSide = null; s.arc.played = false;
     const key = posKey(s);
     s.keys[key] = (s.keys[key] || 0) + 1;
@@ -937,7 +982,7 @@ const arcanoRules = (catalog = []) => {
      carta jogável (com alvos) com não jogar nada. Com o Oráculo garantido, a IA joga o lance revelado. */
   const AI_LV = { 1:{ ms:250, noise:70, cardP:0.45 }, 2:{ ms:700, noise:12, cardP:1 }, 3:{ ms:1400, noise:0, cardP:1 } };
   const FX_VAL = { escudo:90, martir:80, golem:120, heranca:90, coroa:140, coroa_raio:70, coroa_herdada:160, alcance:60, vinganca:40, salto_herdado:60, visao_arcana:50, muralha_viva:120,
-    oraculo_b:40, pegaso:90, dragao:260, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:200, dominio:30, salto:40, lanceiro:70, ferradura:25, paralisado:-1, nevoa:-30 };
+    oraculo_b:40, pegaso:80, dragao:180, canhao:110, andarilho:50, necro:40, centuriao:50, fenix:120, dominio:30, salto:40, lanceiro:70, ferradura:25, paralisado:-1, nevoa:-30 };
   // valor de carta que a avaliação do tabuleiro não enxerga (armadilhas, informação, portais): sem isso a IA sem ruído nunca as joga
   const CARD_AI = { 'armadilha-espinhos':40, 'troca-sombra':45, 'duplo-corpo':45, 'profecia-selada':40, 'visao-oraculo':30, 'veu-sombras':15, 'bispo-oraculo':55,
     'portal-runa':25, 'ponto-ancoragem':20, 'necromante-cinzas':15, 'grimorio-arcano':10 };

@@ -32,6 +32,11 @@ CHEFES = {
     # evoluções do Arcano da Aurora (estáticas): o Pégaso (cavaleiro no cavalo alado) e o Golem de Pedra (a torre que vira colosso)
     "pegaso":       dict(arte="evolucoes/pegaso_v1.png", rig=False, poly=20000),
     "golem":        dict(arte="torre_golem.jpg", rig=False, poly=16000, modelo="meshy-6-lite"),   # lite: 15 créditos
+    # mascote do Clã dos Primatas: o ídolo gorila de pedra que acorda, bate no peito e arremessa o Rei
+    "idolo":        dict(arte="reinos/primatas/idolo.png", rig=True, altura=3.6, poly=20000,
+                         acoes=[0, 214, 198]),   # Idle, Punch_Forward_with_Both_Fists (soco no chão), Punch_Combo (bate no peito/golpeia)
+    # mascote do Abismo Estelar: a Rainha-Mãe colossal (estática: quatro patas e cauda, o jogo anima por código)
+    "rainha_mae":   dict(arte="reinos/abismo/rainha_mae.png", rig=False, poly=24000),
 }
 CUSTO = lambda n: (15 if CHEFES[n].get("modelo") == "meshy-6-lite" else 30) + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
 

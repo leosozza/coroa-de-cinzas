@@ -343,6 +343,244 @@
         "summon": "A ALCATEIA TRAZ"
       },
       "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
+    },
+    {
+      "id": "primatas",
+      "nome": "Clã dos Primatas",
+      "descricao": "Selva primordial: madeira viva, jade, ouro antigo, osso e pintura tribal vermelha. Força bruta e xamanismo.",
+      "paleta": {
+        "principal": "#2a1e14",
+        "metal": "#c9a24a",
+        "acento": "#b8321f",
+        "brilho": "#3fa36a",
+        "runa": "#7fe0a0"
+      },
+      "aneis": { "ring": "#5fd08a", "ring2": "#ffb347" },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/primatas/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/peao.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/primatas/peao/walk.gltf.json"
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/primatas/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/bispo.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/primatas/bispo/walk.gltf.json"
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/primatas/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/dama.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/primatas/dama/walk.gltf.json"
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/primatas/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/rei.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/primatas/rei/walk.gltf.json"
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/primatas/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/primatas/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/primatas/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/primatas/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/primatas/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/primatas/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/primatas/torre.png",
+          "rig": false
+        }
+      },
+      "clipes": {
+        "p": "Idle, Thrust_Slash (bastonada), dying_backwards",
+        "b": "Idle, Charged_Spell_Cast, dying_backwards",
+        "q": "Idle, Charged_Axe_Chop (o bastão desce), dying_backwards",
+        "k": "Idle, Punch_Forward_with_Both_Fists (o soco no chão), dying_backwards",
+        "n": "estático: o macaco guerreiro montado no dente-de-sabre (cai inteiro, como o lobo da Lua Nova)",
+        "r": "estático: a torre-tronco com o macaco atirador no topo"
+      },
+      "artes": "assets/concepts/reinos/primatas/<peça>.png",
+      "referencia": "assets/concepts/reinos/primatas/referencia.jpg (feita de rei.png)",
+      "golpes": {
+        "tema": "folhas e jade, madeira viva, ouro antigo e a terra: gritos de macaco e tambores (batida no peito) sintetizados",
+        "p": "BASTONADA: salta girando num redemoinho de folhas e desce a bastonada; contra a Torre (arremesso) atira um FRUTO DE PEDRA que explode em folhas",
+        "r": "RAÍZES VIVAS: o atirador do topo lança pedras de funda e as raízes rompem o chão sob a vítima e a golpeiam",
+        "b": "CIPÓS DA SELVA: cipós brotam do chão e enlaçam a vítima; espíritos de animais em jade a atravessam",
+        "n": "MORDIDA DO DENTE-DE-SABRE: a fera salta e morde; o macaco finaliza com a lança de osso",
+        "q": "BASTÃO QUE CRESCE: o bastão dourado se estende pelo tabuleiro e esmaga a vítima; contra a Dama, duelo de bastões",
+        "k": "PUNHO DO GORILA: bate no peito, ruge, soca o chão e a onda de choque arremessa a vítima",
+        "morte_vitima": "cipós e folhas engolem a vítima, que vira terra e pétalas",
+        "xeque_mate": "o ídolo gorila de pedra desperta (olhos de jade), desce do templo em passos que tremem o chão, agarra o Rei, ruge na cara dele e o arremessa para a selva; a árvore gigante o engole em cipós e folhas; plano final com o ídolo batendo no peito"
+      },
+      "mundo": {
+        "arena": "selva",
+        "nome_arena": "Templo da Selva Perdida",
+        "toque": "ruínas de pedra tomadas por raízes, o templo em degraus atrás das negras (o ídolo dorme no alto), a árvore gigante à esquerda, a cachoeira à direita, luz verde filtrada pelas folhas, vagalumes, névoa baixa e estandartes tribais; chão do tabuleiro em pedra musgosa com seiva de jade nas juntas",
+        "musica": "musica_zodiaco (placeholder)",
+        "ambiente": "ambiente_zodiaco (placeholder)"
+      },
+      "mascote": {
+        "idolo": "assets/meshy/chefes/idolo/animated.opt.gltf.json (Idle, Punch_Forward_with_Both_Fists, Punch_Combo): dorme no templo; nas capturas e de tempos em tempos acorda, bate no peito, ruge e volta a dormir"
+      },
+      "arcano": {
+        "pegaso": "MACACO ALADO (asas de folhas de jade)",
+        "dragao": "COLOSSO DA SELVA",
+        "canhao": "CATAPULTA DE TRONCOS",
+        "golem": "ÍDOLO DE PEDRA (o golem com tinta de musgo e jade)",
+        "centuriao": "GUERREIRO DA TRIBO",
+        "berserk": "FÚRIA PRIMAL",
+        "fenix": "AVE DO TROVÃO / RENASCE DA SELVA",
+        "andarilho": "ANDARILHO DOS CIPÓS",
+        "necro": "XAMÃ DOS ANCESTRAIS",
+        "oraculo_b": "OLHO DA SELVA",
+        "lanceiro": "CAÇADOR DA ZARABATANA",
+        "summon": "A TRIBO TRAZ"
+      },
+      "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
+    },
+    {
+      "id": "abismo",
+      "nome": "Abismo Estelar",
+      "descricao": "Colmeia biomecânica de uma estrela morta: carapaça negro-violácea fundida a tubos e placas, veias ciano, ácido verde, osso e resina. Furtividade e veneno.",
+      "paleta": {
+        "principal": "#15101c",
+        "metal": "#2b2436",
+        "acento": "#9dff3a",
+        "brilho": "#3fe0ff",
+        "runa": "#7fe8ff"
+      },
+      "aneis": { "ring": "#9dff3a", "ring2": "#3fe0ff" },
+      "pecas": {
+        "p": {
+          "modelo": "assets/meshy/reinos/abismo/peao/animated.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/peao/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/peao/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/peao/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/peao/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/peao.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/abismo/peao/walk.gltf.json"
+        },
+        "b": {
+          "modelo": "assets/meshy/reinos/abismo/bispo/animated.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/bispo/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/bispo/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/bispo/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/bispo/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/bispo.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/abismo/bispo/walk.gltf.json"
+        },
+        "q": {
+          "modelo": "assets/meshy/reinos/abismo/dama/animated.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/dama/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/dama/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/dama/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/dama/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/dama.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/abismo/dama/walk.gltf.json"
+        },
+        "k": {
+          "modelo": "assets/meshy/reinos/abismo/rei/animated.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/rei/animated.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/rei/animated.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/rei/animated.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/rei/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/rei.png",
+          "rig": true,
+          "andar": "assets/meshy/reinos/abismo/rei/walk.gltf.json"
+        },
+        "n": {
+          "modelo": "assets/meshy/reinos/abismo/cavaleiro/model.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/cavaleiro/model.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/cavaleiro/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/cavaleiro/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/cavaleiro/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/cavaleiro.png",
+          "rig": false
+        },
+        "r": {
+          "modelo": "assets/meshy/reinos/abismo/torre/model.opt.glb",
+          "draco": "assets/meshy/reinos/abismo/torre/model.opt.c.glb",
+          "json": "assets/meshy/reinos/abismo/torre/model.opt.gltf.json",
+          "json_draco": "assets/meshy/reinos/abismo/torre/model.opt.c.gltf.json",
+          "retrato": "assets/meshy/reinos/abismo/torre/thumbnail.png",
+          "arte": "assets/concepts/reinos/abismo/torre.png",
+          "rig": false
+        }
+      },
+      "clipes": {
+        "p": "Idle, Thrust_Slash (o ferrão), dying_backwards",
+        "b": "Idle, Charged_Spell_Cast, dying_backwards",
+        "q": "Idle, Charged_Slash (a lâmina da cauda), dying_backwards",
+        "k": "Idle, Charged_Spell_Cast (o rugido), dying_backwards",
+        "n": "estático: o zangão montado na besta-cripta (cai inteiro, como o lobo da Lua Nova)",
+        "r": "estático: a espira da colmeia com a boca no topo e os casulos"
+      },
+      "artes": "assets/concepts/reinos/abismo/<peça>.png",
+      "referencia": "assets/concepts/reinos/abismo/referencia.jpg (feita de rei.png)",
+      "golpes": {
+        "tema": "ácido verde, ondas psíquicas ciano, ferrão e carapaça; sibilo alienígena e pulso psíquico sintetizados",
+        "p": "FERRÃO: a cauda chicoteia e o ferrão atravessa a vítima; à distância (arremesso, granada, frasco, veneno) CUSPE DE ÁCIDO: bola de ácido que corrói",
+        "r": "LARVAS DA ESPIRA: a boca do topo cospe ácido e os casulos se abrem soltando larvas que enxameiam a vítima",
+        "b": "ONDA PSÍQUICA: anéis ciano saem do crânio translúcido; a vítima flutua, se contorce e implode em ácido",
+        "n": "MORDIDA DA BESTA-CRIPTA: a besta investe e morde; o zangão finaliza com o ferrão",
+        "q": "LÂMINA DA CAUDA: empala com a cauda, ergue a vítima, que se dissolve em ácido",
+        "k": "RUGIDO ÁCIDO: o grito em ondas ciano estilhaça a carapaça do inimigo; o cetro brilha",
+        "morte_vitima": "o ácido corrói a peça (brilho verde, fumaça ácida), sobra o esqueleto por um instante (setMateFx bone) e vira pó",
+        "xeque_mate": "a câmara desperta (ovos pulsam, luzes piscam); a Rainha-Mãe desce do casco sibilando; a cauda prende o Rei em câmera lenta (clarão ciano); a resina envolve o Rei num casulo com ácido escorrendo; ela puxa o casulo para a câmara de ovos e o Rei some; o casulo pulsa entre os ovos e se apaga"
+      },
+      "mundo": {
+        "arena": "colmeia",
+        "nome_arena": "Nave-Colmeia Naufragada",
+        "toque": "casco biomecânico aberto (nervuras de metal e resina em arco com veias ciano), tubos e túneis, câmara de ovos pulsando em verde atrás das negras, névoa verde baixa, luzes que piscam, ácido pingando do teto (gotas que fervem no chão), estrelas, a estrela morta e a nebulosa roxa pelo rasgo do casco; tabuleiro de placas de metal e osso com veias ciano nas juntas",
+        "musica": "musica_multiverso (placeholder)",
+        "ambiente": "ambiente_multiverso (placeholder)"
+      },
+      "mascote": {
+        "rainha_mae": "assets/meshy/chefes/rainha_mae/model.opt.gltf.json (estático, animado por código): presa à parede da câmara de ovos; nas capturas e de tempos em tempos desce, sibila, balança e volta"
+      },
+      "arcano": {
+        "pegaso": "ZANGÃO ALADO (asas de membrana negras com veias ciano)",
+        "dragao": "COLOSSO DA COLMEIA",
+        "canhao": "CUSPIDOR DE ÁCIDO",
+        "golem": "CARAPAÇA VIVA (o golem tingido negro-violáceo com veias ciano e ácido)",
+        "centuriao": "GUARDA DA COLMEIA",
+        "berserk": "FÚRIA ÁCIDA",
+        "fenix": "RENASCE DO CASULO",
+        "andarilho": "RASTEJADOR DAS SOMBRAS",
+        "necro": "PARASITA ANCESTRAL",
+        "oraculo_b": "MENTE DA COLMEIA",
+        "lanceiro": "FERRÃO",
+        "summon": "A COLMEIA GERA"
+      },
+      "esqueleto": "Meshy, 24 ossos (Hips...): usa os golpes.glb da Aurora como os outros reinos"
     }
   ],
   "regra_golpes": "Cada reino tem golpes próprios (efeito visual e som). O tipo de golpe da matriz (lâmina, arremesso, magia...) continua o mesmo para as regras e a morte da vítima; o reino do ATACANTE troca só a aparência: cor, elemento e partículas. A morte da vítima usa o 'morte_vitima' do reino do atacante quando houver."
