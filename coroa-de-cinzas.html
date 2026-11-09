@@ -78,6 +78,25 @@ button[aria-pressed="false"]{color:var(--ash)}
 .seg button[aria-pressed="true"]{background:linear-gradient(var(--ember-deep), #6a4314); color:#fff4dc}
 #flip, #follow{min-height:36px; padding:6px 12px; font-size:.88rem}
 #flip[aria-pressed="true"], #follow[aria-pressed="true"]{color:var(--ember); border-color:var(--ember-deep)}
+.rec{display:inline-flex; flex-wrap:wrap; gap:8px}
+.rec[hidden]{display:none}
+.rec button{min-height:36px; padding:6px 12px; font-size:.88rem}
+#rec-go[aria-pressed="true"]{color:#fff; background:#a3192b; border-color:#ff5a6a; animation:recPulse 1.2s ease-in-out infinite}
+#rec-auto[aria-pressed="true"]{color:var(--ember); border-color:var(--ember-deep)}
+#rec-list b{color:var(--ember)}
+@keyframes recPulse{50%{box-shadow:0 0 0 4px rgba(255,90,106,.25)}}
+.rec-pop{position:fixed; right:16px; bottom:16px; z-index:60; width:min(420px, calc(100vw - 32px)); max-height:min(70vh, 640px); overflow:auto; padding:12px; border:1px solid var(--seam); border-radius:6px; background:rgba(12,10,16,.96); box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.rec-pop[hidden]{display:none}
+.rec-h{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-family:var(--f-ui); letter-spacing:.04em}
+.rec-h b{flex:1; color:var(--ember)}
+.rec-h button{min-height:32px; padding:4px 10px; font-size:.82rem}
+#rec-items{list-style:none; margin:0; padding:0; display:grid; gap:10px}
+#rec-items li{display:flex; gap:10px; align-items:flex-start}
+#rec-items video{width:90px; aspect-ratio:9/16; object-fit:cover; border-radius:4px; background:#000; cursor:pointer; flex:none}
+.rec-it{display:flex; flex-direction:column; gap:6px; font-family:var(--f-ui); font-size:.85rem; min-width:0}
+.rec-it b{color:var(--bone)}
+.rec-it span{color:var(--ash)}
+.rec-it .rec-a, .rec-it button{align-self:flex-start; min-height:32px; padding:4px 12px; font-size:.82rem; border:1px solid var(--seam); border-radius:3px; color:var(--ember); text-decoration:none; display:inline-flex; align-items:center}
 .turnflip{display:inline-flex; align-items:center; gap:8px; font-family:var(--f-ui); font-size:.85rem; letter-spacing:.04em; color:var(--ash); min-height:36px; cursor:pointer}
 .turnflip input{width:18px; height:18px; margin:0; accent-color:var(--ember)}
 .view-hint{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:2; pointer-events:none; padding:6px 14px; border:1px solid var(--seam); border-radius:999px; background:var(--hud); font-family:var(--f-ui); font-size:.78rem; letter-spacing:.08em; color:var(--bone); white-space:nowrap}
@@ -1156,6 +1175,11 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
         <button type="button" id="flip" aria-pressed="false" title="Atalho: I">Inverter campo</button>
         <button type="button" id="follow" aria-pressed="true" title="A câmera desliza até cada lance e volta (vistas Padrão e Foco)">Acompanhar lances</button>
         <label class="turnflip" id="turnflip-wrap" hidden><input type="checkbox" id="turnflip"> Girar a cada turno</label>
+        <span class="rec" id="rec" hidden><button type="button" id="rec-go" aria-pressed="false" title="Grava a tela em vídeo vertical (9:16) com som, para Reels">● Gravar</button><button type="button" id="rec-auto" aria-pressed="false" title="Guarda sozinho um clipe vertical de cada captura e de cada xeque-mate">Clipes automáticos</button><button type="button" id="rec-list" aria-expanded="false" aria-controls="rec-pop" hidden>Clipes <b id="rec-n">0</b></button></span>
+      </div>
+      <div class="rec-pop" id="rec-pop" role="dialog" aria-label="Clipes gravados" hidden>
+        <div class="rec-h"><b>Clipes para o Instagram</b><button type="button" id="rec-all">Baixar todos</button><button type="button" id="rec-clear">Limpar</button><button type="button" id="rec-close" aria-label="Fechar">×</button></div>
+        <ul id="rec-items"></ul>
       </div>
       <p class="hint" id="hint"></p>
     </section>
@@ -16418,6 +16442,221 @@ function updateEnv(now, dt){
   if (CRIM.g) crimsonTick(performance.now());
 }
 let lastT = performance.now(), checkSide = null;
+// ===== Gravador de clipes verticais (Reels): grava a cena em 9:16 com o som do jogo =====
+// "Gravar" grava tudo até parar; "Clipes automáticos" guarda sozinho um clipe de cada captura e de cada xeque-mate
+// (cada lance abre um trecho; os lances sem golpe são descartados).
+const REC = { ok:typeof MediaRecorder !== 'undefined' && !!(HTMLCanvasElement.prototype.captureStream),
+  cv:null, g:null, stream:null, dest:null, mime:'', ext:'webm', manual:null, auto:false, seg:null, clips:[], n:0,
+  fx:0.5, capK:0, mover:null };
+const REC_W = 1080, REC_H = 1920, REC_HANDLE = '@arcanechess_oficial', REC_SITE = 'arcanechess.pages.dev/jogar';
+const _recV = typeof THREE !== 'undefined' ? new THREE.Vector3() : null;
+function recMime(){
+  for (const m of ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'])
+    if (MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+}
+function recSetup(){
+  if (REC.cv) return true;
+  if (!REC.ok || !GLOK) return false;
+  REC.cv = document.createElement('canvas'); REC.cv.width = REC_W; REC.cv.height = REC_H;
+  REC.g = REC.cv.getContext('2d');
+  REC.stream = REC.cv.captureStream(30);
+  // o som sai do mesmo mixer do jogo (música, ambiente, golpes e narração)
+  const ac = audio();
+  if (ac && AUD.bus.master && ac.createMediaStreamDestination){
+    try {
+      REC.dest = ac.createMediaStreamDestination();
+      AUD.bus.master.connect(REC.dest);
+      for (const t of REC.dest.stream.getAudioTracks()) REC.stream.addTrack(t);
+    } catch (e){ REC.dest = null; }
+  }
+  REC.mime = recMime(); REC.ext = REC.mime.includes('mp4') ? 'mp4' : 'webm';
+  return true;
+}
+function recOpen(kind){
+  if (!recSetup()) return null;
+  recDraw();
+  let mr;
+  try { mr = new MediaRecorder(REC.stream, { mimeType:REC.mime || undefined, videoBitsPerSecond:8e6, audioBitsPerSecond:160000 }); }
+  catch (e){ try { mr = new MediaRecorder(REC.stream); } catch (e2){ return null; } }
+  const s = { kind, mr, chunks:[], t0:performance.now(), want:kind === 'manual', cap:'', mate:false, sawMate:false, moveDone:0, quiet:0 };
+  mr.ondataavailable = e => { if (e.data && e.data.size) s.chunks.push(e.data); };
+  mr.start(500);
+  return s;
+}
+const recSlug = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function recClose(s, keep){
+  if (!s || s.closed) return;
+  s.closed = true;
+  const dur = (performance.now() - s.t0) / 1000;
+  s.mr.onstop = () => {
+    if (!keep || !s.chunks.length) return;
+    const blob = new Blob(s.chunks, { type:(REC.mime || 'video/webm').split(';')[0] });
+    const n = ++REC.n, tag = s.kind === 'manual' ? 'gravacao' : recSlug(s.cap) || (s.mate ? 'xeque-mate' : 'golpe');
+    const name = `arcane-${recSlug(sideCurto('w'))}-x-${recSlug(sideCurto('b'))}-${tag}-${String(n).padStart(2, '0')}.${REC.ext}`;
+    REC.clips.push({ n, name, blob, url:URL.createObjectURL(blob), dur, cap:s.cap || (s.mate ? 'Xeque-mate' : s.kind === 'manual' ? 'Gravação' : 'Golpe') });
+    recUI();
+  };
+  try { s.mr.stop(); } catch (e){}
+}
+// ganchos do lance (doMove)
+function recMoveBegin(res, mover){
+  REC.mover = mover;
+  if (!REC.auto || REC.manual || !res) return;
+  if (REC.seg) recClose(REC.seg, REC.seg.want);
+  const s = REC.seg = recOpen('auto');
+  if (!s) return;
+  s.mate = /#/.test(res.san || '');
+  s.want = !!res.captured || s.mate;
+}
+function recMoveEnd(){ if (REC.seg && !REC.seg.moveDone) REC.seg.moveDone = performance.now(); }
+function recTick(now){
+  const s = REC.seg;
+  if (!s) return;
+  const live = cine.active || MATE.cinema;
+  if (MATE.cinema){ s.sawMate = true; s.want = true; }
+  if (live){ s.want = true; s.quiet = 0; if (!s.cap && cineCap.classList.contains('show')) s.cap = cineCap.querySelector('b').textContent; }
+  if (s.moveDone && !live){
+    // o xeque-mate abre o encerramento logo depois do lance: espera por ele
+    if (!(s.mate && !s.sawMate && now - s.moveDone < 9000)){
+      if (!s.quiet) s.quiet = now;
+      if (now - s.quiet > (s.want ? 1100 : 0)){ recClose(s, s.want); REC.seg = null; }
+    }
+  }
+  if (REC.seg && now - s.t0 > 75000){ recClose(s, s.want); REC.seg = null; }
+}
+function recText(g, txt, x, y, maxW, lh){
+  const words = String(txt || '').split(/\s+/); let line = '', yy = y;
+  for (const w of words){
+    const t = line ? line + ' ' + w : w;
+    if (g.measureText(t).width > maxW && line){ g.strokeText(line, x, yy); g.fillText(line, x, yy); line = w; yy += lh; }
+    else line = t;
+  }
+  if (line){ g.strokeText(line, x, yy); g.fillText(line, x, yy); }
+}
+function recDraw(){
+  const g = REC.g, cw = cv.width, ch = cv.height;
+  if (!g || !cw || !ch) return;
+  // recorte 9:16 que segue o golpe (ou a peça que anda) quando a tela é mais larga que o vídeo
+  const A = REC_W / REC_H;
+  let sx = 0, sy = 0, sw = cw, sh = ch;
+  if (cw / ch > A){
+    sw = ch * A;
+    let tx = 0.5;
+    const m = REC.mover;
+    if (_recV && camera){
+      if (cine.active && cine.look) _recV.copy(cine.look);
+      else if (m && !m.dead && m.dx !== undefined) _recV.set(m.dx, 0.5, m.dz);
+      else _recV.set(0, 0, 0);
+      _recV.project(camera);
+      if (Math.abs(_recV.x) < 1.6) tx = (_recV.x + 1) / 2;
+    }
+    REC.fx += (tx - REC.fx) * (cine.active ? 0.25 : 0.08);
+    sx = Math.max(0, Math.min(cw - sw, REC.fx * cw - sw / 2));
+  } else { sh = cw / A; sy = Math.max(0, (ch - sh) / 2); }
+  g.fillStyle = '#07060a'; g.fillRect(0, 0, REC_W, REC_H);
+  g.drawImage(cv, sx, sy, sw, sh, 0, 0, REC_W, REC_H);
+  try { g.drawImage(ov, sx * ov.width / cw, sy * ov.height / ch, sw * ov.width / cw, sh * ov.height / ch, 0, 0, REC_W, REC_H); } catch (e){}
+  // faixa de cima: marca e o confronto
+  let gr = g.createLinearGradient(0, 0, 0, 330);
+  gr.addColorStop(0, 'rgba(5,4,8,0.82)'); gr.addColorStop(1, 'rgba(5,4,8,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, REC_W, 330);
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round';
+  g.font = '700 84px "Grenze Gotisch", "UnifrakturMaguntia", Georgia, serif';
+  g.lineWidth = 6; g.strokeStyle = 'rgba(0,0,0,0.6)'; g.fillStyle = '#e3a548';
+  g.strokeText('Arcane Chess', REC_W / 2, 132); g.fillText('Arcane Chess', REC_W / 2, 132);
+  g.font = '600 40px "Alegreya Sans SC", "Alegreya Sans", system-ui, sans-serif';
+  g.lineWidth = 5; g.fillStyle = '#f1e6cf';
+  const vs = `${sideCurto('w')}  ×  ${sideCurto('b')}`;
+  g.strokeText(vs, REC_W / 2, 196); g.fillText(vs, REC_W / 2, 196);
+  // legenda do golpe (a mesma da câmera de combate)
+  const show = cineCap.classList.contains('show');
+  REC.capK += ((show ? 1 : 0) - REC.capK) * 0.18;
+  if (REC.capK > 0.02){
+    const b = cineCap.querySelector('b').textContent, sp = cineCap.querySelector('span').textContent;
+    g.globalAlpha = Math.min(1, REC.capK);
+    gr = g.createLinearGradient(0, 1060, 0, 1500);
+    gr.addColorStop(0, 'rgba(5,4,8,0)'); gr.addColorStop(0.45, 'rgba(5,4,8,0.55)'); gr.addColorStop(1, 'rgba(5,4,8,0)');
+    g.fillStyle = gr; g.fillRect(0, 1060, REC_W, 440);
+    g.font = '700 104px "Grenze Gotisch", "UnifrakturMaguntia", Georgia, serif';
+    g.lineWidth = 9; g.strokeStyle = 'rgba(0,0,0,0.75)';
+    g.fillStyle = cine.side === 'b' ? '#ff5a6a' : '#ffc061';
+    recText(g, b, REC_W / 2, 1250, REC_W - 120, 104);
+    if (sp){
+      g.font = '500 44px "Alegreya", Georgia, serif'; g.lineWidth = 6; g.fillStyle = '#f6eedd';
+      recText(g, sp, REC_W / 2, 1340, REC_W - 160, 54);
+    }
+    g.globalAlpha = 1;
+  }
+  // assinatura (acima da área que o Instagram cobre com o nome e a legenda)
+  g.font = '600 38px "Alegreya Sans SC", "Alegreya Sans", system-ui, sans-serif';
+  g.lineWidth = 5; g.strokeStyle = 'rgba(0,0,0,0.6)'; g.fillStyle = 'rgba(241,230,207,0.92)';
+  g.strokeText(REC_HANDLE, REC_W / 2, 258); g.fillText(REC_HANDLE, REC_W / 2, 258);
+  g.font = '500 30px "Alegreya Sans", system-ui, sans-serif'; g.fillStyle = 'rgba(241,230,207,0.7)';
+  g.strokeText(REC_SITE, REC_W / 2, 1480); g.fillText(REC_SITE, REC_W / 2, 1480);
+}
+function recFrame(now){
+  if (!REC.cv || (!REC.manual && !REC.seg)) return;
+  recTick(now);
+  if (REC.manual || REC.seg) recDraw();
+  if (REC.manual && recGo) recGo.textContent = `■ Parar ${Math.floor((now - REC.manual.t0) / 60000)}:${String(Math.floor((now - REC.manual.t0) / 1000) % 60).padStart(2, '0')}`;
+}
+// interface: botões na barra das vistas e a lista de clipes
+const recWrap = document.getElementById('rec'), recGo = document.getElementById('rec-go'), recAutoBtn = document.getElementById('rec-auto'),
+  recListBtn = document.getElementById('rec-list'), recPop = document.getElementById('rec-pop');
+function recUI(){
+  if (!recWrap) return;
+  recGo.setAttribute('aria-pressed', REC.manual ? 'true' : 'false');
+  if (!REC.manual) recGo.textContent = '● Gravar';
+  recAutoBtn.setAttribute('aria-pressed', REC.auto ? 'true' : 'false');
+  document.getElementById('rec-n').textContent = REC.clips.length;
+  recListBtn.hidden = !REC.clips.length;
+  if (recPop.hidden) return;
+  const L = document.getElementById('rec-items');
+  L.textContent = '';
+  const share = !!(navigator.canShare && REC.clips[0] && navigator.canShare({ files:[new File([REC.clips[0].blob], REC.clips[0].name, { type:REC.clips[0].blob.type })] }));
+  for (const c of [...REC.clips].reverse()){
+    const li = document.createElement('li');
+    const v = document.createElement('video'); v.src = c.url; v.muted = true; v.playsInline = true; v.preload = 'metadata';
+    v.addEventListener('mouseenter', () => v.play().catch(() => {})); v.addEventListener('mouseleave', () => v.pause());
+    v.addEventListener('click', () => { v.muted = false; v.controls = true; v.play().catch(() => {}); });
+    const tx = document.createElement('div'); tx.className = 'rec-it';
+    tx.innerHTML = `<b></b><span>${c.dur.toFixed(0)} s · ${(c.blob.size / 1048576).toFixed(1)} MB</span>`;
+    tx.querySelector('b').textContent = c.cap;
+    const a = document.createElement('a'); a.href = c.url; a.download = c.name; a.textContent = 'Baixar'; a.className = 'rec-a';
+    tx.appendChild(a);
+    if (share){
+      const sb = document.createElement('button'); sb.type = 'button'; sb.textContent = 'Compartilhar';
+      sb.addEventListener('click', () => navigator.share({ files:[new File([c.blob], c.name, { type:c.blob.type })], title:'Arcane Chess' }).catch(() => {}));
+      tx.appendChild(sb);
+    }
+    li.append(v, tx); L.appendChild(li);
+  }
+}
+function recToggleManual(){
+  if (REC.manual){ const s = REC.manual; REC.manual = null; recClose(s, true); recUI(); return; }
+  if (REC.seg){ recClose(REC.seg, false); REC.seg = null; }
+  REC.manual = recOpen('manual');
+  recUI();
+}
+if (recWrap && REC.ok){
+  recWrap.hidden = false;
+  recGo.addEventListener('click', recToggleManual);
+  recAutoBtn.addEventListener('click', () => {
+    REC.auto = !REC.auto;
+    if (!REC.auto && REC.seg){ recClose(REC.seg, REC.seg.want && !!REC.seg.moveDone); REC.seg = null; }
+    if (REC.auto) recSetup();
+    recUI();
+  });
+  recListBtn.addEventListener('click', () => { recPop.hidden = !recPop.hidden; recListBtn.setAttribute('aria-expanded', recPop.hidden ? 'false' : 'true'); recUI(); });
+  document.getElementById('rec-close').addEventListener('click', () => { recPop.hidden = true; recListBtn.setAttribute('aria-expanded', 'false'); });
+  document.getElementById('rec-all').addEventListener('click', () => {
+    REC.clips.forEach((c, i) => setTimeout(() => { const a = document.createElement('a'); a.href = c.url; a.download = c.name; document.body.appendChild(a); a.click(); a.remove(); }, i * 400));
+  });
+  document.getElementById('rec-clear').addEventListener('click', () => { for (const c of REC.clips) URL.revokeObjectURL(c.url); REC.clips = []; recUI(); recPop.hidden = true; });
+}
+window.__rec = REC;
+
 function frame(now){
   const rdt = Math.min(50, now - lastT);
   lastT = now;
@@ -16447,6 +16686,7 @@ function frame(now){
     if (MATE.tick) MATE.tick(dt, now);
     renderer.render(world, camera);
     drawOverlay();
+    recFrame(now);
     updateHud();
     pvTick(now);
     mmTick();
@@ -17313,9 +17553,11 @@ async function doMove(m){
   const token = S;
   renderAll();
   focusMove(res);
+  recMoveBegin(res, mover);
   followBegin(res, mover);
   await play(ev);
   followEnd();
+  recMoveEnd();
   if (S !== token) return;
   focusAfter(res);
   cineReset();
