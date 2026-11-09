@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import meshy_gen as M
 
-LIMITE = 135
+LIMITE = 420
 CHEFES = {
     "deus_morte": dict(reino="ferro_negro", arte="deus_morte_v1.png", rig=True, altura=3.0, poly=20000,
                        acoes=[89, 237, 125]),   # Combat_Stance, Charged_Axe_Chop, Charged_Spell_Cast
@@ -45,6 +45,20 @@ CHEFES = {
     "zangao_alado":    dict(arte="evolucoes/zangao_alado_v1.png", rig=False, poly=20000),
     "hipocampo_alado": dict(arte="evolucoes/hipocampo_alado_v1.png", rig=False, poly=20000),
     "vespa_dunas":     dict(arte="evolucoes/vespa_dunas_v1.png", rig=False, poly=20000),
+    # peças de cenário das arenas novas e o tentáculo do Kraken/sacerdote-polvo (estáticos)
+    "tentaculo": dict(arte="cenario/tentaculo.png", rig=False, poly=14000),
+    "selva_totem": dict(arte="cenario/selva_totem.png", rig=False, poly=12000),
+    "selva_altar": dict(arte="cenario/selva_altar.png", rig=False, poly=12000),
+    "selva_tambores": dict(arte="cenario/selva_tambores.png", rig=False, poly=12000),
+    "colmeia_casulos": dict(arte="cenario/colmeia_casulos.png", rig=False, poly=12000),
+    "colmeia_pilar": dict(arte="cenario/colmeia_pilar.png", rig=False, poly=12000),
+    "colmeia_ovo": dict(arte="cenario/colmeia_ovo.png", rig=False, poly=12000),
+    "mar_concha": dict(arte="cenario/mar_concha.png", rig=False, poly=12000),
+    "mar_estatua": dict(arte="cenario/mar_estatua.png", rig=False, poly=12000),
+    "mar_arco": dict(arte="cenario/mar_arco.png", rig=False, poly=12000),
+    "deserto_sarcofago": dict(arte="cenario/deserto_sarcofago.png", rig=False, poly=12000),
+    "deserto_escorpiao": dict(arte="cenario/deserto_escorpiao.png", rig=False, poly=12000),
+    "deserto_braseiro": dict(arte="cenario/deserto_braseiro.png", rig=False, poly=12000),
 }
 CUSTO = lambda n: (15 if CHEFES[n].get("modelo") == "meshy-6-lite" else 30) + ((5 + 3 * len(CHEFES[n]["acoes"])) if CHEFES[n]["rig"] else 0)
 

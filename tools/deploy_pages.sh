@@ -20,6 +20,8 @@ done
 # imagens dos cartões de reino (escolha do reino em cada modo)
 mkdir -p "$W/assets/concepts" && cp "$ROOT/assets/concepts/rei.jpg" "$W/assets/concepts/"
 for f in "$ROOT"/assets/concepts/reinos/*/referencia.*; do d="$W/assets/concepts/reinos/$(basename "$(dirname "$f")")"; mkdir -p "$d"; cp "$f" "$d/"; done
+# texturas das arenas (chão e paredes)
+[ -d "$ROOT/assets/textures/arenas" ] && mkdir -p "$W/assets/textures/arenas" && cp "$ROOT"/assets/textures/arenas/*.jpg "$W/assets/textures/arenas/"
 # site (página inicial com o hero, ranking e login): o jogo vai para /jogar.html e as páginas para a raiz
 GAME="index.html"
 if [ -f "$ROOT/site/index.html" ]; then

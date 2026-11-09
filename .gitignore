@@ -37,3 +37,6 @@ assets/meshy/reinos/lua_nova/*/meshy_animated.glb
 assets/meshy/reinos/**/walk.glb
 
 assets/audio/reinos/state.json
+
+# texturas de arena: o jogo usa os .jpg
+assets/textures/arenas/*.png

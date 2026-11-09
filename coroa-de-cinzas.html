@@ -3752,6 +3752,7 @@ function themeMats(o){
   darkStoneMat = new THREE.MeshStandardMaterial({ color:C(o.dark), roughness:0.94, flatShading:true, envMapIntensity:0.35 });
   ironMat = new THREE.MeshStandardMaterial({ color:C(o.iron), roughness:o.ironR || 0.5, metalness:0.75, flatShading:true });
   woodMat = new THREE.MeshStandardMaterial({ color:C(o.wood), roughness:0.9, flatShading:true });
+  arenaWallTex();
 }
 function paintGround(base, blots, specks){
   return (g, rnd) => {
@@ -3778,6 +3779,7 @@ function groundMesh(paint, seed, w, d, z, rough = 1){
   m.rotation.x = -Math.PI / 2; m.position.set(0, GROUND_Y, z);
   m.receiveShadow = true;
   envRoot.add(m);
+  arenaGroundTex(m, w, d);
   return m;
 }
 function scatterRocks(rnd, N, colorAt, avoid){
@@ -11303,6 +11305,174 @@ function occTick(dt){
     }
   }
 }
+/* Peças de cenário das arenas novas (modelos da Meshy em assets/meshy/chefes/<nome>, estáticos) e os poderes de cada equipe
+   vivos na arena. Cada arena lista os modelos, onde ficam (flancos e atrás das negras, fora do volume das câmeras; todos com
+   occAdd), a altura e o papel ('totem', 'casulo'...), que diz o que pulsa, brilha ou solta partículas; numa captura, o pico
+   do poder. Sem o arquivo, a peça não aparece e nada quebra. Texturas pintadas de chão e parede: assets/textures/arenas. */
+const APROP = { list:[], arena:null, pulse:0, px:0, pz:0, tents:[], next:0, storm:0, wrapped:false };
+const APROP_DEF = {
+  selva:{ rim:0x5fd08a, em:0x1e4a2a, items:[
+    ['selva_totem', 3.0, [[-6.9, -7.4], [6.9, -7.4], [-10.3, 3.4], [10.3, 3.6]], 'totem'],
+    ['selva_altar', 2.2, [[-10.5, -4.4]], 'altar'],
+    ['selva_tambores', 1.7, [[10.3, -4.2], [-10.1, 7.2]], 'tambor'] ] },
+  colmeia:{ rim:0x3fe0ff, em:0x0a2a1a, items:[
+    ['colmeia_casulos', 2.6, [[-7.5, -8.9], [7.7, -8.7], [-10.3, 1.8]], 'casulo'],
+    ['colmeia_pilar', 4.2, [[-9.7, -4.2], [9.7, -4.0], [9.9, 4.8]], 'pilar'],
+    ['colmeia_ovo', 1.6, [[-5.9, -10.3], [5.7, -10.5], [10.1, 1.2]], 'ovo'] ] },
+  afundada:{ rim:0x4fe3d0, em:0x0a2a3a, items:[
+    ['mar_concha', 1.9, [[-9.9, -4.0], [9.9, 4.2]], 'concha'],
+    ['mar_estatua', 3.4, [[-7.5, -8.7], [7.5, -8.7]], 'estatua'],
+    ['mar_arco', 3.2, [[10.1, -4.2], [-10.3, 4.4]], 'arco'] ] },
+  necropole:{ rim:0xffb04a, em:0x3a2a10, items:[
+    ['deserto_sarcofago', 2.6, [[-7.3, -8.9], [7.3, -8.9]], 'sarcofago'],
+    ['deserto_escorpiao', 2.0, [[-10.1, -3.4], [10.1, -3.6]], 'escorpiao'],
+    ['deserto_braseiro', 1.7, [[-9.7, 3.6], [9.7, 3.8], [-5.3, -9.9], [5.3, -9.9]], 'braseiro'] ] },
+};
+// texturas pintadas das arenas: o chão troca o mapa quando a imagem chega; as paredes (stoneMat/darkStoneMat) nascem com um
+// mapa branco de 1 pixel, para que o bakeInto guarde as coordenadas de textura, e recebem a pintura quando ela chega
+const ARENA_TEX = { selva:1, colmeia:1, afundada:1, necropole:1 };
+let _texWhite = null;
+function arenaTexLoad(name, rep, onOk){
+  try {
+    new THREE.TextureLoader().load(`assets/textures/arenas/${name}.jpg`, t => {
+      t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]);
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      onOk(t);
+    }, undefined, () => {});
+  } catch (e){}
+}
+function arenaWallTex(){
+  if (!ARENA_TEX[arena] || !stoneMat) return;
+  if (!_texWhite){ _texWhite = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1, THREE.RGBAFormat); _texWhite.needsUpdate = true; }
+  const mats = [stoneMat, darkStoneMat], want = arena;
+  for (const m of mats){ m.map = _texWhite; m.needsUpdate = true; }
+  arenaTexLoad(arena + '_parede', [1, 1], t => {
+    if (arena !== want) { t.dispose(); return; }
+    stoneMat.map = t; stoneMat.color.set(0xd8d8d8); stoneMat.bumpMap = t; stoneMat.bumpScale = 0.03; stoneMat.needsUpdate = true;
+    darkStoneMat.map = t; darkStoneMat.color.set(0x8c8c8c); darkStoneMat.bumpMap = t; darkStoneMat.bumpScale = 0.03; darkStoneMat.needsUpdate = true;
+  });
+}
+function arenaGroundTex(m, w, d){
+  if (!ARENA_TEX[arena] || !m) return;
+  const want = arena;
+  arenaTexLoad(arena + '_chao', [w / 7, d / 7], t => {
+    if (arena !== want || !m.material){ t.dispose(); return; }
+    const old = m.material.map;
+    m.material.map = t; m.material.bumpMap = t; m.material.bumpScale = 0.05; m.material.color.set(0xb8b8b8); m.material.needsUpdate = true;
+    if (old && old !== t) old.dispose();
+  });
+}
+function apropInit(){
+  const id = arena, D = APROP_DEF[id];
+  APROP.arena = id; APROP.root = envRoot; APROP.list = []; APROP.tents = []; APROP.wrapped = false; APROP.next = performance.now() + 6000;
+  if (!D || !envRoot || !GLOK) return;
+  const root = envRoot;
+  for (const [key, H0, spots, role] of D.items) chefeLoad(key).then(A => {
+    if (!A || !A.geo || envRoot !== root || arena !== id) return;
+    const H = W < 560 ? H0 * 0.9 : H0;
+    for (const [x, z] of spots){
+      const m = staticMesh(A, H, { em:D.em, emk:0.4, metal:0.25, rim:D.rim, rimK:0.55 });
+      m.castShadow = true; m.renderOrder = -1;
+      const g = new THREE.Group(); g.add(m); g.position.set(x, GROUND_Y, z); g.rotation.y = Math.atan2(-x, -z);   // de frente para o centro
+      root.add(g);
+      occAdd(g, H * 0.65, V3(x, GROUND_Y + H * 0.5, z));
+      const it = { role, g, m, H, x, z, ph:Math.random() * TAU, glow:[], k:0, t:0 };
+      // brilhos dos poderes (olhos de jade, pérola, ovo, ferrão, chama)
+      const gl = (dx, dy, dz, s, hex, op) => { const sp = glowSprite(g, dx, dy, dz, s, hex, op); sp.userData.op = op; it.glow.push(sp); return sp; };
+      if (role === 'totem'){ gl(-0.1, H * 0.78, 0.22, 0.32, 0x7fe0a0, 0.6); gl(0.1, H * 0.78, 0.22, 0.32, 0x7fe0a0, 0.6); gl(0, H * 0.45, 0.25, 0.4, 0x7fe0a0, 0.35); }
+      else if (role === 'altar') gl(0, H * 0.72, 0.35, 0.9, 0x5fd08a, 0.45);
+      else if (role === 'casulo') gl(0, H * 0.6, 0, H * 0.9, 0x9dff3a, 0.35);
+      else if (role === 'pilar') gl(0, H * 0.92, 0, 0.9, 0x3fe0ff, 0.4);
+      else if (role === 'ovo') gl(0, H * 0.7, 0, H * 0.7, 0x9dff3a, 0.5);
+      else if (role === 'concha') gl(0, H * 0.42, 0.15, 0.9, 0xd8fffb, 0.7);
+      else if (role === 'estatua') gl(H * 0.17, H * 0.98, 0, 0.5, 0x4fe3d0, 0.35);
+      else if (role === 'arco') { gl(-H * 0.25, H * 0.6, 0.1, 0.5, 0x4fe3d0, 0.35); gl(H * 0.25, H * 0.45, 0.1, 0.5, 0x4fe3d0, 0.35); }
+      else if (role === 'escorpiao') gl(0, H * 0.95, -H * 0.15, 0.55, 0x2fe8d0, 0.6);
+      else if (role === 'braseiro') gl(0, H * 1.02, 0, 1.0, 0x2fe8d0, 0.55);
+      APROP.list.push(it);
+    }
+  });
+  // Cidade Afundada: tentáculos do Kraken que emergem e afundam em volta da arena
+  if (id === 'afundada') chefeLoad('tentaculo').then(A => {
+    if (!A || !A.geo || envRoot !== root || arena !== id) return;
+    for (const [x, z] of [[-11.2, -1.2], [11.4, 0.6], [-6.4, -11.4], [6.6, -11.6]]){
+      const m = staticMesh(A, 3.4, { em:0x0a2a3a, emk:0.45, metal:0.15, rim:0x4fe3d0, rimK:0.7 }); m.castShadow = false;
+      const g = new THREE.Group(); g.add(m); g.position.set(x, GROUND_Y - 3.6, z); g.rotation.y = Math.atan2(-x, -z) + Math.PI / 2; root.add(g);
+      occAdd(g, 2.2, V3(x, GROUND_Y + 1.6, z));
+      APROP.tents.push({ g, x, z, st:'down', t0:0, up:0, ph:Math.random() * TAU });
+    }
+  });
+}
+// os poderes da equipe vivos na arena e o pico numa captura
+function apropCapture(x, z){
+  APROP.pulse = performance.now(); APROP.px = x; APROP.pz = z;
+  if (!GLOK) return;
+  for (const it of APROP.list){
+    const P = it.g.position, top = V3(P.x, GROUND_Y + it.H * 0.9, P.z);
+    if (it.role === 'totem') leafBurst(top, 6, 0.8);
+    else if (it.role === 'tambor'){ it.t = performance.now(); dustAt(P.x, P.z, nFx(8), 0.6, ['#4a3a24', '#2a1e14']); }
+    else if (it.role === 'pilar' && Math.random() < 0.6) psyRings(top, V3(x, 0.6, z), 2, 700, 0.6);
+    else if (it.role === 'casulo') acidSplash(V3(P.x, GROUND_Y + 0.2, P.z), 8, 1, false);
+    else if (it.role === 'estatua'){ flashLight(top, 0x4fe3d0, 5, 600); sparks.burst(top, nFx(16), MAR_COLS, 2.2, { life:500, size:0.05, grav:-1 }); }
+    else if (it.role === 'braseiro') sparks.burst(V3(P.x, GROUND_Y + it.H, P.z), nFx(18), ['#e8fffb', '#2fe8d0', '#ffd27a'], 1.8, { life:700, size:0.06, grav:1, upward:true });
+    else if (it.role === 'escorpiao') flashLight(top, 0x2fe8d0, 3, 500);
+  }
+  // o tentáculo mais perto da captura sobe
+  let best = null, bd = 1e9;
+  for (const T of APROP.tents){ const d = Math.hypot(T.x - x, T.z - z); if (T.st === 'down' && d < bd){ bd = d; best = T; } }
+  if (best){ best.st = 'up'; best.t0 = performance.now(); bubbleBurst(V3(best.x, GROUND_Y + 0.1, best.z), 24, 1.4); }
+  if (arena === 'afundada') snd('raio_golpe', { vol:0.25, rate:0.8 });
+}
+function apropTick(now, dt){
+  if (APROP.arena !== arena || APROP.root !== envRoot) apropInit();
+  if (!APROP.wrapped && ENVX.onCapture !== undefined && envRoot && APROP_DEF[arena]){
+    const prev = ENVX.onCapture; APROP.wrapped = true;
+    ENVX.onCapture = (x, z, k) => { if (prev) try { prev(x, z, k); } catch (e){} apropCapture(x, z); };
+  }
+  if (!GLOK) return;
+  const k = Math.min(dt, 60), t = now / 1000, hot = Math.max(0, 1 - (now - APROP.pulse) / 1600), lite = golpeLite();
+  const chest = SELVA.d && SELVA.d.st === 'wake';
+  for (const it of APROP.list){
+    const P = it.g.position, pul = 0.5 + 0.5 * Math.sin(t * 1.6 + it.ph);
+    for (const sp of it.glow) sp.material.opacity = sp.userData.op * (RM ? 1 : 0.6 + 0.4 * pul) * (1 + hot * 1.4);
+    if (RM) continue;
+    const r = Math.random();
+    if (it.role === 'totem' && r < k * 0.0015) sparks.emit(P.x + (Math.random() - 0.5) * 0.6, GROUND_Y + it.H, P.z + (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.3, -0.2, (Math.random() - 0.5) * 0.3, 2400, 0.06, PRIM_LEAF[(Math.random() * 4) | 0], 1, 0.3, 0.4, 1);
+    else if (it.role === 'altar' && r < k * 0.004) dust.emit(P.x, GROUND_Y + it.H * 0.75, P.z + 0.3, 0, 0.4, 0, 2200, 0.25, '#c8d8c0', 0.25, -0.05, 0.3);
+    else if (it.role === 'tambor'){
+      // os tambores batem junto com o ídolo batendo no peito (e na captura)
+      const beat = chest ? Math.max(0, Math.sin(now / 160)) : 0, th = Math.max(0, 1 - (now - it.t) / 400);
+      it.m.scale.y = it.H * (1 + 0.06 * Math.max(beat, th)); it.m.scale.x = it.m.scale.z = it.H * (1 - 0.02 * Math.max(beat, th));
+    } else if (it.role === 'casulo'){
+      it.m.material.emissiveIntensity = 0.4 + 0.5 * pul + hot;
+      if (!lite && r < k * 0.0004){ acidSplash(V3(P.x + (Math.random() - 0.5) * 0.8, GROUND_Y + 0.3, P.z + (Math.random() - 0.5) * 0.8), 6, 0.8, false); }   // um casulo eclode
+    } else if (it.role === 'pilar'){
+      if (r < k * 0.006) sparks.emit(P.x + (Math.random() - 0.5) * 0.5, GROUND_Y + it.H * (0.4 + Math.random() * 0.5), P.z + (Math.random() - 0.5) * 0.5, 0, -0.4, 0, 1100, 0.045, ABI_ACID[(Math.random() * 3) | 0], 1, 2.2, 0.5);
+      if (!lite && now > (it.next || 0)){ it.next = now + 6000 + Math.random() * 6000; psyRings(V3(P.x, GROUND_Y + it.H * 0.92, P.z), V3(P.x * 0.6, GROUND_Y + it.H * 0.92, P.z * 0.6), 2, 900, 0.5); }
+    } else if (it.role === 'ovo') it.m.material.emissiveIntensity = 0.4 + 0.4 * pul + hot;
+    else if (it.role === 'concha' && r < k * 0.004) sparks.emit(P.x + (Math.random() - 0.5) * 0.6, GROUND_Y + it.H * 0.5, P.z, 0, 0.7, 0, 2200, 0.05, '#e8fffb', 0.9, -0.3, 0.3, 1);
+    else if (it.role === 'arco' && r < k * 0.003) sparks.emit(P.x + (Math.random() - 0.5) * it.H * 0.6, GROUND_Y + 0.2, P.z, 0, 0.6, 0, 2600, 0.05, MAR_COLS[(Math.random() * 3) | 0], 0.9, -0.3, 0.3, 1);
+    else if (it.role === 'estatua' && now > (it.next || 0)){
+      // o relâmpago de Netuno no tridente da estátua
+      it.next = now + 12000 + Math.random() * 10000;
+      if (it.next > now + 1000 && Math.random() < 0.7){ const tip = V3(P.x, GROUND_Y + it.H, P.z); flashLight(tip, 0x4fe3d0, 4, 450); sparks.burst(tip, nFx(12), ['#ffffff', '#8ae8ff', '#4fe3d0'], 2, { life:400, size:0.05, grav:-1 }); snd('raio_golpe', { vol:0.12, rate:1.2 }); }
+    } else if (it.role === 'sarcofago' && r < k * 0.004) dust.emit(P.x + (Math.random() - 0.5) * 0.6, GROUND_Y + it.H * 0.8, P.z + 0.3, 0, -0.3, 0, 1600, 0.12, DES_SAND[(Math.random() * 3) | 0], 0.5, 0.6, 0.4);
+    else if (it.role === 'braseiro' && r < k * (lite ? 0.008 : 0.02)) sparks.emit(P.x + (Math.random() - 0.5) * 0.3, GROUND_Y + it.H * 0.98, P.z + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.15, 0.8 + Math.random() * 0.6, (Math.random() - 0.5) * 0.15, 800, 0.06, Math.random() < 0.7 ? '#2fe8d0' : '#ffd27a', 1, -0.6, 0.6, 1);
+  }
+  // Necrópole: de tempos em tempos uma tempestade de areia leve atravessa a arena (por fora do tabuleiro)
+  if (arena === 'necropole' && !RM && !lite){
+    if (now > APROP.storm){ APROP.storm = now + 20000 + Math.random() * 15000; APROP.stormT = now; APROP.stormDir = Math.random() < 0.5 ? 1 : -1; }
+    if (now - (APROP.stormT || 0) < 4500 && Math.random() < k * 0.08){ const zz = -9 + Math.random() * 18, side = Math.random() < 0.5 ? -1 : 1; dust.emit(APROP.stormDir * -12, GROUND_Y + 0.3 + Math.random() * 1.6, zz + side * 0, APROP.stormDir * (3 + Math.random() * 2), 0.05, (Math.random() - 0.5) * 0.4, 3500, 0.5 + Math.random() * 0.5, DES_SAND[(Math.random() * 3) | 0], 0.35, 0, 0.3); }
+  }
+  // tentáculos: sobem, ondulam e afundam
+  for (const T of APROP.tents){
+    if (T.st === 'down' && now > (T.next || 0) && Math.random() < k * 0.0004){ T.st = 'up'; T.t0 = now; }
+    if (T.st === 'up'){ const u = (now - T.t0) / 4200; T.up = u < 0.25 ? easeOut(u / 0.25) : u < 0.75 ? 1 : 1 - easeIO((u - 0.75) / 0.25); if (u >= 1){ T.st = 'down'; T.up = 0; T.next = now + 8000; } if (u < 0.05 && Math.random() < 0.5) bubbleBurst(V3(T.x, GROUND_Y + 0.1, T.z), 6, 1); }
+    T.g.position.y = GROUND_Y - 3.6 + T.up * 3.4;
+    T.g.rotation.z = Math.sin(t * 1.3 + T.ph) * 0.18 * T.up; T.g.rotation.x = Math.sin(t * 0.9 + T.ph) * 0.1 * T.up;
+    T.g.visible = T.up > 0.01;
+  }
+}
 const SELVA = { on:false, d:null, loading:false, retry:0, tree:null, temple:null, fire:[], pulse:0 };
 // tabuleiro: lajes de pedra musgosa com seiva de jade nas juntas e a moldura de ouro antigo com triângulos tribais
 function paintBoardSelva(map, emis){
@@ -12256,14 +12426,32 @@ function inkCloud(v, ms = 1200){
   const g = new THREE.Group(); g.position.set(x, 0, z); world.add(g);
   const mat = new THREE.MeshStandardMaterial({ color:C(0x0b2233), roughness:0.5, emissive:C(0x1f6b7a), emissiveIntensity:0.5, transparent:true, opacity:1 });
   const n = golpeLite() ? 3 : 5;
-  for (let i = 0; i < n; i++){ const a0 = i / n * TAU, pts = []; for (let k = 0; k <= 8; k++){ const u = k / 8, r = 0.42 - u * 0.28, a = a0 + u * 2.2; pts.push(V3(Math.cos(a) * r, u * h * 1.05, Math.sin(a) * r)); } g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 20, 0.03, 5, false), mat)); }
+  // os tentáculos do sacerdote-polvo: o modelo texturizado (ventosas, manchas turquesa) em volta da vítima, inclinados para ela;
+  // sem o modelo, os tubos de antes
+  const tms = [];
+  for (let i = 0; i < n; i++){
+    const a0 = i / n * TAU, tm = tentacleModel(h * 1.15);
+    if (tm){ const tg = new THREE.Group(); tg.position.set(Math.cos(a0) * 0.5, 0, Math.sin(a0) * 0.5); tg.rotation.set(0, -a0 + Math.PI / 2, 0.35); tg.add(tm); g.add(tg); tms.push(tm.material); continue; }
+    const pts = []; for (let k = 0; k <= 8; k++){ const u = k / 8, r = 0.42 - u * 0.28, a = a0 + u * 2.2; pts.push(V3(Math.cos(a) * r, u * h * 1.05, Math.sin(a) * r)); } g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 20, 0.03, 5, false), mat));
+  }
+  if (tms.length) g.userData.fadeMats = tms;
   g.scale.set(1, 0.001, 1);
   snd('nevoa', { vol:0.6, rate:0.7 }); snd('sombra', { vol:0.4 });
   return tween(ms, q => {
     g.scale.y = q < 0.4 ? Math.max(0.001, easeOut(q / 0.4)) : 1 - Math.max(0, (q - 0.7) / 0.3) * 0.8;
     mat.opacity = q > 0.8 ? 1 - (q - 0.8) / 0.2 : 1;
+    if (g.userData.fadeMats){ for (const m of g.userData.fadeMats) m.opacity = mat.opacity; g.rotation.y = Math.sin(q * 6) * 0.15; }
     if (q < 0.7 && Math.random() < 0.9) for (let i = 0; i < 2; i++) S2.emit(x + (Math.random() - 0.5) * 0.7, Math.random() * h, z + (Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.3, 0.1, (Math.random() - 0.5) * 0.3, 900, 0.4, MAR_INK[i % 3], 0.6, 0, 0.5);
-  }, linE).then(() => { g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); world.remove(g); mat.dispose(); });
+  }, linE).then(() => { g.traverse(o => { if (o.geometry && !o.userData.sharedGeo) o.geometry.dispose(); }); world.remove(g); mat.dispose(); for (const m of g.userData.fadeMats || []) m.dispose(); });
+}
+// o tentáculo texturizado (assets/meshy/chefes/tentaculo): malha compartilhada, material próprio para tingir e apagar.
+// Nasce no pé (y=0) e tem altura H. Sem o modelo carregado, devolve null (quem chama usa o tubo procedural).
+function tentacleModel(H){
+  const A = AVT.tentaculo;
+  if (!A || !A.geo) return null;
+  const m = staticMesh(A, H, { em:0x0a2a3a, emk:0.45, metal:0.15, rim:0x4fe3d0, rimK:0.7 });
+  m.castShadow = false;
+  return m;
 }
 // morte pela água: a água envolve a vítima e ela se desfaz em bolhas e espuma
 function foamDeath(v){
@@ -12589,6 +12777,7 @@ function afundadaTick(now, dt){
 }
 // tentáculo: tubo escuro curvo que sobe do chão num ponto e se inclina para um alvo
 function tentacleMesh(h, mat){
+  { const tm = tentacleModel(h); if (tm) return tm; }
   const pts = []; for (let k = 0; k <= 8; k++){ const u = k / 8; pts.push(V3(Math.sin(u * 1.6) * h * 0.35, u * h, 0)); }
   const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 18, 0.14 * h / 2.5, 7, false), mat);
   m.geometry.scale(1, 1, 1); return m;
@@ -12693,6 +12882,23 @@ function sandVortex(x, z, h = 1.4, ms = 1100){
 // a boca do verme da areia: um cone escuro que irrompe do chão (dentes de bronze), abocanha e afunda
 function wormMouth(x, z, h = 1.6, ms = 1100){
   if (!GLOK) return wait(ms);
+  // o Verme-Colosso texturizado (assets/meshy/chefes/verme) irrompe da areia sob a vítima, abocanha e afunda
+  const VA = AVT.verme;
+  if (VA && VA.geo){
+    const H = h * 1.35, m = staticMesh(VA, H, { em:0x3a2a10, emk:0.45, metal:0.3, rim:0xffb04a, rimK:0.8 }); m.castShadow = false;
+    const g = new THREE.Group(); g.position.set(x, -H, z); g.add(m); world.add(g);
+    g.rotation.y = Math.random() * TAU;
+    snd('terra_brota', { vol:0.8 }); snd('rugido_dragao', { vol:0.35, rate:0.7, delay:0.2 }); shake(0.06);
+    sandBurst(x, z, 26, 1.3);
+    return tween(ms, q => {
+      const up = q < 0.3 ? easeOut(q / 0.3) : q < 0.7 ? 1 : 1 - easeOut((q - 0.7) / 0.3);
+      g.position.y = mix(-H, -H * 0.12, up);
+      g.rotation.z = Math.sin(q * 18) * 0.05 * up;
+      if (q > 0.3 && q < 0.45) g.scale.setScalar(1 - (q - 0.3) * 0.8);   // abocanha
+      else g.scale.setScalar(1);
+      if (Math.random() < 0.8) dust.emit(x + (Math.random() - 0.5) * 1.4, 0.1, z + (Math.random() - 0.5) * 1.4, (Math.random() - 0.5) * 0.8, 0.6, (Math.random() - 0.5) * 0.8, 700, 0.18, DES_SAND[(Math.random() * 3) | 0], 0.6, 0.4, 0.5);
+    }, linE).then(() => { world.remove(g); m.material.dispose(); sandBurst(x, z, 16, 1); });
+  }
   const g = new THREE.Group(); g.position.set(x, -0.02, z); world.add(g);
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.28, 1, 10, 1, true), new THREE.MeshStandardMaterial({ color:C(0x5a3a24), roughness:0.9, flatShading:true, emissive:C(0x1a0c06), side:THREE.DoubleSide })); body.geometry.translate(0, 0.5, 0); g.add(body);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.05, 6, 14), new THREE.MeshStandardMaterial({ color:C(0x2fb8a8), emissive:C(0x146a60), emissiveIntensity:0.8 })); ring.rotation.x = Math.PI / 2; ring.position.y = 1; g.add(ring);
@@ -14228,7 +14434,7 @@ function avatarPreload(){
   const ids = new Set(['w', 'b'].map(kingdomOf));
   // no Arcano, as montarias aladas do Pégaso (pegaso, macaco_alado, zangao_alado, hipocampo_alado, vespa_dunas) e as
   // criaturas-chefe da evolução Dragão (o ídolo e a Rainha-Mãe já são os avatares; kraken e verme do Mar e do Deserto)
-  setTimeout(() => { for (const id of ids){ const k = AVATAR_KEY[id]; if (k) chefeLoad(k); } if (cfg.arc){ chefeLoad('golem'); if (ids.has('aurora')) chefeLoad('pegaso'); if (ids.has('ferro_negro')){ chefeLoad('pesadelo'); chefeLoad('dragao_ossos'); } if (ids.has('dragoes')) chefeLoad('serpe'); if (ids.has('lua_nova')) lwFormLoad(); if (ids.has('primatas')) chefeLoad('macaco_alado'); if (ids.has('abismo')) chefeLoad('zangao_alado'); if (ids.has('mar')){ chefeLoad('hipocampo_alado'); chefeLoad('kraken'); } if (ids.has('deserto')){ chefeLoad('vespa_dunas'); chefeLoad('verme'); } } if (ids.has('lua_nova')) chefeLoad('lobo_gigante'); }, 2500);
+  setTimeout(() => { for (const id of ids){ const k = AVATAR_KEY[id]; if (k) chefeLoad(k); } if (cfg.arc){ chefeLoad('golem'); if (ids.has('aurora')) chefeLoad('pegaso'); if (ids.has('ferro_negro')){ chefeLoad('pesadelo'); chefeLoad('dragao_ossos'); } if (ids.has('dragoes')) chefeLoad('serpe'); if (ids.has('lua_nova')) lwFormLoad(); if (ids.has('primatas')) chefeLoad('macaco_alado'); if (ids.has('abismo')) chefeLoad('zangao_alado'); if (ids.has('mar')){ chefeLoad('hipocampo_alado'); chefeLoad('kraken'); } if (ids.has('deserto')){ chefeLoad('vespa_dunas'); chefeLoad('verme'); } } if (ids.has('lua_nova')) chefeLoad('lobo_gigante'); if (ids.has('mar') || arena === 'afundada') chefeLoad('tentaculo'); }, 2500);
 }
 function avatarReady(id, ms){
   const k = AVATAR_KEY[id];
@@ -16166,6 +16372,7 @@ function updateEnv(now, dt){
   // Cidade Afundada: algas, cardumes, baleia, bolhas e o Kraken; Necrópole: braseiros, fios de areia e o Verme-Colosso
   if (arena === 'afundada') afundadaTick(now, dt);
   if (arena === 'necropole') necropoleTick(now, dt);
+  if (APROP_DEF[arena]) apropTick(now, dt);
   // objetos e mascotes marcados somem quando ficam entre a câmera e o tabuleiro (todas as arenas)
   if (OCC.list.length) occTick(dt);
   // o dragão plana pelo céu de vez em quando
