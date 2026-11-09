@@ -61,6 +61,11 @@ Oito reinos, escolhidos para as Brancas e as Negras na tela de partida. Cada um 
 
 As chaves das APIs nunca ficam no código: os scripts leem do Keychain do macOS (`security add-generic-password -a "$USER" -s <servico>-api-key -w`). O passo a passo do pipeline está em [skill/](skill/SKILL.md).
 
+## Clipes e Reels
+
+- No jogo, a barra das vistas tem **● Gravar** (grava a cena em vídeo vertical 1080×1920 com som) e **Clipes automáticos** (um clipe por captura e por xeque-mate, com a legenda do golpe, o confronto, a marca e o mapinha do tabuleiro com a seta do lance).
+- [tools/reels/](tools/reels): o Reel automático do Instagram (@arcanechess_oficial). `reel_auto.mjs` abre o jogo no Chrome, assiste uma partida IA × IA entre dois reinos sorteados, monta o vídeo (closes das capturas + o xeque-mate) com ffmpeg, hospeda o MP4 em `midia.arcanechess.pages.dev` e publica pela API da Meta. `instalar.sh` instala em `~/ArcaneChessReels` e agenda de hora em hora no launchd (`--parar` desliga). O token fica no Keychain (`instagram-api-key`).
+
 ## Estrutura
 
 ```

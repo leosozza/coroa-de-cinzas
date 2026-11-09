@@ -1,0 +1,10 @@
+{
+  "name": "arcanechess-reels",
+  "private": true,
+  "type": "module",
+  "description": "Reel automático do Arcane Chess: grava uma partida IA x IA, monta o vídeo e publica no Instagram",
+  "dependencies": {
+    "ffmpeg-static": "5.2.0",
+    "playwright-core": "1.48.2"
+  }
+}

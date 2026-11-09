@@ -16479,7 +16479,7 @@ function recOpen(kind){
   let mr;
   try { mr = new MediaRecorder(REC.stream, { mimeType:REC.mime || undefined, videoBitsPerSecond:8e6, audioBitsPerSecond:160000 }); }
   catch (e){ try { mr = new MediaRecorder(REC.stream); } catch (e2){ return null; } }
-  const s = { kind, mr, chunks:[], t0:performance.now(), want:kind === 'manual', cap:'', mate:false, sawMate:false, moveDone:0, quiet:0 };
+  const s = { kind, mr, chunks:[], t0:performance.now(), want:kind === 'manual', cap:'', mate:false, sawMate:false, moveDone:0, quiet:0, marks:[], on:false };
   mr.ondataavailable = e => { if (e.data && e.data.size) s.chunks.push(e.data); };
   mr.start(500);
   return s;
@@ -16494,7 +16494,9 @@ function recClose(s, keep){
     const blob = new Blob(s.chunks, { type:(REC.mime || 'video/webm').split(';')[0] });
     const n = ++REC.n, tag = s.kind === 'manual' ? 'gravacao' : recSlug(s.cap) || (s.mate ? 'xeque-mate' : 'golpe');
     const name = `arcane-${recSlug(sideCurto('w'))}-x-${recSlug(sideCurto('b'))}-${tag}-${String(n).padStart(2, '0')}.${REC.ext}`;
-    REC.clips.push({ n, name, blob, url:URL.createObjectURL(blob), dur, cap:s.cap || (s.mate ? 'Xeque-mate' : s.kind === 'manual' ? 'Gravação' : 'Golpe') });
+    if (s.on){ s.on = false; s.marks[s.marks.length - 1][1] = dur; }
+    REC.clips.push({ n, name, blob, url:URL.createObjectURL(blob), dur, cap:s.cap || (s.mate ? 'Xeque-mate' : s.kind === 'manual' ? 'Gravação' : 'Golpe'),
+      mate:s.mate || s.sawMate, marks:s.marks.map(m => [+m[0].toFixed(2), +m[1].toFixed(2)]), w:sideCurto('w'), b:sideCurto('b') });
     recUI();
   };
   try { s.mr.stop(); } catch (e){}
@@ -16515,6 +16517,10 @@ function recTick(now){
   if (!s) return;
   const live = cine.active || MATE.cinema;
   if (MATE.cinema){ s.sawMate = true; s.want = true; }
+  // trechos com o close do golpe (os robôs de clipes cortam o vídeo por eles)
+  const close = scene.classList.contains('cine-on'), ts = (now - s.t0) / 1000;
+  if (close && !s.on){ s.on = true; s.marks.push([ts, ts]); }
+  else if (!close && s.on){ s.on = false; s.marks[s.marks.length - 1][1] = ts; }
   if (live){ s.want = true; s.quiet = 0; if (!s.cap && cineCap.classList.contains('show')) s.cap = cineCap.querySelector('b').textContent; }
   if (s.moveDone && !live){
     // o xeque-mate abre o encerramento logo depois do lance: espera por ele
@@ -16588,12 +16594,34 @@ function recDraw(){
     }
     g.globalAlpha = 1;
   }
+  recMini(g);
   // assinatura (acima da área que o Instagram cobre com o nome e a legenda)
   g.font = '600 38px "Alegreya Sans SC", "Alegreya Sans", system-ui, sans-serif';
   g.lineWidth = 5; g.strokeStyle = 'rgba(0,0,0,0.6)'; g.fillStyle = 'rgba(241,230,207,0.92)';
   g.strokeText(REC_HANDLE, REC_W / 2, 258); g.fillText(REC_HANDLE, REC_W / 2, 258);
   g.font = '500 30px "Alegreya Sans", system-ui, sans-serif'; g.fillStyle = 'rgba(241,230,207,0.7)';
   g.strokeText(REC_SITE, REC_W / 2, 1480); g.fillText(REC_SITE, REC_W / 2, 1480);
+}
+// mapinha do tabuleiro no vídeo (canto de cima, à direita): a posição depois do lance, com a seta de onde a peça veio
+function recMini(g){
+  if (!G || !S) return;
+  const px = 300, L = S.last, sq = rc => 'abcdefgh'[rc[1]] + (8 - rc[0]);
+  if (!REC.mm){ REC.mm = document.createElement('canvas'); REC.mm.width = REC.mm.height = px; REC.mmg = REC.mm.getContext('2d'); }
+  const sig = G.fen() + (L ? sq(L.from) + sq(L.to) : '');
+  if (sig !== REC.mmSig){
+    REC.mmSig = sig;
+    let check = null;
+    if (G.in_check()){ const b = G.board(), t = G.turn(); for (let r = 0; r < 8 && !check; r++) for (let c = 0; c < 8; c++){ const q = b[r][c]; if (q && q.type === 'k' && q.color === t){ check = [r, c]; break; } } }
+    mmDraw(REC.mmg, px, { board:G.board(), flip:false, last:L, check, arrows:L ? [{ from:sq(L.from), to:sq(L.to), color:'rgba(255,196,84,.9)' }] : [] });
+  }
+  const x = REC_W - px - 40, y = 300;
+  g.save();
+  g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 24;
+  g.fillStyle = 'rgba(8,6,10,0.6)'; g.fillRect(x - 8, y - 8, px + 16, px + 16);
+  g.shadowBlur = 0;
+  g.drawImage(REC.mm, x, y, px, px);
+  g.strokeStyle = 'rgba(227,165,72,0.95)'; g.lineWidth = 4; g.strokeRect(x - 6, y - 6, px + 12, px + 12);
+  g.restore();
 }
 function recFrame(now){
   if (!REC.cv || (!REC.manual && !REC.seg)) return;
