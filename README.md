@@ -1,72 +1,88 @@
-# Arcane Chess
+# Arcane Chess — The Battle for the Grimoire
 
-**Jogue online:** https://arcanechess.pages.dev
+**Jogue:** https://arcanechess.pages.dev (o jogo fica em [/jogar](https://arcanechess.pages.dev/jogar))
 
-Xadrez clássico em 3D com alma de RPG sombrio (antes chamado Coroa de Cinzas). Cada peça é um personagem com poderes próprios, as capturas viram cenas de combate em câmera cinematográfica, as peças abatidas vão para um cemitério ao lado da arena, e há narrador, trilha sonora e uma IA em três níveis.
+Xadrez em 3D com alma de RPG sombrio (antes chamado Coroa de Cinzas). Cada peça é um personagem do seu reino, cada captura vira uma cena de combate com câmera cinematográfica, e o xeque-mate é dado pelo avatar do reino vencedor. O modo Padrão segue as regras clássicas do xadrez; o modo Arcano acrescenta cartas, essência e transformações.
 
-O jogo é um único arquivo HTML ([coroa-de-cinzas.html](coroa-de-cinzas.html)) feito com Three.js r128 e chess.js. Ele foi publicado como Artifact do Claude.
+Versão atual: **v33.1** (veja o [histórico de commits](https://github.com/leosozza/coroa-de-cinzas/commits/main)).
 
-## Personagens
+## Modos
 
-| Peça | Personagem | Movimento | Captura |
-|---|---|---|---|
-| Peão | soldado com elmo, escudo e lança | caminha | estocada de lança |
-| Cavalo | cavaleiro montado em cavalo de guerra | galopa e salta em arco | carga de lança |
-| Bispo | bispo guerreiro, mestre da magia | teleporte arcano | mísseis arcanos |
-| Torre | torre de pedra com arqueiro, mestra da terra | afunda e brota na casa | flechas e espinhos de terra |
-| Dama | rainha do relâmpago, rápida como a luz | vira um raio | relâmpago do céu |
-| Rei | rei de armadura | caminha | espada |
+| Modo | O que é |
+|---|---|
+| Padrão | Xadrez clássico contra a IA (Recruta, Veterano, Mestre) ou a dois no mesmo aparelho, com relógio opcional. |
+| Espectador | IA contra IA com velocidade, séries (melhor de 3/5), pausa, voltar lance e assumir um lado. Câmera de transmissão que acompanha os lances. |
+| Aprendiz | Sete lições guiadas com narração, dicas do motor e insígnias. |
+| Arcano | Xadrez com 41 cartas (Magia, Ataque, Defesa, Terreno), essência, runas, armadilhas e evoluções das peças. Contra a IA, a dois ou IA × IA. |
+| Online | Partida por link e filas casual e ranqueada (Xadrez Puro e Arcano), com contas, nota Glicko-2, ligas, ranking, relógio e reconexão. Servidor autoritativo em Cloudflare Workers + Durable Objects + D1 ([server/](server/LEIA.md)). |
 
-Os dois exércitos (Ordem da Aurora e Legião Cinzenta) usam os mesmos modelos, tingidos por lado.
+## Reinos (equipes)
+
+Oito reinos, escolhidos para as Brancas e as Negras na tela de partida. Cada um tem peças próprias (modelos 3D animados), golpes com nome e som próprios, morte da vítima, arena, mascote/chefão, xeque-mate cinematográfico e as suas versões das evoluções do Arcano.
+
+| Reino | Arena | Mascote / xeque-mate |
+|---|---|---|
+| Reino da Aurora | arenas clássicas (Fortaleza, Ruínas, Celestial, Olimpo, Zodíaco, Multiverso, Pedra Filosofal, Fogo x Gelo) | Arcanjo dourado |
+| Legião do Ferro Negro | Mistério Infernal | Deus da Morte |
+| Reino dos Dragões | Covil dos Dragões | Dragão gigante |
+| Alpha da Lua Nova | Vigília da Lua Cheia | Lobo gigante que vira lobisomem |
+| Clã dos Primatas | Templo da Selva Perdida | Ídolo gorila de pedra |
+| Abismo Estelar | Nave-Colmeia Naufragada | Rainha-Mãe |
+| Clã do Mar Profundo | Cidade Afundada | Kraken |
+| Império do Deserto Subterrâneo | Necrópole sob as Dunas | Verme-Colosso |
 
 ## Recursos
 
-- Regras completas do xadrez: xeque, xeque-mate, roque, en passant, promoção e empates.
-- IA própria (negamax com alfa-beta e quiescência) num Web Worker: Recruta, Veterano e Mestre.
-- Câmera de combate estilo fatality: close, câmera lenta, faixas de cinema e título do golpe.
-- Arenas trocadas no meio da partida, cada uma com música e ambiente próprios: Fortaleza Medieval, Ruínas Medievais, Covil dos Dragões, Fogo x Gelo, Zodíaco, Multiverso, Mistério Infernal, Celestial, Monte Olimpo e Pedra Filosofal.
-- Vistas Padrão, Drone (360°) e Aérea, além de inverter o campo.
-- Ficha da peça com o personagem em 3D girando.
-- Áudio: 25 efeitos, ambiente, música tema e narrador em português.
-- Modo contra a IA ou dois jogadores, desfazer jogada, teclado e toque.
+- Regras completas do xadrez (xeque, mate, roque, en passant, promoção, empates) por chess.js; motor de busca próprio 0x88 (negamax, alfa-beta, quiescência, aprofundamento iterativo) num Web Worker.
+- Motor de regras do Arcano ([engine/arcano-rules.js](engine/arcano-rules.js)) compartilhado pelo jogo e pelo servidor online.
+- Câmera de combate: close sem peças na frente, câmera lenta, legendas por golpe; encerramentos de xeque-mate em planos de cinema.
+- Vistas Padrão (transmissão), Foco, Drone e Aérea; modo cinema no celular (retrato e paisagem).
+- Áudio: música e ambiente por arena, efeitos, pacote de sons por reino (passos, montaria, golpes, morte, mascote, vinheta) e narração lance a lance em português.
+- Minimapa, ficha da peça em 3D, cemitério, crônica e linha do tempo do Arcano.
 
-## Como os assets foram feitos
+## Testes
+
+| Teste | O que garante |
+|---|---|
+| `node tools/engine-sync-check.js coroa-de-cinzas.html engine/arcano-rules.js` | o motor embutido no jogo é idêntico ao do servidor |
+| testes do Arcano (perft contra chess.js, 120 partidas, ida e volta do estado) | as regras do Arcano não divergem do xadrez clássico nem entre cliente e servidor |
+| auditoria das 41 cartas | cada texto de carta descreve o que o motor faz |
+| [server/test/](server/test) | glicko-2, filas, contas e partidas de ponta a ponta |
+
+## Como os assets são feitos
 
 | Asset | Ferramenta | Script |
 |---|---|---|
-| Arte-conceito dos personagens | Gemini (API de imagem) | [tools/gemini_images.py](tools/gemini_images.py) |
-| Modelos 3D, rig e animações | Meshy (image-to-3D, rigging, animation) | [tools/meshy_gen.py](tools/meshy_gen.py) |
-| Conversão para o Artifact (`.glb` → `.gltf.json`) | Python | [tools/glb_to_json.py](tools/glb_to_json.py) |
-| Efeitos sonoros, narrador e música | ElevenLabs | [tools/elevenlabs_audio.py](tools/elevenlabs_audio.py) |
+| Artes-conceito das peças, chefes e cenário | Gemini / Meshy (imagem) | [tools/gemini_images.py](tools/gemini_images.py), [tools/meshy_reino.py](tools/meshy_reino.py) |
+| Modelos 3D, rig e animações | Meshy | [tools/meshy_reino.py](tools/meshy_reino.py), [tools/meshy_chefe.py](tools/meshy_chefe.py) |
+| Correções de rig (armas rígidas, quadrúpedes) | Blender | [tools/blender/](tools/blender) |
+| Otimização (`.glb` → webp → draco → `.gltf.json`) | gltf-transform + Python | [tools/glb_to_json.py](tools/glb_to_json.py), [tools/meshy-manifest.js](tools/meshy-manifest.js) |
+| Efeitos, narrador, músicas e sons por reino | ElevenLabs | [tools/elevenlabs_audio.py](tools/elevenlabs_audio.py), [tools/elevenlabs_reinos.py](tools/elevenlabs_reinos.py) |
 
-As chaves das APIs nunca ficam no código. Os scripts leem do Keychain do macOS:
-
-```bash
-security add-generic-password -a "$USER" -s meshy-api-key -w
-security add-generic-password -a "$USER" -s gemini-api-key -w
-security add-generic-password -a "$USER" -s elevenlabs-api-key -w
-```
-
-O passo a passo completo (prompts, custos, animações, efeitos, câmera, áudio e lições aprendidas) está em [skill/](skill/SKILL.md).
+As chaves das APIs nunca ficam no código: os scripts leem do Keychain do macOS (`security add-generic-password -a "$USER" -s <servico>-api-key -w`). O passo a passo do pipeline está em [skill/](skill/SKILL.md).
 
 ## Estrutura
 
 ```
-coroa-de-cinzas.html      o jogo
-assets/concepts/          artes-conceito do Gemini (.jpg)
-assets/meshy/<peça>/      modelos do Meshy: originais (.glb), otimizados (.opt.glb) e para o Artifact (.gltf.json)
-assets/audio/             efeitos, ambientes, músicas e narrador (.mp3)
-tools/                    scripts de geração
-skill/                    documentação do pipeline
+coroa-de-cinzas.html      o jogo (HTML único: Three.js r128 + chess.js)
+engine/                   motor de regras do Arcano (também usado pelo servidor)
+server/                   API online (Cloudflare Worker, Durable Objects, D1)
+site/                     página inicial, ranking e login
+assets/concepts/          artes-conceito
+assets/meshy/             modelos (.opt.c.gltf.json servidos) e manifest.json
+assets/audio/             músicas, efeitos, narração e pacotes por reino (pack.json)
+assets/cards/             artes das cartas
+assets/textures/          texturas das arenas
+data/                     cartas, reinos e narração
+tools/                    scripts de geração, otimização e publicação
 ```
 
 ## Rodar localmente
 
-O arquivo não tem `<!doctype>` nem `<html>` porque o Artifact acrescenta isso na publicação. Para testar:
+O arquivo do jogo não tem `<!doctype>` nem `<head>` (o Artifact e o deploy acrescentam). Para testar com os assets, sirva a pasta do projeto e embrulhe o HTML, como faz o deploy:
 
 ```bash
-mkdir -p /tmp/coroa && { echo '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">'; cat coroa-de-cinzas.html; echo '</body></html>'; } > /tmp/coroa/index.html
-cp -R assets /tmp/coroa/ && cd /tmp/coroa && python3 -m http.server 8765
+tools/deploy_pages.sh coroa-de-cinzas.html /tmp/arcane teste   # publica a prévia em teste.arcanechess.pages.dev
 ```
 
-Depois abra http://localhost:8765/. Sem os assets, o jogo usa personagens geométricos e sons sintetizados.
+ou monte um `index.html` com `<meta charset="utf-8">` e `<meta name="viewport" ...>` antes do conteúdo e abra com `python3 -m http.server`. Sem os assets, o jogo usa personagens geométricos e sons sintetizados.
