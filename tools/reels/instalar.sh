@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Instala o Reel automático em ~/ArcaneChessReels e agenda no launchd (de hora em hora).
+# Instala o Reel automático em ~/ArcaneChessReels e agenda no launchd (toda hora cheia: 0h, 1h, 2h...).
 # Uso: tools/reels/instalar.sh            instala/atualiza e liga o agendamento
 #      tools/reels/instalar.sh --parar    desliga o agendamento (os arquivos ficam)
 set -e
@@ -30,7 +30,7 @@ cat > "$PLIST" <<EOF
   <key>ProgramArguments</key>
   <array><string>$NODE</string><string>$DEST/reel_auto.mjs</string></array>
   <key>WorkingDirectory</key><string>$DEST</string>
-  <key>StartInterval</key><integer>3600</integer>
+  <key>StartCalendarInterval</key><dict><key>Minute</key><integer>0</integer></dict>
   <key>RunAtLoad</key><false/>
   <key>EnvironmentVariables</key>
   <dict>

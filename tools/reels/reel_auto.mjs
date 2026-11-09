@@ -17,6 +17,7 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? proces
 const URL_JOGO = arg('--url', 'https://arcanechess.pages.dev/jogar');
 const PUBLICAR = !process.argv.includes('--nao-publicar');
 const MOSTRAR = process.argv.includes('--mostrar');
+const MODO = arg('--modo', null); // força 'arcano' ou 'padrao' (testes)
 const IG_USER = '17841451609633495';
 const GRAPH = 'https://graph.facebook.com/v23.0';
 const PAGES_PROJ = 'arcanechess', PAGES_BRANCH = 'midia', MIDIA = 'https://midia.arcanechess.pages.dev';
@@ -32,15 +33,20 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function lerEstado(){ try { return JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch { return { feitos:[] }; } }
 function salvarEstado(e){ fs.writeFileSync(ESTADO, JSON.stringify(e, null, 1)); }
 
-// sorteia o confronto que menos apareceu (os 56 pares ordenados giram antes de repetir)
+// sorteia o confronto que menos apareceu (os 56 pares ordenados giram antes de repetir), sem repetir nenhum reino do
+// post anterior; o Modo Arcano entra em 1 de cada 3 posts
 function sortear(e){
   const pares = [];
   for (const w of NOMES) for (const b of NOMES) if (w !== b) pares.push([w, b]);
   const conta = k => e.feitos.filter(f => f === k).length;
-  const min = Math.min(...pares.map(p => conta(p.join('|'))));
-  const cand = pares.filter(p => conta(p.join('|')) === min);
+  const ult = new Set((e.ultimo || '').split('|').filter(Boolean));
+  let pool = pares.filter(p => !ult.has(p[0]) && !ult.has(p[1]));
+  if (!pool.length) pool = pares;
+  const min = Math.min(...pool.map(p => conta(p.join('|'))));
+  const cand = pool.filter(p => conta(p.join('|')) === min);
   return cand[Math.floor(Math.random() * cand.length)];
 }
+const modoDaVez = e => ((e.n || 0) % 3 === 2 ? 'arcano' : 'padrao');
 
 function token(){
   return execFileSync('security', ['find-generic-password', '-a', process.env.USER || '', '-s', 'instagram-api-key', '-w'], { encoding:'utf8' }).trim();
@@ -54,7 +60,7 @@ async function graph(metodo, rota, campos){
   return j;
 }
 
-async function gravarPartida(w, b){
+async function gravarPartida(w, b, modo){
   const browser = await chromium.launch({
     channel:'chrome', headless:!MOSTRAR,
     args:['--autoplay-policy=no-user-gesture-required', '--ignore-gpu-blocklist', '--enable-gpu-rasterization', '--use-angle=metal'],
@@ -63,27 +69,32 @@ async function gravarPartida(w, b){
     const page = await (await browser.newContext({ viewport:{ width:860, height:1530 }, deviceScaleFactor:1 })).newPage();
     await page.goto(URL_JOGO, { waitUntil:'load', timeout:120000 });
     await page.waitForTimeout(3000);
-    // Modo Espectador → reinos das Brancas e das Negras → arena de um dos dois → Assistir
-    await page.evaluate(async ({ w, b }) => {
+    // Modo Espectador (ou Arcano IA × IA) → reinos das Brancas e das Negras → arena de um dos dois → Assistir/Jogar
+    await page.evaluate(async ({ w, b, modo }) => {
       const wait = ms => new Promise(r => setTimeout(r, ms));
-      const card = [...document.querySelectorAll('*')].find(e => e.textContent.trim() === 'Modo Espectador' && e.children.length === 0);
+      const arc = modo === 'arcano', pre = arc ? 'setup-arcano-s' : 'setup-spec-s';
+      const card = [...document.querySelectorAll('*')].find(e => e.textContent.trim() === (arc ? 'Modo Arcano' : 'Modo Espectador') && e.children.length === 0);
       card.closest('button,div').click(); await wait(900);
       const vis = () => [...document.querySelectorAll('button')].filter(x => x.offsetParent);
       // cada lado tem o seu painel (passo 1 = Brancas, passo 2 = Negras); abre o painel se estiver fechado e escolhe ali
       const escolher = async (passo, nome) => {
-        const head = document.querySelector(`button[aria-controls="setup-spec-s${passo}"]`);
+        const head = document.querySelector(`button[aria-controls="${pre}${passo}"]`);
         if (head && head.getAttribute('aria-expanded') !== 'true'){ head.click(); await wait(400); }
-        const bt = [...document.getElementById(`setup-spec-s${passo}`).querySelectorAll('button')].find(x => x.textContent.trim().startsWith(nome));
+        const bt = [...document.getElementById(`${pre}${passo}`).querySelectorAll('button')].find(x => x.textContent.trim().startsWith(nome));
         bt.click(); await wait(400);
-        return document.querySelector(`button[aria-controls="setup-spec-s${passo}"]`).textContent;
+        return document.querySelector(`button[aria-controls="${pre}${passo}"]`).textContent;
       };
       const hw = await escolher(1, w), hb = await escolher(2, b);
       const arenas = vis().filter(x => / — /.test(x.textContent) && (x.textContent.trim().endsWith(w) || x.textContent.trim().endsWith(b)));
       if (arenas.length) arenas[Math.floor(Math.random() * arenas.length)].click();
       await wait(300);
       if (!hw.includes(w) || !hb.includes(b)) throw new Error(`escolha dos reinos falhou: ${hw} / ${hb}`);
-      vis().find(x => x.textContent.trim() === 'Assistir').click();
-    }, { w, b });
+      if (arc){
+        const opp = document.getElementById('a-opp');
+        opp.value = 'spec'; opp.dispatchEvent(new Event('change', { bubbles:true })); await wait(300);
+        document.getElementById('a-start').click();
+      } else vis().find(x => x.textContent.trim() === 'Assistir').click();
+    }, { w, b, modo });
     const placar = await page.evaluate(() => document.getElementById('spec-score')?.textContent || '');
     console.log('confronto na tela:', placar);
     await page.waitForTimeout(2500);
@@ -177,10 +188,10 @@ async function publicar(url, texto, capaMs){
 async function main(){
   fs.mkdirSync(OUT, { recursive:true });
   const e = lerEstado();
-  const [w, b] = sortear(e);
+  const [w, b] = sortear(e), modo = MODO || modoDaVez(e);
   const id = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  log({ etapa:'inicio', id, w, b, url:URL_JOGO, publicar:PUBLICAR });
-  const { fim, clipes } = await gravarPartida(w, b);
+  log({ etapa:'inicio', id, w, b, modo, url:URL_JOGO, publicar:PUBLICAR });
+  const { fim, clipes } = await gravarPartida(w, b, modo);
   const pasta = path.join(OUT, id);
   fs.mkdirSync(pasta, { recursive:true });
   for (const c of clipes) fs.writeFileSync(path.join(pasta, c.name), Buffer.from(c.data, 'base64'));
@@ -199,14 +210,14 @@ async function main(){
     venc = iw >= 0 && (ib < 0 || iw < ib) ? 'w' : ib >= 0 ? 'b' : null;
   }
   const lances = fim ? +(fim.stats.match(/(\d+)\s*lances/) || [0, 0])[1] : 0;
-  const texto = legenda({ w, b, venc, lances: lances || 60 });
+  const texto = legenda({ w, b, venc, lances: lances || 60, arcano:modo === 'arcano' });
   fs.writeFileSync(path.join(pasta, 'legenda.txt'), texto);
   log({ etapa:'montado', id, segundos:+total.toFixed(1), venc, lances });
   if (!PUBLICAR){ log({ etapa:'fim-sem-publicar', id, mp4 }); return; }
   const url = hospedar(mp4, id);
   const capaMs = Math.round(Math.max(0, total - (cortes.at(-1).b - cortes.at(-1).a) * 0.55) * 1000);
   const link = await publicar(url, texto, capaMs);
-  e.feitos.push(`${w}|${b}`); salvarEstado(e);
+  e.feitos.push(`${w}|${b}`); e.ultimo = `${w}|${b}`; e.n = (e.n || 0) + 1; salvarEstado(e);
   log({ etapa:'publicado', id, link });
   // guarda só os 48 últimos Reels no disco
   const pastas = fs.readdirSync(OUT).filter(n => /^\d{12}$/.test(n)).sort();

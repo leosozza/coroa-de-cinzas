@@ -16624,6 +16624,11 @@ function recMini(g){
   g.restore();
 }
 function recFrame(now){
+  // cartas e feitiços do Arcano têm câmera de combate fora de um lance: abre um clipe só para eles
+  if (REC.cv && REC.auto && !REC.manual && !REC.seg && cine.active && !cine.skip){
+    const s = REC.seg = recOpen('auto');
+    if (s){ s.want = true; s.moveDone = now; s.spell = true; }
+  }
   if (!REC.cv || (!REC.manual && !REC.seg)) return;
   recTick(now);
   if (REC.manual || REC.seg) recDraw();

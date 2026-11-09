@@ -44,14 +44,20 @@ const PERGUNTAS = [
 const BASE = ['#xadrez', '#xadrezbrasil', '#xadrezonline', '#xadrez3d', '#chess', '#jogosindie', '#indiegame', '#gamedev', '#jogosgratis', '#jogosdenavegador', '#chesstok', '#jogos'];
 
 // r: gerador 0..1; w/b: nomes completos dos reinos; venc: 'w' | 'b' | null; lances: número de lances
-export function legenda({ w, b, venc, lances, r = Math.random }){
+const GANCHOS_ARC = [
+  'Modo Arcano: xadrez com cartas de magia, ataque, defesa e terreno.',
+  'E se o seu cavalo virasse um Pégaso no meio da partida?',
+  'Xadrez + cartas de feitiço. Olha o que acontece.',
+  'No Modo Arcano, o tabuleiro também luta.',
+];
+export function legenda({ w, b, venc, lances, arcano = false, r = Math.random }){
   const W = REINOS[w], B = REINOS[b];
   const vs = `${W.curto} × ${B.curto}`;
   let corpo;
   if (venc){
     const V = venc === 'w' ? W : B, P = venc === 'w' ? B : W;
     corpo = pick([
-      `${vs}: ${V.curto} vence em ${lances} lances, e ${V.mascote} entra em cena para o xeque-mate.`,
+      `${vs}: ${V.curto} ${V.art === 'os' ? 'vencem' : 'vence'} em ${lances} lances, e ${V.mascote} entra em cena para o xeque-mate.`,
       `${vs}. No fim, ${V.mascote} decide a partida contra ${P.art} ${P.curto}.`,
       `Batalha ${vs}: ${lances} lances até ${V.mascote} aparecer.`,
     ], r);
@@ -61,7 +67,10 @@ export function legenda({ w, b, venc, lances, r = Math.random }){
       `Batalha ${vs} sem coroa: terminou empatada em ${lances} lances.`,
     ], r);
   }
-  const tags = [...shuffle(BASE, r).slice(0, 8), ...W.tags.slice(0, 1), ...B.tags.slice(0, 1)];
-  return [pick(GANCHOS, r), '', corpo, 'Cada peça é um personagem do seu reino e cada captura vira combate. O mapinha no canto mostra o lance no tabuleiro.', '',
+  const tags = [...shuffle(BASE, r).slice(0, arcano ? 6 : 8), ...(arcano ? ['#modoarcano', '#cardgame'] : []), ...W.tags.slice(0, 1), ...B.tags.slice(0, 1)];
+  const meio = arcano
+    ? 'Modo Arcano: cartas de magia, ataque, defesa e terreno, essência e peças que evoluem. O mapinha no canto mostra cada lance no tabuleiro.'
+    : 'Cada peça é um personagem do seu reino e cada captura vira combate. O mapinha no canto mostra o lance no tabuleiro.';
+  return [pick(arcano ? GANCHOS_ARC : GANCHOS, r), '', corpo, meio, '',
     pick(CHAMADAS, r), pick(PERGUNTAS, r), '', [...new Set(tags)].join(' ')].join('\n');
 }
