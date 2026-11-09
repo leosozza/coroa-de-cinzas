@@ -40,3 +40,4 @@ assets/audio/reinos/state.json
 
 # texturas de arena: o jogo usa os .jpg
 assets/textures/arenas/*.png
+assets/social/*.mp4
