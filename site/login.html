@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderGuestForm(pv){
     $('#titulo').textContent = 'Entrar';
     const saved = AC.session.load().name || '';
-    box.innerHTML = `<h2>Jogar agora</h2><p>Escolha um nome para a mesa. Ele aparece para os rivais online.</p>
+    box.innerHTML = `<h2>Jogar agora</h2><p>Dê um nome ao seu Guardião. Ele aparece no ranking, para os rivais online e na campanha.</p>
       <form id="g" novalidate>
-        <div class="field"><label for="g-nome">Nome de batalha</label>
+        <div class="field"><label for="g-nome">Nome do Guardião</label>
           <input id="g-nome" name="nome" autocomplete="nickname" maxlength="20" minlength="3" value="${esc(saved)}" aria-describedby="g-ajuda g-erro" required>
           <small id="g-ajuda">De 3 a 20 letras ou números (espaço, ponto, hífen e sublinhado valem).</small><span class="field__err" id="g-erro"></span></div>
         <button class="btn btn--primary btn--block" type="submit">Jogar como convidado</button>
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try { r = await AC.fetchApi('/api/guest', { body:{ name }, token:null }); } catch (e){}
       if (!r || !r.ok || !r.j.token){ b.disabled = false; b.textContent = 'Jogar como convidado'; notice(esc((r && r.j.err) || 'Servidor fora do ar. Tente de novo em instantes.'), 'err'); return; }
       AC.session.save(r.j.token, r.j.user.name);
-      notice(`Bem-vindo à mesa, <b>${esc(r.j.user.name)}</b>. A sessão também vale no jogo.`, 'ok');
+      notice(`O Guardião <b>${esc(r.j.user.name)}</b> despertou. A sessão também vale no jogo.`, 'ok');
       refresh();
     });
   }
@@ -156,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div><p class="acct__name">${esc(u.name)}</p><span class="acct__kind ${acct ? 'acct__kind--account' : ''}">${acct ? 'Conta' : 'Convidado'}</span>${via ? ` <small style="color:var(--ash)">entrou com ${esc(via)}</small>` : ''}</div></div>
       <div class="ratings">${ratingCard(R.xadrez, 'Xadrez Puro')}${ratingCard(R.arcano, 'Arcano')}</div>
       <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px"><a class="btn btn--primary" href="${esc(AC.gameUrl('online'))}">Jogar online</a><a class="btn" href="${esc(AC.siteUrl('ranking.html'))}">Ver o ranking</a></div>
-      <h3>Trocar o nome</h3>
+      <h3>Nome do Guardião</h3>
       <form id="n" class="row" novalidate>
-        <div class="field"><label for="n-nome">Nome público</label><input id="n-nome" maxlength="20" value="${esc(u.name)}" autocomplete="nickname" aria-describedby="n-erro"><span class="field__err" id="n-erro"></span></div>
+        <div class="field"><label for="n-nome">Novo nome</label><input id="n-nome" maxlength="20" value="${esc(u.name)}" autocomplete="nickname" aria-describedby="n-erro"><span class="field__err" id="n-erro"></span></div>
         <button class="btn" type="submit">Salvar</button>
       </form>
       ${acct && u.birth === false ? `<h3>Data de nascimento</h3><p style="font-size:.92rem">Pedimos uma vez, ao virar conta. Ela não aparece para ninguém.</p>
