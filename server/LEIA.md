@@ -36,6 +36,7 @@ Durable Objects com SQLite e D1 cabem no plano gratuito. `DEV_TC`, `RECONNECT_MS
 - O endereço do servidor é a constante `ONLINE_API` em `coroa-de-cinzas.html` (procure por `ONLINE_API =`). Teste local: abra o jogo servido em `http://localhost:8767/...?api=http://127.0.0.1:8787` (o `?api=` só aceita localhost e 127.0.0.1).
 - Para testar duas abas reais com recarga de página, use no `.dev.vars` `RECONNECT_MS=30000` e `FIRST_MOVE_MS=60000` (a página leva alguns segundos para carregar a cena); para `test/e2e.mjs` volte a 3000 e 8000.
 - `POST /api/name {name}` troca o nome público sem perder a nota (devolve uma ficha nova).
+- `GET /api/campanha` e `POST /api/campanha {fases:{'1-1':[venceu, portador, rápido]}, cartas:[nome], selos:[mundo]}`: progresso da Conquista dos Mundos da conta (`campaign_progress` e `campaign_items`, migração 0004). O POST só soma (estrelas em bits, cartas e Selos por união) e devolve o total; o convidado fundido numa conta leva o progresso. Teste: `node test/campanha.mjs` (13 verificações, `DEV_AUTH=1`).
 
 ## Login (Google e Discord)
 - Fluxo: `POST /api/auth/start {provider, return}` (com a ficha do convidado) → URL do provedor com `state` e PKCE S256 → `GET /api/auth/<provedor>/callback` → página do jogo com `#login=<código de uso único>` → `POST /api/auth/exchange {code}` → `{ token, user }`. `GET /api/auth/providers` diz quais botões mostrar. `POST /api/me/birth {birth}`.

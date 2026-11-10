@@ -115,6 +115,11 @@ export async function mergeGuest(db, guestId, accountId){
   st.push(db.prepare('DELETE FROM ratings WHERE user_id = ?').bind(guestId));
   st.push(db.prepare('UPDATE games SET white = ? WHERE white = ?').bind(accountId, guestId));
   st.push(db.prepare('UPDATE games SET black = ? WHERE black = ?').bind(accountId, guestId));
+  // campanha: as estrelas do convidado somam às da conta; cartas e Selos entram na coleção dela
+  st.push(db.prepare('INSERT INTO campaign_progress (user_id, phase, stars, updated) SELECT ?, phase, stars, updated FROM campaign_progress WHERE user_id = ? ON CONFLICT(user_id, phase) DO UPDATE SET stars = campaign_progress.stars | excluded.stars, updated = MAX(campaign_progress.updated, excluded.updated)').bind(accountId, guestId));
+  st.push(db.prepare('INSERT OR IGNORE INTO campaign_items (user_id, kind, item, created) SELECT ?, kind, item, created FROM campaign_items WHERE user_id = ?').bind(accountId, guestId));
+  st.push(db.prepare('DELETE FROM campaign_progress WHERE user_id = ?').bind(guestId));
+  st.push(db.prepare('DELETE FROM campaign_items WHERE user_id = ?').bind(guestId));
   st.push(db.prepare('UPDATE users SET deleted = 1, merged_into = ? WHERE id = ?').bind(accountId, guestId));
   await db.batch(st);
 }

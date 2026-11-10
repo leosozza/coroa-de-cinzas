@@ -650,6 +650,7 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 .camp-head h2{margin:0; font-family:var(--f-display); font-size:clamp(1.8rem, 5vw, 2.6rem); color:#f0cf7a; letter-spacing:.02em; line-height:1}
 .camp-head p{margin:4px 0 0; font-family:var(--f-ui); letter-spacing:.06em; color:var(--ash)}
 .camp-head p b{color:#f6e2a8}
+.camp-sync{color:#9fd8a8}
 .camp-total{font-family:var(--f-ui); letter-spacing:.08em; color:#f0cf7a; border:1px solid rgba(240,207,122,.45); border-radius:999px; padding:4px 12px}
 .camp-lore{margin:0; font-style:italic; color:#d9cdb3; max-width:70ch}
 .camp-namebox{display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid rgba(240,207,122,.4); border-radius:6px; background:rgba(30,22,10,.6)}
@@ -21511,9 +21512,25 @@ function campGuardiao(){
 // o baralho de 20 cartas de uma lista curta: repete a lista até completar
 const campDeck = (ids, enfase) => { const base = [...(enfase ? Array(6).fill(enfase) : []), ...ids]; const out = []; for (let i = 0; out.length < 20 && base.length; i++) out.push(base[i % base.length]); return out; };
 
+// progresso na conta: com uma sessão (convidado ou conta), soma o que está neste navegador ao que está no servidor
+// (estrelas e cartas só se somam; nada que já foi ganho se perde). Sem sessão ou sem servidor, fica só no navegador.
+async function campSync(){
+  if (!netLoad().token && !NET.token) return;
+  try {
+    if (!(await netReady())) return;
+    const r = await netFetch('/api/campanha', { body:{ fases:CAMP.save.fases, cartas:CAMP.save.cartas, selos:CAMP.save.selos } });
+    if (!r.ok || !r.j || !r.j.fases) return;
+    for (const [k, v] of Object.entries(r.j.fases)){ const a = CAMP.save.fases[k] || [0, 0, 0]; CAMP.save.fases[k] = a.map((x, i) => (x || v[i]) ? 1 : 0); }
+    for (const c of r.j.cartas || []) if (!CAMP.save.cartas.includes(c)) CAMP.save.cartas.push(c);
+    for (const w of r.j.selos || []) if (!CAMP.save.selos.includes(w)) CAMP.save.selos.push(w);
+    campSaveNow(); CAMP.synced = Date.now();
+    if (CAMP.open) campRender();
+  } catch (e){}
+}
 function campRender(){
   const g = campGuardiao();
-  $('camp-guard').innerHTML = g ? `Guardião <b>${escHtml(g)}</b>` : 'Guardião sem nome';
+  $('camp-guard').innerHTML = (g ? `Guardião <b>${escHtml(g)}</b>` : 'Guardião sem nome') +
+    ` · <span class="camp-sync">${CAMP.synced ? 'progresso salvo na sua conta' : 'progresso salvo neste navegador'}</span>`;
   $('camp-namebox').hidden = !!g;
   $('camp-total').textContent = `${campTotal()} / ${CAMP_MUNDOS.length * 18} estrelas`;
   const map = $('camp-map');
@@ -21555,6 +21572,7 @@ function campOpen(){
   CAMP.sel = prox ? prox.n : 8;
   campRender();
   $('camp').hidden = false;
+  campSync();
   setTimeout(() => { const b = $('camp').querySelector('.camp-node.sel'); if (b) b.focus(); }, 30);
 }
 function campClose(toMenu){
@@ -21664,7 +21682,7 @@ function campEnd(o){
     extra = r.p === 6 ? ` Você guardou ${m.selo.toLowerCase()}.` : ` A carta ${r.nomeCarta} é sua.`;
   } else if (venceu && r.portador && !r.capturado) extra = ` O Portador ficou vivo: ${r.p === 6 ? 'o Selo' : 'a carta'} continua escondid${r.p === 6 ? 'o' : 'a'}. Jogue a fase de novo para buscá-l${r.p === 6 ? 'o' : 'a'}.`;
   else if (!venceu && r.capturado) extra = ` ${r.p === 6 ? 'O Selo volta' : 'A carta volta'} para o baú da fase.`;
-  campSaveNow();
+  campSaveNow(); campSync();
   const s = CAMP.save.fases[k];
   const abriu = venceu && r.p === 6 && r.w < 8 ? ` O Mundo ${r.w + 1}, ${REINOS[CAMP_MUNDOS[r.w].reino].nome}, está aberto.` : venceu && r.p === 6 ? ' O Livro da Vida está inteiro: os casulos se abrem e o povo da Aurora desperta.' : '';
   $('end-title').textContent = venceu ? (r.p === 6 ? `${m.chefe} cai!` : 'Fase vencida') : 'Fase perdida';

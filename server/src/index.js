@@ -24,7 +24,7 @@ import { enabled as authProviders, startLogin, callback as authCallback, fakeAut
 import { LEAGUES, GRANDMASTER, PROVISIONAL_RD } from './glicko2.js';
 export { GameRoom, Matchmaker };
 
-const VERSION = 'fase2-a';
+const VERSION = 'fase2-b';
 function cors(req, env){
   const origin = req.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -106,6 +106,34 @@ export default {
         if (!d || isNaN(d) || d.toISOString().slice(0, 10) !== b || age < 3 || age > 120) return json(req, env, { err:'Data inválida.' }, 400);
         await env.DB.prepare('UPDATE users SET birth = ? WHERE id = ? AND deleted = 0').bind(b, u.uid).run();
         return json(req, env, { ok:true });
+      }
+
+      // Conquista dos Mundos: progresso da campanha da conta. GET devolve; POST soma o que veio ao que já está guardado
+      // (estrelas por bits, cartas e Selos por união) e devolve o resultado. Nada que já foi ganho se perde.
+      if (p === '/api/campanha'){
+        const u = await auth(req, env);
+        if (!u) return json(req, env, { err:'Sessão inválida.' }, 401);
+        if (!env.DB) return json(req, env, { err:'Servidor sem banco.' }, 500);
+        if (req.method === 'POST'){
+          const b = await body(req), now = Date.now(), st = [];
+          const fases = b && typeof b.fases === 'object' && b.fases ? b.fases : {};
+          for (const [k, v] of Object.entries(fases).slice(0, 48)){
+            if (!/^[1-8]-[1-6]$/.test(k)) continue;
+            const bits = Array.isArray(v) ? (v[0] ? 1 : 0) | (v[1] ? 2 : 0) | (v[2] ? 4 : 0) : (Number.isInteger(v) ? v & 7 : 0);
+            if (!bits) continue;
+            st.push(env.DB.prepare('INSERT INTO campaign_progress (user_id, phase, stars, updated) VALUES (?, ?, ?, ?) ON CONFLICT(user_id, phase) DO UPDATE SET stars = campaign_progress.stars | excluded.stars, updated = excluded.updated')
+              .bind(u.uid, k, bits, now));
+          }
+          const cartas = Array.isArray(b.cartas) ? b.cartas.slice(0, 60) : [], selos = Array.isArray(b.selos) ? b.selos.slice(0, 8) : [];
+          for (const c of cartas){ const n = String(c || '').normalize('NFC').slice(0, 40).trim(); if (n.length >= 2 && /^[\p{L}\p{N} .'-]+$/u.test(n)) st.push(env.DB.prepare('INSERT OR IGNORE INTO campaign_items (user_id, kind, item, created) VALUES (?, ?, ?, ?)').bind(u.uid, 'carta', n, now)); }
+          for (const w of selos){ if (Number.isInteger(w) && w >= 1 && w <= 8) st.push(env.DB.prepare('INSERT OR IGNORE INTO campaign_items (user_id, kind, item, created) VALUES (?, ?, ?, ?)').bind(u.uid, 'selo', String(w), now)); }
+          if (st.length) await env.DB.batch(st);
+        }
+        const rows = (await env.DB.prepare('SELECT phase, stars FROM campaign_progress WHERE user_id = ?').bind(u.uid).all()).results;
+        const items = (await env.DB.prepare('SELECT kind, item FROM campaign_items WHERE user_id = ? ORDER BY created').bind(u.uid).all()).results;
+        const out = { fases:{}, cartas:items.filter(i => i.kind === 'carta').map(i => i.item), selos:items.filter(i => i.kind === 'selo').map(i => +i.item) };
+        for (const r of rows) out.fases[r.phase] = [r.stars & 1 ? 1 : 0, r.stars & 2 ? 1 : 0, r.stars & 4 ? 1 : 0];
+        return json(req, env, out);
       }
 
       if (p === '/api/rooms' && req.method === 'POST'){
