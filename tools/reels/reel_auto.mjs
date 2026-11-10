@@ -24,7 +24,7 @@ const PAGES_PROJ = 'arcanechess', PAGES_BRANCH = 'midia', MIDIA = 'https://midia
 const OUT = path.join(DIR, 'saida');
 const ESTADO = path.join(DIR, 'estado.json');
 const LOG = path.join(DIR, 'registro.jsonl');
-const TETO_PARTIDA_MS = 14 * 60 * 1000;
+const TETO_PARTIDA_MS = 12 * 60 * 1000;
 
 const agora = () => new Date().toISOString();
 const log = (o) => { const l = JSON.stringify({ t:agora(), ...o }); fs.appendFileSync(LOG, l + '\n'); console.log(l); };
@@ -60,7 +60,7 @@ async function graph(metodo, rota, campos){
   return j;
 }
 
-async function gravarPartida(w, b, modo){
+async function gravarPartida(w, b, modo, niveis){
   const browser = await chromium.launch({
     channel:'chrome', headless:!MOSTRAR,
     args:['--autoplay-policy=no-user-gesture-required', '--ignore-gpu-blocklist', '--enable-gpu-rasterization', '--use-angle=metal'],
@@ -69,11 +69,11 @@ async function gravarPartida(w, b, modo){
     const page = await (await browser.newContext({ viewport:{ width:860, height:1530 }, deviceScaleFactor:1 })).newPage();
     await page.goto(URL_JOGO, { waitUntil:'load', timeout:120000 });
     await page.waitForTimeout(3000);
-    // Modo Espectador (ou Arcano IA × IA) → reinos das Brancas e das Negras → arena de um dos dois → Assistir/Jogar
-    await page.evaluate(async ({ w, b, modo }) => {
+    // Modo Espectador → reinos das Brancas e das Negras → arena de um dos dois → regras, níveis e velocidade → Assistir
+    await page.evaluate(async ({ w, b, modo, niveis }) => {
       const wait = ms => new Promise(r => setTimeout(r, ms));
-      const arc = modo === 'arcano', pre = arc ? 'setup-arcano-s' : 'setup-spec-s';
-      const card = [...document.querySelectorAll('*')].find(e => e.textContent.trim() === (arc ? 'Modo Arcano' : 'Modo Espectador') && e.children.length === 0);
+      const pre = 'setup-spec-s';
+      const card = [...document.querySelectorAll('*')].find(e => e.textContent.trim() === 'Modo Espectador' && e.children.length === 0);
       card.closest('button,div').click(); await wait(900);
       const vis = () => [...document.querySelectorAll('button')].filter(x => x.offsetParent);
       // cada lado tem o seu painel (passo 1 = Brancas, passo 2 = Negras); abre o painel se estiver fechado e escolhe ali
@@ -84,22 +84,20 @@ async function gravarPartida(w, b, modo){
         bt.click(); await wait(400);
         return document.querySelector(`button[aria-controls="${pre}${passo}"]`).textContent;
       };
-      const hw = await escolher(1, w), hb = await escolher(2, b);
-      const arenas = vis().filter(x => / — /.test(x.textContent) && (x.textContent.trim().endsWith(w) || x.textContent.trim().endsWith(b)));
-      if (arenas.length) arenas[Math.floor(Math.random() * arenas.length)].click();
+      // a arena acompanha o reino das Brancas (escolher a arena de um reino troca as Brancas para ele), então não mexe nela
+      await escolher(1, w); await escolher(2, b);
+      const head = n => document.querySelector(`button[aria-controls="${pre}${n}"]`).textContent;
+      if (!head(1).includes(w) || !head(2).includes(b)) throw new Error(`escolha dos reinos falhou: ${head(1)} / ${head(2)}`);
+      const sel = (id, v) => { const el = document.getElementById(id); el.value = String(v); el.dispatchEvent(new Event('change', { bubbles:true })); };
+      sel('s-rules', modo === 'arcano' ? 'arcano' : 'padrao'); sel('s-w', niveis.w); sel('s-b', niveis.b); sel('s-speed', 'normal'); sel('s-series', 1);
       await wait(300);
-      if (!hw.includes(w) || !hb.includes(b)) throw new Error(`escolha dos reinos falhou: ${hw} / ${hb}`);
-      if (arc){
-        const opp = document.getElementById('a-opp');
-        opp.value = 'spec'; opp.dispatchEvent(new Event('change', { bubbles:true })); await wait(300);
-        document.getElementById('a-start').click();
-      } else vis().find(x => x.textContent.trim() === 'Assistir').click();
-    }, { w, b, modo });
+      vis().find(x => x.textContent.trim() === 'Assistir').click();
+    }, { w, b, modo, niveis });
     const placar = await page.evaluate(() => document.getElementById('spec-score')?.textContent || '');
     console.log('confronto na tela:', placar);
-    await page.waitForTimeout(2500);
-    await page.evaluate(() => { const r = window.__rec; if (r && !r.auto) document.getElementById('rec-auto').click(); });
-    const ok = await page.evaluate(() => !!(window.__rec && window.__rec.auto && window.__rec.mime));
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => { const r = window.__rec; if (r && !r.manual) document.getElementById('rec-go').click(); });
+    const ok = await page.evaluate(() => !!(window.__rec && window.__rec.manual && window.__rec.mime));
     if (!ok) throw new Error('gravador não ligou (MediaRecorder indisponível?)');
     // espera o fim da partida (ou o teto de tempo)
     const t0 = Date.now();
@@ -109,12 +107,17 @@ async function gravarPartida(w, b, modo){
       fim = await page.evaluate(() => {
         const e = document.getElementById('end');
         if (!e || e.hidden) return null;
+        const cor = document.getElementById('end-title').style.color;
         return { titulo:document.getElementById('end-title').textContent, texto:document.getElementById('end-text').textContent,
-          stats:document.getElementById('end-stats').textContent, segAberto:!!window.__rec.seg };
+          lado:/ember/.test(cor) ? 'w' : /blood/.test(cor) ? 'b' : null,
+          stats:document.getElementById('end-stats').textContent, segAberto:!!(window.__rec.seg || window.MATE_CINEMA) };
       });
       if (fim && !fim.segAberto) break;
     }
-    await page.waitForTimeout(1500);
+    // segura 2,5 s na posição final e para a gravação
+    await page.waitForTimeout(2500);
+    await page.evaluate(() => { if (window.__rec.manual) document.getElementById('rec-go').click(); });
+    await page.waitForTimeout(2500);
     // tira os clipes da página (base64) e salva
     const clipes = await page.evaluate(async () => {
       const toB64 = blob => new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result.split(',')[1]); fr.readAsDataURL(blob); });
@@ -124,6 +127,37 @@ async function gravarPartida(w, b, modo){
     });
     return { fim, clipes };
   } finally { await browser.close(); }
+}
+
+// partida inteira: junta os trechos com ação (lances, golpes, feitiços, mate) e corta as pausas da IA pensando
+const MAX_S = 178;
+function roteiroInteira(c){
+  let iv = c.marks.map(([a, z], i) => [Math.max(0, a - (i ? 0.25 : 1.2)), Math.min(c.dur, z + 0.4)]);
+  if (!iv.length) return null;
+  iv[iv.length - 1][1] = c.dur;
+  const m = [];
+  for (const x of iv){ const l = m[m.length - 1]; if (l && x[0] - l[1] < 0.5) l[1] = Math.max(l[1], x[1]); else m.push(x.slice()); }
+  let total = m.reduce((s, x) => s + x[1] - x[0], 0), fator = 1;
+  if (total > MAX_S) fator = Math.min(1.6, total / MAX_S);
+  // ainda longo: fica com o final (o mais perto do xeque-mate) que cabe em 3 minutos
+  let cut = m;
+  if (total / fator > MAX_S){
+    cut = []; let s = 0;
+    for (let i = m.length - 1; i >= 0 && s < MAX_S * fator; i--){ cut.unshift(m[i]); s += m[i][1] - m[i][0]; }
+    total = s;
+  }
+  return { iv:cut, fator, total:Math.min(total / fator, MAX_S + 1) };
+}
+
+function montarInteira(arq, r, saida){
+  const sel = r.iv.map(([a, z]) => `between(t,${a.toFixed(3)},${z.toFixed(3)})`).join('+');
+  const vf = `fps=30,select='${sel}',setpts=N/30/TB${r.fator > 1.001 ? `,setpts=PTS/${r.fator.toFixed(4)}` : ''},format=yuv420p,setsar=1`;
+  const af = `aselect='${sel}',asetpts=N/SR/TB,aresample=48000${r.fator > 1.001 ? `,atempo=${r.fator.toFixed(4)}` : ''}`;
+  const args = ['-v', 'error', '-y', '-i', arq, '-filter_complex', `[0:v]${vf}[v];[0:a]${af}[a]`, '-map', '[v]', '-map', '[a]',
+    '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'medium', '-crf', '21', '-maxrate', '8M', '-bufsize', '16M', '-r', '30',
+    '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-t', String(MAX_S + 1), '-movflags', '+faststart', saida];
+  const res = spawnSync(ffmpeg, args, { encoding:'utf8' });
+  if (res.status !== 0) throw new Error('ffmpeg: ' + res.stderr.slice(-400));
 }
 
 // escolhe os trechos: até 5 closes de captura (espalhados pela partida) + o xeque-mate inteiro
@@ -190,32 +224,36 @@ async function main(){
   const e = lerEstado();
   const [w, b] = sortear(e), modo = MODO || modoDaVez(e);
   const id = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  log({ etapa:'inicio', id, w, b, modo, url:URL_JOGO, publicar:PUBLICAR });
-  const { fim, clipes } = await gravarPartida(w, b, modo);
+  // um lado Recruta (1) e o outro Mestre (3): a partida termina rápido e cabe inteira num Reel
+  const niveis = Math.random() < 0.5 ? { w:1, b:3 } : { w:3, b:1 };
+  log({ etapa:'inicio', id, w, b, modo, niveis, url:URL_JOGO, publicar:PUBLICAR });
+  const { fim, clipes } = await gravarPartida(w, b, modo, niveis);
   const pasta = path.join(OUT, id);
   fs.mkdirSync(pasta, { recursive:true });
   for (const c of clipes) fs.writeFileSync(path.join(pasta, c.name), Buffer.from(c.data, 'base64'));
   fs.writeFileSync(path.join(pasta, 'clipes.json'), JSON.stringify(clipes.map(({ data, ...c }) => c), null, 1));
   log({ etapa:'gravado', id, clipes:clipes.length, fim:fim && fim.titulo });
-  const cortes = roteiro(clipes, pasta);
-  if (cortes.length < 3) throw new Error(`poucos golpes para um Reel (${cortes.length})`);
+  const inteira = clipes.find(c => /gravacao/.test(c.name)) || clipes[0];
+  if (!inteira) throw new Error('nenhuma gravação saiu da página');
+  const rot = roteiroInteira(inteira);
+  if (!rot) throw new Error('gravação sem trechos de ação');
   const mp4 = path.join(pasta, `reel-${id}.mp4`);
-  montar(cortes, mp4);
-  const total = cortes.reduce((s, c) => s + c.b - c.a, 0);
+  montarInteira(path.join(pasta, inteira.name), rot, mp4);
+  const total = rot.total;
   // vencedor: o texto do fim diz "<artigo> <reino> vence"
-  let venc = null;
-  if (fim && /Xeque-mate/i.test(fim.titulo)){
+  let venc = fim && /Xeque-mate/i.test(fim.titulo) ? fim.lado : null;
+  if (!venc && fim && /Xeque-mate/i.test(fim.titulo)){
     const t = fim.texto;
     const iw = t.indexOf(w.split(' ').slice(-2).join(' ')), ib = t.indexOf(b.split(' ').slice(-2).join(' '));
     venc = iw >= 0 && (ib < 0 || iw < ib) ? 'w' : ib >= 0 ? 'b' : null;
   }
   const lances = fim ? +(fim.stats.match(/(\d+)\s*lances/) || [0, 0])[1] : 0;
-  const texto = legenda({ w, b, venc, lances: lances || 60, arcano:modo === 'arcano' });
+  const texto = legenda({ w, b, venc, lances: lances || 60, arcano:modo === 'arcano', niveis, minutos:total / 60 });
   fs.writeFileSync(path.join(pasta, 'legenda.txt'), texto);
-  log({ etapa:'montado', id, segundos:+total.toFixed(1), venc, lances });
+  log({ etapa:'montado', id, segundos:+total.toFixed(1), fator:+rot.fator.toFixed(2), trechos:rot.iv.length, venc, lances });
   if (!PUBLICAR){ log({ etapa:'fim-sem-publicar', id, mp4 }); return; }
   const url = hospedar(mp4, id);
-  const capaMs = Math.round(Math.max(0, total - (cortes.at(-1).b - cortes.at(-1).a) * 0.55) * 1000);
+  const capaMs = Math.round(Math.max(0, total - 9) * 1000);
   const link = await publicar(url, texto, capaMs);
   e.feitos.push(`${w}|${b}`); e.ultimo = `${w}|${b}`; e.n = (e.n || 0) + 1; salvarEstado(e);
   log({ etapa:'publicado', id, link });

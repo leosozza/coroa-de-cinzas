@@ -16503,7 +16503,7 @@ function recClose(s, keep){
 }
 // ganchos do lance (doMove)
 function recMoveBegin(res, mover){
-  REC.mover = mover;
+  REC.mover = mover; REC.moving = true;
   if (!REC.auto || REC.manual || !res) return;
   if (REC.seg) recClose(REC.seg, REC.seg.want);
   const s = REC.seg = recOpen('auto');
@@ -16511,7 +16511,7 @@ function recMoveBegin(res, mover){
   s.mate = /#/.test(res.san || '');
   s.want = !!res.captured || s.mate;
 }
-function recMoveEnd(){ if (REC.seg && !REC.seg.moveDone) REC.seg.moveDone = performance.now(); }
+function recMoveEnd(){ REC.moving = false; if (REC.seg && !REC.seg.moveDone) REC.seg.moveDone = performance.now(); }
 function recTick(now){
   const s = REC.seg;
   if (!s) return;
@@ -16630,6 +16630,12 @@ function recFrame(now){
     if (s){ s.want = true; s.moveDone = now; s.spell = true; }
   }
   if (!REC.cv || (!REC.manual && !REC.seg)) return;
+  if (REC.manual){
+    const m = REC.manual, act = REC.moving || cine.active || MATE.cinema, ts = (now - m.t0) / 1000;
+    if (act && !m.on){ m.on = true; m.marks.push([ts, ts]); }
+    else if (act) m.marks[m.marks.length - 1][1] = ts;
+    else if (m.on) m.on = false;
+  }
   recTick(now);
   if (REC.manual || REC.seg) recDraw();
   if (REC.manual && recGo) recGo.textContent = `■ Parar ${Math.floor((now - REC.manual.t0) / 60000)}:${String(Math.floor((now - REC.manual.t0) / 1000) % 60).padStart(2, '0')}`;

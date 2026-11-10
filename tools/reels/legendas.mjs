@@ -50,8 +50,10 @@ const GANCHOS_ARC = [
   'Xadrez + cartas de feitiço. Olha o que acontece.',
   'No Modo Arcano, o tabuleiro também luta.',
 ];
-export function legenda({ w, b, venc, lances, arcano = false, r = Math.random }){
-  const W = REINOS[w], B = REINOS[b];
+const NIVEL = { 1:'Recruta', 2:'Veterano', 3:'Mestre' };
+export function legenda({ w, b, venc, lances, arcano = false, niveis = null, minutos = 0, r = Math.random }){
+  // a Aurora do lado das Negras é a Legião Cinzenta no jogo
+  const W = REINOS[w], B = b === 'Reino da Aurora' ? { ...REINOS[b], curto:'Legião Cinzenta', art:'a' } : REINOS[b];
   const vs = `${W.curto} × ${B.curto}`;
   let corpo;
   if (venc){
@@ -66,6 +68,12 @@ export function legenda({ w, b, venc, lances, arcano = false, r = Math.random })
       `${vs}: ${lances} lances de golpes e nenhum vencedor. Empate de gigantes.`,
       `Batalha ${vs} sem coroa: terminou empatada em ${lances} lances.`,
     ], r);
+  }
+  if (niveis){
+    const t = minutos >= 1 ? `${Math.floor(minutos)}min${String(Math.round((minutos % 1) * 60)).padStart(2, '0')}` : `${Math.round(minutos * 60)}s`;
+    corpo = corpo.replace(`Batalha ${vs}`, '').replace(vs, '').replace(/^[\s:.]+/, '');
+    corpo = corpo.charAt(0).toUpperCase() + corpo.slice(1);
+    corpo = `Partida inteira em ${t}, do primeiro lance ao fim: ${W.curto} (${NIVEL[niveis.w]}) × ${B.curto} (${NIVEL[niveis.b]}). ` + corpo;
   }
   const tags = [...shuffle(BASE, r).slice(0, arcano ? 6 : 8), ...(arcano ? ['#modoarcano', '#cardgame'] : []), ...W.tags.slice(0, 1), ...B.tags.slice(0, 1)];
   const meio = arcano
