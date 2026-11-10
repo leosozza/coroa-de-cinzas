@@ -194,6 +194,25 @@ function montar(cortes, saida){
   if (r.status !== 0) throw new Error('ffmpeg: ' + r.stderr.slice(-400));
 }
 
+// cabe no teto de 25 MB por arquivo do Pages: bitrate calculado pela duração, 720×1280 quando o bitrate fica baixo
+function comprimir(master, saida, dur){
+  const alvoBits = 23.5 * 1024 * 1024 * 8 * 0.96, audio = 96000;
+  let vb = Math.floor(alvoBits / Math.max(dur, 3) - audio);
+  vb = Math.min(vb, 6000000);
+  const escala = vb < 2500000 ? 'scale=720:1280:flags=lanczos,' : '';
+  const base = ['-v', 'error', '-y', '-i', master, '-vf', `${escala}format=yuv420p`, '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'slow',
+    '-b:v', String(vb), '-maxrate', String(Math.round(vb * 1.4)), '-bufsize', String(vb * 2), '-r', '30'];
+  const log = path.join(path.dirname(saida), 'x264pass');
+  let r = spawnSync(ffmpeg, [...base, '-pass', '1', '-passlogfile', log, '-an', '-f', 'mp4', '/dev/null'], { encoding:'utf8' });
+  if (r.status !== 0) throw new Error('ffmpeg passo 1: ' + r.stderr.slice(-300));
+  r = spawnSync(ffmpeg, [...base, '-pass', '2', '-passlogfile', log, '-c:a', 'aac', '-b:a', String(audio), '-ar', '48000', '-movflags', '+faststart', saida], { encoding:'utf8' });
+  if (r.status !== 0) throw new Error('ffmpeg passo 2: ' + r.stderr.slice(-300));
+  for (const f of fs.readdirSync(path.dirname(saida))) if (f.startsWith('x264pass')) fs.rmSync(path.join(path.dirname(saida), f), { force:true });
+  const mb = fs.statSync(saida).size / 1048576;
+  if (mb > 24.9) throw new Error(`vídeo ficou com ${mb.toFixed(1)} MB (teto do Pages: 25 MB)`);
+  return mb;
+}
+
 function hospedar(mp4, id){
   const site = path.join(OUT, '_site');
   fs.rmSync(site, { recursive:true, force:true });
@@ -206,14 +225,32 @@ function hospedar(mp4, id){
   return `${MIDIA}/r/${id}.mp4`;
 }
 
-async function publicar(url, texto, capaMs){
-  const c = await graph('POST', `${IG_USER}/media`, { media_type:'REELS', video_url:url, caption:texto, share_to_feed:'true', thumb_offset:String(capaMs) });
-  for (let i = 0; i < 60; i++){
+// envia o MP4 direto para a Meta (upload "resumable"): sem hospedar o vídeo em lugar nenhum e sem o teto de 25 MB do Pages
+async function enviarVideo(mp4, texto, capaMs){
+  const c = await graph('POST', `${IG_USER}/media`, { media_type:'REELS', upload_type:'resumable', caption:texto, share_to_feed:'true', thumb_offset:String(capaMs) });
+  const buf = fs.readFileSync(mp4);
+  const res = await fetch(c.uri || `https://rupload.facebook.com/ig-api-upload/v23.0/${c.id}`, {
+    method:'POST', body:buf,
+    headers:{ Authorization:`OAuth ${token()}`, offset:'0', file_size:String(buf.length) },
+  });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || j.success === false) throw new Error('upload do vídeo falhou: ' + JSON.stringify(j).slice(0, 300));
+  return c.id;
+}
+
+async function aguardar(id){
+  for (let i = 0; i < 90; i++){
     await sleep(10000);
-    const s = await graph('GET', c.id, { fields:'status_code,status' });
-    if (s.status_code === 'FINISHED') break;
+    const s = await graph('GET', id, { fields:'status_code,status' });
+    if (s.status_code === 'FINISHED') return;
     if (s.status_code === 'ERROR' || s.status_code === 'EXPIRED') throw new Error('Instagram recusou o vídeo: ' + s.status);
   }
+  throw new Error('Instagram não terminou de processar o vídeo em 15 min');
+}
+
+async function publicar(url, texto, capaMs){
+  const c = await graph('POST', `${IG_USER}/media`, { media_type:'REELS', video_url:url, caption:texto, share_to_feed:'true', thumb_offset:String(capaMs) });
+  await aguardar(c.id);
   const p = await graph('POST', `${IG_USER}/media_publish`, { creation_id:c.id });
   const m = await graph('GET', p.id, { fields:'permalink' });
   return m.permalink;
@@ -252,8 +289,11 @@ async function main(){
   fs.writeFileSync(path.join(pasta, 'legenda.txt'), texto);
   log({ etapa:'montado', id, segundos:+total.toFixed(1), fator:+rot.fator.toFixed(2), trechos:rot.iv.length, venc, lances });
   if (!PUBLICAR){ log({ etapa:'fim-sem-publicar', id, mp4 }); return; }
-  const url = hospedar(mp4, id);
   const capaMs = Math.round(Math.max(0, total - 9) * 1000);
+  const leve = path.join(pasta, `reel-${id}-ig.mp4`);
+  const mb = comprimir(mp4, leve, total);
+  log({ etapa:'comprimido', id, mb:+mb.toFixed(1) });
+  const url = hospedar(leve, id);
   const link = await publicar(url, texto, capaMs);
   e.feitos.push(`${w}|${b}`); e.ultimo = `${w}|${b}`; e.n = (e.n || 0) + 1; salvarEstado(e);
   log({ etapa:'publicado', id, link });
