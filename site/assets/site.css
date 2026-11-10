@@ -627,3 +627,183 @@ p{ margin:0 0 1em; }
 .hero__fade{ position:absolute; inset:0; z-index:3; background:#050403; opacity:0; pointer-events:none; transition:opacity 1s var(--ease); }
 .hero__fade.on{ opacity:1; }
 .bc-start{ margin-right:6px; }
+
+/* =====================================================================
+   Login como porta da campanha "Conquista dos Mundos" (login.html)
+   Só classes novas (.despertar*, .guardiao-*): nada acima foi alterado.
+   ===================================================================== */
+
+/* ---------- cabeçalho "O Despertar" ---------- */
+.despertar{
+  --despertar-abismo:#9dffbd;
+  position:relative; isolation:isolate; overflow:hidden; display:flex; align-items:flex-end;
+  min-height:clamp(480px, 74vh, 660px); padding:calc(var(--nav-h) + 64px) 0 104px; background:#070605;
+}
+.despertar__arte{ position:absolute; inset:0; z-index:-1; pointer-events:none; }
+.despertar__arte img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 85%;
+  transform:scale(1.3); transform-origin:50% 100%;
+}
+/* a Aurora à esquerda; o Abismo invade pela direita */
+.despertar__ceu{ filter:saturate(.85) brightness(.58); }
+.despertar__abismo{
+  filter:saturate(1) brightness(.52);
+  -webkit-mask-image:linear-gradient(108deg, transparent 40%, rgba(0,0,0,.6) 56%, #000 72%);
+  mask-image:linear-gradient(108deg, transparent 40%, rgba(0,0,0,.6) 56%, #000 72%);
+}
+.despertar__arte::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(90deg, rgba(7,6,5,.92) 0%, rgba(7,6,5,.72) 34%, rgba(7,6,5,.18) 66%, transparent 82%),
+    linear-gradient(0deg, var(--crypt) 0%, rgba(23,21,16,.6) 16%, transparent 40%),
+    linear-gradient(180deg, rgba(7,6,5,.8) 0%, transparent 24%);
+}
+.despertar__lua{
+  position:absolute; right:clamp(20px, 9vw, 150px); top:calc(var(--nav-h) + 20px); width:clamp(70px, 11vw, 132px); height:auto;
+  filter:drop-shadow(0 0 22px rgba(255,236,190,.35)) drop-shadow(0 0 3px rgba(157,255,189,.45));
+  opacity:.9;
+}
+.despertar__fenda{ filter:drop-shadow(0 0 3px var(--despertar-abismo)); animation:despertar-fenda 5s ease-in-out infinite alternate; }
+@keyframes despertar-fenda{ from{ opacity:.55; } to{ opacity:1; } }
+/* a nave-colmeia caindo: um risco verde que atravessa o céu de vez em quando */
+.despertar__queda{
+  position:absolute; right:22%; top:calc(var(--nav-h) + 6px); width:2px; height:150px; opacity:0;
+  background:linear-gradient(180deg, transparent, rgba(157,255,189,.5) 70%, #eafff1);
+  box-shadow:0 0 12px rgba(157,255,189,.6); border-radius:2px;
+  transform-origin:50% 0; transform:rotate(32deg);
+  animation:despertar-queda 11s cubic-bezier(.5,0,.9,.6) 1.2s infinite both;
+}
+@keyframes despertar-queda{
+  0%{ opacity:0; transform:rotate(32deg) translateY(-40px); }
+  3%{ opacity:1; }
+  14%{ opacity:0; transform:rotate(32deg) translateY(360px); }
+  100%{ opacity:0; transform:rotate(32deg) translateY(360px); }
+}
+.despertar__txt{ position:relative; }
+.despertar__txt .eyebrow{ margin-bottom:12px; }
+.despertar h1{
+  font-family:var(--f-display); font-weight:700; letter-spacing:.01em; line-height:.95;
+  font-size:clamp(3rem, 10vw, 5.6rem); margin:0 0 18px; color:var(--bone);
+  text-shadow:0 2px 0 rgba(0,0,0,.7), 0 0 38px rgba(227,165,72,.32);
+}
+.despertar__lore{ max-width:56ch; }
+.despertar__lore p{ margin:0 0 .7em; font-size:clamp(1.02rem, 1.6vw, 1.18rem); line-height:1.55; color:var(--bone); text-shadow:0 1px 8px rgba(0,0,0,.95); }
+.despertar__lore strong{ color:var(--ember); font-weight:600; }
+.despertar #subtitulo{ margin:14px 0 0; max-width:56ch; padding-top:12px; border-top:1px solid var(--line); color:var(--ash); font-size:.98rem; }
+@media (max-width: 720px){
+  .despertar{ min-height:0; padding:calc(var(--nav-h) + 96px) 0 52px; }
+  .despertar-corpo{ padding-top:52px; }
+  .despertar__arte::after{
+    background:
+      linear-gradient(0deg, var(--crypt) 0%, rgba(14,13,11,.88) 40%, rgba(7,6,5,.45) 72%, rgba(7,6,5,.75) 100%);
+  }
+  .despertar__abismo{ -webkit-mask-image:linear-gradient(108deg, transparent 30%, #000 70%); mask-image:linear-gradient(108deg, transparent 30%, #000 70%); }
+  .despertar__lua{ top:calc(var(--nav-h) + 14px); right:16px; }
+  .despertar__queda{ right:40%; height:110px; }
+}
+
+/* ---------- painel principal: passo da campanha e nome em destaque ---------- */
+.guardiao-passo{
+  display:inline-flex; align-items:center; gap:10px; margin:0 0 14px;
+  font-family:var(--f-ui); font-weight:700; font-size:.8rem; letter-spacing:.16em; color:var(--ember);
+}
+.panel .guardiao-passo{ color:var(--ember); }
+.guardiao-passo__n{
+  width:26px; height:26px; display:grid; place-items:center; flex:none;
+  font-family:var(--f-engrave); font-size:.78rem; letter-spacing:0; color:#1a1209; background:var(--ember);
+  clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.guardiao-campo{
+  margin:20px 0 18px; padding:16px 16px 10px; border:1px solid rgba(227,165,72,.38);
+  background:linear-gradient(180deg, rgba(227,165,72,.09), rgba(7,6,5,.25));
+}
+.guardiao-campo label{ font-family:var(--f-engrave); font-size:.92rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ember); }
+.guardiao-painel{ min-width:0; }
+.guardiao-campo input{
+  width:100%; min-width:0;
+  min-height:56px; font-family:var(--f-engrave); font-weight:700; font-size:1.3rem; letter-spacing:.04em;
+  border-color:rgba(227,165,72,.5); background:rgba(7,6,5,.82);
+}
+.guardiao-campo .field__err:empty{ min-height:0; }
+
+/* ---------- cartão do Guardião (depois de entrar) ---------- */
+.guardiao-cartao{
+  position:relative; margin:0 0 6px; padding:24px 22px 22px; text-align:left;
+  border:1px solid rgba(227,165,72,.55);
+  background:
+    radial-gradient(90% 70% at 15% 0%, rgba(227,165,72,.16), transparent 65%),
+    radial-gradient(80% 60% at 100% 100%, rgba(157,255,189,.06), transparent 70%),
+    rgba(7,6,5,.55);
+  box-shadow:0 0 34px rgba(227,165,72,.1), inset 0 0 0 1px rgba(14,13,11,.8);
+}
+.guardiao-cartao::before,.guardiao-cartao::after{ content:""; position:absolute; width:14px; height:14px; border:1px solid var(--ember); pointer-events:none; }
+.guardiao-cartao::before{ left:-5px; top:-5px; border-right:0; border-bottom:0; }
+.guardiao-cartao::after{ right:-5px; bottom:-5px; border-left:0; border-top:0; }
+.panel .guardiao-cartao__rotulo{ margin:0 0 12px; font-family:var(--f-ui); font-weight:700; font-size:.78rem; letter-spacing:.2em; color:var(--ember); }
+.guardiao-cartao__id{ margin-bottom:20px; }
+.guardiao-cartao__id .acct__sigil{ width:72px; height:72px; font-size:1.9rem; clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); border:0; background:radial-gradient(circle at 50% 35%, rgba(227,165,72,.45), var(--stone) 70%); }
+.panel .guardiao-cartao__nome{ font-family:var(--f-logo); font-weight:900; font-size:clamp(1.5rem, 4.6vw, 2.2rem); line-height:1.1; letter-spacing:.02em; color:var(--bone); text-shadow:0 0 24px rgba(227,165,72,.3); }
+.guardiao-cartao .ratings:empty{ display:none; }
+.guardiao-cta{ margin-top:22px; min-height:56px; text-align:center; line-height:1.3; font-size:.92rem; }
+.guardiao-acoes{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin-top:14px; }
+.guardiao-acoes .btn{ padding-left:.8em; padding-right:.8em; letter-spacing:.12em; text-align:center; }
+@media (max-width: 520px){
+  .guardiao-cartao{ padding:20px 16px 18px; }
+  .guardiao-cartao__id{ gap:14px; }
+  .guardiao-cartao__id .acct__sigil{ width:58px; height:58px; font-size:1.5rem; }
+  .guardiao-cta{ font-size:.8rem; letter-spacing:.1em; padding-left:.8em; padding-right:.8em; }
+  .guardiao-acoes .btn{ font-size:.74rem; letter-spacing:.08em; }
+}
+@media (max-width: 340px){ .guardiao-acoes{ grid-template-columns:1fr; } }
+
+/* ---------- faixa dos 8 mundos ---------- */
+.despertar-mundos{ margin-top:72px; }
+.despertar-mundos__head{ max-width:640px; margin:0 auto 30px; text-align:center; }
+.despertar-mundos__head .eyebrow{ justify-content:center; margin-bottom:10px; }
+.despertar-mundos__head .eyebrow::after{ content:""; width:28px; height:1px; background:currentColor; }
+.despertar-mundos__head h2{ font-size:clamp(1.4rem, 3vw, 2rem); text-transform:uppercase; letter-spacing:.1em; }
+.despertar-mundos__head p{ color:var(--ash); margin:0; }
+.despertar-mundos__lista{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(8, minmax(0,1fr)); gap:16px; }
+.despertar-mundo{ margin:0; min-width:0; text-align:center; }
+.despertar-mundo__moldura{ position:relative; }
+/* o caminho entre um mundo e o próximo */
+.despertar-mundo__moldura::after{
+  content:""; position:absolute; top:50%; left:100%; width:16px; height:1px;
+  background:linear-gradient(90deg, var(--ember-deep), rgba(227,165,72,.6));
+}
+.despertar-mundo:last-child .despertar-mundo__moldura::after{ display:none; }
+.despertar-mundo__arte{ position:relative; aspect-ratio:1; overflow:hidden; border:1px solid var(--seam); background:#0b0a08; }
+.despertar-mundo__arte img{ width:100%; height:100%; object-fit:cover; object-position:50% 30%; filter:saturate(.9) brightness(.92); }
+.despertar-mundo--retrato .despertar-mundo__arte img{ object-position:50% 0; transform:scale(1.5); transform-origin:50% 12%; }
+.despertar-mundo__arte::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 50% 42%, transparent 38%, rgba(7,6,5,.55) 72%, rgba(7,6,5,.9) 100%);
+  box-shadow:inset 0 0 0 1px rgba(14,13,11,.9);
+}
+.despertar-mundo__txt{ margin:10px 0 0; line-height:1.2; }
+.despertar-mundo__txt span{ display:block; font-family:var(--f-ui); font-weight:700; font-size:.72rem; letter-spacing:.14em; color:var(--ash); }
+.despertar-mundo__txt b{ display:block; margin-top:3px; font-family:var(--f-engrave); font-size:.86rem; letter-spacing:.04em; color:var(--bone); overflow-wrap:anywhere; hyphens:auto; }
+.despertar-mundo--lar .despertar-mundo__arte{ border-color:var(--ember); box-shadow:0 0 18px rgba(227,165,72,.25); }
+.despertar-mundo--lar .despertar-mundo__txt span{ color:var(--ember); }
+.despertar-mundo--fim .despertar-mundo__arte{ border-color:rgba(157,255,189,.55); box-shadow:0 0 18px rgba(157,255,189,.16); }
+.despertar-mundo--fim .despertar-mundo__txt span{ color:#9dffbd; }
+@media (max-width: 899px){
+  .despertar-mundos__lista{ grid-template-columns:repeat(4, minmax(0,1fr)); gap:18px 12px; }
+  .despertar-mundo__moldura::after{ width:12px; }
+  .despertar-mundo:nth-child(4n) .despertar-mundo__moldura::after{ display:none; }
+}
+@media (max-width: 720px){ .despertar-mundos{ margin-top:52px; } }
+@media (max-width: 420px){
+  .despertar-mundos__lista{ gap:16px 8px; }
+  .despertar-mundo__moldura::after{ width:8px; }
+  .despertar-mundo__txt span{ font-size:.64rem; letter-spacing:.08em; }
+  .despertar-mundo__txt b{ font-size:.74rem; letter-spacing:0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .despertar__queda{ display:none; }
+  .despertar__fenda{ animation:none; opacity:.85; }
+}
+@media (forced-colors: active){
+  .guardiao-passo__n,.guardiao-cartao__id .acct__sigil{ clip-path:none; border:1px solid CanvasText; }
+}

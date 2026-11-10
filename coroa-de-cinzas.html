@@ -639,6 +639,52 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 .mode-card:hover:not(.soon){border-color:#f0cf7a; box-shadow:inset 0 0 0 3px rgba(8,6,10,.85), inset 0 0 0 4px rgba(170,120,255,.5), 0 0 22px rgba(170,120,255,.25)}
 .mode-card.soon{opacity:.62; cursor:default; padding-bottom:32px}
 .mode-card em{position:absolute; right:12px; bottom:10px; font-style:normal; font-family:var(--f-ui); font-size:.7rem; letter-spacing:.1em; color:#bfa8ff; border:1px solid rgba(170,120,255,.5); padding:1px 7px; border-radius:10px}
+.camp-card{grid-column:1 / -1; min-height:92px; border-color:#f0cf7a; background:linear-gradient(120deg, rgba(60,40,14,.95), rgba(26,18,30,.95) 60%, rgba(14,30,40,.95))}
+.camp-card b{font-size:1.25rem}
+.camp{position:fixed; inset:0; z-index:61; overflow-y:auto; padding:20px 14px 36px; background:radial-gradient(ellipse at 50% 0%, rgba(60,40,14,.55), rgba(6,5,10,.97) 60%), #07060a; color:var(--bone)}
+.camp[hidden]{display:none}
+.camp-inner{max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+.camp-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.camp-backbtn{min-height:40px; padding:6px 14px}
+.camp-head{flex:1; min-width:200px}
+.camp-head h2{margin:0; font-family:var(--f-display); font-size:clamp(1.8rem, 5vw, 2.6rem); color:#f0cf7a; letter-spacing:.02em; line-height:1}
+.camp-head p{margin:4px 0 0; font-family:var(--f-ui); letter-spacing:.06em; color:var(--ash)}
+.camp-head p b{color:#f6e2a8}
+.camp-total{font-family:var(--f-ui); letter-spacing:.08em; color:#f0cf7a; border:1px solid rgba(240,207,122,.45); border-radius:999px; padding:4px 12px}
+.camp-lore{margin:0; font-style:italic; color:#d9cdb3; max-width:70ch}
+.camp-namebox{display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid rgba(240,207,122,.4); border-radius:6px; background:rgba(30,22,10,.6)}
+.camp-namebox label{font-family:var(--f-ui); letter-spacing:.08em; color:#f0cf7a}
+.camp-namebox div{display:flex; gap:8px; flex-wrap:wrap}
+.camp-namebox input{flex:1; min-width:160px; min-height:40px; padding:6px 10px; background:#100d14; color:var(--bone); border:1px solid var(--seam); border-radius:4px; font:inherit}
+.camp-namebox small{color:var(--ash)} .camp-namebox a{color:#f0cf7a}
+.camp-map{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; counter-reset:w}
+.camp-node{width:100%; display:flex; flex-direction:column; gap:6px; padding:8px; text-align:left; background:rgba(20,16,24,.92); border:1px solid rgba(232,192,112,.35); border-radius:6px; color:var(--bone); cursor:pointer; min-height:44px}
+.camp-node.sel{border-color:#f0cf7a; box-shadow:0 0 0 2px rgba(240,207,122,.45), 0 0 22px rgba(240,180,80,.25)}
+.camp-node.done{border-color:#7fd08a}
+.camp-node.locked{opacity:.5; filter:grayscale(.8); cursor:not-allowed}
+.camp-img{display:block; width:100%; aspect-ratio:4/3; border-radius:4px; background:#000 center/cover no-repeat}
+.camp-img.big{width:120px; flex:none; aspect-ratio:3/4}
+.camp-txt{display:flex; flex-direction:column; gap:1px}
+.camp-txt small{font-family:var(--f-ui); letter-spacing:.1em; color:var(--ash); font-size:.72rem}
+.camp-txt b{font-family:var(--f-engrave); font-size:.92rem; color:#f0d48a; line-height:1.15}
+.camp-txt em{font-style:normal; font-size:.78rem; color:#cfc6b4}
+.camp-world{padding:14px; border:1px solid rgba(232,192,112,.35); border-radius:8px; background:rgba(14,12,18,.94)}
+.camp-wh{display:flex; gap:14px; align-items:flex-start}
+.camp-wh small{font-family:var(--f-ui); letter-spacing:.1em; color:var(--ash)}
+.camp-wh h3{margin:2px 0 6px; font-family:var(--f-display); font-size:1.7rem; color:#f0cf7a}
+.camp-wh p{margin:0 0 6px; font-size:.95rem; color:#e3d8c2}
+.camp-rule b, .camp-cards b{color:#f0cf7a}
+.camp-phases{list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px}
+.camp-phases li{display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--seam); border-radius:6px; background:rgba(24,20,28,.9)}
+.camp-phases li > div{flex:1; display:flex; flex-direction:column; gap:2px}
+.camp-phases li b{font-family:var(--f-engrave); color:#f0d48a}
+.camp-phases li span{font-size:.88rem; color:#cfc6b4}
+.camp-phases li.locked{opacity:.5}
+.camp-st{font-size:1.1rem; color:#ffd36b; letter-spacing:.08em; white-space:nowrap}
+.camp-phases .btn-main{min-height:40px; padding:6px 14px; white-space:nowrap}
+.camp-note{margin:10px 0 0; font-size:.84rem; color:var(--ash)}
+.camp-endst b{color:#ffd36b !important; letter-spacing:.1em}
+@media (max-width:560px){ .camp-wh{flex-direction:column} .camp-img.big{width:100%; aspect-ratio:16/9} .camp-phases li{flex-wrap:wrap} .camp-phases .btn-main{width:100%} }
 .setup{width:100%; max-width:720px; padding:16px; border:1px solid rgba(232,192,112,.35); border-radius:4px; background:rgba(16,14,20,.94); text-align:left}
 .setup, .setup *{box-sizing:border-box}
 /* passos da escolha da luta: 1 Brancas, 2 Negras, 3 Arena, 4 Opções; no celular cada passo recolhe mostrando a escolha */
@@ -970,6 +1016,23 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
     <button type="button" class="btn-main" id="arc-ready">Estou pronto</button>
   </div>
 </div>
+<div class="camp" id="camp" role="dialog" aria-modal="true" aria-labelledby="camp-t" hidden>
+  <div class="camp-inner">
+    <div class="camp-top">
+      <button type="button" id="camp-back" class="camp-backbtn">← Menu</button>
+      <div class="camp-head"><h2 id="camp-t">Conquista dos Mundos</h2><p id="camp-guard"></p></div>
+      <span class="camp-total" id="camp-total"></span>
+    </div>
+    <p class="camp-lore">A nave-colmeia do Abismo Estelar caiu do céu, rachou a lua e estilhaçou o Livro da Vida em 7 Selos. A Rainha-Mãe levou o povo da Aurora em casulos. Só o Guardião ficou acordado.</p>
+    <div class="camp-namebox" id="camp-namebox" hidden>
+      <label for="camp-name">Nome do Guardião</label>
+      <div><input id="camp-name" maxlength="20" autocomplete="nickname" placeholder="De 3 a 20 letras"><button type="button" class="btn-main" id="camp-namego">Despertar</button></div>
+      <small>Com uma conta (<a href="site/login.html">Entrar</a>), o nome vale também no ranking e no online.</small>
+    </div>
+    <ol class="camp-map" id="camp-map" aria-label="Os 8 mundos"></ol>
+    <section class="camp-world" id="camp-world" aria-live="polite"></section>
+  </div>
+</div>
 <div class="title" id="title" role="dialog" aria-modal="true" aria-labelledby="title-logo">
   <div class="title-inner">
     <div class="logo big" id="title-logo" role="heading" aria-level="2" aria-label="Arcane Chess"><span class="logo-word">Arcane Chess</span><span class="logo-sub">The Battle for the Grimoire</span></div>
@@ -977,6 +1040,7 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
     <p class="title-pt">Xadrez clássico com alma de RPG sombrio</p>
     <div class="acts-top"><button class="btn-main title-continue" id="t-continue" type="button" hidden>Continuar partida</button></div>
     <div class="modes" id="t-modes">
+      <button class="mode-card camp-card" type="button" data-mode="campanha"><b>Conquista dos Mundos</b><span>A campanha do Guardião: 8 mundos, 48 fases, os chefões e os 7 Selos do Livro da Vida.</span><em>Novo</em></button>
       <button class="mode-card" type="button" data-mode="padrao"><b>Modo Padrão</b><span>Xadrez clássico contra a IA ou a dois no mesmo aparelho.</span></button>
       <button class="mode-card" type="button" data-mode="spec"><b>Modo Espectador</b><span>IA contra IA: assista, pause, volte um lance ou assuma um lado.</span></button>
       <button class="mode-card" type="button" data-mode="aprendiz"><b>Modo Aprendiz</b><span>Sete lições guiadas, dicas do motor e insígnias.</span><em id="apr-count">0/7 insígnias</em></button>
@@ -1248,7 +1312,9 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
     <p id="end-text"></p>
     <div class="end-stats" id="end-stats"></div>
     <div class="end-actions">
+      <button class="btn-main" id="camp-endnext" type="button" hidden>Próxima fase</button>
       <button class="btn-main" id="again" type="button">Nova partida</button>
+      <button id="camp-endmap" type="button" hidden>Voltar ao mapa</button>
       <button id="end-undo" type="button">Desfazer jogada</button>
     </div>
   </div>
@@ -16730,6 +16796,7 @@ function frame(now){
     pvTick(now);
     mmTick();
     aprTick();
+    if (CAMP.run) campTick();
     if (cfg.arc || ARCW.g) arcWorldTick(now);
     rankTick();
     if (MATE.follow) MATE.follow();
@@ -17248,7 +17315,7 @@ function newGame(){
   if (APR.on && APR.scripted){ aprStartLesson(APR.L); return; }
   if (cfg.arc){ arcNewGame(); return; }
   aiToken++;
-  G = new Chess();
+  G = cfg.campFen ? new Chess(cfg.campFen) : new Chess();
   LOG = [];
   resetUI();
   busy = false;
@@ -17732,6 +17799,7 @@ function showEnd(){
   $('again').textContent = cfg.mode === 'online' ? 'Jogar online de novo' : 'Nova partida';
   if (cfg.mode === 'online') onlineEndExtra();
   if (cfg.mode === 'spec') seriesEnd();
+  if (CAMP.run) campEnd(o); else { $('camp-endmap').hidden = true; $('camp-endnext').hidden = true; }
   setTimeout(() => { if (S.over){ $('end').hidden = false; $('again').focus(); } }, 650 * SPD);
 }
 
@@ -18648,6 +18716,7 @@ function leaveSpec(){
   clearTimeout(SERIES.t);
 }
 function startPadrao(){
+  if (typeof campLeave === 'function') campLeave();
   arcExit();
   aprExit();
   leaveSpec();
@@ -18663,6 +18732,7 @@ function startPadrao(){
   syncViewUI();
 }
 function startSpec(){
+  if (typeof campLeave === 'function') campLeave();
   arcExit();
   if (cfg.arc) cfg.arc = false;
   aprExit();
@@ -18763,7 +18833,7 @@ function renderThumbs(){
   setTimeout(step, 60);
 }
 function syncThumbs(){ for (const b of $('t-arenas').children) b.setAttribute('aria-pressed', String(b.dataset.arena === (arenaPending || arena))); }
-document.querySelectorAll('#t-modes [data-mode]').forEach(b => b.addEventListener('click', () => { audio(); showSetup(b.dataset.mode); }));
+document.querySelectorAll('#t-modes [data-mode]').forEach(b => b.addEventListener('click', () => { audio(); if (b.dataset.mode === 'campanha'){ campOpen(); return; } showSetup(b.dataset.mode); }));
 $('t-back1').addEventListener('click', () => showSetup(null));
 $('t-back2').addEventListener('click', () => showSetup(null));
 $('t-start').addEventListener('click', () => { audio(); startPadrao(); });
@@ -21310,7 +21380,7 @@ function arcNewGame(){
   aiToken++;
   const seed = (Math.random() * 4294967296) >>> 0;
   ARCAI.tok++; ARCAI.running = false;
-  G = new ArcanoG(ARC.create({ seed, decks:{ w:cfg.arcDecks ? cfg.arcDecks.w : 'tempestade', b:cfg.arcDecks ? cfg.arcDecks.b : 'cinzas' }, oracle:cfg.mode === 'ai' ? 'garantido' : 'previsto' }));
+  G = new ArcanoG(ARC.create({ seed, decks:{ w:cfg.arcDecks ? cfg.arcDecks.w : 'tempestade', b:cfg.arcDecks ? cfg.arcDecks.b : 'cinzas' }, oracle:cfg.mode === 'ai' ? 'garantido' : 'previsto', fen:cfg.campFen || undefined }));
   LOG = [];
   resetUI(); busy = false; resetFx();
   syncState();
@@ -21318,7 +21388,8 @@ function arcNewGame(){
   $('end').hidden = true; $('arc-pass').hidden = true;
   ARCUI.sel = null; ARCUI.picks = []; ARCUI.opts = []; ARCUI.hidden = false; ARCUI.arrows = []; ARCUI.reply = null; ARCUI.reveal = false;
   clockStart();
-  pushLog(`Começa o <b>Modo Arcano</b>. Grimórios: Aurora com <b>${ARC.DECKS[G.s.arc.decks.w].nome}</b>, Legião com <b>${ARC.DECKS[G.s.arc.decks.b].nome}</b>.`);
+  const dn = id => (ARC.DECKS[id] && ARC.DECKS[id].nome) || (id === 'custom' ? 'o grimório da campanha' : id);
+  pushLog(`Começa o <b>Modo Arcano</b>. Grimórios: ${sideCurto('w')} com <b>${dn(G.s.arc.decks.w)}</b>, ${sideCurto('b')} com <b>${dn(G.s.arc.decks.b)}</b>.`);
   snd('v_inicio', { delay:0.3 }); reinoVinheta();
   setFlip(false);
   layout();
@@ -21330,6 +21401,7 @@ function arcNewGame(){
 }
 // IA contra IA no Arcano: o Espectador com as regras do Arcano, com o nível e o grimório de cada lado escolhidos aqui
 function startArcanoSpec(){
+  if (typeof campLeave === 'function') campLeave();
   aprExit();
   if (AC) for (const id of ARC_SFX) loadOne(id);
   if (cfg.mode !== 'spec'){ SERIES.cine = cine.mode; SERIES.view = VIEW.mode; }
@@ -21347,6 +21419,7 @@ function startArcanoSpec(){
   syncViewUI();
 }
 function startArcano(){
+  if (typeof campLeave === 'function') campLeave();
   if ($('a-opp').value === 'spec'){ startArcanoSpec(); return; }
   aprExit(); leaveSpec();
   if (AC) for (const id of ARC_SFX) loadOne(id);
@@ -21377,6 +21450,242 @@ $('arc-end').addEventListener('click', () => { audio(); arcEndTurn(); });
 $('arc-play').addEventListener('click', () => { audio(); arcPlay(); });
 $('arc-cancel').addEventListener('click', () => { audio(); arcCancel(); });
 $('arc-ready').addEventListener('click', () => { audio(); arcReady(); });
+
+/* ---------- Conquista dos Mundos (campanha) ----------
+   8 mundos (os 8 reinos) com 6 fases cada: batalha, problema de mate, regra do mundo, sobrevivência, batalha difícil e
+   chefão. O Guardião (o jogador, com o nome da conta) joga com a Aurora contra o reino do mundo, na arena dele. Em toda
+   fase uma peça inimiga (nunca o Rei) é o Portador da carta da fase: capturá-la e vencer por mate garante a carta.
+   Estrelas: vencer; capturar o Portador e vencer; vencer em até 30 lances. O progresso fica neste navegador. */
+const CAMP_KEY = 'arcane-chess:campanha';
+const CAMP_C = id => { const c = ARC.card && ARC.card(id); return c ? c.nome : id; };
+const CAMP_MUNDOS = [
+  { n:1, reino:'aurora', arena:'celestial', chefe:'O Arcanjo', prova:'a Prova do Arcanjo', regra:'Xadrez puro, sem cartas: o Arcanjo testa o Guardião.', selo:'As primeiras páginas do Livro da Vida',
+    hist:'O Arcanjo desce num pilar de luz para testar o último Guardião acordado.', cartas:[], arc:false, base:1,
+    problema:{ fen:'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4', n:1 } },
+  { n:2, reino:'primatas', chefe:'O ídolo gorila', regra:'O rival esconde Armadilhas de Espinhos.', regraCarta:'armadilha-espinhos', selo:'Selo da Selva Primal',
+    hist:'O Selo caiu no alto do templo e despertou o ídolo gorila de pedra.', cartas:['passo-relampago', 'olho-bispo', 'armadilha-espinhos', 'vinganca-isca', 'alcance-torre', 'dominio-diagonal'], arc:true, base:1,
+    problema:{ fen:'k7/8/8/8/8/8/6R1/5R1K w - - 0 1', n:2 } },
+  { n:3, reino:'mar', chefe:'O Kraken', regra:'O rival abre Portais de Runa: a correnteza.', regraCarta:'portal-runa', selo:'Selo das Marés Abissais',
+    hist:'A onda da Queda trouxe o Kraken, que guarda o Selo na Cidade Afundada.', cartas:['portal-runa', 'espelho-posicao', 'empuxo-gravitacional', 'ponto-ancoragem', 'troca-sombra', 'duplo-corpo'], arc:true, base:2,
+    problema:{ fen:'r6k/6pp/7N/8/8/1Q6/8/6K1 w - - 0 1', n:2 } },
+  { n:4, reino:'deserto', chefe:'O Verme-Colosso', regra:'O rival abre Fossos de Lava: a areia movediça.', regraCarta:'fosso-lava', selo:'Selo das Dunas Ancestrais',
+    hist:'O Verme-Colosso engoliu o Selo e o carrega sob as dunas.', cartas:['fosso-lava', 'visao-oraculo', 'profecia-selada', 'contrafeitico', 'veu-sombras', 'escudo-arcano'], arc:true, base:2,
+    problema:{ fen:'7k/8/5K2/8/8/8/8/6R1 w - - 0 1', n:2 } },
+  { n:5, reino:'lua_nova', chefe:'O Lobisomem', regra:'A Névoa Fria cai sobre o tabuleiro.', regraCarta:'nevoa-fria', selo:'Selo da Lua Partida',
+    hist:'O Selo caiu com o pedaço da lua; sob a lua partida, o Alfa vira lobisomem e não volta.', cartas:['nevoa-fria', 'pegaso', 'centuriao', 'berserker', 'andarilho-arcano', 'bispo-oraculo'], arc:true, base:2,
+    problema:{ fen:'k7/pp3R2/8/8/5B2/8/N2r4/1K6 w - - 0 1', n:2 } },
+  { n:6, reino:'ferro_negro', chefe:'O Deus da Morte', regra:'O rival ergue Recrutas do Cemitério.', regraCarta:'recruta-cemiterio', selo:'Selo da Necrópole',
+    hist:'A Legião usou o Selo para erguer o Dragão de Ossos, os restos do ancestral dos dragões.', cartas:['rito-sacrificio', 'ressurreicao-cinzas', 'recruta-cemiterio', 'necromante-cinzas', 'golem-pedra', 'heranca-cavaleiro'], arc:true, base:3,
+    problema:{ fen:'7Q/3k4/R1p1p3/8/1K6/8/3n4/8 w - - 0 1', n:2 } },
+  { n:7, reino:'dragoes', chefe:'O Dragão Gigante', regra:'Repercussão de Impacto em toda captura do rival.', regraCarta:'repercussao-impacto', selo:'Selo do Fogo Dracônico',
+    hist:'O Dragão Gigante só entrega o fogo a quem o vencer.', cartas:['dragao-cinzas', 'fenix', 'canhao-cerco', 'coroa-emprestada', 'aura-cavaleiro', 'repercussao-impacto'], arc:true, base:3,
+    problema:{ fen:'8/7k/7p/8/7R/7R/8/1K6 w - - 0 1', n:2 } },
+  { n:8, reino:'abismo', chefe:'A Rainha-Mãe', regra:'As regras dos seis mundos anteriores, misturadas.', selo:'O Último Selo: o Livro da Vida inteiro',
+    hist:'A Rainha-Mãe guarda o último Selo no coração da câmara de ovos.', cartas:[], arc:true, base:3,
+    problema:{ fen:'K5k1/1R4p1/8/8/Q7/8/8/8 w - - 0 1', n:2 } },
+];
+for (const m of CAMP_MUNDOS){ if (!m.arena) m.arena = REINOS[m.reino].mundo; }
+// cartas que o Guardião já aprendeu ao chegar a um mundo (as dos mundos anteriores e as deste)
+const campCartasAte = n => CAMP_MUNDOS.filter(m => m.n >= 2 && m.n <= n).flatMap(m => m.cartas);
+const CAMP_FASES = [
+  { id:'batalha', nome:'Batalha', desc:'Partida contra o exército do mundo.' },
+  { id:'problema', nome:'Problema', desc:'Dê o xeque-mate a partir de uma posição pronta.' },
+  { id:'regra', nome:'A regra do mundo', desc:'Partida com a regra deste mundo ativa.' },
+  { id:'sobrevivencia', nome:'Sobrevivência', desc:'Aguente 20 lances com menos peças (ou vença antes).' },
+  { id:'dificil', nome:'Batalha difícil', desc:'A regra do mundo e o grimório do rival completo.' },
+  { id:'chefao', nome:'Chefão', desc:'O soberano do mundo, com o Selo escondido numa peça maior.' },
+];
+const CAMP = { open:false, sel:1, run:null, save:(() => { try { const v = JSON.parse(localStorage.getItem(CAMP_KEY) || 'null'); if (v && v.fases) return v; } catch (e){} return { nome:'', fases:{}, cartas:[], selos:[] }; })() };
+const campSaveNow = () => { try { localStorage.setItem(CAMP_KEY, JSON.stringify(CAMP.save)); } catch (e){} };
+const campStars = (w, p) => (CAMP.save.fases[`${w}-${p}`] || [0, 0, 0]);
+const campWon = (w, p) => !!campStars(w, p)[0];
+const campOpenPhase = (w, p) => p === 1 ? (w === 1 || campWon(w - 1, 6)) : campWon(w, p - 1);
+const campOpenWorld = w => campOpenPhase(w, 1);
+const campTotal = () => Object.values(CAMP.save.fases).reduce((s, a) => s + a.filter(Boolean).length, 0);
+function campGuardiao(){
+  const u = NET.user && NET.user.name;
+  if (u) return u;
+  try { const v = JSON.parse(localStorage.getItem(ONLINE_KEY) || 'null'); if (v && v.name) return v.name; } catch (e){}
+  return CAMP.save.nome || '';
+}
+// o baralho de 20 cartas de uma lista curta: repete a lista até completar
+const campDeck = (ids, enfase) => { const base = [...(enfase ? Array(6).fill(enfase) : []), ...ids]; const out = []; for (let i = 0; out.length < 20 && base.length; i++) out.push(base[i % base.length]); return out; };
+
+function campRender(){
+  const g = campGuardiao();
+  $('camp-guard').innerHTML = g ? `Guardião <b>${escHtml(g)}</b>` : 'Guardião sem nome';
+  $('camp-namebox').hidden = !!g;
+  $('camp-total').textContent = `${campTotal()} / ${CAMP_MUNDOS.length * 18} estrelas`;
+  const map = $('camp-map');
+  map.innerHTML = CAMP_MUNDOS.map(m => {
+    const R = REINOS[m.reino], open = campOpenWorld(m.n), done = campWon(m.n, 6);
+    const st = [1, 2, 3, 4, 5, 6].reduce((s, p) => s + campStars(m.n, p).filter(Boolean).length, 0);
+    return `<li><button type="button" class="camp-node${m.n === CAMP.sel ? ' sel' : ''}${open ? '' : ' locked'}${done ? ' done' : ''}" data-w="${m.n}" ${open ? '' : 'aria-disabled="true"'}
+      aria-label="Mundo ${m.n}: ${R.nome}${open ? `, ${st} de 18 estrelas` : ', bloqueado'}">
+      <span class="camp-img" style="background-image:url('${R.img}')"></span>
+      <span class="camp-txt"><small>Mundo ${m.n}</small><b>${R.nome}</b><em>${open ? (done ? 'Selo conquistado' : `${st}/18 ★`) : 'Bloqueado'}</em></span></button></li>`;
+  }).join('');
+  map.querySelectorAll('.camp-node').forEach(b => b.addEventListener('click', () => {
+    const w = +b.dataset.w;
+    if (!campOpenWorld(w)){ onlineToast(`Vença o chefão do Mundo ${w - 1} para abrir este mundo.`); return; }
+    CAMP.sel = w; campRender();
+    const d = $('camp-world'); if (d.scrollIntoView) d.scrollIntoView({ behavior:RM ? 'auto' : 'smooth', block:'start' });
+  }));
+  const m = CAMP_MUNDOS[CAMP.sel - 1], R = REINOS[m.reino];
+  $('camp-world').innerHTML = `<header class="camp-wh"><span class="camp-img big" style="background-image:url('${R.img}')"></span>
+      <div><small>Mundo ${m.n} · ${escHtml(R.nome)}</small><h3>${escHtml(m.chefe)}</h3><p>${escHtml(m.hist)}</p>
+      <p class="camp-rule"><b>Regra do mundo:</b> ${escHtml(m.regra)} <b>Selo:</b> ${escHtml(m.selo)}.</p>
+      ${m.cartas.length ? `<p class="camp-cards"><b>Cartas deste mundo:</b> ${m.cartas.map(id => escHtml(CAMP_C(id))).join(' · ')}</p>` : ''}</div></header>
+    <ol class="camp-phases">${CAMP_FASES.map((f, i) => {
+      const p = i + 1, open = campOpenPhase(m.n, p), s = campStars(m.n, p);
+      return `<li class="${open ? '' : 'locked'}"><div><b>${p}. ${escHtml(f.nome)}</b><span>${escHtml(p === 6 ? `${m.chefe}, com ${m.selo.toLowerCase()} escondido numa peça maior.` : p === 2 ? `Dê o xeque-mate em ${m.problema.n} lance${m.problema.n > 1 ? 's' : ''}.` : f.desc)}</span></div>
+        <span class="camp-st" aria-label="${s.filter(Boolean).length} de 3 estrelas">${s.map(x => x ? '★' : '☆').join('')}</span>
+        <button type="button" class="btn-main" data-p="${p}" ${open ? '' : 'disabled'}>${open ? (s[0] ? 'Jogar de novo' : 'Jogar') : 'Bloqueada'}</button></li>`;
+    }).join('')}</ol>
+    <p class="camp-note">Estrelas: vencer · capturar o Portador da carta e vencer · vencer em até 30 lances. O Portador é uma peça inimiga sorteada em segredo (nunca o Rei); a cada 10 lances a aura dele pisca no mapinha.</p>`;
+  $('camp-world').querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { audio(); campStart(CAMP.sel, +b.dataset.p); }));
+}
+const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+function campOpen(){
+  CAMP.open = true;
+  if (!TITLE.open) openTitle();
+  $('title').hidden = true;
+  // abre no primeiro mundo ainda não conquistado
+  const prox = CAMP_MUNDOS.find(m => campOpenWorld(m.n) && !campWon(m.n, 6));
+  CAMP.sel = prox ? prox.n : 8;
+  campRender();
+  $('camp').hidden = false;
+  setTimeout(() => { const b = $('camp').querySelector('.camp-node.sel'); if (b) b.focus(); }, 30);
+}
+function campClose(toMenu){
+  CAMP.open = false;
+  $('camp').hidden = true;
+  if (toMenu){ $('title').hidden = false; showSetup(null); }
+}
+$('camp-back').addEventListener('click', () => { audio(); campClose(true); });
+$('camp-namego').addEventListener('click', () => {
+  const v = $('camp-name').value.trim();
+  if (!/^[\p{L}\p{N} ._-]{3,20}$/u.test(v)){ onlineToast('O nome do Guardião tem de 3 a 20 letras ou números.'); return; }
+  CAMP.save.nome = v; campSaveNow(); campRender(); onlineToast(`O Guardião ${v} despertou.`);
+});
+
+// começa uma fase: Aurora (o Guardião, nas Brancas) contra o reino do mundo, na arena dele
+function campStart(w, p){
+  const m = CAMP_MUNDOS[w - 1], f = CAMP_FASES[p - 1];
+  arcExit(); aprExit(); leaveSpec();
+  const lvl = p === 2 ? 3 : p === 5 ? Math.min(3, m.base + 1) : p === 6 ? Math.max(2, m.base) : m.base;
+  const semDama = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1', semDamaTorre = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NB1KBNR w Kkq - 0 1';
+  const fen = p === 2 ? m.problema.fen : p === 4 ? (w <= 4 ? semDama : semDamaTorre) : null;
+  const arc = m.arc && p !== 2;
+  KINGDOM.w = 'aurora'; KINGDOM.b = m.reino; kingdomSave(); kingdomNames(); kingdomLoad(m.reino);
+  setArena(m.arena);
+  // grimórios: o Guardião com as cartas que já aprendeu; o rival com as do mundo, puxando a carta da regra
+  const meu = campCartasAte(m.n), dele = m.n === 8 ? campCartasAte(7) : m.cartas;
+  const enfase = (p === 3 || p === 5 || p === 6) ? m.regraCarta || null : null;
+  CAMP.run = { w, p, fen, limite:p === 2 ? m.problema.n : p === 4 ? 20 : 0, sobreviver:p === 4, portador:null, capturado:false, hintAt:10, nomeCarta:null };
+  Object.assign(cfg, { mode:'ai', human:'w', diff:lvl, clock:'none', undoLeft:0, paused:false, campFen:fen });
+  if (arc) Object.assign(cfg, { arc:true, arcDecks:{ w:campDeck(meu.length ? meu : m.cartas), b:campDeck(dele.length ? dele : meu, enfase) } });
+  $('mode').value = 'ai';
+  clockStart();
+  campClose(false);
+  closeTitle();
+  setFlip(false);
+  if (arc){ if (AC) for (const id of ARC_SFX) loadOne(id); arcNewGame(); }
+  else newGame();
+  syncViewUI();
+  cfg.campFen = null;
+  campPickPortador();
+  const c = p === 6 ? m.selo : campCartaDaFase(w, p);
+  CAMP.run.nomeCarta = c;
+  pushLog(`<b>Conquista dos Mundos</b> · Mundo ${w}, fase ${p}: ${f.nome}. ${p === 6 ? `${m.chefe} guarda ${m.selo.toLowerCase()}.` : ''} Uma peça inimiga carrega ${p === 6 ? 'o Selo' : `a carta ${c}`}.`);
+  onlineToast(`Mundo ${w} · ${f.nome}${CAMP.run.limite && !CAMP.run.sobreviver ? ` · mate em ${CAMP.run.limite}` : CAMP.run.sobreviver ? ' · aguente 20 lances' : ''}`);
+}
+const campCartaDaFase = (w, p) => { const m = CAMP_MUNDOS[w - 1], l = m.cartas.length ? m.cartas : campCartasAte(7); return CAMP_C(l[(p - 1) % l.length]); };
+// sorteia em segredo o Portador: uma peça do rival, nunca o Rei (no chefão, Torre, Bispo, Cavalo ou Dama)
+function campPickPortador(){
+  const r = CAMP.run; if (!r) return;
+  // no problema não há tempo de caçar o Portador: a carta vem com o mate
+  if (r.p === 2){ r.portador = null; r.capturado = true; return; }
+  const hum = cfg.human, inim = S.pieces.filter(q => !q.dead && q.side !== hum && q.t !== 'k');
+  const maiores = inim.filter(q => 'qrbn'.includes(q.t));
+  const pool = r.p === 6 && maiores.length ? maiores : inim;
+  if (!pool.length){ r.portador = null; r.capturado = true; return; }
+  const q = pool[Math.floor(Math.random() * pool.length)];
+  r.portador = { ref:q, eid:q.eid != null ? q.eid : null };
+}
+function campPortadorVivo(){
+  const r = CAMP.run, P = r && r.portador; if (!P) return false;
+  if (P.eid != null && G && G.board){ for (const row of G.board()) for (const q of row) if (q && q.eid === P.eid) return true; return false; }
+  return !P.ref.dead && S.pieces.includes(P.ref);
+}
+function campPortadorCasa(){
+  const r = CAMP.run, P = r && r.portador; if (!P) return null;
+  if (P.eid != null && G && G.board){ const b = G.board(); for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) if (b[i][j] && b[i][j].eid === P.eid) return 'abcdefgh'[j] + (8 - i); return null; }
+  return P.ref.dead ? null : 'abcdefgh'[P.ref.c] + (8 - P.ref.r);
+}
+// a cada quadro: captura do Portador, pista a cada 10 lances, limites do problema e da sobrevivência
+function campTick(){
+  const r = CAMP.run; if (!r || !S || !G || busy) return;
+  const hist = G.history ? G.history({ verbose:true }) : [], meus = hist.filter(x => x.color === cfg.human).length;
+  if (!r.capturado && r.portador && !campPortadorVivo()){
+    r.capturado = true;
+    snd('camera_lenta', { vol:0.6 });
+    onlineToast(`Você capturou o Portador! ${CAMP.run.p === 6 ? 'O Selo' : `A carta ${r.nomeCarta}`} aparece. Vença por xeque-mate para ficar com ${CAMP.run.p === 6 ? 'ele' : 'ela'}.`);
+    pushLog(`<b>Portador capturado:</b> ${r.p === 6 ? 'o Selo' : `a carta ${r.nomeCarta}`} sai da peça.`);
+  }
+  if (!r.capturado && r.portador && meus >= r.hintAt && !S.over){
+    r.hintAt += 10;
+    const sq = campPortadorCasa();
+    if (sq && MM.setMarks){ MM.setMarks([{ sq, kind:'aura', color:'#ffd36b' }]); setTimeout(() => { if (CAMP.run === r) MM.setMarks([]); }, 2200); onlineToast('A aura do Portador pisca no mapinha…'); }
+  }
+  if (S.over || r.fim) return;
+  if (r.limite && S.turn === cfg.human){
+    const venceu = r.sobreviver ? meus >= r.limite : false, falhou = !r.sobreviver && meus >= r.limite;
+    if (venceu || falhou){
+      r.fim = true; aiToken++; if (typeof ARCAI !== 'undefined'){ ARCAI.tok++; ARCAI.running = false; }
+      S.over = { kind:'campanha', winner:venceu ? cfg.human : other(cfg.human) };
+      renderAll(); showEnd();
+    }
+  }
+}
+// fim de uma fase: estrelas, carta, Selo, próximo mundo
+function campEnd(o){
+  const r = CAMP.run; if (!r) return;
+  const m = CAMP_MUNDOS[r.w - 1], f = CAMP_FASES[r.p - 1];
+  const hist = G.history ? G.history({ verbose:true }) : [], meus = hist.filter(x => x.color === cfg.human).length;
+  const venceu = !!o.winner && o.winner === cfg.human && (o.kind === 'mate' || o.kind === 'campanha');
+  const novas = [venceu, venceu && r.capturado, venceu && (r.limite || meus <= 30)];
+  const k = `${r.w}-${r.p}`, ant = CAMP.save.fases[k] || [0, 0, 0];
+  CAMP.save.fases[k] = ant.map((x, i) => x || (novas[i] ? 1 : 0));
+  let extra = '';
+  if (venceu && r.capturado){
+    if (r.p === 6){ if (!CAMP.save.selos.includes(r.w)) CAMP.save.selos.push(r.w); }
+    else if (!CAMP.save.cartas.includes(r.nomeCarta)) CAMP.save.cartas.push(r.nomeCarta);
+    extra = r.p === 6 ? ` Você guardou ${m.selo.toLowerCase()}.` : ` A carta ${r.nomeCarta} é sua.`;
+  } else if (venceu && r.portador && !r.capturado) extra = ` O Portador ficou vivo: ${r.p === 6 ? 'o Selo' : 'a carta'} continua escondid${r.p === 6 ? 'o' : 'a'}. Jogue a fase de novo para buscá-l${r.p === 6 ? 'o' : 'a'}.`;
+  else if (!venceu && r.capturado) extra = ` ${r.p === 6 ? 'O Selo volta' : 'A carta volta'} para o baú da fase.`;
+  campSaveNow();
+  const s = CAMP.save.fases[k];
+  const abriu = venceu && r.p === 6 && r.w < 8 ? ` O Mundo ${r.w + 1}, ${REINOS[CAMP_MUNDOS[r.w].reino].nome}, está aberto.` : venceu && r.p === 6 ? ' O Livro da Vida está inteiro: os casulos se abrem e o povo da Aurora desperta.' : '';
+  $('end-title').textContent = venceu ? (r.p === 6 ? `${m.chefe} cai!` : 'Fase vencida') : 'Fase perdida';
+  $('end-title').style.color = venceu ? 'var(--ember)' : 'var(--blood)';
+  $('end-text').textContent = (venceu
+    ? (o.kind === 'campanha' && r.sobreviver ? `O Guardião ${campGuardiao() || ''} resistiu 20 lances.` : `Mundo ${r.w}, ${f.nome}: vitória.`)
+    : (o.kind === 'campanha' && !r.sobreviver ? `O mate não saiu em ${r.limite} lance${r.limite > 1 ? 's' : ''}. Tente de novo.` : `Mundo ${r.w}, ${f.nome}: o rival venceu desta vez.`)) + extra + abriu;
+  $('end-stats').insertAdjacentHTML('afterbegin', `<span class="camp-endst"><b>${s.map(x => x ? '★' : '☆').join('')}</b>estrelas</span>`);
+  $('again').textContent = 'Jogar a fase de novo';
+  $('camp-endmap').hidden = false;
+  const prox = r.p < 6 ? [r.w, r.p + 1] : r.w < 8 ? [r.w + 1, 1] : null;
+  $('camp-endnext').hidden = !(venceu && prox && campOpenPhase(prox[0], prox[1]));
+  $('camp-endnext').dataset.next = prox ? prox.join('-') : '';
+}
+$('again').addEventListener('click', e => { if (!CAMP.run) return; e.stopImmediatePropagation(); audio(); $('end').hidden = true; campStart(CAMP.run.w, CAMP.run.p); }, true);
+$('camp-endmap').addEventListener('click', () => { audio(); $('end').hidden = true; const w = CAMP.run ? CAMP.run.w : 1; CAMP.run = null; campOpen(); CAMP.sel = w; campRender(); });
+$('camp-endnext').addEventListener('click', () => { audio(); $('end').hidden = true; const [w, p] = ($('camp-endnext').dataset.next || '').split('-').map(Number); if (w) campStart(w, p); });
+// qualquer outro modo encerra a campanha em andamento
+const campLeave = () => { CAMP.run = null; $('camp-endmap').hidden = true; $('camp-endnext').hidden = true; };
+// testes: ?dbg na URL expõe atalhos da campanha
+if (new URLSearchParams(location.search).has('dbg')) window.CAMPDBG = { sel:w => { CAMP.sel = w; campRender(); }, start:(w, p) => campStart(w, p), move:(f, t) => doMove({ from:f, to:t }), run:() => CAMP.run && { w:CAMP.run.w, p:CAMP.run.p, capturado:CAMP.run.capturado, portador:campPortadorCasa() } };
 
 /* ---------- Modo Aprendiz ----------
    Lições roteirizadas sobre posições prontas (a Legião não joga sozinha, a não ser no mate em dois) e uma partida
@@ -21987,7 +22296,7 @@ function onlineHash(){
   // links das páginas do site: #modo=arcano|online|espectador abre o menu já no modo (valores desconhecidos são ignorados);
   // uma partida em andamento não se perde (o menu mostra "Voltar à partida")
   const md = location.hash.match(/^#modo=([a-z]+)$/);
-  if (md){ const id = { arcano:'arcano', online:'online', espectador:'spec' }[md[1]]; if (id){ if (!TITLE.open) openTitle(); showSetup(id); } return; }
+  if (md){ if (md[1] === 'campanha'){ campOpen(); return; } const id = { arcano:'arcano', online:'online', espectador:'spec' }[md[1]]; if (id){ if (!TITLE.open) openTitle(); showSetup(id); } return; }
   const lg = location.hash.match(/^#login=([A-Za-z0-9_-]{16,64})$/);
   if (lg){ onlineLoginReturn(lg[1]); return; }
   const le = location.hash.match(/^#login-erro=([a-z]+)$/);

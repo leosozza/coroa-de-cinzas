@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entrar — Arcane Chess</title>
-<meta name="description" content="Entre no Arcane Chess como convidado ou com a sua conta para guardar a nota do ranking em qualquer aparelho.">
+<title>O Despertar · Entrar — Arcane Chess</title>
+<meta name="description" content="Dê um nome ao seu Guardião e comece a Conquista dos Mundos. Entre como convidado ou com a sua conta para guardar a nota do ranking em qualquer aparelho.">
 <meta name="theme-color" content="#0e0d0b">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
@@ -39,25 +39,45 @@
 </header>
 
 <main id="conteudo">
-  <section class="page-head">
-    <img class="page-head__bg" src="../assets/concepts/arena_celestial_ref.webp" alt="" width="1024" height="442">
-    <div class="wrap">
-      <p class="eyebrow" style="justify-content:center">Sua conta</p>
-      <h1 id="titulo">Entrar</h1>
+  <section class="despertar" aria-labelledby="titulo">
+    <div class="despertar__arte" aria-hidden="true">
+      <img class="despertar__ceu" src="../assets/concepts/arena_celestial_ref.webp" alt="" width="1024" height="442" fetchpriority="high">
+      <img class="despertar__abismo" src="../assets/concepts/arena_infernal_ref.webp" alt="" width="1024" height="442" decoding="async">
+      <svg class="despertar__lua" viewBox="0 0 120 120" focusable="false">
+        <defs>
+          <radialGradient id="despertar-lua-luz" cx="38%" cy="34%" r="72%"><stop offset="0" stop-color="#fff3d6"/><stop offset=".55" stop-color="#e6cd98"/><stop offset="1" stop-color="#7a5a30"/></radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="44" fill="url(#despertar-lua-luz)"/>
+        <circle cx="42" cy="46" r="7" fill="#b8955f" opacity=".45"/>
+        <circle cx="76" cy="80" r="5" fill="#b8955f" opacity=".4"/>
+        <circle cx="50" cy="84" r="3.5" fill="#b8955f" opacity=".35"/>
+        <path d="M71 15 62 37 71 46 54 61 64 72 49 105" fill="none" stroke="#0e0d0b" stroke-width="3.2" stroke-linejoin="bevel"/>
+        <path class="despertar__fenda" d="M71 15 62 37 71 46 54 61 64 72 49 105" fill="none" stroke="#9dffbd" stroke-width="1" stroke-linejoin="bevel"/>
+      </svg>
+      <span class="despertar__queda"></span>
+    </div>
+    <div class="wrap despertar__txt">
+      <p class="eyebrow">Conquista dos Mundos · Prólogo</p>
+      <h1 id="titulo">O Despertar</h1>
+      <div class="despertar__lore">
+        <p>O Reino da Aurora guardava o Livro da Vida. Até que uma nave-colmeia do Abismo Estelar caiu do céu: rachou a lua, afundou a cidade dos tritões e estilhaçou o Livro em 7 Selos, espalhados por 7 reinos.</p>
+        <p>A Rainha-Mãe levou o povo da Aurora em casulos. Só um Guardião ficou acordado. <strong>Você.</strong></p>
+      </div>
       <p id="subtitulo">Jogue agora como convidado. Com uma conta, a sua nota vale em qualquer aparelho.</p>
     </div>
   </section>
 
-  <section class="section section--alt torn-top">
+  <section class="section section--alt torn-top despertar-corpo">
     <div class="wrap">
       <div id="aviso" aria-live="polite"></div>
       <div class="auth">
-        <div class="panel" id="principal" aria-live="polite">
+        <div class="panel guardiao-painel" id="principal" aria-live="polite">
           <div class="state" style="border:0;background:none"><div class="spinner" aria-hidden="true"></div><p>Conferindo a sua sessão…</p></div>
         </div>
         <aside class="panel" aria-labelledby="porque-t">
-          <h2 id="porque-t">Por que entrar</h2>
+          <h2 id="porque-t">O que o Guardião leva</h2>
           <ul class="perks">
+            <li>Um nome em todo lugar<small>O nome do Guardião aparece no ranking, para os rivais online e na campanha.</small></li>
             <li>Uma nota por modo<small>Glicko-2 separado para o Xadrez Puro e o Arcano.</small></li>
             <li>Ranking e ligas<small>De Aprendiz a Grão-Mestre Arcano. O ranking lista as contas com nota firme.</small></li>
             <li>Perfil, histórico e replays<small>As últimas partidas ficam guardadas para rever lance a lance.</small></li>
@@ -66,6 +86,48 @@
           <p style="margin-top:18px;font-size:.92rem">Como convidado você joga online e ranqueado, mas a nota fica só neste navegador. Ao entrar com Google ou Discord, o que você fez como convidado vem junto.</p>
         </aside>
       </div>
+
+      <section class="despertar-mundos" aria-labelledby="mundos-t">
+        <div class="despertar-mundos__head">
+          <p class="eyebrow">A rota da campanha</p>
+          <h2 id="mundos-t">Os 8 mundos</h2>
+          <p>Da Aurora ao Abismo Estelar: sete reinos, e em cada um espera um Selo do Livro da Vida.</p>
+        </div>
+        <ol class="despertar-mundos__lista">
+          <li class="despertar-mundo despertar-mundo--lar despertar-mundo--retrato">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/rei.jpg" alt="" width="896" height="1200" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Seu reino</span><b>Aurora</b></p>
+          </li>
+          <li class="despertar-mundo despertar-mundo--retrato">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/primatas/referencia.jpg" alt="" width="896" height="1200" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo I</span><b>Primatas</b></p>
+          </li>
+          <li class="despertar-mundo despertar-mundo--retrato">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/mar/referencia.jpg" alt="" width="896" height="1200" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo II</span><b>Mar Profundo</b></p>
+          </li>
+          <li class="despertar-mundo despertar-mundo--retrato">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/deserto/referencia.jpg" alt="" width="896" height="1200" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo III</span><b>Deserto</b></p>
+          </li>
+          <li class="despertar-mundo">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/lua_nova/referencia.jpg" alt="" width="1024" height="342" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo IV</span><b>Lua Nova</b></p>
+          </li>
+          <li class="despertar-mundo">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/ferro_negro/referencia.png" alt="" width="1024" height="342" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo V</span><b>Ferro Negro</b></p>
+          </li>
+          <li class="despertar-mundo">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/dragoes/referencia.jpg" alt="" width="1024" height="342" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo VI</span><b>Dragões</b></p>
+          </li>
+          <li class="despertar-mundo despertar-mundo--fim despertar-mundo--retrato">
+            <div class="despertar-mundo__moldura"><div class="despertar-mundo__arte"><img src="../assets/concepts/reinos/abismo/referencia.jpg" alt="" width="896" height="1200" loading="lazy" decoding="async"></div></div>
+            <p class="despertar-mundo__txt"><span>Selo VII</span><b>Abismo Estelar</b></p>
+          </li>
+        </ol>
+      </section>
     </div>
   </section>
 </main>
@@ -116,14 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderGuestForm(pv){
-    $('#titulo').textContent = 'Entrar';
+    $('#titulo').textContent = 'O Despertar';
+    $('#subtitulo').textContent = 'Jogue agora como convidado. Com uma conta, a sua nota vale em qualquer aparelho.';
     const saved = AC.session.load().name || '';
-    box.innerHTML = `<h2>Jogar agora</h2><p>Dê um nome ao seu Guardião. Ele aparece no ranking, para os rivais online e na campanha.</p>
+    box.innerHTML = `<p class="guardiao-passo"><span class="guardiao-passo__n" aria-hidden="true">I</span>Primeiro passo da campanha</p>
+      <h2>Desperte o seu Guardião</h2><p>Dê um nome ao seu Guardião. Ele aparece no ranking, para os rivais online e na campanha.</p>
       <form id="g" novalidate>
-        <div class="field"><label for="g-nome">Nome do Guardião</label>
+        <div class="field guardiao-campo"><label for="g-nome">Nome do Guardião</label>
           <input id="g-nome" name="nome" autocomplete="nickname" maxlength="20" minlength="3" value="${esc(saved)}" aria-describedby="g-ajuda g-erro" required>
           <small id="g-ajuda">De 3 a 20 letras ou números (espaço, ponto, hífen e sublinhado valem).</small><span class="field__err" id="g-erro"></span></div>
-        <button class="btn btn--primary btn--block" type="submit">Jogar como convidado</button>
+        <button class="btn btn--primary btn--block" type="submit">Despertar como convidado</button>
       </form>
       <div class="divider">ou entre com</div>${providerButtons(pv, false)}`;
     wireProviders();
@@ -133,10 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = inp.value.normalize('NFC').replace(/\s+/g, ' ').trim();
       if (!NAME_RE.test(name)){ inp.setAttribute('aria-invalid', 'true'); err.textContent = 'Use de 3 a 20 letras ou números.'; inp.focus(); return; }
       inp.removeAttribute('aria-invalid'); err.textContent = '';
-      const b = f.querySelector('button'); b.disabled = true; b.textContent = 'Entrando…';
+      const b = f.querySelector('button'); b.disabled = true; b.textContent = 'Despertando…';
       let r = null;
       try { r = await AC.fetchApi('/api/guest', { body:{ name }, token:null }); } catch (e){}
-      if (!r || !r.ok || !r.j.token){ b.disabled = false; b.textContent = 'Jogar como convidado'; notice(esc((r && r.j.err) || 'Servidor fora do ar. Tente de novo em instantes.'), 'err'); return; }
+      if (!r || !r.ok || !r.j.token){ b.disabled = false; b.textContent = 'Despertar como convidado'; notice(esc((r && r.j.err) || 'Servidor fora do ar. Tente de novo em instantes.'), 'err'); return; }
       AC.session.save(r.j.token, r.j.user.name);
       notice(`O Guardião <b>${esc(r.j.user.name)}</b> despertou. A sessão também vale no jogo.`, 'ok');
       refresh();
@@ -149,13 +213,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderAccount(d, pv){
     const u = d.user, acct = u.kind === 'account', R = d.ratings || {};
-    $('#titulo').textContent = 'Sua conta';
+    $('#titulo').textContent = 'O Guardião despertou';
     $('#subtitulo').textContent = acct ? 'A sua nota fica guardada em qualquer aparelho.' : 'Você joga como convidado neste navegador.';
     const via = acct && u.logins && u.logins.length ? u.logins.map(x => (pv.find(p => p.id === x) || KNOWN.find(k => k.id === x) || { name:x }).name).join(' e ') : '';
-    box.innerHTML = `<div class="acct"><span class="acct__sigil" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
-        <div><p class="acct__name">${esc(u.name)}</p><span class="acct__kind ${acct ? 'acct__kind--account' : ''}">${acct ? 'Conta' : 'Convidado'}</span>${via ? ` <small style="color:var(--ash)">entrou com ${esc(via)}</small>` : ''}</div></div>
-      <div class="ratings">${ratingCard(R.xadrez, 'Xadrez Puro')}${ratingCard(R.arcano, 'Arcano')}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px"><a class="btn btn--primary" href="${esc(AC.gameUrl('online'))}">Jogar online</a><a class="btn" href="${esc(AC.siteUrl('ranking.html'))}">Ver o ranking</a></div>
+    box.innerHTML = `<div class="guardiao-cartao">
+        <p class="guardiao-cartao__rotulo">Guardião da Aurora</p>
+        <div class="acct guardiao-cartao__id"><span class="acct__sigil" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
+          <div><p class="acct__name guardiao-cartao__nome">${esc(u.name)}</p><span class="acct__kind ${acct ? 'acct__kind--account' : ''}">${acct ? 'Conta' : 'Convidado'}</span>${via ? ` <small style="color:var(--ash)">entrou com ${esc(via)}</small>` : ''}</div></div>
+        <div class="ratings">${ratingCard(R.xadrez, 'Xadrez Puro')}${ratingCard(R.arcano, 'Arcano')}</div>
+        <a class="btn btn--primary btn--block guardiao-cta" href="${esc(AC.gameUrl('campanha'))}">Começar a Conquista dos Mundos</a>
+        <div class="guardiao-acoes"><a class="btn" href="${esc(AC.gameUrl('online'))}">Jogar online</a><a class="btn" href="${esc(AC.siteUrl('ranking.html'))}">Ver o ranking</a></div>
+      </div>
       <h3>Nome do Guardião</h3>
       <form id="n" class="row" novalidate>
         <div class="field"><label for="n-nome">Novo nome</label><input id="n-nome" maxlength="20" value="${esc(u.name)}" autocomplete="nickname" aria-describedby="n-erro"><span class="field__err" id="n-erro"></span></div>

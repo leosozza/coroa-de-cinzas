@@ -10,6 +10,7 @@ Versão atual: **v33.1** (veja o [histórico de commits](https://github.com/leos
 
 | Modo | O que é |
 |---|---|
+| Conquista dos Mundos | A campanha do Guardião: 8 mundos (os 8 reinos), 6 fases cada (batalha, problema de mate, regra do mundo, sobrevivência, batalha difícil e chefão), estrelas, o Portador escondido de cada fase e os 7 Selos do Livro da Vida. O progresso fica no navegador. |
 | Padrão | Xadrez clássico contra a IA (Recruta, Veterano, Mestre) ou a dois no mesmo aparelho, com relógio opcional. |
 | Espectador | IA contra IA com velocidade, séries (melhor de 3/5), pausa, voltar lance e assumir um lado. Câmera de transmissão que acompanha os lances. |
 | Aprendiz | Sete lições guiadas com narração, dicas do motor e insígnias. |
