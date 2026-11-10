@@ -17941,6 +17941,17 @@ function setView(mode){
   VIEW.mode = mode;
   saveView(); syncViewUI();
 }
+// para o robô dos Reels: vista Drone com distância, inclinação e giro escolhidos (giro opcional, em radianos)
+window.__arcCam = {
+  drone(D = 11, pitch = 0.85, yaw = null){
+    setView('drone');
+    VIEW.droneD = clamp(D, 7, 30); VIEW.dronePitch = clamp(pitch, PITCH.min, PITCH.max);
+    if (yaw != null) VIEW.droneYaw = yaw;
+    VIEW.panX = 0; VIEW.panZ = 0; VIEW.lastInput = performance.now();
+    $('view-hint').hidden = true;
+    return { mode:VIEW.mode, D:VIEW.droneD, pitch:VIEW.dronePitch };
+  },
+};
 function setFlip(f){
   f = !!f;
   if (f === VIEW.flip) return;

@@ -96,6 +96,9 @@ async function gravarPartida(w, b, modo, niveis){
     const placar = await page.evaluate(() => document.getElementById('spec-score')?.textContent || '');
     console.log('confronto na tela:', placar);
     await page.waitForTimeout(1200);
+    // vista Drone mais perto do tabuleiro (os closes dos golpes continuam com a câmera de combate)
+    await page.evaluate(() => { if (window.__arcCam) window.__arcCam.drone(12.5, 0.9); });
+    await page.waitForTimeout(1500);
     await page.evaluate(() => { const r = window.__rec; if (r && !r.manual) document.getElementById('rec-go').click(); });
     const ok = await page.evaluate(() => !!(window.__rec && window.__rec.manual && window.__rec.mime));
     if (!ok) throw new Error('gravador não ligou (MediaRecorder indisponível?)');
