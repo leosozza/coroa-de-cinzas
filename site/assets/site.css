@@ -91,7 +91,8 @@ p{ margin:0 0 1em; }
 .btn:hover{ color:var(--basalt); background:var(--bone); }
 .btn--primary{ --c:var(--ember); box-shadow:0 0 18px rgba(227,165,72,.18) inset; }
 .btn--primary:hover{ color:#1a1209; background:var(--ember); box-shadow:var(--ember-glow); }
-.btn--sm{ min-height:40px; padding:.5em 1.1em; font-size:.76rem; letter-spacing:.14em; }
+.btn:active{ transform:translateY(1px); }
+.btn--sm{ min-height:44px; padding:.5em 1.1em; font-size:.76rem; letter-spacing:.14em; }
 .btn--block{ width:100%; }
 .btn[disabled],.btn[aria-disabled="true"]{ opacity:.48; cursor:not-allowed; }
 .btn[disabled]:hover,.btn[aria-disabled="true"]:hover{ color:var(--c); background:rgba(14,13,11,.35); box-shadow:none; }
@@ -286,7 +287,8 @@ p{ margin:0 0 1em; }
   .logo{ font-size:clamp(2.3rem, 11vw, 3rem); }
   .logo__sub{ margin-top:8px; letter-spacing:.24em; }
   .hero__tagline{ margin:12px 0 18px; font-size:1rem; }
-  .hero__actions{ gap:12px; flex-wrap:nowrap; }
+  .hero__actions{ gap:12px; flex-wrap:wrap; }
+  .hero__actions .btn--primary{ flex:1 1 100%; }
   .hero__actions .btn{ flex:1 1 0; min-width:0; padding:.7em .5em; letter-spacing:.08em; font-size:.74rem; }
   .hero__links{ margin-top:16px; }
   .bc-lower__txt span{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -415,18 +417,16 @@ p{ margin:0 0 1em; }
 @media (max-width: 720px){ .empty__steps{ grid-template-columns:1fr; } }
 
 /* ---------- como jogar ---------- */
-.steps{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; counter-reset:step; }
+.steps{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; counter-reset:step; }
 .step{ position:relative; padding:34px 26px 28px; border:1px solid var(--line); background:linear-gradient(180deg, rgba(34,31,25,.6), rgba(14,13,11,.4)); counter-increment:step; }
 .step::before{
   content:counter(step, upper-roman); position:absolute; top:-22px; left:24px; width:44px; height:44px; display:grid; place-items:center;
-  background:var(--basalt); border:1px solid var(--ember); color:var(--ember); font-family:var(--f-engrave); font-weight:700; transform:rotate(45deg);
+  background:var(--ember); color:#1a1209; font-family:var(--f-engrave); font-weight:700; clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 .step h3{ margin-top:10px; font-size:1.06rem; text-transform:uppercase; letter-spacing:.1em; }
 .step p{ color:var(--ash); margin:0; }
 .step .glyphs{ font-family:var(--f-glyph); font-size:1.6rem; letter-spacing:6px; color:var(--bone); margin-bottom:10px; opacity:.85; }
 @media (max-width: 860px){ .steps{ grid-template-columns:1fr; gap:40px; } }
-/* o losango do passo é girado; o número volta ao normal */
-.step::before{ transform:none; clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); border:0; background:var(--ember); color:#1a1209; }
 
 /* ---------- vozes do tabuleiro (carrossel de citações) ---------- */
 .quotes{ position:relative; max-width:820px; margin:0 auto; text-align:center; }
@@ -440,8 +440,8 @@ p{ margin:0 0 1em; }
 .quote__sigil img{ width:100%; height:100%; object-fit:cover; }
 .quote figcaption b{ display:block; font-family:var(--f-engrave); letter-spacing:.08em; }
 .quote figcaption span{ font-family:var(--f-ui); font-size:.8rem; letter-spacing:.1em; color:var(--ash); }
-.quotes__dots{ display:flex; justify-content:center; gap:10px; margin-top:28px; }
-.quotes__dot{ width:28px; height:28px; display:grid; place-items:center; border:0; background:transparent; cursor:pointer; padding:0; }
+.quotes__dots{ display:flex; justify-content:center; gap:0; margin-top:28px; }
+.quotes__dot{ width:44px; height:44px; display:grid; place-items:center; border:0; background:transparent; cursor:pointer; padding:0; }
 .quotes__dot::before{ content:""; width:9px; height:9px; transform:rotate(45deg); border:1px solid var(--ash); transition:background-color .3s, border-color .3s; }
 .quotes__dot[aria-current="true"]::before{ background:var(--ember); border-color:var(--ember); }
 .quotes__note{ margin-top:16px; font-size:.82rem; color:var(--ash); }
@@ -461,7 +461,7 @@ p{ margin:0 0 1em; }
 .footer h4{ font-size:.8rem; text-transform:uppercase; letter-spacing:.2em; color:var(--ember); margin-bottom:14px; }
 .footer ul{ list-style:none; margin:0; padding:0; }
 .footer li{ margin:0 0 8px; }
-.footer a{ color:var(--bone); text-decoration:none; opacity:.8; }
+.footer a{ color:var(--bone); text-decoration:none; opacity:.8; display:inline-block; padding:6px 0; }
 .footer a:hover{ opacity:1; color:var(--ember); }
 .footer p{ color:var(--ash); font-size:.95rem; max-width:40ch; }
 .footer__base{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; color:var(--ash); font-size:.86rem; }
@@ -556,7 +556,7 @@ p{ margin:0 0 1em; }
   min-height:48px; padding:10px 14px; background:rgba(7,6,5,.7); border:1px solid var(--line-strong); color:var(--bone); border-radius:var(--radius);
   font-family:var(--f-body); font-size:1.05rem;
 }
-.field input:focus{ outline:none; border-color:var(--ember); box-shadow:0 0 0 3px rgba(227,165,72,.2); }
+.field input:focus{ outline:2px solid var(--ember); outline-offset:2px; border-color:var(--ember); box-shadow:0 0 0 3px rgba(227,165,72,.2); }
 .field input[aria-invalid="true"]{ border-color:var(--blood); }
 .field small{ color:var(--ash); font-size:.84rem; }
 .field__err{ color:#f08a94; font-size:.88rem; min-height:1.2em; }
@@ -796,8 +796,8 @@ p{ margin:0 0 1em; }
 @media (max-width: 420px){
   .despertar-mundos__lista{ gap:16px 8px; }
   .despertar-mundo__moldura::after{ width:8px; }
-  .despertar-mundo__txt span{ font-size:.64rem; letter-spacing:.08em; }
-  .despertar-mundo__txt b{ font-size:.74rem; letter-spacing:0; }
+  .despertar-mundo__txt span{ font-size:.72rem; letter-spacing:.08em; }
+  .despertar-mundo__txt b{ font-size:.8rem; letter-spacing:0; }
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -806,4 +806,97 @@ p{ margin:0 0 1em; }
 }
 @media (forced-colors: active){
   .guardiao-passo__n,.guardiao-cartao__id .acct__sigil{ clip-path:none; border:1px solid CanvasText; }
+}
+
+/* =====================================================================
+   Conquista dos Mundos na home (index.html, #campanha) e a linha de
+   progresso na conta (login.html). Os dados vêm de assets/campanha.js.
+   Só classes novas (.campanha-*): nada acima foi alterado.
+   ===================================================================== */
+
+/* ---------- barra de progresso ---------- */
+.campanha-barra{ height:4px; background:var(--line); overflow:hidden; }
+.campanha-barra span{ display:block; width:0; height:100%; background:var(--ember); transition:width .5s var(--ease); }
+.campanha-barra--total{ height:6px; margin-top:18px; }
+
+/* ---------- resumo do visitante ---------- */
+.campanha-resumo{
+  display:flex; align-items:center; gap:28px 40px; padding:28px 30px;
+  border:1px solid var(--line-strong); background:linear-gradient(180deg, rgba(34,31,25,.6), rgba(14,13,11,.4));
+}
+.campanha-resumo__dados{ flex:1 1 auto; min-width:0; }
+.campanha-resumo__t{ margin:0 0 14px; font-family:var(--f-ui); font-size:.82rem; letter-spacing:.18em; color:var(--ember); }
+.campanha-resumo__lista{ display:flex; flex-wrap:wrap; gap:16px 44px; margin:0; }
+.campanha-resumo__lista div{ min-width:0; }
+.campanha-resumo__lista dt{ font-family:var(--f-ui); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ash); }
+.campanha-resumo__lista dd{ margin:2px 0 0; font-family:var(--f-engrave); font-size:1rem; letter-spacing:.04em; color:var(--ash); font-variant-numeric:tabular-nums; }
+.campanha-resumo__lista dd b{ font-size:1.7rem; line-height:1.1; color:var(--bone); }
+.campanha-resumo__lista dd.campanha-resumo__atual{ font-size:1.12rem; line-height:1.9; color:var(--bone); overflow-wrap:anywhere; }
+.campanha-resumo__fonte{ margin:12px 0 0; font-size:.9rem; color:var(--ash); }
+.campanha-resumo__cta{ flex:0 0 auto; min-height:56px; text-align:center; }
+
+/* ---------- os oito mundos ---------- */
+.campanha-mundos{ list-style:none; margin:28px 0 0; padding:0; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; }
+.campanha-mundo{ position:relative; min-width:0; display:flex; flex-direction:column; border:1px solid var(--seam); background:#0b0a08; }
+.campanha-mundo__arte{ position:relative; flex:0 0 auto; aspect-ratio:3 / 2; overflow:hidden; background:var(--stone); }
+.campanha-mundo__arte img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 50%; filter:brightness(.82) saturate(.92); transition:filter .6s; }
+.campanha-mundo--retrato .campanha-mundo__arte img{ object-position:50% 8%; }
+.campanha-mundo__arte::after{ content:""; position:absolute; inset:0; background:linear-gradient(0deg, rgba(11,10,8,.92) 0%, rgba(11,10,8,.18) 46%, rgba(11,10,8,.3) 100%); pointer-events:none; }
+.campanha-mundo:hover .campanha-mundo__arte img{ filter:brightness(.96) saturate(1); }
+.campanha-mundo__corpo{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; padding:16px 16px 18px; }
+.campanha-mundo__num{ margin:0 0 4px; font-family:var(--f-ui); font-weight:700; font-size:.78rem; letter-spacing:.18em; color:var(--ember); }
+.campanha-mundo__nome{ margin:0 0 8px; font-size:1.02rem; letter-spacing:.05em; line-height:1.25; overflow-wrap:anywhere; }
+.campanha-mundo__nome a{ color:inherit; text-decoration:none; }
+.campanha-mundo__hist{ margin:0 0 8px; font-size:.93rem; line-height:1.45; color:var(--ash); }
+.campanha-mundo__regra{ margin:0 0 14px; font-size:.86rem; line-height:1.45; color:var(--ash); }
+.campanha-mundo__regra b{ font-family:var(--f-ui); font-weight:700; letter-spacing:.06em; color:var(--bone); }
+.campanha-mundo__prog{ margin-top:auto; padding-top:12px; border-top:1px solid var(--line); display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px 10px; }
+.campanha-mundo__estado{ justify-self:start; margin:0; padding:2px 8px; border:1px solid currentColor; font-family:var(--f-ui); font-weight:700; font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; color:var(--bone); }
+.campanha-mundo__estrelas{ margin:0; font-family:var(--f-engrave); font-size:.82rem; letter-spacing:.04em; color:var(--ash); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.campanha-mundo__prog .campanha-barra{ grid-column:1 / -1; }
+.campanha-mundo__dica{ grid-column:1 / -1; margin:0; font-size:.82rem; line-height:1.4; color:var(--ash); }
+
+/* estados: o rótulo em texto diz o estado; a cor só reforça */
+.campanha-mundo[data-estado="atual"]{ border-color:var(--ember); box-shadow:0 0 0 1px var(--ember-a), 0 0 26px rgba(227,165,72,.12); }
+.campanha-mundo[data-estado="atual"] .campanha-mundo__estado{ color:var(--ember); }
+.campanha-mundo[data-estado="concluido"] .campanha-mundo__estado{ color:var(--life); }
+.campanha-mundo[data-estado="concluido"] .campanha-barra span{ background:var(--life); }
+.campanha-mundo[data-estado="bloqueado"]{ border-style:dashed; }
+.campanha-mundo[data-estado="bloqueado"] .campanha-mundo__estado{ border-style:dashed; color:var(--ash); }
+.campanha-mundo[data-estado="bloqueado"] .campanha-mundo__nome{ color:var(--ash); }
+.campanha-mundo[data-estado="bloqueado"] .campanha-mundo__arte img,
+.campanha-mundo[data-estado="bloqueado"]:hover .campanha-mundo__arte img{ filter:grayscale(1) brightness(.5); }
+
+/* ---------- como a conquista funciona ---------- */
+.campanha-passos{ list-style:none; padding:0; margin:72px 0 0; }
+
+/* ---------- linha de progresso na conta (login.html) ---------- */
+.campanha-linha{ margin:10px 0 0; font-family:var(--f-ui); font-size:.9rem; letter-spacing:.06em; text-align:center; color:var(--ash); font-variant-numeric:tabular-nums; }
+.campanha-linha:empty{ display:none; }
+
+@media (max-width: 960px){
+  .campanha-mundos{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 720px){
+  .campanha-resumo{ flex-direction:column; align-items:stretch; padding:22px 18px; }
+  .campanha-resumo__lista{ gap:14px 28px; }
+  .campanha-resumo__cta{ width:100%; }
+  .campanha-passos{ margin-top:64px; }
+}
+@media (max-width: 520px){
+  .campanha-mundos{ grid-template-columns:minmax(0,1fr); gap:12px; }
+  .campanha-mundo{ flex-direction:row; }
+  .campanha-mundo__arte{ flex:0 0 96px; aspect-ratio:auto; min-height:150px; }
+  .campanha-mundo__arte::after{ background:linear-gradient(270deg, rgba(11,10,8,.85) 0%, rgba(11,10,8,.12) 60%); }
+  .campanha-mundo__corpo{ padding:14px 14px 16px; }
+  .campanha-resumo__lista dd b{ font-size:1.5rem; }
+}
+@media (prefers-reduced-motion: reduce){
+  .campanha-barra span,.campanha-mundo__arte img{ transition:none; }
+}
+@media (forced-colors: active){
+  .campanha-barra{ border:1px solid CanvasText; }
+  .campanha-barra span{ background:Highlight; }
+  .campanha-resumo,.campanha-mundo{ border-color:CanvasText; }
+  .campanha-mundo__arte::after{ display:none; }
 }

@@ -29,6 +29,7 @@ GAME="index.html"
 if [ -f "$ROOT/site/index.html" ]; then
   GAME="jogar.html"
   cp "$ROOT"/site/index.html "$ROOT"/site/ranking.html "$ROOT"/site/login.html "$W/"
+  [ -f "$ROOT/site/mapa.html" ] && cp "$ROOT/site/mapa.html" "$W/"
   cp "$ROOT"/site/assets/* "$W/assets/"
   mkdir -p "$W/assets/concepts" && cp "$ROOT"/assets/concepts/arena_*_ref.webp "$W/assets/concepts/"
   (cd "$ROOT/assets/meshy" && ls */thumbnail.png 2>/dev/null) | while read -r f; do mkdir -p "$W/assets/meshy/$(dirname "$f")"; cp "$ROOT/assets/meshy/$f" "$W/assets/meshy/$f"; done

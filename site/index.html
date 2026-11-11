@@ -8,7 +8,10 @@
 <meta name="theme-color" content="#0e0d0b">
 <meta property="og:title" content="Arcane Chess — The Battle for the Grimoire">
 <meta property="og:description" content="Xadrez em 3D com alma de RPG sombrio. Cada captura é um duelo.">
-<meta property="og:image" content="../assets/concepts/arena_infernal_ref.webp">
+<meta property="og:image" content="https://arcanechess.pages.dev/assets/concepts/arena_infernal_ref.webp">
+<meta property="og:url" content="https://arcanechess.pages.dev/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +20,7 @@
 <link rel="stylesheet" href="assets/site.css">
 <script src="assets/site.js" defer></script>
 <script src="assets/hero.js" defer></script>
+<script src="assets/campanha.js" defer></script>
 </head>
 <body data-page="home">
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -31,6 +35,8 @@
     <div class="nav__panel" id="menu">
       <ul class="nav__links">
         <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a href="#campanha">Campanha</a></li>
+        <li><a data-page="mapa" href="mapa.html">Mapa</a></li>
         <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
         <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
         <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
@@ -60,6 +66,7 @@
         <p class="hero__tagline">Xadrez de verdade, com guerreiros de verdade. Cada captura vira duelo, e um peão pode virar lenda.</p>
         <div class="hero__actions">
           <a class="btn btn--primary" data-game="" href="../coroa-de-cinzas.html">Jogar agora</a>
+          <a class="btn" href="mapa.html">Conquista dos Mundos</a>
           <a class="btn" data-game="espectador" href="../coroa-de-cinzas.html"><span class="glyph" aria-hidden="true">◉</span> Assistir ao vivo</a>
         </div>
         <div class="hero__links">
@@ -129,13 +136,167 @@
     </div>
   </section>
 
+  <!-- Conquista dos Mundos: a campanha e o progresso do visitante (assets/campanha.js) -->
+  <section class="section torn-top" id="campanha" data-campanha style="--sec-bg:var(--basalt)" aria-labelledby="campanha-t">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <p class="eyebrow">A campanha</p>
+        <h2 class="sec-title" id="campanha-t">Conquista dos <em>Mundos</em></h2>
+        <p class="sec-lede">A Queda estilhaçou o Livro da Vida em Selos e os espalhou pelos mundos. Você é o último Guardião acordado da Aurora: atravesse oito mundos, derrube os seus soberanos e recomponha o Livro.</p>
+      </header>
+
+      <div class="campanha-resumo reveal" role="group" aria-labelledby="campanha-prog-t">
+        <div class="campanha-resumo__dados">
+          <h3 class="campanha-resumo__t" id="campanha-prog-t">Sua conquista</h3>
+          <dl class="campanha-resumo__lista">
+            <div><dt>Estrelas</dt><dd><b data-campanha-total>0</b> / 144</dd></div>
+            <div><dt>Mundos conquistados</dt><dd><b data-campanha-selos>0</b> / 8</dd></div>
+            <div><dt>Onde você está</dt><dd class="campanha-resumo__atual" data-campanha-atual>Mundo 1 · Reino da Aurora</dd></div>
+          </dl>
+          <div class="campanha-barra campanha-barra--total" aria-hidden="true"><span data-campanha-barra></span></div>
+          <p class="campanha-resumo__fonte" data-campanha-fonte>Sua conquista ainda não começou. O progresso fica salvo neste navegador.</p>
+        </div>
+        <a class="btn btn--primary campanha-resumo__cta" data-campanha-cta href="mapa.html">Começar a conquista</a>
+      </div>
+
+      <ol class="campanha-mundos" aria-label="Os oito mundos da campanha">
+        <li class="campanha-mundo campanha-mundo--retrato" data-mundo="1" data-estado="atual">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/rei.jpg" alt="Rei da Aurora de armadura dourada, coroa e espada longa" loading="lazy" decoding="async" width="896" height="1200"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 1</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Reino da Aurora</a></h3>
+            <p class="campanha-mundo__hist">O Arcanjo desce num pilar de luz para testar o último Guardião acordado.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> Xadrez puro, sem cartas: o Arcanjo testa o Guardião.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Mundo atual</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica hidden>Vença o chefão do mundo anterior para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo campanha-mundo--retrato" data-mundo="2" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/primatas/referencia.jpg" alt="Rei gorila de armadura, soberano do Clã dos Primatas" loading="lazy" decoding="async" width="896" height="1200"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 2</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Clã dos Primatas</a></h3>
+            <p class="campanha-mundo__hist">O Selo caiu no alto do templo e despertou o ídolo gorila de pedra.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> O rival esconde Armadilhas de Espinhos.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 1 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo campanha-mundo--retrato" data-mundo="3" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/mar/referencia.jpg" alt="Rei tritão de barba de algas, coroa de coral e tridente" loading="lazy" decoding="async" width="896" height="1200"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 3</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Clã do Mar Profundo</a></h3>
+            <p class="campanha-mundo__hist">A onda da Queda trouxe o Kraken, que guarda o Selo na Cidade Afundada.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> O rival abre Portais de Runa: a correnteza.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 2 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo campanha-mundo--retrato" data-mundo="4" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/deserto/referencia.jpg" alt="Guerreiro do deserto com cauda de escorpião" loading="lazy" decoding="async" width="896" height="1200"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 4</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Império do Deserto Subterrâneo</a></h3>
+            <p class="campanha-mundo__hist">O Verme-Colosso engoliu o Selo e o carrega sob as dunas.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> O rival abre Fossos de Lava: a areia movediça.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 3 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo" data-mundo="5" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/lua_nova/referencia.jpg" alt="Matilha da Lua Nova reunida sob a lua partida, com lobos e um castelo ao fundo" loading="lazy" decoding="async" width="1024" height="342"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 5</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Alpha da Lua Nova</a></h3>
+            <p class="campanha-mundo__hist">O Selo caiu com o pedaço da lua; sob a lua partida, o Alpha vira lobisomem e não volta.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> A Névoa Fria cai sobre o tabuleiro.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 4 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo" data-mundo="6" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/ferro_negro/referencia.png" alt="Legião do Ferro Negro em marcha, de armaduras escuras e estandartes rubros" loading="lazy" decoding="async" width="1024" height="342"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 6</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Legião do Ferro Negro</a></h3>
+            <p class="campanha-mundo__hist">A Legião usou o Selo para erguer o Dragão de Ossos, os restos do ancestral dos dragões.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> O rival ergue Recrutas do Cemitério.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 5 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo" data-mundo="7" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/dragoes/referencia.jpg" alt="Soberana alada do Reino dos Dragões conjurando fogo entre sua guarda" loading="lazy" decoding="async" width="1024" height="342"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 7</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Reino dos Dragões</a></h3>
+            <p class="campanha-mundo__hist">O Dragão Gigante só entrega o fogo a quem o vencer.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> Repercussão de Impacto em toda captura do rival.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 6 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+        <li class="campanha-mundo campanha-mundo--retrato" data-mundo="8" data-estado="bloqueado">
+          <div class="campanha-mundo__arte"><img src="../assets/concepts/reinos/abismo/referencia.jpg" alt="Soberano do Abismo Estelar de armadura escura e cajado de cristal" loading="lazy" decoding="async" width="896" height="1200"></div>
+          <div class="campanha-mundo__corpo">
+            <p class="campanha-mundo__num">Mundo 8</p>
+            <h3 class="campanha-mundo__nome"><a href="mapa.html">Abismo Estelar</a></h3>
+            <p class="campanha-mundo__hist">A Rainha-Mãe guarda o último Selo no coração da câmara de ovos.</p>
+            <p class="campanha-mundo__regra"><b>Regra do mundo:</b> As regras dos seis mundos anteriores, misturadas.</p>
+            <div class="campanha-mundo__prog">
+              <p class="campanha-mundo__estado" data-mundo-estado>Bloqueado</p>
+              <p class="campanha-mundo__estrelas"><span data-mundo-estrelas>0/18</span> estrelas</p>
+              <div class="campanha-barra" aria-hidden="true"><span data-mundo-barra></span></div>
+              <p class="campanha-mundo__dica" data-mundo-dica>Vença o chefão do Mundo 7 para abrir este mundo.</p>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <ol class="steps reveal campanha-passos">
+        <li class="step"><div class="glyphs" aria-hidden="true">♙♘♔</div><h3>Seis fases por mundo</h3><p>Batalha, problema de mate, a regra do mundo, sobrevivência, batalha difícil e o chefão. Vencer uma fase abre a seguinte; derrubar o chefão abre o próximo mundo.</p></li>
+        <li class="step"><div class="glyphs" aria-hidden="true">★★★</div><h3>Três estrelas por fase</h3><p>Uma por vencer, outra por capturar o Portador e vencer, a terceira por vencer em até 30 lances. São 18 por mundo e 144 na conquista inteira.</p></li>
+        <li class="step"><div class="glyphs" aria-hidden="true">♜♝♛</div><h3>O Portador da Carta</h3><p>Em toda fase uma peça inimiga, nunca o Rei, esconde a carta da fase: capture o Portador e vença por mate para ficar com ela. No chefão, o Selo do mundo está escondido numa peça maior.</p></li>
+      </ol>
+    </div>
+  </section>
+
   <!-- contadores -->
   <section class="section section--deep torn-top" aria-label="Em números">
     <div class="wrap counters">
       <div class="counter"><b data-count="41">41</b><span>Cartas</span><small>em três grimórios</small></div>
       <div class="counter"><b data-count="10">10</b><span>Arenas</span><small>com música própria</small></div>
       <div class="counter"><b data-count="6">6</b><span>Personagens</span><small>com rig e animações</small></div>
-      <div class="counter"><b data-count="5">5</b><span>Ligas</span><small>até Grão-Mestre Arcano</small></div>
+      <div class="counter"><b data-count="4">4</b><span>Ligas</span><small>e o título de Grão-Mestre Arcano</small></div>
     </div>
   </section>
 
@@ -188,7 +349,7 @@
         <p class="sec-lede">As melhores notas firmes do Xadrez Puro. Contas entram no ranking depois de algumas partidas ranqueadas, quando a nota Glicko-2 deixa de ser provisória.</p>
         <p><a class="link-arrow" href="ranking.html">Ver ranking completo</a></p>
       </div>
-      <div class="reveal" data-rank-preview data-pool="xadrez" aria-live="polite"></div>
+      <div class="reveal" data-rank-preview data-pool="xadrez"></div>
     </div>
   </section>
 
@@ -199,7 +360,7 @@
         <p class="eyebrow">Como jogar</p>
         <h2 class="sec-title" id="como-t">Três passos até o <em>primeiro duelo</em></h2>
       </header>
-      <ol class="steps reveal" style="list-style:none; padding:0; margin:0">
+      <ol class="steps reveal">
         <li class="step"><div class="glyphs" aria-hidden="true">♔♕♖</div><h3>Escolha o modo</h3><p>Xadrez Puro contra a IA (Recruta, Veterano ou Mestre), o Modo Arcano com cartas, ou uma partida online por link ou pela fila.</p></li>
         <li class="step"><div class="glyphs" aria-hidden="true">♘♗♙</div><h3>Mova como no xadrez</h3><p>As regras são as clássicas: roque, en passant, promoção e empates. Ao capturar, a câmera corta para o duelo.</p></li>
         <li class="step"><div class="glyphs" aria-hidden="true">✦✧✦</div><h3>Gaste a essência</h3><p>No Arcano, cada turno rende essência para jogar cartas do seu grimório. Uma armadilha bem posta vale uma torre.</p></li>
@@ -251,7 +412,7 @@
         <a class="brand" href="index.html"><svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/></svg><span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span></a>
         <p style="margin-top:16px">Xadrez clássico em 3D com alma de RPG sombrio. Ordem da Aurora contra a Legião Cinzenta.</p>
       </div>
-      <nav aria-label="Jogar"><h4>Jogar</h4><ul><li><a data-game="" href="../coroa-de-cinzas.html">Xadrez Puro</a></li><li><a data-game="arcano" href="../coroa-de-cinzas.html">Modo Arcano</a></li><li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li><li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li></ul></nav>
+      <nav aria-label="Jogar"><h4>Jogar</h4><ul><li><a href="mapa.html">Conquista dos Mundos</a></li><li><a data-game="" href="../coroa-de-cinzas.html">Xadrez Puro</a></li><li><a data-game="arcano" href="../coroa-de-cinzas.html">Modo Arcano</a></li><li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li><li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li></ul></nav>
       <nav aria-label="Comunidade"><h4>Comunidade</h4><ul><li><a href="ranking.html">Ranking</a></li><li><a href="login.html">Entrar</a></li><li><a href="#como-jogar">Como jogar</a></li></ul></nav>
       <div><h4>Ao vivo</h4><p>A partida do topo é a Partida da Ópera, jogada por Paul Morphy em Paris, em 1858, recriada lance a lance.</p></div>
     </div>

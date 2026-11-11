@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ranking — Arcane Chess</title>
 <meta name="description" content="Ranking do Arcane Chess: as melhores notas Glicko-2 do Xadrez Puro e do Modo Arcano, ligas e como entrar na lista.">
+<meta property="og:title" content="Ranking — Arcane Chess">
+<meta property="og:description" content="Ranking do Arcane Chess: as melhores notas Glicko-2 do Xadrez Puro e do Modo Arcano, ligas e como entrar na lista.">
+<meta property="og:image" content="https://arcanechess.pages.dev/assets/concepts/arena_infernal_ref.webp">
+<meta property="og:url" content="https://arcanechess.pages.dev/ranking">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0e0d0b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +32,7 @@
     <div class="nav__panel" id="menu">
       <ul class="nav__links">
         <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a data-page="mapa" href="mapa.html">Mapa</a></li>
         <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
         <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
         <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
@@ -57,7 +64,7 @@
         </div>
       </div>
       <div id="minha" hidden></div>
-      <div id="painel" role="tabpanel" aria-labelledby="tab-xadrez" aria-live="polite" tabindex="0"></div>
+      <div id="painel" role="tabpanel" aria-labelledby="tab-xadrez" tabindex="0"></div>
       <p class="note">O ranking mostra até 50 contas com a nota já firme (incerteza ≤ 110). Convidados jogam ranqueadas, mas só aparecem aqui depois de criar uma conta.</p>
     </div>
   </section>
@@ -85,7 +92,7 @@
 
 <footer class="footer torn-top">
   <div class="wrap">
-    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
+    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="mapa.html">Mapa</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
   </div>
 </footer>
 
@@ -155,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const where = R.rank ? `${R.rank}º no ranking` : u.kind !== 'account' ? 'convidados não entram no ranking: crie uma conta para aparecer aqui' : R.provisional ? 'nota provisória: jogue mais ranqueadas para firmar' : 'fora do top 50';
     minha.innerHTML = `<div class="my-rating"><div class="my-rating__who"><span class="acct__sigil" style="width:48px;height:48px;font-size:1.2rem" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
       <span><small>Sua nota · ${pool === 'arcano' ? 'Arcano' : 'Xadrez Puro'}</small><b>${esc(u.name)}</b></span></div>
-      <div><span class="my-rating__num">${R.r}${R.provisional ? '<span title="provisória">?</span>' : ''}</span></div>
+      <div><span class="my-rating__num">${R.r}${R.provisional ? '<span title="provisória" aria-hidden="true">?</span><span class="sr-only"> (nota provisória)</span>' : ''}</span></div>
       <div class="my-rating__meta">${badge({ id:R.league, name:R.leagueName })}<br>${R.games || 0} ${(R.games || 0) === 1 ? 'partida ranqueada' : 'partidas ranqueadas'} · ${esc(where)}</div>
       <a class="btn btn--sm" href="${esc(AC.siteUrl('login.html'))}">Sua conta</a></div>`;
   }

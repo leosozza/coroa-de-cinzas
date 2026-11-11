@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
 <link rel="stylesheet" href="assets/site.css">
 <script src="assets/site.js" defer></script>
+<script src="assets/campanha.js" defer></script>
 </head>
 <body data-page="login">
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -30,6 +31,7 @@
         <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
         <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
         <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
+        <li><a data-page="mapa" href="mapa.html">Mapa</a></li>
         <li><a data-page="ranking" href="ranking.html">Ranking</a></li>
         <li><a href="index.html#como-jogar">Como jogar</a></li>
       </ul>
@@ -71,7 +73,7 @@
     <div class="wrap">
       <div id="aviso" aria-live="polite"></div>
       <div class="auth">
-        <div class="panel guardiao-painel" id="principal" aria-live="polite">
+        <div class="panel guardiao-painel" id="principal">
           <div class="state" style="border:0;background:none"><div class="spinner" aria-hidden="true"></div><p>Conferindo a sua sessão…</p></div>
         </div>
         <aside class="panel" aria-labelledby="porque-t">
@@ -134,7 +136,7 @@
 
 <footer class="footer torn-top">
   <div class="wrap">
-    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
+    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="mapa.html">Mapa</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
   </div>
 </footer>
 
@@ -207,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const ratingCard = (R, label) => R ? `<div class="rating"><small>${label}</small><b>${R.r}${R.provisional ? '<em title="nota provisória">?</em>' : ''}</b>
+  const ratingCard = (R, label) => R ? `<div class="rating"><small>${label}</small><b>${R.r}${R.provisional ? '<em title="nota provisória" aria-hidden="true">?</em><span class="sr-only"> (nota provisória)</span>' : ''}</b>
       <span class="badge badge--${esc(R.league)}">${esc(R.leagueName)}</span>
       <span class="meta">${R.games || 0} ranqueada${R.games === 1 ? '' : 's'}${R.rank ? ` · ${R.rank}º no ranking` : R.provisional ? ' · provisória' : ''}</span></div>` : '';
 
@@ -221,7 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="acct guardiao-cartao__id"><span class="acct__sigil" aria-hidden="true">${esc(u.name.charAt(0).toUpperCase())}</span>
           <div><p class="acct__name guardiao-cartao__nome">${esc(u.name)}</p><span class="acct__kind ${acct ? 'acct__kind--account' : ''}">${acct ? 'Conta' : 'Convidado'}</span>${via ? ` <small style="color:var(--ash)">entrou com ${esc(via)}</small>` : ''}</div></div>
         <div class="ratings">${ratingCard(R.xadrez, 'Xadrez Puro')}${ratingCard(R.arcano, 'Arcano')}</div>
-        <a class="btn btn--primary btn--block guardiao-cta" href="${esc(AC.gameUrl('campanha'))}">Começar a Conquista dos Mundos</a>
+        <a class="btn btn--primary btn--block guardiao-cta" data-campanha-cta href="${esc(AC.siteUrl('mapa.html'))}">Começar a Conquista dos Mundos</a>
+        <p class="campanha-linha" data-campanha-linha></p>
         <div class="guardiao-acoes"><a class="btn" href="${esc(AC.gameUrl('online'))}">Jogar online</a><a class="btn" href="${esc(AC.siteUrl('ranking.html'))}">Ver o ranking</a></div>
       </div>
       <h3>Nome do Guardião</h3>
@@ -235,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="divider"></div>
       <button class="btn btn--sm" type="button" id="sair">Sair</button>
       <p style="font-size:.86rem;margin:10px 0 0">${acct ? 'Sair só desconecta este navegador. A conta e a nota continuam guardadas.' : 'Sair apaga a sessão de convidado deste navegador. A nota de convidado não pode ser recuperada.'}</p>`;
+    if (window.ACCampanha) window.ACCampanha.pintarConta(box);
     wireProviders();
     $('#n').addEventListener('submit', async e => {
       e.preventDefault();
@@ -257,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (r && r.ok){ notice('Data salva.', 'ok'); refresh(); } else err.textContent = (r && r.j.err) || 'Não foi possível salvar.';
     });
     $('#sair').addEventListener('click', () => {
+      if (!acct && !confirm('Sair apaga a sessão de convidado deste navegador e a nota de convidado não pode ser recuperada. Sair mesmo assim?')) return;
       AC.session.clear();
       notice(acct ? 'Você saiu da conta neste aparelho. A conta e a nota continuam guardadas.' : 'Sessão de convidado encerrada neste navegador.', 'ok');
       refresh();

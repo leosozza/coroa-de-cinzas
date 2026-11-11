@@ -1,0 +1,380 @@
+/* Mapa da Conquista dos Mundos — depende dos tokens de site.css */
+body[data-page="mapa"]{
+  --mapa-h: clamp(420px, 62vh, 660px);
+  --no: 96px;            /* diâmetro do medalhão */
+  --guardiao: 48px;      /* diâmetro do retrato do Guardião */
+  --painel-w: 360px;
+  --mar-1: #14282b;
+  --mar-2: #0d1a1d;
+  --pergaminho: #cdb98c;
+  --painel-fechado: 0px;
+}
+
+.mapa-pagina{ padding: calc(var(--nav-h) + 28px) 0 72px; }
+.mapa-caixa{
+  width: 100%; max-width: 1600px; margin: 0 auto;
+  padding-left: var(--gutter); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- faixa de cabeçalho ---------- */
+.mapa-topo{
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 12px 32px; margin-bottom: 20px;
+}
+.mapa-topo .eyebrow{ margin: 0 0 4px; }
+.mapa-topo h1{ margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem); line-height: 1.1; color: var(--bone); }
+.mapa-placar{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px; margin: 0; }
+.mapa-placar__item{ display: flex; align-items: baseline; gap: 8px; margin: 0; }
+.mapa-placar dt{ font-family: var(--f-ui); font-size: .9375rem; letter-spacing: .06em; color: var(--ash); }
+.mapa-placar dd{ margin: 0; font-family: var(--f-engrave); font-size: 1.25rem; color: var(--ember); font-variant-numeric: tabular-nums; }
+.mapa-fonte{ flex: 1 0 100%; margin: 0; font-size: .9375rem; color: var(--ash); min-height: 1.5em; }
+
+/* ---------- palco: mapa + painel ---------- */
+.mapa-palco{ display: grid; grid-template-columns: minmax(0, 1fr) var(--painel-w); gap: 20px; align-items: start; }
+
+.mapa-quadro{
+  position: relative; min-width: 0;
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--mar-2);
+  box-shadow: 0 0 0 1px #000, 0 24px 60px rgba(0,0,0,.5);
+}
+.mapa-viewport{
+  position: relative; overflow-x: auto; overflow-y: hidden;
+  overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--seam) transparent;
+  cursor: grab; -webkit-overflow-scrolling: touch;
+}
+.mapa-viewport.is-arrastando{ cursor: grabbing; user-select: none; }
+.mapa-world{
+  position: relative;
+  width: max(100%, calc(var(--mapa-h) * 2)); aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+.mapa-svg{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.mapa-vinheta{
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 52%, rgba(8,7,6,.62) 100%),
+    linear-gradient(to bottom, rgba(8,7,6,.35), transparent 14%, transparent 86%, rgba(8,7,6,.45));
+}
+/* a janela segura o mapa e a vinheta; a etiqueta de destino e o rodapé ficam fora dela */
+.mapa-janela{ position: relative; }
+
+/* ---------- rodapé do quadro: dicas de teclado e versão em lista ---------- */
+.mapa-legenda{
+  position: relative; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 20px;
+  margin: 0; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--crypt);
+  font-family: var(--f-ui); font-size: .875rem; letter-spacing: .04em; line-height: 1.5; color: var(--ash);
+}
+.mapa-dicas{ margin: 0; min-width: 0; }
+.mapa-dicas--toque{ display: none; }
+.mapa-dicas__sep{ margin: 0 4px; color: var(--seam); }
+.mapa-dicas kbd{
+  display: inline-block; min-width: 1.7em; padding: 0 5px; text-align: center;
+  font: inherit; font-size: .8125rem; line-height: 1.45; color: var(--bone);
+  background: var(--stone); border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: var(--radius);
+}
+.mapa-lista{ position: relative; margin-left: auto; font-size: .875rem; white-space: nowrap; }
+.mapa-lista::before{ content: ""; position: absolute; inset: -11px -8px; }   /* área de toque de 44 px, dentro do rodapé */
+@media (hover: none){
+  .mapa-dicas--teclado{ display: none; }
+  .mapa-dicas--toque{ display: block; }
+}
+
+/* ---------- barra numerada 01–08 ---------- */
+.mapa-barra{ margin: 0 0 12px; min-width: 0; }
+.mapa-barra__lista{
+  position: relative; display: flex; gap: 6px; margin: 0; padding: 4px; list-style: none;
+  overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--seam) transparent;
+}
+.mapa-barra__lista > li{ flex: 0 0 auto; margin: 0; padding: 0; }
+.mapa-barra__item{
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 48px; min-height: 44px; margin: 0; padding: 6px 12px;
+  font: inherit; color: var(--ash); text-align: center; cursor: pointer;
+  background: var(--crypt); border: 1px solid var(--line); border-radius: var(--radius);
+  transition: border-color .2s var(--ease), background-color .2s var(--ease), color .2s var(--ease);
+}
+.mapa-barra__num{ font-family: var(--f-engrave); font-size: 1rem; letter-spacing: .08em; line-height: 1; color: var(--bone); font-variant-numeric: tabular-nums; }
+.mapa-barra__nome{ font-family: var(--f-ui); font-size: .8125rem; line-height: 1.2; letter-spacing: .03em; }
+.mapa-barra__cadeado{ display: none; flex: none; width: 12px; height: 12px; fill: currentColor; }
+.mapa-barra__item:hover{ border-color: var(--line-strong); color: var(--bone); }
+.mapa-barra__item:focus-visible{ outline: 2px solid var(--ember); outline-offset: 2px; }
+.mapa-barra__item[data-estado="concluido"] .mapa-barra__num{ color: var(--ember); }
+.mapa-barra__item[aria-current="true"]{ border-color: var(--ember); background: var(--ember-a); color: var(--bone); box-shadow: inset 0 -2px 0 var(--ember); }
+.mapa-barra__item[aria-current="true"] .mapa-barra__num{ color: var(--ember); }
+.mapa-barra__item[aria-disabled="true"]{ border-style: dashed; color: var(--ash); cursor: not-allowed; }
+.mapa-barra__item[aria-disabled="true"] .mapa-barra__num{ color: var(--ash); }
+.mapa-barra__item[aria-disabled="true"] .mapa-barra__cadeado{ display: block; }
+.mapa-barra__item[aria-disabled="true"]:hover{ border-color: var(--line); color: var(--ash); }
+/* telas menores: só o número (o nome continua para leitores de tela) */
+@media (max-width: 1099.98px){
+  .mapa-barra__nome{ position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+}
+/* telas largas: número + nome, oito colunas iguais */
+@media (min-width: 1100px){
+  .mapa-barra__lista{ display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); padding: 0; overflow: visible; }
+  .mapa-barra__item{ flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px; width: 100%; height: 100%; padding: 8px 10px 9px; text-align: left; }
+  .mapa-barra__nome{ max-width: 100%; text-wrap: balance; overflow-wrap: break-word; hyphens: auto; }
+  .mapa-barra__cadeado{ position: absolute; top: 9px; right: 9px; }
+}
+
+/* ---------- etiqueta de destino com bússola ---------- */
+.mapa-destino{
+  position: absolute; top: 10px; left: 10px; z-index: 6; max-width: min(46%, 300px); pointer-events: none;
+  display: flex; align-items: center; gap: 8px; margin: 0; padding: 5px 12px 5px 6px;
+  font-family: var(--f-ui); font-size: .875rem; letter-spacing: .04em; line-height: 1.2; color: var(--bone);
+  background: rgba(14,13,11,.86); border: 1px solid var(--line-strong); border-radius: var(--radius);
+}
+.mapa-destino__bussola{ flex: none; width: 30px; height: 30px; overflow: visible; }
+.mapa-destino__aro{ fill: rgba(14,13,11,.6); stroke: var(--line-strong); stroke-width: 1.5; }
+.mapa-destino__marcas{ stroke: var(--ash); stroke-width: 1.5; stroke-linecap: round; }
+.mapa-destino__agulha{ transform-box: view-box; transform-origin: 16px 16px; transform: rotate(var(--giro, 0deg)); transition: transform .5s var(--ease); }
+.mapa-destino__norte{ fill: var(--ember); }
+.mapa-destino__sul{ fill: var(--ash); }
+.mapa-destino__pino{ fill: var(--basalt); stroke: var(--bone); stroke-width: 1; transition: fill .3s var(--ease); }
+.mapa-destino[data-aqui="true"] .mapa-destino__pino{ fill: var(--ember); }
+.mapa-destino__texto{ min-width: 0; }
+.mapa-destino__rotulo{ font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ash); }
+.mapa-destino__sep{ color: var(--seam); }
+.mapa-destino[data-completa="true"] .mapa-destino__sep{ display: none; }
+.mapa-destino[data-completa="true"] .mapa-destino__rotulo{ color: var(--ember); }
+
+/* ---------- cenário em SVG ---------- */
+.mapa-svg .ilha{ transition: opacity .5s var(--ease); }
+.mapa-svg .ilha[data-estado="bloqueado"]{ opacity: .38; }
+.mapa-svg .ilha[data-estado="bloqueado"] .ilha__terra{ fill: #2a2924; }
+.mapa-svg .ilha[data-estado="bloqueado"] .ilha__relevo{ stroke: #5b574e; }
+.rota-seg{
+  fill: none; stroke: #6f695d; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 1 15;
+  transition: stroke .5s var(--ease), opacity .5s var(--ease);
+}
+.rota-seg[data-aberta="true"]{ stroke: var(--ember); }
+/* a rota se ilumina de um mundo ao outro a cada Selo */
+.rota-seg[data-estado="fechada"]{ stroke: #6f695d; opacity: .5; }
+.rota-seg[data-estado="conquistada"], .rota-seg[data-estado="frente"]{
+  stroke: var(--ember);
+  filter: drop-shadow(0 0 3px var(--ember-deep));
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ember) 75%, transparent));
+}
+/* trecho da frente: os pontos correm da origem para o mundo atual (um período do pontilhado = 16) */
+.rota-seg[data-estado="frente"]{ animation: rota-fluxo 1.6s linear infinite; }
+@keyframes rota-fluxo{ to{ stroke-dashoffset: -16; } }
+/* enquanto o traço novo se desenha, o pontilhado espera apagado */
+.rota-seg.rota-seg--acendendo{ stroke: #6f695d; opacity: .5; filter: none; animation: none; }
+.rota-acende{
+  fill: none; stroke: var(--ember); stroke-width: 4; stroke-linecap: butt; pointer-events: none;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 4px var(--ember-deep));
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ember) 80%, transparent));
+  animation: rota-acende 1.2s cubic-bezier(.45,.05,.3,1) both;
+  transition: opacity .4s var(--ease);
+}
+@keyframes rota-acende{ to{ stroke-dashoffset: 0; } }
+.rota-acende--some{ opacity: 0; }
+.rota-sombra{ fill: none; stroke: rgba(0,0,0,.45); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 1 15; }
+.mapa-svg .nevoa{ opacity: 0; transition: opacity .6s var(--ease); }
+.mapa-svg .nevoa[data-ativa="true"]{ opacity: 1; }
+.mapa-svg .nevoa__massa{ animation: mapa-nevoa 14s ease-in-out infinite alternate; }
+.mapa-svg .nevoa__massa:nth-child(2n){ animation-duration: 19s; animation-direction: alternate-reverse; }
+@keyframes mapa-nevoa{ from{ transform: translateX(-10px); } to{ transform: translateX(12px); } }
+
+.mapa-nuvens{ position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.mapa-nuvem{
+  position: absolute; left: -22%; top: var(--t, 10%); width: var(--w, 18%); aspect-ratio: 3 / 1;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(237,227,204,.20), transparent 62%),
+    radial-gradient(ellipse at 62% 45%, rgba(237,227,204,.16), transparent 60%),
+    radial-gradient(ellipse at 82% 66%, rgba(237,227,204,.11), transparent 58%);
+  animation: mapa-nuvem var(--d, 90s) linear infinite; animation-delay: var(--a, 0s);
+  will-change: transform;
+}
+@keyframes mapa-nuvem{ from{ transform: translate3d(0,0,0); } to{ transform: translate3d(700%,0,0); } }
+
+/* ---------- nós (mundos) ---------- */
+.mapa-nos{ list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.mapa-nos__item{ position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+.no{
+  position: absolute; left: 0; top: 0; transform: translate(-50%, calc(var(--no) / -2));
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: max-content; max-width: calc(var(--no) + 56px);
+  padding: 0; margin: 0; border: 0; background: none; cursor: pointer; text-align: center;
+  pointer-events: auto; -webkit-tap-highlight-color: transparent; touch-action: pan-x pan-y;
+}
+.no:focus-visible{ outline: none; }
+.no__disco{
+  position: relative; flex: none; width: var(--no); height: var(--no); border-radius: 50%;
+  box-shadow: 0 0 0 2px #1a140a, 0 0 0 5px var(--ember-deep), 0 10px 22px rgba(0,0,0,.6);
+  transition: box-shadow .25s var(--ease), transform .25s var(--ease);
+}
+.no:hover .no__disco{ transform: scale(1.04); }
+.no:focus-visible .no__disco{ outline: 3px solid var(--bone); outline-offset: 7px; }
+.no[aria-current="true"] .no__disco{ box-shadow: 0 0 0 2px #1a140a, 0 0 0 5px var(--ember), 0 0 26px rgba(227,165,72,.55), 0 10px 22px rgba(0,0,0,.6); }
+.no__medalha{
+  position: absolute; inset: 0; overflow: hidden; border-radius: 50%; clip-path: circle(50%);
+  background: #14110d; transition: filter .5s var(--ease);
+}
+.no__medalha img{ position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.no__medalha--retrato{ background: var(--pergaminho); }
+.no__medalha--retrato img{ inset: auto; left: -50%; top: -2%; width: 200%; height: auto; mix-blend-mode: multiply; }
+.no__num{
+  position: absolute; left: -4px; top: -4px; z-index: 3; width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--f-engrave); font-size: .8125rem; line-height: 1; color: var(--bone);
+  background: var(--basalt); box-shadow: 0 0 0 1px var(--ember-deep);
+}
+.no__anel{ position: absolute; inset: -9px; border-radius: 50%; border: 2px solid var(--ember); opacity: 0; pointer-events: none; }
+.no[data-estado="atual"] .no__anel{ animation: mapa-pulso 2s var(--ease) infinite; }
+@keyframes mapa-pulso{ 0%{ opacity: .9; transform: scale(.94); } 70%, 100%{ opacity: 0; transform: scale(1.28); } }
+
+.no__nevoa{
+  position: absolute; inset: -14px; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .5s var(--ease);
+  background:
+    radial-gradient(ellipse at 28% 34%, rgba(198,202,210,.55), transparent 56%),
+    radial-gradient(ellipse at 72% 62%, rgba(180,184,194,.5), transparent 58%),
+    radial-gradient(ellipse at 46% 82%, rgba(160,164,176,.42), transparent 52%);
+}
+.no__cadeado, .no__selo{ position: absolute; display: none; place-items: center; border-radius: 50%; z-index: 3; }
+.no__cadeado{ inset: 50% auto auto 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; background: rgba(14,13,11,.88); color: var(--bone); box-shadow: 0 0 0 1px var(--line-strong); }
+.no__selo{ right: -4px; bottom: -4px; width: 28px; height: 28px; background: #12240f; color: var(--life); box-shadow: 0 0 0 2px var(--life); }
+.no__cadeado svg, .no__selo svg{ width: 18px; height: 18px; fill: currentColor; }
+.no[data-estado="bloqueado"]{ cursor: not-allowed; }
+.no[data-estado="bloqueado"] .no__medalha{ filter: grayscale(1) brightness(.5); }
+.no[data-estado="bloqueado"] .no__disco{ box-shadow: 0 0 0 2px #1a140a, 0 0 0 5px #4a463e, 0 10px 22px rgba(0,0,0,.6); }
+.no[data-estado="bloqueado"] .no__nevoa{ opacity: 1; }
+.no[data-estado="bloqueado"] .no__cadeado{ display: grid; }
+.no[data-estado="concluido"] .no__selo{ display: grid; }
+.no--tremor .no__disco{ animation: mapa-tremor .45s linear; }
+@keyframes mapa-tremor{ 0%,100%{ transform: translateX(0); } 20%{ transform: translateX(-7px); } 40%{ transform: translateX(6px); } 60%{ transform: translateX(-4px); } 80%{ transform: translateX(3px); } }
+
+.no__rotulo{
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 8px 5px;
+  background: rgba(14,13,11,.88); border: 1px solid var(--line);
+}
+.no__nome{ font-family: var(--f-ui); font-size: .9375rem; line-height: 1.12; letter-spacing: .03em; color: var(--bone); text-wrap: balance; }
+.no__estrelas{ display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-body); font-size: .875rem; line-height: 1.2; color: var(--ember); font-variant-numeric: tabular-nums; }
+.no__estrelas svg{ width: 12px; height: 12px; fill: currentColor; }
+.no[data-estado="bloqueado"] .no__nome{ color: var(--ash); }
+.no[data-estado="bloqueado"] .no__estrelas{ color: var(--ash); }
+
+/* ---------- Guardião ---------- */
+.guardiao{ position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; will-change: transform; }
+.guardiao[hidden]{ display: none; }
+.guardiao__pino{ position: relative; display: block; width: var(--guardiao); height: calc(var(--guardiao) + 9px); animation: mapa-flutua 2.4s ease-in-out infinite; }
+.guardiao.is-andando .guardiao__pino{ animation: none; }
+@keyframes mapa-flutua{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-5px); } }
+.guardiao__ponta{ position: absolute; left: 50%; bottom: 1px; width: 14px; height: 14px; margin-left: -7px; transform: rotate(45deg); background: var(--ember); box-shadow: 0 0 0 2px #1a140a; }
+.guardiao__retrato{
+  position: absolute; left: 0; top: 0; width: var(--guardiao); height: var(--guardiao); border-radius: 50%; overflow: hidden;
+  background: var(--pergaminho);
+  box-shadow: 0 0 0 2px #1a140a, 0 0 0 4px var(--ember), 0 0 0 5px #1a140a, 0 8px 16px rgba(0,0,0,.65);
+}
+.guardiao__retrato img{ position: absolute; left: -95%; top: 0; width: 290%; max-width: none; height: auto; mix-blend-mode: multiply; }
+
+
+/* ---------- painel de chegada ---------- */
+.mapa-painel{
+  display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 20px;
+  background: var(--crypt); border: 1px solid var(--line-strong); border-radius: var(--radius);
+  box-shadow: 0 0 0 1px #000, 0 24px 60px rgba(0,0,0,.5);
+}
+.painel__topo{ order: 1; }
+.painel__detalhes{ order: 2; }
+.painel__acoes{ order: 3; display: grid; gap: 10px; }
+.painel__num{ margin: 0; font-family: var(--f-ui); font-size: .9375rem; letter-spacing: .08em; color: var(--ember); }
+.painel__nome{ margin: 2px 0 8px; font-size: 1.5rem; line-height: 1.15; color: var(--bone); text-wrap: balance; }
+.painel__estado{ display: inline-block; margin: 0 0 12px; padding: 2px 8px; border: 1px solid var(--line-strong); font-family: var(--f-ui); font-size: .875rem; letter-spacing: .04em; color: var(--bone); }
+.mapa-painel[data-estado="atual"] .painel__estado{ color: var(--ember); border-color: var(--ember-deep); }
+.mapa-painel[data-estado="concluido"] .painel__estado{ color: var(--life); border-color: rgba(123,207,127,.5); }
+.mapa-painel[data-estado="concluido"] .campanha-barra span{ background: var(--life); }
+.painel__estrelas{ display: flex; align-items: center; gap: 6px; margin: 0 0 6px; color: var(--bone); font-variant-numeric: tabular-nums; }
+.painel__estrelas svg{ flex: none; width: 16px; height: 16px; fill: var(--ember); }
+.painel__alternar{ display: none; }
+.painel__hist{ margin: 0 0 14px; color: var(--bone); line-height: 1.5; }
+.painel__fatos{ display: grid; gap: 8px; margin: 0 0 18px; }
+.painel__fatos div{ display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 8px; }
+.painel__fatos dt{ font-family: var(--f-ui); font-size: .875rem; letter-spacing: .05em; color: var(--ash); }
+.painel__fatos dd{ margin: 0; font-size: .9375rem; line-height: 1.4; color: var(--bone); }
+.painel__sub{ margin: 0 0 4px; font-family: var(--f-ui); font-size: .9375rem; font-weight: 400; letter-spacing: .08em; color: var(--ash); }
+.painel__fases{ list-style: none; margin: 0; padding: 0; }
+.fase{ display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+.fase__n{ display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--ember-deep); font-family: var(--f-engrave); font-size: .875rem; line-height: 1; color: var(--ember); }
+.fase__nome{ font-family: var(--f-ui); font-size: 1rem; letter-spacing: .03em; color: var(--bone); }
+.fase__desc{ grid-column: 2 / -1; margin: 0; font-size: .875rem; line-height: 1.35; color: var(--ash); }
+.fase__estrelas{ display: inline-flex; gap: 2px; }
+.fase__estrelas svg{ width: 16px; height: 16px; fill: none; stroke: var(--ash); stroke-width: 1.5; }
+.fase__estrelas svg.is-cheia{ fill: var(--ember); stroke: var(--ember); }
+.fase__trava{ display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-ui); font-size: .875rem; color: var(--ash); }
+.fase__trava svg{ width: 14px; height: 14px; fill: currentColor; }
+.fase[data-estado="proxima"] .fase__n{ background: var(--ember); border-color: var(--ember); color: #1a140a; }
+.fase[data-estado="vencida"] .fase__n{ border-color: rgba(123,207,127,.6); color: var(--life); }
+.fase[data-estado="bloqueada"] .fase__n{ border-color: var(--seam); color: var(--ash); }
+.fase[data-estado="bloqueada"] .fase__nome{ color: var(--ash); }
+
+/* ---------- telas estreitas: folha inferior ---------- */
+@media (max-width: 920px){
+  body[data-page="mapa"]{ --mapa-h: clamp(320px, calc(100svh - 490px), 520px); --no: 76px; --guardiao: 42px; }
+  .mapa-pagina{ padding: calc(var(--nav-h) + 16px) 0 32px; }
+  .mapa-topo{ margin-bottom: 12px; gap: 6px 20px; }
+  .mapa-palco{ grid-template-columns: minmax(0, 1fr); }
+  .mapa-barra{ margin-bottom: 8px; }
+  /* a etiqueta de destino vira uma faixa no topo do quadro: não cobre o mapa */
+  .mapa-destino{ position: static; max-width: none; padding: 6px 12px 6px 8px; border-width: 0 0 1px; border-color: var(--line); border-radius: 0; background: var(--crypt); }
+  .mapa-legenda{ padding: 10px 12px; }
+  .no__nome{ font-size: .875rem; }
+  .mapa-painel{
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; gap: 10px;
+    max-height: min(82svh, 82vh); overflow-y: auto; overscroll-behavior: contain;
+    padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    border-width: 1px 0 0; border-top-color: var(--ember-deep); box-shadow: 0 -18px 40px rgba(0,0,0,.6);
+  }
+  .painel__topo{ display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; align-items: center; }
+  .painel__num{ grid-column: 1; }
+  .painel__nome{ grid-column: 1; margin: 0; font-size: 1.1875rem; }
+  .painel__estado{ grid-column: 2; grid-row: 1 / 3; margin: 0; }
+  .painel__estrelas{ grid-column: 1 / -1; margin: 6px 0 4px; font-size: .9375rem; }
+  .painel__topo .campanha-barra{ grid-column: 1 / -1; }
+  .painel__acoes{ order: 2; grid-template-columns: minmax(0, 1fr) auto; }
+  .painel__detalhes{ order: 3; display: none; padding-top: 4px; }
+  .mapa-painel.is-aberto .painel__detalhes{ display: block; }
+  .painel__alternar{
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px;
+    background: transparent; border: 1px solid var(--line-strong); border-radius: var(--radius);
+    font-family: var(--f-ui); font-size: 1rem; letter-spacing: .04em; color: var(--bone); cursor: pointer;
+  }
+  body[data-page="mapa"] .footer{ padding-bottom: calc(var(--folha-h, 176px) + 16px); }
+  body[data-page="mapa"] .toast{ bottom: calc(var(--folha-h, 176px) + 12px); }
+}
+
+/* ---------- movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce){
+  .mapa-nuvem, .mapa-svg .nevoa__massa, .guardiao__pino, .no--tremor .no__disco, .no[data-estado="atual"] .no__anel{ animation: none; }
+  .mapa-nuvem{ left: var(--l, 20%); }
+  .no[data-estado="atual"] .no__anel{ opacity: .85; }
+  .no__disco, .no__medalha, .no__nevoa, .mapa-svg .ilha, .mapa-svg .nevoa, .rota-seg{ transition: none; }
+  .no:hover .no__disco{ transform: none; }
+  .rota-seg[data-estado="frente"], .rota-acende{ animation: none; }
+  .rota-acende{ stroke-dashoffset: 0; }
+  .mapa-destino__agulha, .mapa-destino__pino, .mapa-barra__item{ transition: none; }
+}
+
+/* ---------- alto contraste do sistema ---------- */
+@media (forced-colors: active){
+  .no__disco{ border: 2px solid ButtonText; }
+  .no[aria-current="true"] .no__disco{ outline: 3px solid Highlight; outline-offset: 2px; }
+  .no__rotulo, .mapa-legenda, .mapa-painel{ border: 1px solid CanvasText; }
+  .guardiao__retrato{ border: 2px solid Highlight; }
+  .fase__estrelas svg{ stroke: CanvasText; }
+  .fase__estrelas svg.is-cheia{ fill: Highlight; stroke: Highlight; }
+  .rota-seg, .rota-seg[data-estado="fechada"], .rota-seg.rota-seg--acendendo{ stroke: GrayText; opacity: 1; filter: none; }
+  .rota-seg[data-aberta="true"]{ stroke: Highlight; }
+  .rota-seg[data-estado="conquistada"], .rota-seg[data-estado="frente"], .rota-acende{ stroke: Highlight; filter: none; }
+  .rota-seg[data-estado="frente"]{ stroke-width: 7; }
+  .mapa-barra__item{ border: 1px solid ButtonText; color: ButtonText; }
+  .mapa-barra__item[aria-current="true"]{ outline: 2px solid Highlight; outline-offset: -4px; box-shadow: none; }
+  .mapa-barra__item[aria-disabled="true"], .mapa-barra__item[aria-disabled="true"] .mapa-barra__num{ color: GrayText; border-color: GrayText; }
+  .mapa-destino{ border: 1px solid CanvasText; }
+  .mapa-destino__norte{ fill: Highlight; }
+  .mapa-destino__sul, .mapa-destino__pino{ fill: CanvasText; }
+  .mapa-dicas kbd{ border: 1px solid CanvasText; }
+}

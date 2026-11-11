@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conquista dos Mundos — Mapa</title>
+<meta name="description" content="Mapa da Conquista dos Mundos do Arcane Chess: leve o Guardião pelos oito mundos, veja estrelas, Selos e fases de cada um.">
+<meta property="og:title" content="Conquista dos Mundos — Mapa">
+<meta property="og:description" content="Mapa da Conquista dos Mundos do Arcane Chess: leve o Guardião pelos oito mundos, veja estrelas, Selos e fases de cada um.">
+<meta property="og:image" content="https://arcanechess.pages.dev/assets/concepts/arena_infernal_ref.webp">
+<meta property="og:url" content="https://arcanechess.pages.dev/mapa">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0e0d0b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' transform='rotate(45 16 16)' fill='%230e0d0b' stroke='%23e3a548' stroke-width='2'/%3E%3Cpath d='M10 20l1.5-8 3 3 1.5-5 1.5 5 3-3 1.5 8z' fill='%23e3a548'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700&family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/mapa.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/campanha.js" defer></script>
+<script src="assets/mapa.js" defer></script>
+</head>
+<body data-page="mapa">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="Arcane Chess, página inicial">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" fill="#0e0d0b" stroke="#e3a548" stroke-width="1.5"/><rect x="11.5" y="11.5" width="17" height="17" transform="rotate(45 20 20)" fill="none" stroke="#8f5c1d" stroke-width="1"/><path d="M13 25l1.8-9 3.6 3.6L20 13l1.6 6.6 3.6-3.6 1.8 9z" fill="#e3a548"/><path d="M13 27h14" stroke="#e3a548" stroke-width="1.5"/></svg>
+      <span class="brand__txt"><span class="brand__name">Arcane Chess</span><span class="brand__sub">The Battle for the Grimoire</span></span>
+    </a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir o menu"><span></span></button>
+    <div class="nav__panel" id="menu">
+      <ul class="nav__links">
+        <li><a data-game="" href="../coroa-de-cinzas.html">Jogar</a></li>
+        <li><a data-page="mapa" href="mapa.html">Mapa</a></li>
+        <li><a data-game="arcano" href="../coroa-de-cinzas.html">Arcano</a></li>
+        <li><a data-game="online" href="../coroa-de-cinzas.html">Online</a></li>
+        <li><a data-game="espectador" href="../coroa-de-cinzas.html">Espectador</a></li>
+        <li><a data-page="ranking" href="ranking.html">Ranking</a></li>
+        <li><a href="index.html#como-jogar">Como jogar</a></li>
+      </ul>
+      <div class="nav__account"><a class="btn btn--sm btn--primary" href="login.html">Entrar</a></div>
+    </div>
+  </div>
+</header>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-estrela" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.4l-6.1 3.4 1.4-6.8-5.1-4.7 6.9-.8z"/></symbol>
+  <symbol id="i-cadeado" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3zm3 3.5a1.6 1.6 0 0 1 .9 2.9V18h-1.8v-1.6a1.6 1.6 0 0 1 .9-2.9z"/></symbol>
+  <symbol id="i-selo" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5l2.3 2 3-.4 1 2.9 2.7 1.4-.8 2.9 1.6 2.6-2.1 2.2.1 3-3 .7-1.5 2.6-2.9-.9-2.9.9-1.5-2.6-3-.7.1-3-2.1-2.2 1.6-2.6-.8-2.9 2.7-1.4 1-2.9 3 .4z"/><path fill="none" stroke="#0e0d0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M8 12.2l2.8 2.8L16 9.6"/></symbol>
+</svg>
+
+<main id="conteudo" class="mapa-pagina">
+  <div class="mapa-caixa">
+    <header class="mapa-topo">
+      <div><p class="eyebrow">Mapa</p><h1>Conquista dos Mundos</h1></div>
+      <dl class="mapa-placar">
+        <div class="mapa-placar__item"><dt>Estrelas</dt><dd data-mapa-total>0/144</dd></div>
+        <div class="mapa-placar__item"><dt>Selos</dt><dd data-mapa-selos>0/8</dd></div>
+      </dl>
+      <p class="mapa-fonte" data-mapa-fonte>O progresso fica salvo neste navegador.</p>
+    </header>
+
+    <nav class="mapa-barra" aria-label="Mundos">
+      <ol class="mapa-barra__lista" data-barra-lista>
+        <li><button type="button" class="mapa-barra__item" data-barra="1" data-estado="atual" aria-current="true"><span class="mapa-barra__num">01</span> <span class="mapa-barra__nome">Reino da Aurora</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="2" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">02</span> <span class="mapa-barra__nome">Clã dos Primatas</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="3" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">03</span> <span class="mapa-barra__nome">Clã do Mar Profundo</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="4" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">04</span> <span class="mapa-barra__nome">Império do Deserto Subterrâneo</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="5" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">05</span> <span class="mapa-barra__nome">Alpha da Lua Nova</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="6" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">06</span> <span class="mapa-barra__nome">Legião do Ferro Negro</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="7" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">07</span> <span class="mapa-barra__nome">Reino dos Dragões</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+        <li><button type="button" class="mapa-barra__item" data-barra="8" data-estado="bloqueado" aria-disabled="true"><span class="mapa-barra__num">08</span> <span class="mapa-barra__nome">Abismo Estelar</span><svg class="mapa-barra__cadeado" aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></button></li>
+      </ol>
+    </nav>
+
+    <div class="mapa-palco">
+      <section class="mapa-quadro" aria-label="Mapa dos oito mundos">
+        <p class="mapa-destino" data-destino>
+          <svg class="mapa-destino__bussola" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <circle class="mapa-destino__aro" cx="16" cy="16" r="13.5"/>
+            <g class="mapa-destino__marcas"><line x1="16" y1="1.5" x2="16" y2="4.5"/><line x1="30.5" y1="16" x2="27.5" y2="16"/><line x1="16" y1="30.5" x2="16" y2="27.5"/><line x1="1.5" y1="16" x2="4.5" y2="16"/></g>
+            <g class="mapa-destino__agulha" data-destino-agulha><polygon class="mapa-destino__norte" points="16,5 19,16 13,16"/><polygon class="mapa-destino__sul" points="16,27 19,16 13,16"/></g>
+            <circle class="mapa-destino__pino" cx="16" cy="16" r="1.8"/>
+          </svg>
+          <span class="mapa-destino__texto"><span class="mapa-destino__rotulo" data-destino-rotulo>Destino</span><span class="mapa-destino__sep" aria-hidden="true"> · </span><span class="mapa-destino__nome" data-destino-nome>Reino da Aurora</span></span>
+        </p>
+        <div class="mapa-janela">
+        <div class="mapa-viewport" data-mapa-viewport>
+          <div class="mapa-world" data-mapa-world>
+            <svg class="mapa-svg" viewBox="0 0 1800 900" aria-hidden="true" focusable="false"><defs><radialGradient id="g-mar" cx="50%" cy="46%" r="75%"><stop offset="0" style="stop-color:var(--mar-1,#14282b)"/><stop offset="1" style="stop-color:var(--mar-2,#0d1a1d)"/></radialGradient><radialGradient id="g-nevoa"><stop offset="0" stop-color="#c9d3d6" stop-opacity=".62"/><stop offset=".6" stop-color="#c9d3d6" stop-opacity=".3"/><stop offset="1" stop-color="#c9d3d6" stop-opacity="0"/></radialGradient><pattern id="p-ondas" width="140" height="70" patternUnits="userSpaceOnUse"><path d="M12 22q9-8 18 0t18 0M82 56q9-8 18 0t18 0" fill="none" stroke="#9fd0d0" stroke-opacity=".11" stroke-width="2" stroke-linecap="round"/></pattern></defs><rect width="1800" height="900" fill="url(#g-mar)"/><rect width="1800" height="900" fill="url(#p-ondas)"/><path d="M150 76L150 -1340M182.1 82.4L724 -1225.8M209.4 100.6L1210.7 -900.7M227.6 127.9L1535.8 -414M234 160L1650 160M227.6 192.1L1535.8 734M209.4 219.4L1210.7 1220.7M182.1 237.6L724 1545.8M150 244L150 1660M117.9 237.6L-424 1545.8M90.6 219.4L-910.7 1220.7M72.4 192.1L-1235.8 734M66 160L-1350 160M72.4 127.9L-1235.8 -414M90.6 100.6L-910.7 -900.7M117.9 82.4L-424 -1225.8" fill="none" stroke="#cdb98c" stroke-opacity=".06" stroke-width="1.5"/><g fill="none" stroke="#cdb98c" stroke-opacity=".55"><circle cx="150" cy="160" r="58" stroke-width="2"/><circle cx="150" cy="160" r="50" stroke-width="1" stroke-dasharray="2 6"/></g><path d="M182.5 127.5L155.7 165.7L144.3 154.3ZM182.5 192.5L144.3 165.7L155.7 154.3ZM117.5 192.5L144.3 154.3L155.7 165.7ZM117.5 127.5L155.7 154.3L144.3 165.7Z" fill="#8f5c1d" fill-opacity=".8" stroke="#0b0a08" stroke-opacity=".6" stroke-width="1"/><path d="M150 86L161 160L139 160ZM224 160L150 171L150 149ZM150 234L139 160L161 160ZM76 160L150 149L150 171Z" fill="#cdb98c" fill-opacity=".9" stroke="#0b0a08" stroke-opacity=".6" stroke-width="1"/><circle cx="150" cy="160" r="5" fill="#e3a548"/><text x="150" y="76" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="24" fill="#cdb98c" fill-opacity=".85">N</text><rect x="14" y="14" width="1772" height="872" fill="none" stroke="#cdb98c" stroke-opacity=".16" stroke-width="2"/><g fill="#26332e" stroke="#0b0a08" stroke-opacity=".6" stroke-width="2"><path d="M365.8 789.2C365.2 796.9 360.1 806.4 353.4 811.7C346.7 817 333.4 821.8 325.6 821C317.8 820.2 311.9 812.9 306.7 807.1C301.5 801.3 295.2 792.6 294.5 786.3C293.8 780 296.9 773.8 302.6 769.4C308.3 764.9 319.6 760.3 328.7 759.6C337.8 759 350.9 760.5 357 765.5C363.2 770.4 366.4 781.5 365.8 789.2Z"/><path d="M585.5 149.5C585.1 155.3 582.8 160.5 578.8 164.5C574.7 168.5 567.7 172.7 561.4 173.6C555.1 174.5 545.9 173.9 540.8 169.8C535.7 165.7 531.1 154.8 530.7 149.1C530.4 143.5 533 140.2 538.5 136C544 131.8 556.5 124.9 563.7 123.8C570.8 122.8 577.5 125.4 581.1 129.7C584.8 133.9 585.9 143.6 585.5 149.5Z"/><path d="M822.3 789.4C822.2 796.6 816 807.9 810.5 811.8C804.9 815.8 795.8 813.8 789.1 813.1C782.4 812.3 775.2 811 770.1 807.3C765.1 803.7 759.5 797.9 758.9 791.4C758.3 784.8 761.2 773.3 766.5 768.1C771.8 763 783.2 760.4 790.6 760.4C798.1 760.4 806.1 763.3 811.4 768.1C816.7 772.9 822.5 782.1 822.3 789.4Z"/><path d="M1034.4 129.5C1033.5 134.6 1032.3 141.5 1027.7 145.7C1023 149.9 1013.2 154.5 1006.6 154.6C1000 154.7 991.8 150.9 987.9 146.4C984.1 141.8 983 132.9 983.3 127.5C983.7 122.2 986 116.9 990.1 114C994.3 111 1001 109.7 1008.1 109.9C1015.1 110.1 1028.2 111.9 1032.6 115.2C1037 118.5 1035.2 124.5 1034.4 129.5Z"/><path d="M1275.3 809.4C1275.6 816 1274 826.3 1268.4 831.1C1262.8 835.8 1249.8 838.1 1241.8 838.1C1233.7 838 1225.6 835.7 1219.9 830.9C1214.1 826.1 1207.8 815.6 1207.2 809.4C1206.7 803.2 1210.8 798 1216.6 793.7C1222.5 789.4 1233.9 784.1 1242.2 783.7C1250.6 783.4 1261 787.2 1266.5 791.5C1272.1 795.8 1275 802.8 1275.3 809.4Z"/><path d="M1493.1 119.6C1492.7 124.7 1490.2 133.4 1486.3 136.7C1482.3 139.9 1475.3 139.2 1469.3 139.3C1463.3 139.4 1454.4 140.2 1450.5 137.2C1446.6 134.2 1445.3 127.2 1445.6 121.4C1446 115.5 1448.4 106 1452.3 102.3C1456.3 98.6 1463.2 98.5 1469.3 99.1C1475.4 99.8 1485 102.5 1489 106C1492.9 109.4 1493.6 114.5 1493.1 119.6Z"/><path d="M1007.6 529.7C1007.3 533.5 1002.6 538.1 998.4 541.4C994.2 544.8 987.2 549.6 982.4 549.6C977.5 549.6 972.3 545.2 969.4 541.7C966.4 538.2 964.7 532.4 964.9 528.4C965.1 524.4 966.8 520.3 970.6 517.5C974.4 514.8 982.8 511.7 987.7 511.8C992.6 511.9 996.7 515.2 1000.1 518.2C1003.4 521.2 1007.9 525.8 1007.6 529.7Z"/><path d="M111.8 379.7C112.3 384.2 112.7 390.4 109.3 393.7C105.9 397.1 96.6 400.1 91.3 400C86 399.9 81.3 396.6 77.4 393.2C73.5 389.8 68.4 384 67.9 379.9C67.5 375.8 71 372.1 74.8 368.6C78.6 365.1 85.5 359.1 90.7 358.8C95.8 358.6 102.2 363.4 105.7 366.9C109.2 370.4 111.2 375.2 111.8 379.7Z"/></g><g><g class="ilha" id="ilha-1" data-estado="atual"><path d="M335.3 603.6C338.6 620.7 339.6 640.3 333.5 655C327.4 669.7 313 678.6 298.7 691.7C284.4 704.9 271.1 728.9 247.5 733.8C223.9 738.6 181 727.1 157.2 720.7C133.4 714.3 118.6 704.7 104.8 695.4C91 686.1 86 677.1 74.3 664.9C62.7 652.7 39.2 641.6 35.1 621.9C30.9 602.3 39.7 566.1 49.5 546.9C59.3 527.8 73.5 515.3 93.8 507C114.1 498.7 148.8 499 171.3 496.9C193.7 494.7 209.8 490.6 228.5 494.2C247.1 497.7 268.9 508.5 283.1 518.3C297.3 528 305 538.2 313.7 552.5C322.4 566.7 332 586.5 335.3 603.6Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M335.3 603.6C338.6 620.7 339.6 640.3 333.5 655C327.4 669.7 313 678.6 298.7 691.7C284.4 704.9 271.1 728.9 247.5 733.8C223.9 738.6 181 727.1 157.2 720.7C133.4 714.3 118.6 704.7 104.8 695.4C91 686.1 86 677.1 74.3 664.9C62.7 652.7 39.2 641.6 35.1 621.9C30.9 602.3 39.7 566.1 49.5 546.9C59.3 527.8 73.5 515.3 93.8 507C114.1 498.7 148.8 499 171.3 496.9C193.7 494.7 209.8 490.6 228.5 494.2C247.1 497.7 268.9 508.5 283.1 518.3C297.3 528 305 538.2 313.7 552.5C322.4 566.7 332 586.5 335.3 603.6Z" fill="#7a6f48" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M87 600V586h10V600M85 586L92 578L99 586M96 554L109 536L122 554M105 543L111 549M152 530V516h10V530M150 516L157 508L164 516M232 526L245 508L258 526M241 515L247 521M277 561V547h10V561M275 547L282 539L289 547M302 598L315 580L328 598M311 587L317 593M302 645V631h10V645M300 631L307 623L314 631M84 643L97 625L110 643M93 632L99 638" fill="none" stroke="#cbb679" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-2" data-estado="bloqueado"><path d="M602.8 322.2C599.6 340.3 580.9 365.7 566.4 383.6C552 401.6 532.6 415.1 516.2 429.8C499.7 444.5 489.7 465 468 472C446.3 479 409.5 480.4 385.8 471.8C362.1 463.2 343.7 434.9 325.8 420.5C308 406 284.5 398.9 278.6 385.2C272.6 371.4 287.1 354.9 290.2 337.8C293.4 320.8 288.2 299.7 297.6 283C306.9 266.2 326.8 251.4 346.1 237.2C365.5 223 395.9 203.2 413.6 197.8C431.3 192.3 434.5 202.5 452.2 204.5C469.9 206.5 497.7 197.8 519.9 209.6C542.1 221.3 571.7 256.3 585.6 275.1C599.4 293.9 606 304.2 602.8 322.2Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M602.8 322.2C599.6 340.3 580.9 365.7 566.4 383.6C552 401.6 532.6 415.1 516.2 429.8C499.7 444.5 489.7 465 468 472C446.3 479 409.5 480.4 385.8 471.8C362.1 463.2 343.7 434.9 325.8 420.5C308 406 284.5 398.9 278.6 385.2C272.6 371.4 287.1 354.9 290.2 337.8C293.4 320.8 288.2 299.7 297.6 283C306.9 266.2 326.8 251.4 346.1 237.2C365.5 223 395.9 203.2 413.6 197.8C431.3 192.3 434.5 202.5 452.2 204.5C469.9 206.5 497.7 197.8 519.9 209.6C542.1 221.3 571.7 256.3 585.6 275.1C599.4 293.9 606 304.2 602.8 322.2Z" fill="#3f5a3a" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M322 320V311M316 308a6 6 0 1 1 12 0a6 6 0 1 1-12 0M347 281V272M341 269a6 6 0 1 1 12 0a6 6 0 1 1-12 0M374 250L387 232L400 250M383 239L389 245M472 252V243M466 240a6 6 0 1 1 12 0a6 6 0 1 1-12 0M519 277V268M513 265a6 6 0 1 1 12 0a6 6 0 1 1-12 0M529 318L542 300L555 318M538 307L544 313M545 366V357M539 354a6 6 0 1 1 12 0a6 6 0 1 1-12 0M315 366V357M309 354a6 6 0 1 1 12 0a6 6 0 1 1-12 0" fill="none" stroke="#8fb37a" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-3" data-estado="bloqueado"><path d="M824.2 613.1C824.1 634.2 809.1 665.1 798.6 682.7C788.1 700.3 781.3 708.8 761.4 718.6C741.4 728.4 701.2 735.2 678.9 741.3C656.6 747.4 649.6 759.7 627.6 755.4C605.5 751 563.6 731.3 546.6 715.3C529.6 699.4 533.7 674.5 525.8 659.7C517.9 644.9 503 640.7 499.4 626.4C495.7 612.1 491.8 593.8 503.7 574C515.7 554.1 550.3 517.5 570.9 507.1C591.5 496.8 603.4 514.3 627.3 511.8C651.2 509.3 691.7 490.6 714.2 492.3C736.7 494 748.3 511.3 762.4 521.9C776.5 532.5 788.6 540.6 798.9 555.8C809.2 571 824.2 591.9 824.2 613.1Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M824.2 613.1C824.1 634.2 809.1 665.1 798.6 682.7C788.1 700.3 781.3 708.8 761.4 718.6C741.4 728.4 701.2 735.2 678.9 741.3C656.6 747.4 649.6 759.7 627.6 755.4C605.5 751 563.6 731.3 546.6 715.3C529.6 699.4 533.7 674.5 525.8 659.7C517.9 644.9 503 640.7 499.4 626.4C495.7 612.1 491.8 593.8 503.7 574C515.7 554.1 550.3 517.5 570.9 507.1C591.5 496.8 603.4 514.3 627.3 511.8C651.2 509.3 691.7 490.6 714.2 492.3C736.7 494 748.3 511.3 762.4 521.9C776.5 532.5 788.6 540.6 798.9 555.8C809.2 571 824.2 591.9 824.2 613.1Z" fill="#2f5a62" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M539 601q6.5-7 13 0t13 0M562 561q6.5-7 13 0t13 0M613 542V528h10V542M611 528L618 520L625 528M691 528q6.5-7 13 0t13 0M733 560q6.5-7 13 0t13 0M763 610V596h10V610M761 596L768 588L775 596M757 646q6.5-7 13 0t13 0M533 647q6.5-7 13 0t13 0" fill="none" stroke="#8cc0c8" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-4" data-estado="bloqueado"><path d="M1045.5 343.8C1045.7 363.1 1036.4 405.1 1029.9 422.1C1023.5 439.1 1022.4 435.9 1006.9 445.9C991.4 455.9 960.1 476.7 937 482.1C913.9 487.5 891.1 480 868.3 478.3C845.6 476.7 820.9 482.1 800.5 472.2C780.2 462.3 753.8 438.7 746.1 418.8C738.5 399 751.1 374.5 754.7 353.1C758.3 331.8 761.3 305.1 767.8 290.7C774.4 276.4 777.2 278.4 793.9 267C810.6 255.6 844.1 231.6 868.3 222.4C892.4 213.2 921 206.5 938.5 211.7C956 217 958.1 238.3 973.2 254.1C988.3 269.8 1016.9 291.3 1029 306.3C1041 321.2 1045.3 324.5 1045.5 343.8Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M1045.5 343.8C1045.7 363.1 1036.4 405.1 1029.9 422.1C1023.5 439.1 1022.4 435.9 1006.9 445.9C991.4 455.9 960.1 476.7 937 482.1C913.9 487.5 891.1 480 868.3 478.3C845.6 476.7 820.9 482.1 800.5 472.2C780.2 462.3 753.8 438.7 746.1 418.8C738.5 399 751.1 374.5 754.7 353.1C758.3 331.8 761.3 305.1 767.8 290.7C774.4 276.4 777.2 278.4 793.9 267C810.6 255.6 844.1 231.6 868.3 222.4C892.4 213.2 921 206.5 938.5 211.7C956 217 958.1 238.3 973.2 254.1C988.3 269.8 1016.9 291.3 1029 306.3C1041 321.2 1045.3 324.5 1045.5 343.8Z" fill="#8a6a3c" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M768 334q7-9 14 0q7-9 14 0M790 293q7-9 14 0q7-9 14 0M835 272L848 254L861 272M844 261L850 267M918 267q7-9 14 0q7-9 14 0M958 295q7-9 14 0q7-9 14 0M982 339L995 321L1008 339M991 328L997 334M981 378q7-9 14 0q7-9 14 0M763 380q7-9 14 0q7-9 14 0" fill="none" stroke="#dab777" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-5" data-estado="bloqueado"><path d="M1256.8 634.5C1262.9 651.5 1277.9 670 1270.3 690.3C1262.7 710.6 1233.5 745.9 1211.3 756.2C1189.1 766.6 1161.8 752.7 1137.1 752.4C1112.3 752.1 1079.3 757.2 1062.7 754.5C1046 751.7 1050.8 746.3 1037.2 735.8C1023.7 725.4 995.1 707.7 981.2 691.9C967.3 676.1 956.7 659.9 953.9 641.1C951.1 622.3 955.5 596.4 964.1 579.2C972.8 561.9 989.6 550.9 1005.7 537.6C1021.9 524.4 1038.2 501.2 1060.7 499.7C1083.3 498.3 1112.3 522.6 1141.1 528.9C1169.8 535.2 1217.8 527.5 1233.2 537.4C1248.6 547.3 1229.6 571.9 1233.6 588.1C1237.5 604.3 1250.7 617.5 1256.8 634.5Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M1256.8 634.5C1262.9 651.5 1277.9 670 1270.3 690.3C1262.7 710.6 1233.5 745.9 1211.3 756.2C1189.1 766.6 1161.8 752.7 1137.1 752.4C1112.3 752.1 1079.3 757.2 1062.7 754.5C1046 751.7 1050.8 746.3 1037.2 735.8C1023.7 725.4 995.1 707.7 981.2 691.9C967.3 676.1 956.7 659.9 953.9 641.1C951.1 622.3 955.5 596.4 964.1 579.2C972.8 561.9 989.6 550.9 1005.7 537.6C1021.9 524.4 1038.2 501.2 1060.7 499.7C1083.3 498.3 1112.3 522.6 1141.1 528.9C1169.8 535.2 1217.8 527.5 1233.2 537.4C1248.6 547.3 1229.6 571.9 1233.6 588.1C1237.5 604.3 1250.7 617.5 1256.8 634.5Z" fill="#474a63" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M989 629L1002 611L1015 629M998 618L1004 624M1022 587V578M1016 575a6 6 0 1 1 12 0a6 6 0 1 1-12 0M1056 563L1069 545L1082 563M1065 552L1071 558M1154 558V549M1148 546a6 6 0 1 1 12 0a6 6 0 1 1-12 0M1186 586L1199 568L1212 586M1195 575L1201 581M1224 629V620M1218 617a6 6 0 1 1 12 0a6 6 0 1 1-12 0M1209 675L1222 657L1235 675M1218 664L1224 670M999 676V667M993 664a6 6 0 1 1 12 0a6 6 0 1 1-12 0" fill="none" stroke="#a9aed2" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-6" data-estado="bloqueado"><path d="M1458.2 355.2C1460.9 378.3 1491.3 405.2 1482.9 420.1C1474.5 435 1432.2 433.1 1407.9 444.7C1383.5 456.2 1357.5 485.4 1336.8 489.4C1316 493.3 1299.6 472.9 1283.4 468.4C1267.2 463.9 1259.2 471.7 1239.5 462.2C1219.9 452.7 1181.5 428.7 1165.4 411.4C1149.3 394 1138.7 374.4 1143.2 358.3C1147.7 342.3 1176.6 330 1192.3 314.9C1208.1 299.9 1221.1 281 1237.9 268C1254.7 255.1 1275.4 241.9 1293.3 237.1C1311.2 232.3 1323.9 235.8 1345.4 239.2C1367 242.6 1402.4 250.5 1422.6 257.5C1442.8 264.6 1460.8 265 1466.7 281.3C1472.6 297.6 1455.5 332.1 1458.2 355.2Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M1458.2 355.2C1460.9 378.3 1491.3 405.2 1482.9 420.1C1474.5 435 1432.2 433.1 1407.9 444.7C1383.5 456.2 1357.5 485.4 1336.8 489.4C1316 493.3 1299.6 472.9 1283.4 468.4C1267.2 463.9 1259.2 471.7 1239.5 462.2C1219.9 452.7 1181.5 428.7 1165.4 411.4C1149.3 394 1138.7 374.4 1143.2 358.3C1147.7 342.3 1176.6 330 1192.3 314.9C1208.1 299.9 1221.1 281 1237.9 268C1254.7 255.1 1275.4 241.9 1293.3 237.1C1311.2 232.3 1323.9 235.8 1345.4 239.2C1367 242.6 1402.4 250.5 1422.6 257.5C1442.8 264.6 1460.8 265 1466.7 281.3C1472.6 297.6 1455.5 332.1 1458.2 355.2Z" fill="#3d3a3a" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M1207 350V336h10V350M1205 336L1212 328L1219 336M1217 305L1230 287L1243 305M1226 294L1232 300M1274 285V271h10V285M1272 271L1279 263L1286 271M1349 282L1362 264L1375 282M1358 271L1364 277M1401 309V295h10V309M1399 295L1406 287L1413 295M1417 348L1430 330L1443 348M1426 337L1432 343M1422 395V381h10V395M1420 381L1427 373L1434 381M1197 394L1210 376L1223 394M1206 383L1212 389" fill="none" stroke="#9a918c" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-7" data-estado="bloqueado"><path d="M1715.7 614.3C1711.3 632.6 1680.4 654.8 1663.5 672.7C1646.6 690.6 1627.3 706.9 1614.4 721.5C1601.5 736.1 1604.6 754.1 1586 760.4C1567.5 766.8 1525.5 764.8 1503.1 759.5C1480.7 754.1 1465.7 741.1 1451.6 728.4C1437.4 715.8 1428.7 702.2 1418.2 683.5C1407.7 664.8 1393.6 634.1 1388.7 616.1C1383.8 598.1 1378 593.8 1388.6 575.7C1399.3 557.7 1436.5 523 1452.7 508C1468.9 492.9 1468.3 488.3 1485.9 485.2C1503.6 482.2 1535.7 483.8 1558.6 489.6C1581.4 495.4 1601.4 507.6 1623.2 519.9C1645 532.2 1674 547.6 1689.5 563.3C1704.9 579.1 1720 596.1 1715.7 614.3Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M1715.7 614.3C1711.3 632.6 1680.4 654.8 1663.5 672.7C1646.6 690.6 1627.3 706.9 1614.4 721.5C1601.5 736.1 1604.6 754.1 1586 760.4C1567.5 766.8 1525.5 764.8 1503.1 759.5C1480.7 754.1 1465.7 741.1 1451.6 728.4C1437.4 715.8 1428.7 702.2 1418.2 683.5C1407.7 664.8 1393.6 634.1 1388.7 616.1C1383.8 598.1 1378 593.8 1388.6 575.7C1399.3 557.7 1436.5 523 1452.7 508C1468.9 492.9 1468.3 488.3 1485.9 485.2C1503.6 482.2 1535.7 483.8 1558.6 489.6C1581.4 495.4 1601.4 507.6 1623.2 519.9C1645 532.2 1674 547.6 1689.5 563.3C1704.9 579.1 1720 596.1 1715.7 614.3Z" fill="#6b3a2c" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M1419 609L1432 591L1445 609M1428 598L1434 604M1435 564L1448 546L1461 564M1444 553L1450 559M1486 540q7-9 14 0q7-9 14 0M1571 537L1584 519L1597 537M1580 526L1586 532M1609 570L1622 552L1635 570M1618 559L1624 565M1633 604q7-9 14 0q7-9 14 0M1642 655L1655 637L1668 655M1651 644L1657 650M1418 654L1431 636L1444 654M1427 643L1433 649" fill="none" stroke="#d48a63" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ilha" id="ilha-8" data-estado="bloqueado"><path d="M1784.7 251.3C1783.8 267 1763.5 287.5 1753.8 300.8C1744.1 314 1739.1 323.4 1726.7 330.7C1714.2 338.1 1693.6 341.1 1679.3 345C1664.9 348.9 1656.1 354.8 1640.8 354C1625.6 353.3 1603 348.8 1587.9 340.4C1572.7 332.1 1559.2 318.9 1549.8 303.8C1540.5 288.6 1527.9 264.8 1531.6 249.6C1535.3 234.4 1562.4 221.9 1572.1 212.6C1581.8 203.2 1578.9 201.1 1589.6 193.5C1600.4 185.9 1618.6 173.2 1636.7 166.9C1654.8 160.6 1679.2 154.2 1698.4 155.6C1717.7 156.9 1742.1 166.5 1752.2 175C1762.3 183.5 1753.7 193.6 1759.1 206.4C1764.5 219.1 1785.6 235.6 1784.7 251.3Z" fill="none" stroke="#9fd0d0" stroke-opacity=".13" stroke-width="16" stroke-linejoin="round"/><path class="ilha__terra" d="M1784.7 251.3C1783.8 267 1763.5 287.5 1753.8 300.8C1744.1 314 1739.1 323.4 1726.7 330.7C1714.2 338.1 1693.6 341.1 1679.3 345C1664.9 348.9 1656.1 354.8 1640.8 354C1625.6 353.3 1603 348.8 1587.9 340.4C1572.7 332.1 1559.2 318.9 1549.8 303.8C1540.5 288.6 1527.9 264.8 1531.6 249.6C1535.3 234.4 1562.4 221.9 1572.1 212.6C1581.8 203.2 1578.9 201.1 1589.6 193.5C1600.4 185.9 1618.6 173.2 1636.7 166.9C1654.8 160.6 1679.2 154.2 1698.4 155.6C1717.7 156.9 1742.1 166.5 1752.2 175C1762.3 183.5 1753.7 193.6 1759.1 206.4C1764.5 219.1 1785.6 235.6 1784.7 251.3Z" fill="#45335f" stroke="#0b0a08" stroke-opacity=".7" stroke-width="2.5" stroke-linejoin="round"/><path class="ilha__relevo" d="M1579 232L1581 239L1588 241L1581 243L1579 250L1577 243L1570 241L1577 239ZM1598 202L1600 209L1607 211L1600 213L1598 220L1596 213L1589 211L1596 209ZM1614 194L1627 176L1640 194M1623 183L1629 189M1691 182L1693 189L1700 191L1693 193L1691 200L1689 193L1682 191L1689 189ZM1726 200L1728 207L1735 209L1728 211L1726 218L1724 211L1717 209L1724 207ZM1734 248L1747 230L1760 248M1743 237L1749 243M1742 266L1744 273L1751 275L1744 277L1742 284L1740 277L1733 275L1740 273ZM1579 265L1581 272L1588 274L1581 276L1579 283L1577 276L1570 274L1577 272Z" fill="none" stroke="#b79cff" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></g><g><path class="rota-sombra" d="M200 610C224.3 590.9 307.6 542.1 345.9 495.4C384.2 448.7 391.6 337.5 430 330"/><path class="rota-seg" id="rota-seg-1" data-aberta="false" d="M200 610C224.3 590.9 307.6 542.1 345.9 495.4C384.2 448.7 391.6 337.5 430 330"/><path class="rota-sombra" d="M430 330C468.4 322.5 538 401.8 576.3 450.1C614.7 498.5 621.8 609.9 660 620"/><path class="rota-seg" id="rota-seg-2" data-aberta="false" d="M430 330C468.4 322.5 538 401.8 576.3 450.1C614.7 498.5 621.8 609.9 660 620"/><path class="rota-sombra" d="M660 620C698.2 630.1 767.1 555.9 805.4 510.9C843.8 465.9 852.3 356.7 890 350"/><path class="rota-seg" id="rota-seg-3" data-aberta="false" d="M660 620C698.2 630.1 767.1 555.9 805.4 510.9C843.8 465.9 852.3 356.7 890 350"/><path class="rota-sombra" d="M890 350C927.7 343.3 995.2 422.5 1031.9 470.8C1068.5 519.2 1074.1 631.1 1110 640"/><path class="rota-seg" id="rota-seg-4" data-aberta="false" d="M890 350C927.7 343.3 995.2 422.5 1031.9 470.8C1068.5 519.2 1074.1 631.1 1110 640"/><path class="rota-sombra" d="M1110 640C1145.9 648.9 1212 570.7 1247 524C1282 477.3 1284.4 370 1320 360"/><path class="rota-seg" id="rota-seg-5" data-aberta="false" d="M1110 640C1145.9 648.9 1212 570.7 1247 524C1282 477.3 1284.4 370 1320 360"/><path class="rota-sombra" d="M1320 360C1355.6 350 1423.9 420.8 1460.5 464.2C1497.2 507.5 1510.4 622.4 1540 620"/><path class="rota-seg" id="rota-seg-6" data-aberta="false" d="M1320 360C1355.6 350 1423.9 420.8 1460.5 464.2C1497.2 507.5 1510.4 622.4 1540 620"/><path class="rota-sombra" d="M1540 620C1569.6 617.6 1618 510.8 1638 450C1658 389.2 1656.3 287.5 1660 255"/><path class="rota-seg" id="rota-seg-7" data-aberta="false" d="M1540 620C1569.6 617.6 1618 510.8 1638 450C1658 389.2 1656.3 287.5 1660 255"/></g><g><g class="nevoa" id="nevoa-1" data-ativa="false"><ellipse class="nevoa__massa" cx="130" cy="568" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="262" cy="554" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="200" cy="632" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="114" cy="658" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="286" cy="662" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-2" data-ativa="true"><ellipse class="nevoa__massa" cx="360" cy="288" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="492" cy="274" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="430" cy="352" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="344" cy="378" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="516" cy="382" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-3" data-ativa="true"><ellipse class="nevoa__massa" cx="590" cy="578" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="722" cy="564" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="660" cy="642" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="574" cy="668" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="746" cy="672" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-4" data-ativa="true"><ellipse class="nevoa__massa" cx="820" cy="308" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="952" cy="294" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="890" cy="372" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="804" cy="398" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="976" cy="402" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-5" data-ativa="true"><ellipse class="nevoa__massa" cx="1040" cy="598" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1172" cy="584" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1110" cy="662" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1024" cy="688" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1196" cy="692" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-6" data-ativa="true"><ellipse class="nevoa__massa" cx="1250" cy="318" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1382" cy="304" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1320" cy="382" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1234" cy="408" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1406" cy="412" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-7" data-ativa="true"><ellipse class="nevoa__massa" cx="1470" cy="578" rx="122" ry="60" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1602" cy="564" rx="130" ry="62" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1540" cy="642" rx="152" ry="72" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1454" cy="668" rx="110" ry="52" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1626" cy="672" rx="116" ry="55" fill="url(#g-nevoa)"/></g><g class="nevoa" id="nevoa-8" data-ativa="true"><ellipse class="nevoa__massa" cx="1604" cy="221" rx="98" ry="48" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1710" cy="210" rx="104" ry="50" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1660" cy="273" rx="122" ry="58" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1591" cy="293" rx="88" ry="42" fill="url(#g-nevoa)"/><ellipse class="nevoa__massa" cx="1729" cy="297" rx="93" ry="44" fill="url(#g-nevoa)"/></g></g></svg>
+            <div class="mapa-nuvens" aria-hidden="true"><span class="mapa-nuvem" style="--t:8%;--w:18%;--d:95s;--a:-10s"></span><span class="mapa-nuvem" style="--t:30%;--w:14%;--d:120s;--a:-60s"></span><span class="mapa-nuvem" style="--t:58%;--w:20%;--d:105s;--a:-35s"></span><span class="mapa-nuvem" style="--t:78%;--w:12%;--d:140s;--a:-90s"></span></div>
+            <ol class="mapa-nos">
+              <li class="mapa-nos__item" style="--x:11.111%;--y:67.778%" data-x="200" data-y="610">
+                <button type="button" class="no" data-mundo="1" data-estado="atual" aria-label="Mundo 1: Reino da Aurora">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha no__medalha--retrato"><img src="../assets/concepts/rei.jpg" alt="" width="896" height="1200" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">1</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Reino da Aurora</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:23.889%;--y:36.667%" data-x="430" data-y="330">
+                <button type="button" class="no" data-mundo="2" data-estado="bloqueado" aria-label="Mundo 2: Clã dos Primatas">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha no__medalha--retrato"><img src="../assets/concepts/reinos/primatas/referencia.jpg" alt="" width="896" height="1200" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">2</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Clã dos Primatas</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:36.667%;--y:68.889%" data-x="660" data-y="620">
+                <button type="button" class="no" data-mundo="3" data-estado="bloqueado" aria-label="Mundo 3: Clã do Mar Profundo">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha no__medalha--retrato"><img src="../assets/concepts/reinos/mar/referencia.jpg" alt="" width="896" height="1200" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">3</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Clã do Mar Profundo</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:49.444%;--y:38.889%" data-x="890" data-y="350">
+                <button type="button" class="no" data-mundo="4" data-estado="bloqueado" aria-label="Mundo 4: Império do Deserto Subterrâneo">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha no__medalha--retrato"><img src="../assets/concepts/reinos/deserto/referencia.jpg" alt="" width="896" height="1200" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">4</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Império do Deserto Subterrâneo</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:61.667%;--y:71.111%" data-x="1110" data-y="640">
+                <button type="button" class="no" data-mundo="5" data-estado="bloqueado" aria-label="Mundo 5: Alpha da Lua Nova">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha"><img src="../assets/concepts/reinos/lua_nova/referencia.jpg" alt="" width="1024" height="342" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">5</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Alpha da Lua Nova</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:73.333%;--y:40.000%" data-x="1320" data-y="360">
+                <button type="button" class="no" data-mundo="6" data-estado="bloqueado" aria-label="Mundo 6: Legião do Ferro Negro">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha"><img src="../assets/concepts/reinos/ferro_negro/referencia.png" alt="" width="1024" height="342" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">6</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Legião do Ferro Negro</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:85.556%;--y:68.889%" data-x="1540" data-y="620">
+                <button type="button" class="no" data-mundo="7" data-estado="bloqueado" aria-label="Mundo 7: Reino dos Dragões">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha"><img src="../assets/concepts/reinos/dragoes/referencia.jpg" alt="" width="1024" height="342" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">7</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Reino dos Dragões</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+              <li class="mapa-nos__item" style="--x:92.222%;--y:28.333%" data-x="1660" data-y="255">
+                <button type="button" class="no" data-mundo="8" data-estado="bloqueado" aria-label="Mundo 8: Abismo Estelar">
+                  <span class="no__disco">
+                    <span class="no__anel" aria-hidden="true"></span>
+                    <span class="no__medalha no__medalha--retrato"><img src="../assets/concepts/reinos/abismo/referencia.jpg" alt="" width="896" height="1200" decoding="async"></span>
+                    <span class="no__nevoa" aria-hidden="true"></span>
+                    <span class="no__num" aria-hidden="true">8</span>
+                    <span class="no__cadeado" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-cadeado"/></svg></span>
+                    <span class="no__selo" aria-hidden="true"><svg aria-hidden="true" focusable="false"><use href="#i-selo"/></svg></span>
+                  </span>
+                  <span class="no__rotulo" aria-hidden="true"><span class="no__nome">Abismo Estelar</span><span class="no__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg><span data-no-estrelas>0/18</span></span></span>
+                </button>
+              </li>
+            </ol>
+            <div class="guardiao" aria-hidden="true" data-guardiao hidden><span class="guardiao__pino"><span class="guardiao__ponta"></span><span class="guardiao__retrato"><img src="../assets/concepts/rei.jpg" alt="" width="896" height="1200"></span></span></div>
+          </div>
+        </div>
+        <div class="mapa-vinheta" aria-hidden="true"></div>
+        </div>
+        <div class="mapa-legenda">
+          <p class="mapa-dicas mapa-dicas--teclado"><span aria-hidden="true"><kbd>↕</kbd> Rolar ou <kbd>←</kbd> <kbd>→</kbd> Mover <span class="mapa-dicas__sep">·</span> <kbd>Enter</kbd> Entrar <span class="mapa-dicas__sep">·</span> Arrastar para olhar ao redor</span><span class="sr-only">Role ou use as setas esquerda e direita para mover o Guardião; Enter entra no mundo; arraste para olhar ao redor.</span></p>
+          <p class="mapa-dicas mapa-dicas--toque">Toque num mundo para viajar</p>
+          <a class="link-arrow mapa-lista" href="index.html#campanha">Ver em lista</a>
+        </div>
+      </section>
+
+      <aside class="mapa-painel" data-painel data-estado="atual" aria-labelledby="painel-nome">
+        <div class="painel__topo">
+          <p class="painel__num" data-p-num>Mundo 1 de 8</p>
+          <h2 class="painel__nome" id="painel-nome" data-p-nome>Reino da Aurora</h2>
+          <p class="painel__estado" data-p-estado>Mundo atual</p>
+          <p class="painel__estrelas"><svg aria-hidden="true" focusable="false"><use href="#i-estrela"/></svg> <span data-p-estrelas>0/18</span> estrelas</p>
+          <div class="campanha-barra" aria-hidden="true"><span data-p-barra></span></div>
+        </div>
+        <div class="painel__acoes">
+          <a class="btn btn--primary btn--block" data-p-cta href="../coroa-de-cinzas.html#modo=campanha">Entrar no mundo</a>
+          <button type="button" class="painel__alternar" data-p-alternar aria-expanded="false" aria-controls="painel-detalhes">Ver fases</button>
+        </div>
+        <div class="painel__detalhes" id="painel-detalhes" data-p-detalhes>
+          <p class="painel__hist" data-p-hist>O Arcanjo desce num pilar de luz para testar o último Guardião acordado.</p>
+          <dl class="painel__fatos">
+            <div><dt>Regra do mundo</dt><dd data-p-regra>Xadrez puro, sem cartas: o Arcanjo testa o Guardião.</dd></div>
+            <div><dt>Chefão</dt><dd data-p-chefe>O Arcanjo</dd></div>
+            <div><dt>Selo</dt><dd data-p-selo>As primeiras páginas do Livro da Vida</dd></div>
+          </dl>
+          <h3 class="painel__sub">Fases</h3>
+          <ol class="painel__fases" data-p-fases></ol>
+        </div>
+      </aside>
+    </div>
+    <p class="sr-only" aria-live="polite" data-mapa-aviso></p>
+  </div>
+</main>
+
+<footer class="footer torn-top">
+  <div class="wrap">
+    <div class="footer__base" style="margin-top:0"><span>© <span data-year>2026</span> Arcane Chess</span><span><a href="index.html">Início</a> · <a href="mapa.html">Mapa</a> · <a href="ranking.html">Ranking</a> · <a href="login.html">Entrar</a></span></div>
+  </div>
+</footer>
+</body>
+</html>
