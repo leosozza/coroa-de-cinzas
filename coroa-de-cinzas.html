@@ -684,6 +684,20 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 .camp-st{font-size:1.1rem; color:#ffd36b; letter-spacing:.08em; white-space:nowrap}
 .camp-phases .btn-main{min-height:40px; padding:6px 14px; white-space:nowrap}
 .camp-note{margin:10px 0 0; font-size:.84rem; color:var(--ash)}
+.camp-histbtn{margin:4px 0 6px; min-height:40px; padding:6px 14px; background:rgba(240,207,122,.1); border:1px solid rgba(240,207,122,.6); border-radius:4px; color:#f0d48a; font-family:var(--f-engrave); letter-spacing:.06em; cursor:pointer}
+.camp-histbtn:hover{background:rgba(240,207,122,.2)}
+/* abertura do mundo: o clipe live action em tela cheia (vertical, centralizado), com o nome do mundo e o Pular */
+.camp-intro{position:fixed; inset:0; z-index:90; display:flex; align-items:center; justify-content:center; background:#000; opacity:0; transition:opacity .45s}
+.camp-intro.on{opacity:1}
+.camp-intro[hidden]{display:none}
+.camp-intro-bg{position:absolute; inset:-40px; background:#000 center/cover no-repeat; filter:blur(28px) brightness(.38) saturate(1.1)}
+.camp-intro video{position:relative; box-shadow:0 0 60px rgba(0,0,0,.85); max-width:100%; max-height:100%; width:auto; height:100%; aspect-ratio:9/16; object-fit:cover; background:#000}
+.camp-intro-cap{position:absolute; left:0; right:0; top:max(18px, env(safe-area-inset-top)); display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; pointer-events:none; text-shadow:0 2px 10px #000, 0 0 2px #000}
+.camp-intro-cap small{font-family:var(--f-ui); letter-spacing:.24em; font-size:.78rem; color:#e3d8c2; text-transform:uppercase}
+.camp-intro-cap b{font-family:var(--f-display); font-size:clamp(1.4rem, 4vw, 2.2rem); color:#f0cf7a}
+.camp-intro-skip{position:absolute; right:max(16px, env(safe-area-inset-right)); bottom:max(18px, env(safe-area-inset-bottom)); min-height:44px; padding:8px 18px; background:rgba(10,8,12,.72); border:1px solid rgba(240,207,122,.6); border-radius:22px; color:#f0d48a; font-family:var(--f-engrave); letter-spacing:.08em; cursor:pointer}
+.camp-intro-skip:hover, .camp-intro-skip:focus-visible{background:rgba(40,30,20,.9)}
+@media (prefers-reduced-motion:reduce){ .camp-intro{transition:none} }
 .camp-endst b{color:#ffd36b !important; letter-spacing:.1em}
 @media (max-width:560px){ .camp-wh{flex-direction:column} .camp-img.big{width:100%; aspect-ratio:16/9} .camp-phases li{flex-wrap:wrap} .camp-phases .btn-main{width:100%} }
 .setup{width:100%; max-width:720px; padding:16px; border:1px solid rgba(232,192,112,.35); border-radius:4px; background:rgba(16,14,20,.94); text-align:left}
@@ -1033,6 +1047,12 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
     <ol class="camp-map" id="camp-map" aria-label="Os 8 mundos"></ol>
     <section class="camp-world" id="camp-world" aria-live="polite"></section>
   </div>
+</div>
+<div class="camp-intro" id="camp-intro" role="dialog" aria-modal="true" aria-labelledby="camp-intro-t" hidden>
+  <div class="camp-intro-bg" id="camp-intro-bg" aria-hidden="true"></div>
+  <video id="camp-intro-v" playsinline preload="auto"></video>
+  <div class="camp-intro-cap"><small id="camp-intro-n"></small><b id="camp-intro-t"></b></div>
+  <button type="button" class="camp-intro-skip" id="camp-intro-skip">Pular ▸▸</button>
 </div>
 <div class="title" id="title" role="dialog" aria-modal="true" aria-labelledby="title-logo">
   <div class="title-inner">
@@ -17017,7 +17037,7 @@ function applyAudio(fade = 0.4){
 // abaixa música e ambiente em ~60% durante a câmera de combate e as falas do narrador
 function audioTick(){
   if (!AC) return;
-  const want = (typeof cine !== 'undefined' && cine.active) || AC.currentTime < AUD.voiceEnd ? 0.4 : 1;
+  const want = typeof CINT !== 'undefined' && CINT.w ? 0 : (typeof cine !== 'undefined' && cine.active) || AC.currentTime < AUD.voiceEnd ? 0.4 : 1;
   if (want === AUD.duck) return;
   AUD.duck = want;
   const t = AC.currentTime;
@@ -21497,6 +21517,7 @@ const CAMP_FASES = [
   { id:'chefao', nome:'Chefão', desc:'O soberano do mundo, com o Selo escondido numa peça maior.' },
 ];
 const CAMP = { open:false, sel:1, run:null, save:(() => { try { const v = JSON.parse(localStorage.getItem(CAMP_KEY) || 'null'); if (v && v.fases) return v; } catch (e){} return { nome:'', fases:{}, cartas:[], selos:[] }; })() };
+if (!Array.isArray(CAMP.save.vistos)) CAMP.save.vistos = [];
 const campSaveNow = () => { try { localStorage.setItem(CAMP_KEY, JSON.stringify(CAMP.save)); } catch (e){} };
 const campStars = (w, p) => (CAMP.save.fases[`${w}-${p}`] || [0, 0, 0]);
 const campWon = (w, p) => !!campStars(w, p)[0];
@@ -21551,6 +21572,7 @@ function campRender(){
   const m = CAMP_MUNDOS[CAMP.sel - 1], R = REINOS[m.reino];
   $('camp-world').innerHTML = `<header class="camp-wh"><span class="camp-img big" style="background-image:url('${R.img}')"></span>
       <div><small>Mundo ${m.n} · ${escHtml(R.nome)}</small><h3>${escHtml(m.chefe)}</h3><p>${escHtml(m.hist)}</p>
+      <button type="button" class="camp-histbtn" data-hist="${m.n}">▶ História</button>
       <p class="camp-rule"><b>Regra do mundo:</b> ${escHtml(m.regra)} <b>Selo:</b> ${escHtml(m.selo)}.</p>
       ${m.cartas.length ? `<p class="camp-cards"><b>Cartas deste mundo:</b> ${m.cartas.map(id => escHtml(CAMP_C(id))).join(' · ')}</p>` : ''}</div></header>
     <ol class="camp-phases">${CAMP_FASES.map((f, i) => {
@@ -21560,8 +21582,48 @@ function campRender(){
         <button type="button" class="btn-main" data-p="${p}" ${open ? '' : 'disabled'}>${open ? (s[0] ? 'Jogar de novo' : 'Jogar') : 'Bloqueada'}</button></li>`;
     }).join('')}</ol>
     <p class="camp-note">Estrelas: vencer · capturar o Portador da carta e vencer · vencer em até 30 lances. O Portador é uma peça inimiga sorteada em segredo (nunca o Rei); a cada 10 lances a aura dele pisca no mapinha.</p>`;
-  $('camp-world').querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { audio(); campStart(CAMP.sel, +b.dataset.p); }));
+  $('camp-world').querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
+    audio(); const w = CAMP.sel, p = +b.dataset.p;
+    if (!CAMP.save.vistos.includes(w)) campIntro(w, () => campStart(w, p)); else campStart(w, p);
+  }));
+  $('camp-world').querySelectorAll('[data-hist]').forEach(b => b.addEventListener('click', () => { audio(); campIntro(+b.dataset.hist); }));
 }
+// abertura de cada mundo: um clipe live action de 8 s (assets/video/mundo_N.mp4, com a narração do mundo). Toca na
+// primeira vez que o Guardião entra numa fase do mundo (os já vistos ficam em CAMP.save.vistos) e sempre pelo
+// "▶ História". A música e o ambiente calam enquanto toca; sem o arquivo (ou no Artifact, onde a CSP barra o vídeo)
+// a fase começa direto.
+var CINT = { then:null, w:0, ok:false }; // var: o audioTick (definido antes) lê CINT sem cair na zona morta do const
+function campIntro(w, then){
+  const m = CAMP_MUNDOS[w - 1], R = REINOS[m.reino], box = $('camp-intro'), v = $('camp-intro-v');
+  CINT.then = then || null; CINT.w = w; CINT.ok = false;
+  $('camp-intro-n').textContent = `Mundo ${m.n}`;
+  $('camp-intro-t').textContent = R.nome;
+  $('camp-intro-bg').style.backgroundImage = `url('${R.img}')`;
+  v.muted = !(AUD.set.on);
+  v.volume = Math.min(1, (AUD.set.vol || 0.8) + 0.15);
+  v.src = `assets/video/mundo_${w}.mp4`;
+  box.hidden = false; requestAnimationFrame(() => box.classList.add('on'));
+  if (AC && AUD.bus.musicDuck){ const t = AC.currentTime; AUD.bus.musicDuck.gain.setTargetAtTime(0, t, 0.15); AUD.bus.ambDuck.gain.setTargetAtTime(0, t, 0.15); AUD.duck = 0; }
+  const pr = v.play(); if (pr && pr.catch) pr.catch(() => { v.muted = true; v.play().catch(() => campIntroEnd()); });
+  setTimeout(() => $('camp-intro-skip').focus(), 60);
+}
+function campIntroEnd(){
+  const box = $('camp-intro'), v = $('camp-intro-v');
+  if (box.hidden) return;
+  // só conta como vista a abertura que de fato tocou (sem o arquivo, ela volta a tentar na próxima entrada)
+  if (CINT.w && CINT.ok && !CAMP.save.vistos.includes(CINT.w)){ CAMP.save.vistos.push(CINT.w); campSaveNow(); }
+  try { v.pause(); } catch (e){}
+  v.removeAttribute('src'); try { v.load(); } catch (e){}
+  box.classList.remove('on'); box.hidden = true;
+  AUD.duck = -1; audioTick();
+  const f = CINT.then; CINT.then = null; CINT.w = 0;
+  if (f) f(); else if (CAMP.open){ const b = $('camp-world').querySelector('.camp-histbtn'); if (b) b.focus(); }
+}
+$('camp-intro-v').addEventListener('ended', campIntroEnd);
+$('camp-intro-v').addEventListener('playing', () => { CINT.ok = true; });
+$('camp-intro-v').addEventListener('error', () => { if (!$('camp-intro').hidden) campIntroEnd(); });
+$('camp-intro-skip').addEventListener('click', campIntroEnd);
+$('camp-intro').addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' '){ e.preventDefault(); e.stopPropagation(); campIntroEnd(); } });
 const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 function campOpen(){
   CAMP.open = true;
@@ -21703,7 +21765,7 @@ $('camp-endnext').addEventListener('click', () => { audio(); $('end').hidden = t
 // qualquer outro modo encerra a campanha em andamento
 const campLeave = () => { CAMP.run = null; $('camp-endmap').hidden = true; $('camp-endnext').hidden = true; };
 // testes: ?dbg na URL expõe atalhos da campanha
-if (new URLSearchParams(location.search).has('dbg')) window.CAMPDBG = { sel:w => { CAMP.sel = w; campRender(); }, start:(w, p) => campStart(w, p), move:(f, t) => doMove({ from:f, to:t }), run:() => CAMP.run && { w:CAMP.run.w, p:CAMP.run.p, capturado:CAMP.run.capturado, portador:campPortadorCasa() } };
+if (new URLSearchParams(location.search).has('dbg')) window.CAMPDBG = { sel:w => { CAMP.sel = w; campRender(); }, start:(w, p) => campStart(w, p), move:(f, t) => doMove({ from:f, to:t }), run:() => CAMP.run && { w:CAMP.run.w, p:CAMP.run.p, capturado:CAMP.run.capturado, portador:campPortadorCasa() }, open:() => campOpen() };
 
 /* ---------- Modo Aprendiz ----------
    Lições roteirizadas sobre posições prontas (a Legião não joga sozinha, a não ser no mate em dois) e uma partida

@@ -20,6 +20,8 @@ done
 # imagens dos cartões de reino (escolha do reino em cada modo)
 mkdir -p "$W/assets/concepts" && cp "$ROOT/assets/concepts/rei.jpg" "$W/assets/concepts/"
 for f in "$ROOT"/assets/concepts/reinos/*/referencia.*; do d="$W/assets/concepts/reinos/$(basename "$(dirname "$f")")"; mkdir -p "$d"; cp "$f" "$d/"; done
+# aberturas dos mundos da Conquista dos Mundos (clipes live action de 8 s)
+[ -d "$ROOT/assets/video" ] && mkdir -p "$W/assets/video" && cp "$ROOT"/assets/video/mundo_*.mp4 "$W/assets/video/"
 # texturas das arenas (chão e paredes)
 [ -d "$ROOT/assets/textures/arenas" ] && mkdir -p "$W/assets/textures/arenas" && cp "$ROOT"/assets/textures/arenas/*.jpg "$W/assets/textures/arenas/"
 # site (página inicial com o hero, ranking e login): o jogo vai para /jogar.html e as páginas para a raiz

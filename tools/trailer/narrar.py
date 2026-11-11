@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Grava a narração do trailer com a voz do narrador do jogo (ElevenLabs, voz de catálogo, nunca clonada).
 
-Uso: python3 tools/trailer/narrar.py [--refazer]
-Lê tools/trailer/roteiro.json ("falas": id, texto) e grava tools/trailer/saida/narr_<id>.mp3.
+Uso: python3 tools/trailer/narrar.py [--roteiro mundos.json] [--refazer]
+Lê tools/trailer/roteiro.json (ou o --roteiro) ("falas": id, texto) e grava tools/trailer/saida/narr_<id>.mp3.
 Cada fala leva a anterior e a seguinte como contexto para a entonação casar na montagem.
 """
 import json
@@ -18,7 +18,8 @@ EPICA = {"stability": 0.4, "similarity_boost": 0.8, "style": 0.55, "use_speaker_
 
 
 def main():
-    falas = json.loads((DIR / "roteiro.json").read_text())["falas"]
+    nome = sys.argv[sys.argv.index("--roteiro") + 1] if "--roteiro" in sys.argv else "roteiro.json"
+    falas = json.loads((DIR / nome).read_text())["falas"]
     OUT.mkdir(exist_ok=True)
     print(f"{len(falas)} falas, {sum(len(f['texto']) for f in falas)} caracteres", flush=True)
     for i, f in enumerate(falas):
