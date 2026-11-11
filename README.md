@@ -67,6 +67,8 @@ As chaves das APIs nunca ficam no código: os scripts leem do Keychain do macOS 
 - No jogo, a barra das vistas tem **● Gravar** (grava a cena em vídeo vertical 1080×1920 com som) e **Clipes automáticos** (um clipe por captura e por xeque-mate, com a legenda do golpe, o confronto, a marca e o mapinha do tabuleiro com a seta do lance).
 - [tools/reels/](tools/reels): o Reel automático do Instagram (@arcanechess_oficial). `reel_auto.mjs` abre o jogo no Chrome, assiste uma partida IA × IA entre dois reinos sorteados, monta o vídeo (closes das capturas + o xeque-mate) com ffmpeg, hospeda o MP4 em `midia.arcanechess.pages.dev` e publica pela API da Meta. `instalar.sh` instala em `~/ArcaneChessReels` e agenda toda hora cheia no launchd (`--parar` desliga). Cada Reel é uma partida inteira (até 3 minutos, um lado Recruta e o outro Mestre, sem as pausas da IA pensando); um em cada três é no Modo Arcano, e dois posts seguidos nunca repetem um reino. O token fica no Keychain (`instagram-api-key`).
 
+- [tools/trailer/](tools/trailer): o trailer de 58 s no estilo filme (AIDA). Seis clipes live action gerados no Veo 3.1 pelo OpenArt (`openart_gerar.py`, lê os prompts de `roteiro.json`; o programa `openart` entra pela conta do OpenArt, sem chave), a narração do narrador do jogo no ElevenLabs (`narrar.py`), a montagem com trechos de uma partida gravada pelo robô, textos e a cartela final (`montar.py`) e a publicação como Reel (`publicar.mjs`, hospeda em `trailer.arcanechess.pages.dev`). O `veo.py` faz o mesmo direto pela API do Gemini, para quando a chave tiver o Veo liberado.
+
 ## Estrutura
 
 ```

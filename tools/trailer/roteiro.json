@@ -1,0 +1,82 @@
+{
+ "clipes": [
+  {
+   "id": "c1_coroa",
+   "segundos": 8,
+   "prompt": "Extreme close-up, high-speed slow motion (shot at 240 fps). A heavy, ornate royal crown of burnished gold set with pale white gemstones is already tumbling through the air in the very first frame, turning slowly against deep darkness filled with drifting embers. At about 1.5 seconds it strikes a polished stone floor laid out as a giant chessboard of black obsidian and ivory marble squares. The impact throws up a ring of fine dust and tiny sparks; the crown bounces once, rolls in a slow arc and settles on its side across the line between a black and a white square. Fine dust and small stone fragments rain down from an unseen ceiling, and the floor trembles. Setting: an ancient throne hall sunk in shadow. Lighting: a pulsing deep red-orange glow from tall windows off-frame right, as if the sky outside is burning; a single warm golden rim light on the crown. Camera: locked low angle at floor level, 100mm macro lens, then a very slow push-in after the crown comes to rest. Color grade: teal-black shadows, burnished gold highlights, ember-orange accents. Sound: low rumble of distant impacts, a heavy slowed-down metallic clang as the crown hits, a long resonant ringing tail, dust pattering down, faint crackle of embers. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, chess pieces in focus, modern objects, people, hands"
+  },
+  {
+   "id": "c2_queda",
+   "segundos": 8,
+   "prompt": "Ultra-wide establishing shot, vertical. A night sky above a sleeping city of white stone towers and golden domes on a sea cliff, with only the rooftops visible along the bottom of the frame. A colossal living hive-ship falls through the sky from the upper left: an organic vessel shaped like a spiraled seashell fused with a wasp nest, built from pale ash-grey chitin plates and thousands of hexagonal cells glowing a sickly violet-teal, trailing fire and a plume of glowing spores. It grazes the full moon: a huge chunk of the moon cracks away, and glowing fragments scatter across the sky like a meteor shower. The ship's glow floods the clouds violet while the city's golden lights flicker below. Camera: 24mm lens, slow upward tilt following the ship, a subtle handheld tremor as the shockwave reaches the rooftops. Lighting: cold blue moonlight, violet bioluminescence from the ship, orange re-entry fire. Color grade: teal-black night, violet and ember-orange contrast, gold city lights. Sound: a rising atmospheric roar of something massive entering the sky, deep sub-bass rumble, a thunderous crack of breaking rock, distant bells, wind gusts, the shockwave rushing over the rooftops. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, metal spaceship hull, starship, flying saucer, sci-fi spacecraft, xenomorph, black biomechanical ribbed alien design, Giger style"
+  },
+  {
+   "id": "c3_grimorio",
+   "segundos": 8,
+   "prompt": "Low-angle wide shot looking upward, vertical. Inside an ancient throne hall with a floor of black obsidian and ivory marble chessboard squares, an enormous leather-bound grimoire with tarnished gold clasps lies open on a carved stone lectern beneath a cracked dome of glass and black iron. The book erupts with golden light: eight glowing parchment pages tear free, spiral upward together, burst through the dome in an explosion of glass, and for one instant form an eight-pointed star against the night sky before streaking away in eight different directions like golden comets. Through the broken dome we see a red-tinted sky and the wounded moon with a chunk missing. Camera: starts on the open book in the lower third of the frame, then tilts up smoothly with a slight upward crane following the pages, 28mm lens. Lighting: warm gold radiating from the pages, red-orange skylight, glass shards glinting as they fall. Color grade: teal-black shadows, intense gold highlights, ember-orange sky. Sound: a deep rush of air being drawn in, amplified pages ripping and fluttering, a resonant crystalline hum, the glass dome shattering, eight whooshes fading into the distance, wind through the broken dome. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, readable writing on pages, runes forming words, people, wizard character"
+  },
+  {
+   "id": "c4_lobo",
+   "segundos": 8,
+   "prompt": "Medium-wide low-angle shot, vertical. On a jagged mountain cliff at night, under a wounded moon with a chunk missing, a towering wolf lord stands upright on two legs, about three meters tall: thick grey-black fur, old scars, fragments of ancient bronze armor and a torn fur mantle. A glowing golden parchment page drifts down from the sky like a burning ember and sinks into its chest; a glowing sigil brands itself into the fur, with veins of gold light spreading outward. Its eyes ignite from amber to blazing crimson; it throws its head back and howls, its breath steaming in the cold air. As it howls, the camera tilts up to the sky, where the winged silhouette of a dragon crosses the face of the broken moon and other golden streaks fall onto distant lands. Practical creature feel: real fur, wet nose, weight and muscle. Camera: 50mm lens, slow push-in, then a smooth tilt up to the moon. Lighting: cold blue moonlight, golden glow from the sigil, crimson eyes as the brightest point. Color grade: teal-blue night, gold and crimson accents. Sound: cold mountain wind, a low guttural growl, fur and leather creaking, a searing hiss as the page brands the chest, a long howl echoing across the valley, distant heavy wingbeats. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, cartoon werewolf, person in costume, famous movie werewolf design, gore, blood, human face on the wolf"
+  },
+  {
+   "id": "c5_guardiao",
+   "segundos": 8,
+   "prompt": "Opens on an extreme close-up of a warrior's eyes snapping open: an anonymous face half-hidden in the shadow of an open helm, smudged with ash, no recognizable likeness. The camera then pulls back and rises as the lone Guardian gets up from the stone pavement of an empty city plaza of white stone and gold at dawn. The Guardian wears worn gold-and-steel plate armor, a tattered off-white cloak and a softly glowing golden sigil on the breastplate, and grips a long sword. The plaza is deserted: abandoned carts, a fallen banner, and long strands of translucent amber resin hanging from the columns and dragging across the ground where people used to stand. The Guardian looks up: high above the city hangs the colossal living hive-ship (spiraled seashell-and-wasp-nest shape, pale ash-grey chitin, violet-teal glowing cells), casting a vast shadow over the towers. Camera: 85mm for the eyes, then a smooth pull-back crane widening to 35mm, the Guardian small in the lower center and the ship filling the upper frame. Lighting: pale grey-gold dawn through haze, violet underglow from the ship, floating ash. Color grade: teal-grey shadows, muted gold, violet accents. Sound: a sharp intake of breath, armor plates scraping on stone, ash wind across an empty plaza, resin strands creaking, a deep oppressive hum from the ship above, a sword drawn with a ringing scrape. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, knight from a famous franchise, superhero suit, modern clothing, crowds, gore, blood"
+  },
+  {
+   "id": "c6_ovos",
+   "segundos": 8,
+   "prompt": "Slow dolly forward through a vast, cathedral-like egg chamber inside a living hive-ship. The walls rise in tall honeycomb tiers of translucent amber resin cocoons, hundreds of them, each holding the dim silhouette of a sleeping human in simple clothes, curled peacefully, faces softly blurred by the resin, alive, with a faint slow pulse of light inside like a heartbeat. The structure is made of pale mother-of-pearl chitin ribs threaded with thin veins of violet-teal bioluminescence, with low mist across the floor and golden spores floating in the air. At the far end, deep in shadow, an immense presence shifts: the Mother Queen, seen only as a towering silhouette crowned with crystalline spines and a constellation of small amber lights, her shape never clearly revealed. In the final second the nearest cocoon flares with a warm golden heartbeat glow, as if someone inside is about to wake. Camera: 24mm lens, symmetrical composition with cocoon tiers framing both sides, the shadowy queen centered high in the frame, very slow steady push. Lighting: warm amber glow from inside the cocoons against cold violet darkness, volumetric haze. Color grade: amber versus violet-black, gold in the final flare. Sound: a deep slow heartbeat thrum, wet creaking resin, slow drips echoing, a cavernous low hum, distant chittering clicks from the shadows, the golden heartbeat swelling in the last second. Photorealistic live-action cinematic film footage, 35mm, shallow depth of field, fine film grain, practical sets and practical effects, epic dark-fantasy movie trailer tone. Vertical 9:16 frame, subject centered, key action inside the central 60% of the frame, top 15% and bottom 25% kept clean for captions and app UI. Ambient sound and sound effects only, no dialogue, no voices, no music.",
+   "negativo": "text, letters, words, subtitles, captions, title cards, logos, watermark, signature, UI overlay, cartoon, anime, illustration, painting, 3D render, CGI look, video game graphics, plastic skin, oversaturated colors, famous characters, celebrity likeness, recognizable real person, franchise costumes, dialogue, speech, narration, singing, music, xenomorph, Giger style, black biomechanical ribbed walls, elongated alien head, facehugger, slime-covered black eggs, gore, blood, nudity, jump scare, recognizable faces"
+  }
+ ],
+ "falas": [
+  {
+   "id": "n1",
+   "texto": "Na noite em que a coroa caiu..."
+  },
+  {
+   "id": "n2",
+   "texto": "o céu caiu junto. Uma nave viva... arrancou um pedaço da lua."
+  },
+  {
+   "id": "n3",
+   "texto": "O Livro da Vida se partiu... em oito Selos."
+  },
+  {
+   "id": "n4",
+   "texto": "Cada Selo enlouqueceu um rei. Lobos... dragões... o próprio Kraken."
+  },
+  {
+   "id": "n5",
+   "texto": "A Rainha-Mãe levou a humanidade. Só um ficou acordado... Você."
+  },
+  {
+   "id": "n6",
+   "texto": "Só vencendo cada reino... você liberta a raça humana."
+  },
+  {
+   "id": "n7",
+   "texto": "A batalha começa... agora."
+  },
+  {
+   "id": "n8",
+   "texto": "Vença cada chefão... e o exército dele vira seu."
+  },
+  {
+   "id": "n9",
+   "texto": "Desta vez... quem cai é o rei deles."
+  },
+  {
+   "id": "n10",
+   "texto": "Arcane Chess. A Batalha pelo Grimório. Jogue grátis, direto no navegador... link na bio."
+  }
+ ]
+}

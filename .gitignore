@@ -45,3 +45,6 @@ tools/reels/node_modules/
 tools/reels/saida/
 tools/reels/estado.json
 tools/reels/registro.jsonl
+
+# mídia gerada do trailer (clipes, narração, montagem)
+tools/trailer/saida/
