@@ -14986,7 +14986,8 @@ async function mateKraken(k, winner, A, live, fx, fanfare, place, F){
   F.light(P(0.6, 4.2, 2.4), P(1.0, 1.4, 0), P(3.0, 2.0, -1.8));
   const g = new THREE.Group(), sway = new THREE.Group(); g.add(sway); mateProp(g);
   const m = staticMesh(A, H, { em:0x0a3a44, emk:0.55, metal:0.3, rim:0x4fe3d0, rimK:0.9 }); sway.add(m);
-  const yDown = -H * 0.9, yUp = -H * 0.25;
+  // sobe inteiro, com a base no tabuleiro (meio submerso, o corpo sumia abaixo da arena no Reel de 2026-11-11)
+  const yDown = -H * 0.9, yUp = 0;
   g.position.set(spot.x, yDown, spot.z); g.rotation.y = yaw;
   const tmat = new THREE.MeshStandardMaterial({ color:C(0x0b2233), roughness:0.5, emissive:C(0x1f6b7a), emissiveIntensity:0.55, transparent:true, opacity:1 });
   const tents = [];
