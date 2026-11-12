@@ -19033,8 +19033,12 @@ const AUD_KEY = 'coroa-de-cinzas:audio';
 const AUD = { bus:{}, buf:{}, failed:new Set(), waiting:{}, started:false, loops:false, voiceEnd:0, duck:1, log:[], cur:{ music:null, amb:null }, loading:{},
   set:{ on:true, music:true, voice:true, vol:0.8, narr:'imp' } };
 try { const v = JSON.parse(localStorage.getItem(AUD_KEY) || 'null'); if (v && typeof v === 'object') Object.assign(AUD.set, v); } catch (e){}
+// ?recsom=efeitos: gravação para edição só com os efeitos do jogo (sem música, narrador, narração dos lances nem a fanfarra
+// de vitória/derrota); a voz e a trilha entram na edição. Não salva no navegador.
+const REC_SO_EFEITOS = new URLSearchParams(location.search).get('recsom') === 'efeitos';
+if (REC_SO_EFEITOS) Object.assign(AUD.set, { on:true, music:false, voice:false, narr:'off' });
 soundOn = AUD.set.on;
-function saveAudio(){ try { localStorage.setItem(AUD_KEY, JSON.stringify(AUD.set)); } catch (e){} }
+function saveAudio(){ if (REC_SO_EFEITOS) return; try { localStorage.setItem(AUD_KEY, JSON.stringify(AUD.set)); } catch (e){} }
 function audio(){
   if (!AC){
     try {
@@ -19335,6 +19339,7 @@ function snd(name, o = {}){
   AUD.log.push(rec); if (AUD.log.length > 200) AUD.log.shift();
   if (!AC || !AUD.started){ rec.via = 'antes-do-gesto'; return; }
   if (voice && !AUD.set.voice){ rec.via = 'narrador-desligado'; return; }
+  if (REC_SO_EFEITOS && (name === 'vitoria' || name === 'derrota')){ rec.via = 'so-efeitos'; return; }
   if (voice && narrBusy() && name !== 'v_inicio'){ rec.via = 'narracao-falando'; return; }
   const b = AUD.buf[name];
   if (!b){
