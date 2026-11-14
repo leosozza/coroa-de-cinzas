@@ -3,9 +3,11 @@
 
 Uso: python3 tools/elevenlabs_audio.py [sfx] [voz] [musica] [aprendiz] [cartas]   (sem argumentos: sfx, voz e musica)
 A chave vem do Keychain do macOS (serviço "elevenlabs-api-key") e nunca é impressa.
-Arquivos já gerados são pulados, então rodar de novo só completa o que falta.
+Arquivos já gerados são pulados, então rodar de novo só completa o que falta; REFAZER=1 grava tudo de novo
+(para trocar a voz).
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -128,7 +130,7 @@ KEY = key()
 
 
 def post(path, body, dest, sobrescrever=False):
-    if dest.exists() and not sobrescrever:
+    if dest.exists() and not (sobrescrever or os.environ.get("REFAZER")):
         print(f"  já existe {dest.name}", flush=True)
         return
     req = urllib.request.Request(API + path, data=json.dumps(body).encode(), method="POST",

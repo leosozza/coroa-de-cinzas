@@ -13,7 +13,9 @@ Montagem (o jogo escolhe pelo tipo de lance):
   carta sem peça: lado_<w|b> + jogam_carta + k_<carta>
   especiais: e_* (roque, promoção, xeque...)
 """
+import base64
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -92,7 +94,7 @@ def main():
         {"regras": regras, "falas": {i: {"texto": v["texto"], "grupo": v["grupo"]} for i, v in frag.items()}},
         indent=2, ensure_ascii=False))
     chars = sum(len(v["texto"]) for v in frag.values())
-    novos = [i for i in frag if not (OUT / f"{i}.mp3").exists()]
+    novos = [i for i in frag if os.environ.get("REFAZER") or not (OUT / f"{i}.mp3").exists()]
     print(f"{len(frag)} pedaços, {chars} caracteres; faltam gravar {len(novos)}", flush=True)
     if "--so-lista" in sys.argv:
         return
@@ -104,8 +106,10 @@ def main():
         if v["antes"]: body["previous_text"] = v["antes"]
         if v["depois"]: body["next_text"] = v["depois"]
         EA.post(f"/v1/text-to-speech/{EA.NARRATOR}?output_format=mp3_44100_96", body, OUT / f"{i}.mp3")
-    feitos = sum(1 for i in frag if (OUT / f"{i}.mp3").exists())
-    print(f"gravados: {feitos}/{len(frag)}", flush=True)
+    feitos = [i for i in frag if (OUT / f"{i}.mp3").exists()]
+    # pacote único (id -> mp3 em base64) que o jogo baixa de uma vez
+    (OUT / "pack.json").write_text(json.dumps({i: base64.b64encode((OUT / f"{i}.mp3").read_bytes()).decode() for i in feitos}))
+    print(f"gravados: {len(feitos)}/{len(frag)}", flush=True)
 
 
 if __name__ == "__main__":
