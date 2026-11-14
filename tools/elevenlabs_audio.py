@@ -16,7 +16,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "audio"
 API = "https://api.elevenlabs.io"
-NARRATOR = "Qrdut83w0Cr152Yb4Xn3"  # "Paulo", voz profissional brasileira da biblioteca do ElevenLabs
+# Vozes (decisão do usuário, 2026-11-14): Eliel no jogo, Morgan na narração dos Reels e das histórias.
+NARRATOR = "y3X5crcIDtFawPx7bcNq"        # "Eliel - Deep, Gravly and Commanding", pt-BR, voz do jogo
+NARRADOR_REELS = "SAxJUlDKRc79XAyeWyMu"  # "Morgan - Deep, Powerful, and Confident", Reels, trailer e histórias
+PAULO = "Qrdut83w0Cr152Yb4Xn3"           # "Paulo", a voz antiga do jogo (até a v44.1)
 
 # nome: (descrição, duração em segundos, loop)
 SFX = {
@@ -124,8 +127,8 @@ def key():
 KEY = key()
 
 
-def post(path, body, dest):
-    if dest.exists():
+def post(path, body, dest, sobrescrever=False):
+    if dest.exists() and not sobrescrever:
         print(f"  já existe {dest.name}", flush=True)
         return
     req = urllib.request.Request(API + path, data=json.dumps(body).encode(), method="POST",

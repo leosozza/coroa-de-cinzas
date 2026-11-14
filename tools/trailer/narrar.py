@@ -31,7 +31,7 @@ def main():
             body["previous_text"] = falas[i - 1]["texto"]
         if i + 1 < len(falas):
             body["next_text"] = falas[i + 1]["texto"]
-        EA.post(f"/v1/text-to-speech/{EA.NARRATOR}?output_format=mp3_44100_128", body, dest)
+        EA.post(f"/v1/text-to-speech/{EA.NARRADOR_REELS}?output_format=mp3_44100_128", body, dest)
         print(f"  ok: {dest.name}", flush=True)
 
 

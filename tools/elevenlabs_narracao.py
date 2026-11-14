@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Narração lance a lance: grava em pedaços (voz "Paulo") as falas que o jogo junta na hora.
+"""Narração lance a lance: grava em pedaços (voz do jogo, EA.NARRATOR) as falas que o jogo junta na hora.
 
 Uso: python3 tools/elevenlabs_narracao.py [--so-lista]
 Saída: assets/audio/narr/<id>.mp3 e data/narracao.json (id -> texto, grupo; mais as regras de montagem).
