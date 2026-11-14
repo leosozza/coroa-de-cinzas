@@ -1042,7 +1042,7 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
     <div class="camp-namebox" id="camp-namebox" hidden>
       <label for="camp-name">Nome do Guardião</label>
       <div><input id="camp-name" maxlength="20" autocomplete="nickname" placeholder="De 3 a 20 letras"><button type="button" class="btn-main" id="camp-namego">Despertar</button></div>
-      <small>Com uma conta (<a href="site/login.html">Entrar</a>), o nome vale também no ranking e no online.</small>
+      <small>Com uma conta (<a id="camp-login" href="site/login.html">Entrar</a>), o nome vale também no ranking e no online.</small>
     </div>
     <ol class="camp-map" id="camp-map" aria-label="Os 8 mundos"></ol>
     <section class="camp-world" id="camp-world" aria-live="polite"></section>
@@ -23686,6 +23686,8 @@ async function campSync(){
     if (CAMP.open) campRender();
   } catch (e){}
 }
+// no Pages o jogo é /jogar.html e o login fica na raiz (/login); no repositório, em site/login.html
+if (/\/jogar(\.html)?$/.test(location.pathname)) document.getElementById('camp-login').href = 'login';
 function campRender(){
   const g = campGuardiao();
   $('camp-guard').innerHTML = (g ? `Guardião <b>${escHtml(g)}</b>` : 'Guardião sem nome') +
