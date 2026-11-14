@@ -1,0 +1,482 @@
+{
+ "c1_1_abre": {
+  "texto": "A praça da Aurora está vazia... só um cesto virado e um fio de resina âmbar no chão. Levaram o seu povo.",
+  "antes": "Mundo 1, fase 1. A praça vazia.",
+  "depois": ""
+ },
+ "c1_1_vence": {
+  "texto": "Os soldados de luz recuam. O fio de resina segue para fora do reino.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c1_2_abre": {
+  "texto": "O Arcanjo risca no chão uma partida antiga, parada a um lance do fim. Termine o que outro Guardião começou.",
+  "antes": "Mundo 1, fase 2. O lance esquecido.",
+  "depois": ""
+ },
+ "c1_2_vence": {
+  "texto": "Mate. O Arcanjo inclina a cabeça: ele conhece essa jogada.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c1_3_abre": {
+  "texto": "Aqui não há cartas. O Arcanjo quer ver o Guardião... não a magia dele.",
+  "antes": "Mundo 1, fase 3. Sem magia.",
+  "depois": ""
+ },
+ "c1_3_vence": {
+  "texto": "Sem cartas, só a cabeça. Por enquanto, basta.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c1_4_abre": {
+  "texto": "A sua Dama ficou de guarda na Árvore da Vida, a árvore de cuja casca o Livro foi feito. Aguente vinte lances sem ela.",
+  "antes": "Mundo 1, fase 4. A Dama fica.",
+  "depois": ""
+ },
+ "c1_4_vence": {
+  "texto": "Vinte lances sem a Dama. O Arcanjo abre as asas: falta pouco.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c1_5_abre": {
+  "texto": "Agora o Arcanjo luta com tudo. Cada peça dele brilha como o sol nascendo.",
+  "antes": "Mundo 1, fase 5. A luz inteira.",
+  "depois": ""
+ },
+ "c1_5_vence": {
+  "texto": "A luz cede, e o pilar se abre para o Guardião.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c1_6_abre": {
+  "texto": "O pilar de luz se fecha em volta do tabuleiro. O Arcanjo desce para jogar... e uma das peças dele guarda as primeiras páginas.",
+  "antes": "Mundo 1, fase 6. A Prova do Arcanjo.",
+  "depois": ""
+ },
+ "c1_6_vence": {
+  "texto": "O Arcanjo entrega as páginas e aponta a lua partida: o resto do Livro caiu em sete mundos. Siga o fio de resina.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_1_abre": {
+  "texto": "O fio de resina some na selva, ao pé de um templo coberto de névoa. O Clã dos Primatas desce os degraus para barrar o estranho.",
+  "antes": "Mundo 2, fase 1. A escadaria.",
+  "depois": ""
+ },
+ "c2_1_vence": {
+  "texto": "O clã recua para o templo. No alto, uma luz dourada pulsa num peito de pedra.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_2_abre": {
+  "texto": "Na parede do templo, uma caçada esculpida em pedra, parada no último golpe. Termine a caçada.",
+  "antes": "Mundo 2, fase 2. Os entalhes.",
+  "depois": ""
+ },
+ "c2_2_vence": {
+  "texto": "As Torres fecham o cerco, como nos entalhes. Uma porta de pedra range.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_3_abre": {
+  "texto": "Aqui o chão morde. O clã esconde Armadilhas de Espinhos: a peça que pisa nelas volta para casa e perde o lance.",
+  "antes": "Mundo 2, fase 3. Chão de espinhos.",
+  "depois": ""
+ },
+ "c2_3_vence": {
+  "texto": "Você aprendeu a ler o chão da selva.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_4_abre": {
+  "texto": "A trilha se fechou atrás de você: a sua Dama ficou do outro lado das raízes. Aguente vinte lances até ela abrir caminho.",
+  "antes": "Mundo 2, fase 4. Do outro lado das raízes.",
+  "depois": ""
+ },
+ "c2_4_vence": {
+  "texto": "As raízes cedem, e a Dama volta coberta de folhas.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_5_abre": {
+  "texto": "Os xamãs acordam todo o grimório do clã. Os tambores batem no ritmo do coração do ídolo.",
+  "antes": "Mundo 2, fase 5. Os tambores.",
+  "depois": ""
+ },
+ "c2_5_vence": {
+  "texto": "Os tambores param. Só um coração continua batendo: o de pedra.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c2_6_abre": {
+  "texto": "O ídolo de pedra se ergue sobre o templo. Ele não odeia você: o Selo caiu no colo dele, e ele o protege como você protege o seu povo.",
+  "antes": "Mundo 2, fase 6. O ídolo acorda.",
+  "depois": ""
+ },
+ "c2_6_vence": {
+  "texto": "O ídolo se ajoelha e volta a dormir, de guarda sobre um templo agora apagado. O fio de resina desce para o mar.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_1_abre": {
+  "texto": "A resina boia até a Cidade Afundada, onde os tritões vigiam ruínas sob um céu de água. Eles não deixam ninguém descer.",
+  "antes": "Mundo 3, fase 1. A Cidade Afundada.",
+  "depois": ""
+ },
+ "c3_1_vence": {
+  "texto": "Os tritões abrem caminho. Lá embaixo, um olho enorme se abre no escuro.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_2_abre": {
+  "texto": "Um mosaico no chão mostra a batalha que afundou a cidade, parada no último instante. Termine-a.",
+  "antes": "Mundo 3, fase 2. O mosaico.",
+  "depois": ""
+ },
+ "c3_2_vence": {
+  "texto": "O mosaico brilha. Por um momento, a cidade lembra como era estar seca.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_3_abre": {
+  "texto": "Aqui a água anda. Os tritões abrem Portais de Runa: a correnteza leva uma peça de uma casa a outra.",
+  "antes": "Mundo 3, fase 3. A correnteza.",
+  "depois": ""
+ },
+ "c3_3_vence": {
+  "texto": "Você nadou contra a corrente... e ela cedeu.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_4_abre": {
+  "texto": "A correnteza arrastou a sua Dama para as ruínas. Aguente vinte lances até ela voltar à tona.",
+  "antes": "Mundo 3, fase 4. Arrastada.",
+  "depois": ""
+ },
+ "c3_4_vence": {
+  "texto": "A Dama volta à tona, ofegante, com uma concha de ouro na mão.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_5_abre": {
+  "texto": "A maré sobe com todo o grimório dos tritões. A cidade treme: o Kraken está acordando.",
+  "antes": "Mundo 3, fase 5. A maré cheia.",
+  "depois": ""
+ },
+ "c3_5_vence": {
+  "texto": "A maré baixa. Só sobra o Kraken... e a torre onde ele se enrola.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c3_6_abre": {
+  "texto": "A onda da Queda trouxe o Kraken de um mar que não existe mais. No escuro, ele se agarrou à única luz que achou: o Selo.",
+  "antes": "Mundo 3, fase 6. O Kraken.",
+  "depois": ""
+ },
+ "c3_6_vence": {
+  "texto": "O Kraken solta a torre e afunda para longe, procurando o mar dele. O fio de resina segue para o deserto.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_1_abre": {
+  "texto": "O fio de resina entra na areia. Embaixo das dunas vive um império inteiro... nos túneis que o Verme cava.",
+  "antes": "Mundo 4, fase 1. Sob as dunas.",
+  "depois": ""
+ },
+ "c4_1_vence": {
+  "texto": "Os guardas das dunas recuam para as tumbas. O chão treme: o Verme está perto.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_2_abre": {
+  "texto": "Numa tumba, um tabuleiro de pedra guarda a última partida de um faraó: um rei sozinho contra uma Torre. Feche a tumba.",
+  "antes": "Mundo 4, fase 2. A tumba do faraó.",
+  "depois": ""
+ },
+ "c4_2_vence": {
+  "texto": "A tumba se fecha. A partida do faraó, enfim, terminou.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_3_abre": {
+  "texto": "Aqui o chão engole. O império abre Fossos de Lava, a areia movediça das dunas: ninguém entra nem atravessa.",
+  "antes": "Mundo 4, fase 3. Areia movediça.",
+  "depois": ""
+ },
+ "c4_3_vence": {
+  "texto": "Você atravessou o deserto sem afundar.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_4_abre": {
+  "texto": "A areia engoliu a sua Dama até a cintura. Aguente vinte lances enquanto ela se solta.",
+  "antes": "Mundo 4, fase 4. Até a cintura.",
+  "depois": ""
+ },
+ "c4_4_vence": {
+  "texto": "A Dama sai da areia, e o deserto inteiro escuta o Verme se virar.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_5_abre": {
+  "texto": "Os sacerdotes leem todo o grimório do império. Eles não lutam pelo Selo: lutam pelo Verme, que cava as casas deles.",
+  "antes": "Mundo 4, fase 5. Os sacerdotes.",
+  "depois": ""
+ },
+ "c4_5_vence": {
+  "texto": "Os sacerdotes se calam. Eles sabem o que vem agora.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c4_6_abre": {
+  "texto": "O Verme-Colosso engoliu o Selo e o carrega na garganta. Vencê-lo é levar o Selo... e deixar o império sem quem cave os túneis.",
+  "antes": "Mundo 4, fase 6. O Verme-Colosso.",
+  "depois": ""
+ },
+ "c4_6_vence": {
+  "texto": "O Verme dorme sob as dunas, e os túneis param de crescer: o império vai ter que subir para o sol. A resina aponta para a lua partida.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_1_abre": {
+  "texto": "O fio de resina sobe até o reino dos lobos, sob o pedaço de lua que caiu. A alcateia vigia a planície... sem o seu Alfa.",
+  "antes": "Mundo 5, fase 1. A vigília.",
+  "depois": ""
+ },
+ "c5_1_vence": {
+  "texto": "A alcateia recua. Do castelo, um uivo responde.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_2_abre": {
+  "texto": "Na pedra do castelo, a alcateia marca as caçadas do Alfa. A última ficou pela metade. Termine-a.",
+  "antes": "Mundo 5, fase 2. A caçada de prata.",
+  "depois": ""
+ },
+ "c5_2_vence": {
+  "texto": "Caçada completa. Um lobo velho olha para você... como se esperasse por isso.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_3_abre": {
+  "texto": "A Névoa Fria desce da lua partida. Dentro dela, as peças se arrastam: uma casa por vez.",
+  "antes": "Mundo 5, fase 3. A Névoa Fria.",
+  "depois": ""
+ },
+ "c5_3_vence": {
+  "texto": "A névoa se abre. Você jogou às cegas e venceu.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_4_abre": {
+  "texto": "A névoa separou o seu exército: a Dama e uma Torre se perderam na floresta. Aguente vinte lances com o que sobrou.",
+  "antes": "Mundo 5, fase 4. Perdidas na névoa.",
+  "depois": ""
+ },
+ "c5_4_vence": {
+  "texto": "As peças perdidas voltam, guiadas pelo uivo da alcateia.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_5_abre": {
+  "texto": "Esta noite a lua partida brilha como se estivesse inteira. A alcateia luta com todo o grimório, e o castelo ruge.",
+  "antes": "Mundo 5, fase 5. A lua cheia.",
+  "depois": ""
+ },
+ "c5_5_vence": {
+  "texto": "A lua some atrás das nuvens. Só o Alfa resta.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c5_6_abre": {
+  "texto": "O Selo caiu com o pedaço da lua e se fundiu ao peito do Alfa. Ele virou lobisomem... e não volta. Tire o Selo dele.",
+  "antes": "Mundo 5, fase 6. O Alfa.",
+  "depois": ""
+ },
+ "c5_6_vence": {
+  "texto": "O Selo sai do peito do lobisomem, e o Alfa volta a ser homem. Ele não agradece: lembra de tudo o que fez. A resina segue para o Ferro Negro.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_1_abre": {
+  "texto": "A resina atravessa um campo de ossos sob um céu vermelho. A Legião do Ferro Negro marcha... e os mortos marcham com ela.",
+  "antes": "Mundo 6, fase 1. O campo de ossos.",
+  "depois": ""
+ },
+ "c6_1_vence": {
+  "texto": "A Legião recua para a fortaleza. Os ossos no chão ainda tremem.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_2_abre": {
+  "texto": "Num estandarte rasgado, a ordem de batalha de um general que nunca voltou. Cumpra a ordem por ele.",
+  "antes": "Mundo 6, fase 2. A última ordem.",
+  "depois": ""
+ },
+ "c6_2_vence": {
+  "texto": "Ordem cumprida. O general pode descansar.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_3_abre": {
+  "texto": "Aqui ninguém fica caído. A Legião ergue Recrutas do Cemitério: os Peões mortos voltam para a luta.",
+  "antes": "Mundo 6, fase 3. Ninguém fica caído.",
+  "depois": ""
+ },
+ "c6_3_vence": {
+  "texto": "Você venceu um exército que não sabe morrer.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_4_abre": {
+  "texto": "Mãos de osso agarraram a sua Dama e uma Torre no campo dos mortos. Aguente vinte lances até elas se soltarem.",
+  "antes": "Mundo 6, fase 4. Mãos de osso.",
+  "depois": ""
+ },
+ "c6_4_vence": {
+  "texto": "Os ossos cedem. A Dama volta com marcas de dedos no braço.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_5_abre": {
+  "texto": "O Deus da Morte abre todo o grimório da Legião. Nas mãos dele, o Livro da Vida só serve para acordar mortos.",
+  "antes": "Mundo 6, fase 5. A Legião inteira.",
+  "depois": ""
+ },
+ "c6_5_vence": {
+  "texto": "A fortaleza se abre. Lá dentro, ossos de dragão se juntam.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c6_6_abre": {
+  "texto": "Ele usou o Selo para erguer o Dragão de Ossos, os restos do ancestral dos dragões. Para ele, ninguém precisa morrer de vez.",
+  "antes": "Mundo 6, fase 6. O Deus da Morte.",
+  "depois": ""
+ },
+ "c6_6_vence": {
+  "texto": "O Selo se solta e o Dragão de Ossos desaba. Os mortos do campo, enfim, deitam. Longe dali, os dragões sentem o ancestral descansar.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_1_abre": {
+  "texto": "Os dragões sentiram o ancestral descansar. Eles esperam o Guardião na porta do covil... para ver se ele merece.",
+  "antes": "Mundo 7, fase 1. A porta do covil.",
+  "depois": ""
+ },
+ "c7_1_vence": {
+  "texto": "Os guerreiros de escamas abaixam as lanças. Por enquanto.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_2_abre": {
+  "texto": "Num mural queimado, duas Torres encurralam um rei contra a borda. Os dragões contam essa história há mil anos. Repita a façanha.",
+  "antes": "Mundo 7, fase 2. O mural queimado.",
+  "depois": ""
+ },
+ "c7_2_vence": {
+  "texto": "O mural se acende. Agora a história também é sua.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_3_abre": {
+  "texto": "Aqui toda captura queima em volta: a Repercussão de Impacto empurra as peças vizinhas a cada golpe do rival.",
+  "antes": "Mundo 7, fase 3. O impacto.",
+  "depois": ""
+ },
+ "c7_3_vence": {
+  "texto": "Você aprendeu a lutar no meio do fogo.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_4_abre": {
+  "texto": "Um rio de lava cortou o tabuleiro: a Dama e uma Torre ficaram do outro lado. Aguente vinte lances.",
+  "antes": "Mundo 7, fase 4. O rio de lava.",
+  "depois": ""
+ },
+ "c7_4_vence": {
+  "texto": "A lava esfria, e uma ponte de basalto liga as margens.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_5_abre": {
+  "texto": "Os dragões soltam todo o grimório. Eles não querem matar o Guardião: querem ver se ele aguenta.",
+  "antes": "Mundo 7, fase 5. O fogo inteiro.",
+  "depois": ""
+ },
+ "c7_5_vence": {
+  "texto": "O covil se cala. No alto do tesouro, um olho dourado se abre.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c7_6_abre": {
+  "texto": "O mais velho dos dragões dorme sobre o Selo. Ele só entrega o fogo a quem o vencer.",
+  "antes": "Mundo 7, fase 6. O Dragão Gigante.",
+  "depois": ""
+ },
+ "c7_6_vence": {
+  "texto": "O Dragão Gigante sopra o fogo para o céu, e o Selo cai aceso nas suas mãos: um presente, não um saque. A última trilha de resina desce para o Abismo.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_1_abre": {
+  "texto": "O fio de resina termina num casco vivo, caído no fundo do Abismo. O cheiro é doce, de fruta podre. A colmeia acorda para se defender.",
+  "antes": "Mundo 8, fase 1. O casco vivo.",
+  "depois": ""
+ },
+ "c8_1_vence": {
+  "texto": "Os zangões recuam. Nas paredes, casulos de resina... com gente dentro.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_2_abre": {
+  "texto": "Num casulo, um soldado da Aurora dorme com a mão num tabuleiro. A partida dele parou no fim. Termine por ele.",
+  "antes": "Mundo 8, fase 2. O soldado que dorme.",
+  "depois": ""
+ },
+ "c8_2_vence": {
+  "texto": "Mate. O soldado sorri no sono.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_3_abre": {
+  "texto": "Aqui as regras dos seis mundos se misturam: espinhos, correnteza, areia, névoa, mortos e fogo. A colmeia aprendeu com todos.",
+  "antes": "Mundo 8, fase 3. Todos os mundos.",
+  "depois": ""
+ },
+ "c8_3_vence": {
+  "texto": "Seis mundos de uma vez... e você ainda está de pé.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_4_abre": {
+  "texto": "A resina prende a sua Dama e uma Torre na parede, como prendeu o seu povo. Aguente vinte lances.",
+  "antes": "Mundo 8, fase 4. Presas na resina.",
+  "depois": ""
+ },
+ "c8_4_vence": {
+  "texto": "A resina racha. A Dama sai... e o casulo ao lado se mexe.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_5_abre": {
+  "texto": "A colmeia usa tudo o que roubou dos sete mundos. No fundo da câmara, os ovos pulsam no ritmo de um coração.",
+  "antes": "Mundo 8, fase 5. A colmeia inteira.",
+  "depois": ""
+ },
+ "c8_5_vence": {
+  "texto": "Os guardas caem. Só falta ela.",
+  "antes": "Vitória!",
+  "depois": ""
+ },
+ "c8_6_abre": {
+  "texto": "No coração da câmara de ovos, a Rainha-Mãe guarda o último Selo. Ela também protege os seus... e vai lutar como você.",
+  "antes": "Mundo 8, fase 6. A Rainha-Mãe.",
+  "depois": ""
+ },
+ "c8_6_vence": {
+  "texto": "A Rainha-Mãe cai, e o grito dela desce pelo fundo do Abismo até sumir. O Livro volta para a Árvore da Vida, de onde saiu. Os casulos se abrem: o seu povo desperta.",
+  "antes": "Vitória!",
+  "depois": ""
+ }
+}

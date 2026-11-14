@@ -12,6 +12,8 @@ cp "$ROOT"/assets/audio/*.mp3 "$W/assets/audio/"
 [ -d "$ROOT/assets/audio/narr" ] && mkdir -p "$W/assets/audio/narr" && cp "$ROOT"/assets/audio/narr/*.mp3 "$ROOT"/assets/audio/narr/pack.json "$W/assets/audio/narr/"
 # pacote de som por reino (passos, golpes, morte, mascote, vinheta): assets/audio/reinos/<reino>/*.mp3 (sem o state.json)
 for d in "$ROOT"/assets/audio/reinos/*/; do [ -d "$d" ] || continue; r="$(basename "$d")"; mkdir -p "$W/assets/audio/reinos/$r"; cp "$d"*.mp3 "$d"pack.json "$W/assets/audio/reinos/$r/"; done
+# falas do roteiro da Conquista dos Mundos: um pacote por mundo (assets/audio/camp/m<n>/pack.json)
+for d in "$ROOT"/assets/audio/camp/m*/; do [ -f "$d/pack.json" ] || continue; mkdir -p "$W/assets/audio/camp/$(basename "$d")"; cp "$d"pack.json "$W/assets/audio/camp/$(basename "$d")/"; done
 mkdir -p "$W/assets/cards/web" && cp "$ROOT"/assets/cards/web/*.jpg "$W/assets/cards/web/"
 mkdir -p "$W/assets/meshy" && cp "$ROOT/assets/meshy/manifest.json" "$W/assets/meshy/manifest.json"
 (cd "$ROOT/assets/meshy" && find . -name "*.gltf.json" -not -path "./state/*" -not -path "./*_texto/*" -not -path "*/meshy_original/*" -not -path "*/tripo_original/*" -not -path "*/tripo_rig/*" -not -path "*/v1_sem_arma/*" -not -path "*/dama_v*/*" -not -path "./peao_meshy/*" -not -path "./peao_v1/*") | while read -r f; do

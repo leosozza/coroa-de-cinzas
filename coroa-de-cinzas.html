@@ -19110,7 +19110,7 @@ document.addEventListener('visibilitychange', () => {
 function decode(ab){ return new Promise((res, rej) => { try { const p = AC.decodeAudioData(ab, res, rej); if (p && p.catch) p.catch(rej); } catch (e){ rej(e); } }); }
 /* Pacotes de áudio: uma pasta inteira num JSON (nome → mp3 em base64) em assets/audio/<pasta>/pack.json. Servem para o
    Artifact (limite de arquivos por versão) e poupam dezenas de pedidos; sem o pacote, cada mp3 vem como antes. */
-const AUD_PACK_DIRS = ['narr'].concat([...REINO_AUD].map(r => 'reinos/' + r));
+const AUD_PACK_DIRS = ['narr'].concat([...REINO_AUD].map(r => 'reinos/' + r), [1, 2, 3, 4, 5, 6, 7, 8].map(w => 'camp/m' + w));
 const AUD_PACKS = {};
 function audioPack(dir){
   if (!AUD_PACKS[dir]) AUD_PACKS[dir] = fetch(`assets/audio/${dir}/pack.json`).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -19343,7 +19343,7 @@ const neigh = (o = {}) => {
   return snd('galope', Object.assign({ offset:GALOPE_CUT }, o));
 };
 function snd(name, o = {}){
-  const voice = name.startsWith('v_');
+  const voice = name.startsWith('v_') || name.startsWith('camp/');
   const rec = { name, t:Math.round(performance.now()) };
   if (o.offset != null) rec.off = o.offset;
   AUD.log.push(rec); if (AUD.log.length > 200) AUD.log.shift();
@@ -19353,7 +19353,7 @@ function snd(name, o = {}){
   if (voice && narrBusy() && name !== 'v_inicio'){ rec.via = 'narracao-falando'; return; }
   const b = AUD.buf[name];
   if (!b){
-    const lazy = APR_LINES[name] != null || ARC_SFX.has(name) || name.startsWith('reinos/');
+    const lazy = APR_LINES[name] != null || ARC_SFX.has(name) || name.startsWith('reinos/') || name.startsWith('camp/');
     if (!AUD.failed.has(name) && (AUD_FILES.includes(name) || lazy)){
       // ainda decodificando: toca quando chegar, se ainda fizer sentido (até 1,5 s; falas do Aprendiz, até 4 s)
       if (lazy && !AUD.loading[name]) loadOne(name);
@@ -23903,8 +23903,29 @@ function campStart(w, p){
   CAMP.run.nomeCarta = c;
   const rot = campRot(w, p);
   pushLog(`<b>Conquista dos Mundos</b> · Mundo ${w}, fase ${p}: ${rot ? `<b>${escHtml(rot.t)}</b>. ${escHtml(rot.abre)}` : `${f.nome}.`} ${p === 6 ? `${m.chefe} guarda ${campSeloTxt(m.selo)}.` : ''} Uma peça inimiga carrega ${p === 6 ? 'o Selo' : `a carta ${c}`}.`);
-  if (rot) campCartela(`Mundo ${w} · Fase ${p} · ${f.nome}`, rot.t, rot.abre);
+  if (rot){
+    campCartela(`Mundo ${w} · Fase ${p} · ${f.nome}`, rot.t, rot.abre);
+    // a voz do narrador lê a abertura depois do "A batalha começa!"; a cartela fica até a fala acabar
+    if (AC) loadOne(campVozId(w, p, 'vence'));
+    campVoz(campVozId(w, p, 'abre'), 1.4, d => { if (!$('camp-cart').hidden){ clearTimeout(campCartT); campCartT = setTimeout(campCartelaFim, d * 1000 + 900); } });
+  }
   onlineToast(`Mundo ${w} · ${f.nome}${CAMP.run.limite && !CAMP.run.sobreviver ? ` · mate em ${CAMP.run.limite}` : CAMP.run.sobreviver ? ' · aguente 20 lances' : ''}`);
+}
+/* Voz das falas do roteiro (assets/audio/camp/m<mundo>/pack.json, gerado por tools/elevenlabs_campanha.py): espera a fala
+   que estiver tocando acabar e desiste se o áudio não chegar a tempo; sem o arquivo ou com o narrador desligado, fica o texto. */
+const campVozId = (w, p, tipo) => `camp/m${w}/c${w}_${p}_${tipo}`;
+let campVozTok = 0;
+function campVoz(id, delay, onPlay){
+  if (!AC || !AUD.started || !AUD.set.voice || REC_SO_EFEITOS) return;
+  const tok = ++campVozTok, t0 = performance.now();
+  loadOne(id);
+  const go = () => {
+    if (tok !== campVozTok || AUD.failed.has(id) || performance.now() - t0 > 9000) return;
+    if (!AUD.buf[id] || AC.currentTime < AUD.voiceEnd - 0.05 || narrBusy()) return void setTimeout(go, 120);
+    snd(id, { cut:true });
+    if (onPlay) onPlay(AUD.buf[id].duration);
+  };
+  setTimeout(go, delay * 1000);
 }
 // cartela do roteiro no começo da fase: título e a fala, some sozinha (tempo de leitura) ou com um clique/tecla
 let campCartT = 0;
@@ -23921,7 +23942,7 @@ function campCartelaFim(){
 }
 $('camp-cart').addEventListener('click', campCartelaFim);
 addEventListener('keydown', e => { if (!$('camp-cart').hidden && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) campCartelaFim(); }, true);
-if (location.hostname === 'localhost') window.__campDbg = { CAMP, ROT:CAMP_ROTEIRO, open:() => campOpen(), render:() => campRender(), start:(w, p) => campStart(w, p), end:o => { S.over = o; renderAll(); showEnd(); } };
+if (location.hostname === 'localhost') window.__campDbg = { CAMP, ROT:CAMP_ROTEIRO, open:() => campOpen(), render:() => campRender(), start:(w, p) => campStart(w, p), end:o => { S.over = o; renderAll(); showEnd(); }, audLog:() => AUD.log.slice(-12), cartOn:() => !$('camp-cart').hidden };
 const campCartaDaFase = (w, p) => { const m = CAMP_MUNDOS[w - 1], l = m.cartas.length ? m.cartas : campCartasAte(7); return CAMP_C(l[(p - 1) % l.length]); };
 // sorteia em segredo o Portador: uma peça do rival, nunca o Rei (no chefão, Torre, Bispo, Cavalo ou Dama)
 function campPickPortador(){
@@ -23989,6 +24010,7 @@ function campEnd(o){
   campSaveNow(); campSync();
   const s = CAMP.save.fases[k];
   const rot = campRot(r.w, r.p), fala = venceu && rot ? ` ${rot.vence}` : '';
+  if (venceu && rot) campVoz(campVozId(r.w, r.p, 'vence'), 1.2); else campVozTok++;
   const abriu = venceu && r.p === 6 && r.w < 8 ? ` O Mundo ${r.w + 1}, ${REINOS[CAMP_MUNDOS[r.w].reino].nome}, está aberto.` : venceu && r.p === 6 && !rot ? ' O Livro da Vida está inteiro: os casulos se abrem e o povo da Aurora desperta.' : '';
   $('end-title').textContent = venceu ? (r.p === 6 ? `${m.chefe} cai!` : 'Fase vencida') : 'Fase perdida';
   $('end-title').style.color = venceu ? 'var(--ember)' : 'var(--blood)';
@@ -24006,7 +24028,7 @@ $('again').addEventListener('click', e => { if (!CAMP.run) return; e.stopImmedia
 $('camp-endmap').addEventListener('click', () => { audio(); $('end').hidden = true; const w = CAMP.run ? CAMP.run.w : 1; CAMP.run = null; campOpen(); CAMP.sel = w; campRender(); });
 $('camp-endnext').addEventListener('click', () => { audio(); $('end').hidden = true; const [w, p] = ($('camp-endnext').dataset.next || '').split('-').map(Number); if (w) campStart(w, p); });
 // qualquer outro modo encerra a campanha em andamento
-const campLeave = () => { CAMP.run = null; $('camp-endmap').hidden = true; $('camp-endnext').hidden = true; };
+const campLeave = () => { CAMP.run = null; campVozTok++; $('camp-endmap').hidden = true; $('camp-endnext').hidden = true; };
 // testes: ?dbg na URL expõe atalhos da campanha
 if (new URLSearchParams(location.search).has('dbg')) window.CAMPDBG = { sel:w => { CAMP.sel = w; campRender(); }, start:(w, p) => campStart(w, p), move:(f, t) => doMove({ from:f, to:t }), run:() => CAMP.run && { w:CAMP.run.w, p:CAMP.run.p, capturado:CAMP.run.capturado, portador:campPortadorCasa() }, open:() => campOpen() };
 
