@@ -684,6 +684,15 @@ body.imm .top .quit-btn:not([hidden]){display:inline-flex; align-items:center}
 .camp-st{font-size:1.1rem; color:#ffd36b; letter-spacing:.08em; white-space:nowrap}
 .camp-phases .btn-main{min-height:40px; padding:6px 14px; white-space:nowrap}
 .camp-note{margin:10px 0 0; font-size:.84rem; color:var(--ash)}
+.camp-phases li span.camp-abre{color:#e6dcc8; font-style:italic; line-height:1.35}
+.camp-phases li span.camp-obj{font-size:.8rem; color:var(--ash)}
+.camp-cart{box-sizing:border-box; position:fixed; left:50%; top:max(70px, 12vh); transform:translate(-50%, -8px); z-index:85; width:min(560px, calc(100vw - 32px)); padding:16px 20px 18px; text-align:center; background:linear-gradient(180deg, rgba(14,10,16,.94), rgba(26,18,22,.94)); border:1px solid rgba(240,207,122,.55); border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,.6); opacity:0; transition:opacity .4s, transform .4s; cursor:pointer}
+.camp-cart.on{opacity:1; transform:translate(-50%, 0)}
+.camp-cart[hidden]{display:none}
+.camp-cart small{display:block; font-family:var(--f-ui); letter-spacing:.2em; font-size:.72rem; text-transform:uppercase; color:#cfc6b4}
+.camp-cart b{display:block; margin:4px 0 6px; font-family:var(--f-display); font-size:clamp(1.3rem, 3.6vw, 1.9rem); color:#f0cf7a}
+.camp-cart p{margin:0; font-size:1rem; line-height:1.45; color:#ece3d2; font-style:italic}
+@media (prefers-reduced-motion: reduce){ .camp-cart{transition:none} }
 .camp-histbtn{margin:4px 0 6px; min-height:40px; padding:6px 14px; background:rgba(240,207,122,.1); border:1px solid rgba(240,207,122,.6); border-radius:4px; color:#f0d48a; font-family:var(--f-engrave); letter-spacing:.06em; cursor:pointer}
 .camp-histbtn:hover{background:rgba(240,207,122,.2)}
 /* abertura do mundo: o clipe live action em tela cheia (vertical, centralizado), com o nome do mundo e o Pular */
@@ -1054,6 +1063,7 @@ body.cin .cin-wake i::before{content:''; display:block; width:100%; height:100%;
   <div class="camp-intro-cap"><small id="camp-intro-n"></small><b id="camp-intro-t"></b></div>
   <button type="button" class="camp-intro-skip" id="camp-intro-skip">Pular ▸▸</button>
 </div>
+<div class="camp-cart" id="camp-cart" role="status" aria-live="polite" hidden><small id="camp-cart-n"></small><b id="camp-cart-t"></b><p id="camp-cart-p"></p></div>
 <div class="title" id="title" role="dialog" aria-modal="true" aria-labelledby="title-logo">
   <div class="title-inner">
     <div class="logo big" id="title-logo" role="heading" aria-level="2" aria-label="Arcane Chess"><span class="logo-word">Arcane Chess</span><span class="logo-sub">The Battle for the Grimoire</span></div>
@@ -23654,6 +23664,79 @@ const CAMP_FASES = [
   { id:'dificil', nome:'Batalha difícil', desc:'A regra do mundo e o grimório do rival completo.' },
   { id:'chefao', nome:'Chefão', desc:'O soberano do mundo, com o Selo escondido numa peça maior.' },
 ];
+// roteiro fase a fase (Sala de Roteiristas, v44): cada mundo é um arco de 6 fases — chegada, o eco de uma batalha
+// antiga, a regra do mundo, a perda (a fase sem a Dama), o cerco e o chefão, que fecha com uma consequência e o
+// gancho do próximo mundo. Um fio de resina âmbar, deixado pela colmeia que levou o povo da Aurora, guia o Guardião.
+// t: título · abre: a fala antes da partida · vence: o que muda no mundo quando o Guardião vence.
+const CAMP_ROTEIRO = {
+  1:[
+    { t:'A praça vazia', abre:'A praça da Aurora está vazia... só um cesto virado e um fio de resina âmbar no chão. Levaram o seu povo.', vence:'Os soldados de luz recuam. O fio de resina segue para fora do reino.' },
+    { t:'O lance esquecido', abre:'O Arcanjo risca no chão uma partida antiga, parada a um lance do fim. Termine o que outro Guardião começou.', vence:'Mate. O Arcanjo inclina a cabeça: ele conhece essa jogada.' },
+    { t:'Sem magia', abre:'Aqui não há cartas. O Arcanjo quer ver o Guardião... não a magia dele.', vence:'Sem cartas, só a cabeça. Por enquanto, basta.' },
+    { t:'A Dama fica', abre:'A sua Dama ficou de guarda na Árvore da Vida, a árvore de cuja casca o Livro foi feito. Aguente vinte lances sem ela.', vence:'Vinte lances sem a Dama. O Arcanjo abre as asas: falta pouco.' },
+    { t:'A luz inteira', abre:'Agora o Arcanjo luta com tudo. Cada peça dele brilha como o sol nascendo.', vence:'A luz cede, e o pilar se abre para o Guardião.' },
+    { t:'A Prova do Arcanjo', abre:'O pilar de luz se fecha em volta do tabuleiro. O Arcanjo desce para jogar... e uma das peças dele guarda as primeiras páginas.', vence:'O Arcanjo entrega as páginas e aponta a lua partida: o resto do Livro caiu em sete mundos. Siga o fio de resina.' },
+  ],
+  2:[
+    { t:'A escadaria', abre:'O fio de resina some na selva, ao pé de um templo coberto de névoa. O Clã dos Primatas desce os degraus para barrar o estranho.', vence:'O clã recua para o templo. No alto, uma luz dourada pulsa num peito de pedra.' },
+    { t:'Os entalhes', abre:'Na parede do templo, uma caçada esculpida em pedra, parada no último golpe. Termine a caçada.', vence:'As Torres fecham o cerco, como nos entalhes. Uma porta de pedra range.' },
+    { t:'Chão de espinhos', abre:'Aqui o chão morde. O clã esconde Armadilhas de Espinhos: a peça que pisa nelas volta para casa e perde o lance.', vence:'Você aprendeu a ler o chão da selva.' },
+    { t:'Do outro lado das raízes', abre:'A trilha se fechou atrás de você: a sua Dama ficou do outro lado das raízes. Aguente vinte lances até ela abrir caminho.', vence:'As raízes cedem, e a Dama volta coberta de folhas.' },
+    { t:'Os tambores', abre:'Os xamãs acordam todo o grimório do clã. Os tambores batem no ritmo do coração do ídolo.', vence:'Os tambores param. Só um coração continua batendo: o de pedra.' },
+    { t:'O ídolo acorda', abre:'O ídolo de pedra se ergue sobre o templo. Ele não odeia você: o Selo caiu no colo dele, e ele o protege como você protege o seu povo.', vence:'O ídolo se ajoelha e volta a dormir, de guarda sobre um templo agora apagado. O fio de resina desce para o mar.' },
+  ],
+  3:[
+    { t:'A Cidade Afundada', abre:'A resina boia até a Cidade Afundada, onde os tritões vigiam ruínas sob um céu de água. Eles não deixam ninguém descer.', vence:'Os tritões abrem caminho. Lá embaixo, um olho enorme se abre no escuro.' },
+    { t:'O mosaico', abre:'Um mosaico no chão mostra a batalha que afundou a cidade, parada no último instante. Termine-a.', vence:'O mosaico brilha. Por um momento, a cidade lembra como era estar seca.' },
+    { t:'A correnteza', abre:'Aqui a água anda. Os tritões abrem Portais de Runa: a correnteza leva uma peça de uma casa a outra.', vence:'Você nadou contra a corrente... e ela cedeu.' },
+    { t:'Arrastada', abre:'A correnteza arrastou a sua Dama para as ruínas. Aguente vinte lances até ela voltar à tona.', vence:'A Dama volta à tona, ofegante, com uma concha de ouro na mão.' },
+    { t:'A maré cheia', abre:'A maré sobe com todo o grimório dos tritões. A cidade treme: o Kraken está acordando.', vence:'A maré baixa. Só sobra o Kraken... e a torre onde ele se enrola.' },
+    { t:'O Kraken', abre:'A onda da Queda trouxe o Kraken de um mar que não existe mais. No escuro, ele se agarrou à única luz que achou: o Selo.', vence:'O Kraken solta a torre e afunda para longe, procurando o mar dele. O fio de resina segue para o deserto.' },
+  ],
+  4:[
+    { t:'Sob as dunas', abre:'O fio de resina entra na areia. Embaixo das dunas vive um império inteiro... nos túneis que o Verme cava.', vence:'Os guardas das dunas recuam para as tumbas. O chão treme: o Verme está perto.' },
+    { t:'A tumba do faraó', abre:'Numa tumba, um tabuleiro de pedra guarda a última partida de um faraó: um rei sozinho contra uma Torre. Feche a tumba.', vence:'A tumba se fecha. A partida do faraó, enfim, terminou.' },
+    { t:'Areia movediça', abre:'Aqui o chão engole. O império abre Fossos de Lava, a areia movediça das dunas: ninguém entra nem atravessa.', vence:'Você atravessou o deserto sem afundar.' },
+    { t:'Até a cintura', abre:'A areia engoliu a sua Dama até a cintura. Aguente vinte lances enquanto ela se solta.', vence:'A Dama sai da areia, e o deserto inteiro escuta o Verme se virar.' },
+    { t:'Os sacerdotes', abre:'Os sacerdotes leem todo o grimório do império. Eles não lutam pelo Selo: lutam pelo Verme, que cava as casas deles.', vence:'Os sacerdotes se calam. Eles sabem o que vem agora.' },
+    { t:'O Verme-Colosso', abre:'O Verme-Colosso engoliu o Selo e o carrega na garganta. Vencê-lo é levar o Selo... e deixar o império sem quem cave os túneis.', vence:'O Verme dorme sob as dunas, e os túneis param de crescer: o império vai ter que subir para o sol. A resina aponta para a lua partida.' },
+  ],
+  5:[
+    { t:'A vigília', abre:'O fio de resina sobe até o reino dos lobos, sob o pedaço de lua que caiu. A alcateia vigia a planície... sem o seu Alfa.', vence:'A alcateia recua. Do castelo, um uivo responde.' },
+    { t:'A caçada de prata', abre:'Na pedra do castelo, a alcateia marca as caçadas do Alfa. A última ficou pela metade. Termine-a.', vence:'Caçada completa. Um lobo velho olha para você... como se esperasse por isso.' },
+    { t:'A Névoa Fria', abre:'A Névoa Fria desce da lua partida. Dentro dela, as peças se arrastam: uma casa por vez.', vence:'A névoa se abre. Você jogou às cegas e venceu.' },
+    { t:'Perdidas na névoa', abre:'A névoa separou o seu exército: a Dama e uma Torre se perderam na floresta. Aguente vinte lances com o que sobrou.', vence:'As peças perdidas voltam, guiadas pelo uivo da alcateia.' },
+    { t:'A lua cheia', abre:'Esta noite a lua partida brilha como se estivesse inteira. A alcateia luta com todo o grimório, e o castelo ruge.', vence:'A lua some atrás das nuvens. Só o Alfa resta.' },
+    { t:'O Alfa', abre:'O Selo caiu com o pedaço da lua e se fundiu ao peito do Alfa. Ele virou lobisomem... e não volta. Tire o Selo dele.', vence:'O Selo sai do peito do lobisomem, e o Alfa volta a ser homem. Ele não agradece: lembra de tudo o que fez. A resina segue para o Ferro Negro.' },
+  ],
+  6:[
+    { t:'O campo de ossos', abre:'A resina atravessa um campo de ossos sob um céu vermelho. A Legião do Ferro Negro marcha... e os mortos marcham com ela.', vence:'A Legião recua para a fortaleza. Os ossos no chão ainda tremem.' },
+    { t:'A última ordem', abre:'Num estandarte rasgado, a ordem de batalha de um general que nunca voltou. Cumpra a ordem por ele.', vence:'Ordem cumprida. O general pode descansar.' },
+    { t:'Ninguém fica caído', abre:'Aqui ninguém fica caído. A Legião ergue Recrutas do Cemitério: os Peões mortos voltam para a luta.', vence:'Você venceu um exército que não sabe morrer.' },
+    { t:'Mãos de osso', abre:'Mãos de osso agarraram a sua Dama e uma Torre no campo dos mortos. Aguente vinte lances até elas se soltarem.', vence:'Os ossos cedem. A Dama volta com marcas de dedos no braço.' },
+    { t:'A Legião inteira', abre:'O Deus da Morte abre todo o grimório da Legião. Nas mãos dele, o Livro da Vida só serve para acordar mortos.', vence:'A fortaleza se abre. Lá dentro, ossos de dragão se juntam.' },
+    { t:'O Deus da Morte', abre:'Ele usou o Selo para erguer o Dragão de Ossos, os restos do ancestral dos dragões. Para ele, ninguém precisa morrer de vez.', vence:'O Selo se solta e o Dragão de Ossos desaba. Os mortos do campo, enfim, deitam. Longe dali, os dragões sentem o ancestral descansar.' },
+  ],
+  7:[
+    { t:'A porta do covil', abre:'Os dragões sentiram o ancestral descansar. Eles esperam o Guardião na porta do covil... para ver se ele merece.', vence:'Os guerreiros de escamas abaixam as lanças. Por enquanto.' },
+    { t:'O mural queimado', abre:'Num mural queimado, duas Torres encurralam um rei contra a borda. Os dragões contam essa história há mil anos. Repita a façanha.', vence:'O mural se acende. Agora a história também é sua.' },
+    { t:'O impacto', abre:'Aqui toda captura queima em volta: a Repercussão de Impacto empurra as peças vizinhas a cada golpe do rival.', vence:'Você aprendeu a lutar no meio do fogo.' },
+    { t:'O rio de lava', abre:'Um rio de lava cortou o tabuleiro: a Dama e uma Torre ficaram do outro lado. Aguente vinte lances.', vence:'A lava esfria, e uma ponte de basalto liga as margens.' },
+    { t:'O fogo inteiro', abre:'Os dragões soltam todo o grimório. Eles não querem matar o Guardião: querem ver se ele aguenta.', vence:'O covil se cala. No alto do tesouro, um olho dourado se abre.' },
+    { t:'O Dragão Gigante', abre:'O mais velho dos dragões dorme sobre o Selo. Ele só entrega o fogo a quem o vencer.', vence:'O Dragão Gigante sopra o fogo para o céu, e o Selo cai aceso nas suas mãos: um presente, não um saque. A última trilha de resina desce para o Abismo.' },
+  ],
+  8:[
+    { t:'O casco vivo', abre:'O fio de resina termina num casco vivo, caído no fundo do Abismo. O cheiro é doce, de fruta podre. A colmeia acorda para se defender.', vence:'Os zangões recuam. Nas paredes, casulos de resina... com gente dentro.' },
+    { t:'O soldado que dorme', abre:'Num casulo, um soldado da Aurora dorme com a mão num tabuleiro. A partida dele parou no fim. Termine por ele.', vence:'Mate. O soldado sorri no sono.' },
+    { t:'Todos os mundos', abre:'Aqui as regras dos seis mundos se misturam: espinhos, correnteza, areia, névoa, mortos e fogo. A colmeia aprendeu com todos.', vence:'Seis mundos de uma vez... e você ainda está de pé.' },
+    { t:'Presas na resina', abre:'A resina prende a sua Dama e uma Torre na parede, como prendeu o seu povo. Aguente vinte lances.', vence:'A resina racha. A Dama sai... e o casulo ao lado se mexe.' },
+    { t:'A colmeia inteira', abre:'A colmeia usa tudo o que roubou dos sete mundos. No fundo da câmara, os ovos pulsam no ritmo de um coração.', vence:'Os guardas caem. Só falta ela.' },
+    { t:'A Rainha-Mãe', abre:'No coração da câmara de ovos, a Rainha-Mãe guarda o último Selo. Ela também protege os seus... e vai lutar como você.', vence:'A Rainha-Mãe cai, e o grito dela desce pelo fundo do Abismo até sumir. O Livro volta para a Árvore da Vida, de onde saiu. Os casulos se abrem: o seu povo desperta.' },
+  ],
+};
+// o nome do Selo no meio da frase: "o Selo da Necrópole", "as primeiras páginas do Livro da Vida", "o Último Selo: …"
+const campSeloTxt = t => /^Selo/.test(t) ? `o ${t}` : t.charAt(0).toLowerCase() + t.slice(1);
+const campRot = (w, p) => (CAMP_ROTEIRO[w] && CAMP_ROTEIRO[w][p - 1]) || null;
 const CAMP = { open:false, sel:1, run:null, save:(() => { try { const v = JSON.parse(localStorage.getItem(CAMP_KEY) || 'null'); if (v && v.fases) return v; } catch (e){} return { nome:'', fases:{}, cartas:[], selos:[] }; })() };
 if (!Array.isArray(CAMP.save.vistos)) CAMP.save.vistos = [];
 const campSaveNow = () => { try { localStorage.setItem(CAMP_KEY, JSON.stringify(CAMP.save)); } catch (e){} };
@@ -23717,7 +23800,8 @@ function campRender(){
       ${m.cartas.length ? `<p class="camp-cards"><b>Cartas deste mundo:</b> ${m.cartas.map(id => escHtml(CAMP_C(id))).join(' · ')}</p>` : ''}</div></header>
     <ol class="camp-phases">${CAMP_FASES.map((f, i) => {
       const p = i + 1, open = campOpenPhase(m.n, p), s = campStars(m.n, p);
-      return `<li class="${open ? '' : 'locked'}"><div><b>${p}. ${escHtml(f.nome)}</b><span>${escHtml(p === 6 ? `${m.chefe}, com ${m.selo.toLowerCase()} escondido numa peça maior.` : p === 2 ? `Dê o xeque-mate em ${m.problema.n} lance${m.problema.n > 1 ? 's' : ''}.` : f.desc)}</span></div>
+      const rot = campRot(m.n, p), obj = p === 6 ? `${m.chefe} esconde ${campSeloTxt(m.selo)} numa peça maior.` : p === 2 ? `Dê o xeque-mate em ${m.problema.n} lance${m.problema.n > 1 ? 's' : ''}.` : f.desc;
+      return `<li class="${open ? '' : 'locked'}"><div><b>${p}. ${escHtml(rot ? rot.t : f.nome)}</b>${rot ? `<span class="camp-abre">${escHtml(rot.abre)}</span>` : ''}<span class="camp-obj">${escHtml(f.nome)} · ${escHtml(obj)}</span></div>
         <span class="camp-st" aria-label="${s.filter(Boolean).length} de 3 estrelas">${s.map(x => x ? '★' : '☆').join('')}</span>
         <button type="button" class="btn-main" data-p="${p}" ${open ? '' : 'disabled'}>${open ? (s[0] ? 'Jogar de novo' : 'Jogar') : 'Bloqueada'}</button></li>`;
     }).join('')}</ol>
@@ -23817,9 +23901,27 @@ function campStart(w, p){
   campPickPortador();
   const c = p === 6 ? m.selo : campCartaDaFase(w, p);
   CAMP.run.nomeCarta = c;
-  pushLog(`<b>Conquista dos Mundos</b> · Mundo ${w}, fase ${p}: ${f.nome}. ${p === 6 ? `${m.chefe} guarda ${m.selo.toLowerCase()}.` : ''} Uma peça inimiga carrega ${p === 6 ? 'o Selo' : `a carta ${c}`}.`);
+  const rot = campRot(w, p);
+  pushLog(`<b>Conquista dos Mundos</b> · Mundo ${w}, fase ${p}: ${rot ? `<b>${escHtml(rot.t)}</b>. ${escHtml(rot.abre)}` : `${f.nome}.`} ${p === 6 ? `${m.chefe} guarda ${campSeloTxt(m.selo)}.` : ''} Uma peça inimiga carrega ${p === 6 ? 'o Selo' : `a carta ${c}`}.`);
+  if (rot) campCartela(`Mundo ${w} · Fase ${p} · ${f.nome}`, rot.t, rot.abre);
   onlineToast(`Mundo ${w} · ${f.nome}${CAMP.run.limite && !CAMP.run.sobreviver ? ` · mate em ${CAMP.run.limite}` : CAMP.run.sobreviver ? ' · aguente 20 lances' : ''}`);
 }
+// cartela do roteiro no começo da fase: título e a fala, some sozinha (tempo de leitura) ou com um clique/tecla
+let campCartT = 0;
+function campCartela(sub, tit, txt){
+  const el = $('camp-cart'); if (!el) return;
+  $('camp-cart-n').textContent = sub; $('camp-cart-t').textContent = tit; $('camp-cart-p').textContent = txt;
+  el.hidden = false; requestAnimationFrame(() => el.classList.add('on'));
+  clearTimeout(campCartT); campCartT = setTimeout(campCartelaFim, 2600 + txt.length * 38);
+}
+function campCartelaFim(){
+  const el = $('camp-cart'); if (!el || el.hidden) return;
+  clearTimeout(campCartT); el.classList.remove('on');
+  setTimeout(() => { if (!el.classList.contains('on')) el.hidden = true; }, RM ? 0 : 400);
+}
+$('camp-cart').addEventListener('click', campCartelaFim);
+addEventListener('keydown', e => { if (!$('camp-cart').hidden && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) campCartelaFim(); }, true);
+if (location.hostname === 'localhost') window.__campDbg = { CAMP, ROT:CAMP_ROTEIRO, open:() => campOpen(), render:() => campRender(), start:(w, p) => campStart(w, p), end:o => { S.over = o; renderAll(); showEnd(); } };
 const campCartaDaFase = (w, p) => { const m = CAMP_MUNDOS[w - 1], l = m.cartas.length ? m.cartas : campCartasAte(7); return CAMP_C(l[(p - 1) % l.length]); };
 // sorteia em segredo o Portador: uma peça do rival, nunca o Rei (no chefão, Torre, Bispo, Cavalo ou Dama)
 function campPickPortador(){
@@ -23881,17 +23983,18 @@ function campEnd(o){
   if (venceu && r.capturado){
     if (r.p === 6){ if (!CAMP.save.selos.includes(r.w)) CAMP.save.selos.push(r.w); }
     else if (!CAMP.save.cartas.includes(r.nomeCarta)) CAMP.save.cartas.push(r.nomeCarta);
-    extra = r.p === 6 ? ` Você guardou ${m.selo.toLowerCase()}.` : ` A carta ${r.nomeCarta} é sua.`;
+    extra = r.p === 6 ? ` Você guardou ${campSeloTxt(m.selo)}.` : ` A carta ${r.nomeCarta} é sua.`;
   } else if (venceu && r.portador && !r.capturado) extra = ` O Portador ficou vivo: ${r.p === 6 ? 'o Selo' : 'a carta'} continua escondid${r.p === 6 ? 'o' : 'a'}. Jogue a fase de novo para buscá-l${r.p === 6 ? 'o' : 'a'}.`;
   else if (!venceu && r.capturado) extra = ` ${r.p === 6 ? 'O Selo volta' : 'A carta volta'} para o baú da fase.`;
   campSaveNow(); campSync();
   const s = CAMP.save.fases[k];
-  const abriu = venceu && r.p === 6 && r.w < 8 ? ` O Mundo ${r.w + 1}, ${REINOS[CAMP_MUNDOS[r.w].reino].nome}, está aberto.` : venceu && r.p === 6 ? ' O Livro da Vida está inteiro: os casulos se abrem e o povo da Aurora desperta.' : '';
+  const rot = campRot(r.w, r.p), fala = venceu && rot ? ` ${rot.vence}` : '';
+  const abriu = venceu && r.p === 6 && r.w < 8 ? ` O Mundo ${r.w + 1}, ${REINOS[CAMP_MUNDOS[r.w].reino].nome}, está aberto.` : venceu && r.p === 6 && !rot ? ' O Livro da Vida está inteiro: os casulos se abrem e o povo da Aurora desperta.' : '';
   $('end-title').textContent = venceu ? (r.p === 6 ? `${m.chefe} cai!` : 'Fase vencida') : 'Fase perdida';
   $('end-title').style.color = venceu ? 'var(--ember)' : 'var(--blood)';
   $('end-text').textContent = (venceu
     ? (o.kind === 'campanha' && r.sobreviver ? `O Guardião ${campGuardiao() || ''} resistiu 20 lances.` : `Mundo ${r.w}, ${f.nome}: vitória.`)
-    : (o.kind === 'campanha' && !r.sobreviver ? `O mate não saiu em ${r.limite} lance${r.limite > 1 ? 's' : ''}. Tente de novo.` : `Mundo ${r.w}, ${f.nome}: o rival venceu desta vez.`)) + extra + abriu;
+    : (o.kind === 'campanha' && !r.sobreviver ? `O mate não saiu em ${r.limite} lance${r.limite > 1 ? 's' : ''}. Tente de novo.` : `Mundo ${r.w}, ${f.nome}: o rival venceu desta vez.`)) + fala + extra + abriu;
   $('end-stats').insertAdjacentHTML('afterbegin', `<span class="camp-endst"><b>${s.map(x => x ? '★' : '☆').join('')}</b>estrelas</span>`);
   $('again').textContent = 'Jogar a fase de novo';
   $('camp-endmap').hidden = false;
