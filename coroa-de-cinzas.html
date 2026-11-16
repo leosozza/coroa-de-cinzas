@@ -11281,6 +11281,8 @@ const KINGDOM_KEY = 'arcane-chess:reinos';
 const KINGDOM = (() => { try { const v = JSON.parse(localStorage.getItem(KINGDOM_KEY) || 'null'); if (v && REINOS[v.w] && REINOS[v.b]) return v; } catch (e){} return { w:'aurora', b:'aurora' }; })();
 const GLBK = {};
 let KPEND = false;
+// reinos com os modelos ainda chegando (o Espectador segura o primeiro lance até eles chegarem)
+const KLOADING = new Set();
 const RING_BASE = { w:RING_SET.std.w, b:RING_SET.std.b };
 // cor do anel do lado: a do reino; as Negras trocam para a segunda cor do reino (ring2) quando a primeira
 // ficaria parecida com a das Brancas (mesmo reino, ou dois carmesins), para as peças não se confundirem
@@ -11298,6 +11300,10 @@ async function kingdomLoad(id){
   const R = REINOS[id];
   if (!R || !R.dir || GLBK[id] || !GOLPES.loader) return;
   GLBK[id] = {};
+  KLOADING.add(id);
+  try { await kingdomLoadAll(id, R); } finally { KLOADING.delete(id); }
+}
+async function kingdomLoadAll(id, R){
   const L = GOLPES.loader, out = GLBK[id];
   await Promise.all(Object.entries(R.pecas).map(async ([t, [slug, name]]) => {
     const base = R.dir + slug + '/' + name + '.opt', list = (DRACO.mod ? [base + '.c.gltf.json', base + '.c.glb'] : []).concat([base + '.gltf.json', base + '.glb']);
@@ -19887,8 +19893,20 @@ function aiThink(fen, diff){
     aiWorker.postMessage({ id, fen, diff });
   }).then(r => r === undefined ? local() : r);
 }
+// o Espectador (IA × IA) quase nunca fica parado: a troca para os modelos do reino entra aqui, entre um lance e outro,
+// e o primeiro lance espera os modelos dos dois reinos chegarem (até 25 s), para a partida já abrir com as peças certas
+let kWaitT0 = 0, kWaitTimer = null;
+function kingdomHold(){
+  if (cfg.mode !== 'spec' || !KLOADING.size || !['w', 'b'].some(s => KLOADING.has(kingdomOf(s)))){ kWaitT0 = 0; return false; }
+  if (!kWaitT0) kWaitT0 = performance.now();
+  if (performance.now() - kWaitT0 > 25000) return false;
+  if (!kWaitTimer) kWaitTimer = setTimeout(() => { kWaitTimer = null; maybeAI(); }, 300);
+  return true;
+}
 function maybeAI(){
   if (cfg.mode === 'online' || cfg.mode === 'replay') return;
+  if (kingdomHold()) return;
+  kingdomTick();
   if (cfg.arc){ arcAIContinue(); return; }
   if (S.over || human(S.turn) || cfg.paused || TITLE.open || (APR.on && APR.scripted)) return;
   busy = true; CLK.thinking = true;
